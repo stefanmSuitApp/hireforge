@@ -50,8 +50,8 @@ COPY --from=builder /app/libs ./libs
 COPY --from=builder /app/apps/web ./apps/web
 COPY --from=builder /app/apps/web/.next ./apps/web/.next
 
-WORKDIR /app/apps/web
+WORKDIR /app
 
 EXPOSE 3000
 
-CMD ["pnpm", "exec", "next", "start", "--hostname", "0.0.0.0", "--port", "3000"]
+CMD ["pnpm", "exec", "next", "start", "apps/web", "--hostname", "0.0.0.0", "--port", "3000"]
