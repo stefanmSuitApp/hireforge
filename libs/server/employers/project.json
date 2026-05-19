@@ -1,0 +1,9 @@
+{
+  "name": "server-employers",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/server/employers/src",
+  "projectType": "library",
+  "tags": ["scope:api", "type:lib", "layer:server"],
+  "// targets": "to see all targets run: nx show project server-employers --web",
+  "targets": {}
+}

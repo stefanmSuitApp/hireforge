@@ -1,0 +1,13 @@
+---
+description: After schema or migration changes, run migrate and seed from the repo root.
+alwaysApply: true
+---
+
+# Database migrations and seeders
+
+When you add or change Drizzle migrations (`drizzle/*.sql`, `libs/database/schema`) or merge work that includes new migrations:
+
+1. Run **`pnpm run db:migrate`** from the repository root (requires `.env` with `DATABASE_URL` and a reachable Postgres).
+2. Run **`pnpm run db:seed:all`** when seed data is needed for local/dev parity or when seed scripts were updated (`db:seed:rs`, `db:seed:domain`).
+
+If only migrations changed, migrate alone may suffice; if unsure, run both. Do not only tell the user to run these—execute them when the environment allows (network/DB access).

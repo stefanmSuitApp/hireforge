@@ -1,0 +1,12 @@
+# Add files here to ignore them from prettier formatting
+/dist
+/coverage
+/.nx/cache
+/.nx/workspace-data
+# Generated / vendor-ish (keep `pnpm format` meaningful for hand-written source)
+/.nx/
+/.sanity/
+/apps/cms/.sanity/
+/apps/cms/dist/
+/pnpm-lock.yaml
+/scripts/db/data/*.json

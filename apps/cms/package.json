@@ -1,0 +1,9 @@
+{
+  "name": "@hireforge/cms",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "dependencies": {
+    "styled-components": "^6.1.15"
+  }
+}

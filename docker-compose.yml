@@ -1,0 +1,47 @@
+# Local dev: PostgreSQL + Redis (credentials from `.env` — copy from .env.example).
+# Usage: pnpm docker:up
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: hireforge-postgres
+    restart: unless-stopped
+    ports:
+      - '${POSTGRES_PORT:-5434}:5432'
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-hireforge}
+      # Required — set in .env (see .env.example).
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-hireforge}
+    volumes:
+      - hireforge_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: hireforge-redis
+    restart: unless-stopped
+    ports:
+      - '${REDIS_PORT:-6382}:6379'
+    environment:
+      # Required — set in .env (see .env.example).
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}
+    command:
+      - sh
+      - -c
+      - exec redis-server --appendonly yes --requirepass "$$REDIS_PASSWORD"
+    volumes:
+      - hireforge_redis_data:/data
+    healthcheck:
+      test: ['CMD-SHELL', 'redis-cli -a "$$REDIS_PASSWORD" ping | grep -q PONG']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  hireforge_postgres_data:
+  hireforge_redis_data:

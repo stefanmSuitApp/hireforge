@@ -1,0 +1,21 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "outDir": "../../dist/out-tsc",
+    "types": ["node"],
+    "jsx": "react-jsx",
+    "moduleResolution": "bundler"
+  },
+  "include": [
+    "env.ts",
+    "singletons.ts",
+    "sanity.config.ts",
+    "sanity.cli.ts",
+    "deskStructure.ts",
+    "schemaTypes/**/*.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

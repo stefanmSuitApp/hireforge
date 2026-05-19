@@ -1,0 +1,75 @@
+{
+  "name": "web",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/web",
+  "projectType": "application",
+  "tags": ["scope:web", "type:app"],
+  "// targets": "to see all targets run: nx show project web --web",
+  "targets": {
+    "analyze": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["^build"],
+      "cache": false,
+      "inputs": [
+        "default",
+        "^production",
+        { "externalDependencies": ["next"] }
+      ],
+      "options": {
+        "cwd": "apps/web",
+        "tty": true,
+        "command": "next build --webpack",
+        "env": {
+          "NODE_ENV": "production",
+          "ANALYZE": "true"
+        }
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["^build"],
+      "cache": true,
+      "inputs": [
+        "default",
+        "^production",
+        { "externalDependencies": ["next"] }
+      ],
+      "outputs": [
+        "{workspaceRoot}/apps/web/.next/!(cache)/**/*",
+        "{workspaceRoot}/apps/web/.next/!(cache)"
+      ],
+      "options": {
+        "cwd": "apps/web",
+        "tty": false,
+        "command": "next build",
+        "env": {
+          "NODE_ENV": "production"
+        }
+      }
+    },
+    "dev": {
+      "continuous": true,
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/web",
+        "command": "WATCHPACK_POLLING=true next dev --hostname 127.0.0.1 --port 3000"
+      }
+    },
+    "start": {
+      "continuous": true,
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
+      "options": {
+        "cwd": "apps/web",
+        "command": "next start --hostname 127.0.0.1 --port 3000"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/web",
+        "command": "vitest run -c vitest.config.mts"
+      }
+    }
+  }
+}

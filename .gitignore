@@ -18,7 +18,29 @@ lerna-debug.log*
 .env.development
 .env.test
 .env.production
+deploy/.env.production
 
 # temp directory
 .temp
 .tmp
+
+# Local candidate resume storage (see CANDIDATE_UPLOAD_DIR)
+var/
+
+.nx/installation
+.nx/cache
+.nx/workspace-data
+
+# Next.js
+.next
+out
+
+vite.config.*.timestamp*
+
+# TypeScript incremental caches (local only)
+*.tsbuildinfo
+
+# CMS: stray emit next to vite.config.mts if someone runs tsc with declaration on the
+# node config. Source of truth is vite.config.mts; tsconfig.node.json uses noEmit.
+apps/cms/vite.config.d.mts*
+apps/cms/vite.config.mjs*

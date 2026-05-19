@@ -1,0 +1,53 @@
+{
+  "name": "cms",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/cms",
+  "projectType": "application",
+  "tags": ["scope:cms", "type:app"],
+  "targets": {
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/cms",
+        "command": "sanity dev --port 4200 --host localhost",
+        "envFile": ".env"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/apps/cms/dist"],
+      "options": {
+        "cwd": "apps/cms",
+        "command": "sanity build --yes",
+        "envFile": ".env"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "production",
+        "^production",
+        "{workspaceRoot}/apps/cms/tsconfig.json",
+        "{workspaceRoot}/apps/cms/tsconfig.app.json",
+        "{workspaceRoot}/apps/cms/tsconfig.node.json",
+        { "externalDependencies": ["typescript"] }
+      ],
+      "options": {
+        "cwd": "apps/cms",
+        "commands": [
+          "tsc --noEmit -p tsconfig.app.json",
+          "tsc --noEmit -p tsconfig.node.json"
+        ],
+        "parallel": false
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/cms/**/*.ts"]
+      }
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "preserve",
+
+    "strict": true,
+    "noEmit": true,
+    "emitDeclarationOnly": false,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "incremental": true,
+    "types": ["vitest/globals"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "contracts": ["../../libs/contracts/src/index.ts"],
+      "shared": ["../../libs/shared/src/index.ts"],
+      "ui": ["../../libs/ui/src/index.ts"],
+      "server-auth": ["../../libs/server/auth/src/index.ts"],
+      "server-jobs": ["../../libs/server/jobs/src/index.ts"],
+      "server-employers": ["../../libs/server/employers/src/index.ts"],
+      "server-applications": ["../../libs/server/applications/src/index.ts"],
+      "server-search": ["../../libs/server/search/src/index.ts"],
+      "server-cv-templates/document": [
+        "../../libs/server/cv-templates/src/cv-document.ts"
+      ],
+      "server-pdf/locale-fonts": [
+        "../../libs/server/pdf/src/lib/locale-pdf-fonts.ts"
+      ],
+      "database": ["../../libs/database/src/index.ts"]
+    },
+    "plugins": [{ "name": "next" }]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.jsx",
+
+    "../../apps/web/.next/types/**/*.ts",
+    "../../dist/apps/web/.next/types/**/*.ts",
+
+    "next-env.d.ts"
+  ],
+  "exclude": ["node_modules", "jest.config.ts", "jest.config.cts"]
+}

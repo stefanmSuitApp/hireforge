@@ -1,0 +1,37 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "es2015",
+    "module": "esnext",
+    "lib": ["es2020", "dom"],
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "contracts": ["libs/contracts/src/index.ts"],
+      "shared": ["libs/shared/src/index.ts"],
+      "ui": ["libs/ui/src/index.ts"],
+      "server-auth": ["libs/server/auth/src/index.ts"],
+      "server-billing": ["libs/server/billing/src/index.ts"],
+      "server-pdf": ["libs/server/pdf/src/index.ts"],
+      "server-pdf/locale-fonts": [
+        "libs/server/pdf/src/lib/locale-pdf-fonts.ts"
+      ],
+      "server-jobs": ["libs/server/jobs/src/index.ts"],
+      "server-employers": ["libs/server/employers/src/index.ts"],
+      "server-applications": ["libs/server/applications/src/index.ts"],
+      "server-cv-templates": ["libs/server/cv-templates/src/index.ts"],
+      "server-search": ["libs/server/search/src/index.ts"],
+      "server-cms-sync": ["libs/server/cms-sync/src/index.ts"],
+      "database": ["libs/database/src/index.ts"]
+    }
+  },
+  "exclude": ["node_modules", "tmp"]
+}

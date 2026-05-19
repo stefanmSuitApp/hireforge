@@ -1,0 +1,29 @@
+{
+  "version": 1.1,
+  "atDirectives": [
+    {
+      "name": "@custom-variant",
+      "description": "Tailwind CSS v4: register a custom variant (see tailwindcss.com)."
+    },
+    {
+      "name": "@theme",
+      "description": "Tailwind CSS v4: define theme tokens inline."
+    },
+    {
+      "name": "@utility",
+      "description": "Tailwind CSS v4: define a custom utility."
+    },
+    {
+      "name": "@plugin",
+      "description": "Tailwind CSS v4: load a plugin."
+    },
+    {
+      "name": "@apply",
+      "description": "Tailwind CSS: inline utility classes into a rule."
+    },
+    {
+      "name": "@layer",
+      "description": "Tailwind CSS: assign rules to base, components, or utilities layer."
+    }
+  ]
+}
