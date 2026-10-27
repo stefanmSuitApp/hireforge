@@ -10,6 +10,10 @@ is green.
 
 > **Status:** In progress. Update step status (`pending → in_progress →
 completed`) at the bottom of each step as you ship.
+>
+> **2026-10-28:** several per-step `Status:` lines below are stale. The
+> verified, current status and launch backlog live in
+> [`PROGRESS.md`](../../PROGRESS.md).
 
 ---
 
