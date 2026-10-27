@@ -644,7 +644,15 @@
     "registerLink": "Create an account",
     "haveAccount": "Already registered?",
     "loginLink": "Sign in",
-    "errorGeneric": "Something went wrong. Try again."
+    "errorGeneric": "Something went wrong. Try again.",
+    "joinRequest": {
+      "eyebrow": "Company access",
+      "pendingTitle": "Request awaiting approval",
+      "rejectedTitle": "Request declined",
+      "companyLabel": "Company:",
+      "pendingBody": "This company is already on Šljakam. To protect its data, our team needs to confirm you belong to it. Sign in again later to check the status of your request.",
+      "rejectedBody": "We could not confirm that you belong to this company. If you think this is a mistake, contact our support."
+    }
   },
   "Moderator": {
     "loginTitle": "Staff sign in",
@@ -802,6 +810,13 @@
       "adminOverrideHint": "Immediately archives this job regardless of status. Use sparingly for policy or legal reasons.",
       "forceArchive": "Force archive",
       "forceArchiving": "Archiving…"
+    },
+    "joinRequests": {
+      "heading": "Company access requests",
+      "lead": "These users signed up with the tax ID or registration number of a company that already exists. Approve only after confirming they work there.",
+      "wantsToJoin": "wants access to {company}",
+      "approve": "Approve",
+      "reject": "Reject"
     }
   },
   "Admin": {
@@ -961,6 +976,11 @@
     "CITY_SLUG_UNKNOWN": "That city could not be found.",
     "CATEGORY_SLUG_UNKNOWN": "That category could not be found.",
     "EMPLOYER_NOT_SETUP": "Your employer profile is not set up yet.",
+    "EMPLOYER_PENDING_APPROVAL": "Your request to join this company is awaiting approval.",
+    "EMPLOYER_JOIN_REJECTED": "Your request to join this company was declined.",
+    "COMPANY_JOIN_REQUEST_NOT_FOUND": "Request not found.",
+    "COMPANY_JOIN_REQUEST_FORBIDDEN": "This company is not assigned to you and is not in the lead pool.",
+    "COMPANY_JOIN_REQUEST_NOT_PENDING": "This request has already been decided.",
     "JOB_NOT_FOUND": "That job could not be found.",
     "JOB_FORBIDDEN_COMPANY": "That job belongs to another company.",
     "JOB_NOT_DRAFT": "That action only applies to job drafts.",

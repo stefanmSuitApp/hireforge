@@ -21,6 +21,7 @@ import {
 } from '../http/coded-http';
 import { getDb } from '../database';
 import { StaffAuditService } from './staff-audit.service';
+import { staffCanAccessCompany } from './staff-company-access';
 
 function trimOrNull(s: string | null | undefined, max?: number): string | null {
   if (s === undefined || s === null) {
@@ -201,16 +202,11 @@ export class StaffCompaniesService {
 
     // Detail includes bank + billing contacts: moderators only see their own
     // companies and the lead pool (same rule as patch).
-    if (ctx.actorRole === 'moderator') {
-      const isOwner = row.assignedModeratorId === ctx.actorUserId;
-      const inPool =
-        row.salesStatus === 'unassigned' || row.salesStatus === 'closed_lost';
-      if (!isOwner && !inPool) {
-        throw codedForbidden(
-          'STAFF_COMPANY_VIEW_FORBIDDEN',
-          'You can only view your companies or unassigned / closed-lost leads',
-        );
-      }
+    if (!staffCanAccessCompany(row, ctx)) {
+      throw codedForbidden(
+        'STAFF_COMPANY_VIEW_FORBIDDEN',
+        'You can only view your companies or unassigned / closed-lost leads',
+      );
     }
 
     const members = await database.db

@@ -44,3 +44,7 @@ vite.config.*.timestamp*
 # node config. Source of truth is vite.config.mts; tsconfig.node.json uses noEmit.
 apps/cms/vite.config.d.mts*
 apps/cms/vite.config.mjs*
+# Playwright
+/test-results/
+/playwright-report/
+/e2e/test-results/

@@ -50,6 +50,11 @@ export class EmployerController {
     return this.employer.getWorkspace(this.userId(req));
   }
 
+  @Get('join-request')
+  joinRequest(@Req() req: Request) {
+    return this.employer.getJoinRequest(this.userId(req));
+  }
+
   @Get('packages')
   listPackagesCatalog() {
     return this.employer.listPackageCatalogForEmployer();

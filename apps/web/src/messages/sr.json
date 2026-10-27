@@ -644,7 +644,15 @@
     "registerLink": "Registruj se",
     "haveAccount": "Već imate nalog?",
     "loginLink": "Prijavi se",
-    "errorGeneric": "Nešto nije u redu. Pokušajte ponovo."
+    "errorGeneric": "Nešto nije u redu. Pokušajte ponovo.",
+    "joinRequest": {
+      "eyebrow": "Pristup kompaniji",
+      "pendingTitle": "Zahtev čeka odobrenje",
+      "rejectedTitle": "Zahtev je odbijen",
+      "companyLabel": "Kompanija:",
+      "pendingBody": "Ova kompanija već postoji na Šljakam. Da bismo zaštitili njene podatke, naš tim mora da potvrdi da pripadate kompaniji. Prijavite se ponovo kasnije da proverite status zahteva.",
+      "rejectedBody": "Nismo mogli da potvrdimo da pripadate ovoj kompaniji. Ako mislite da je ovo greška, javite se našoj podršci."
+    }
   },
   "Moderator": {
     "loginTitle": "Prijava osoblja",
@@ -802,6 +810,13 @@
       "adminOverrideHint": "Odmah arhivira posao bez obzira na status. Koristiti retko.",
       "forceArchive": "Prisilno arhiviraj",
       "forceArchiving": "Arhiviranje…"
+    },
+    "joinRequests": {
+      "heading": "Zahtevi za pristup kompaniji",
+      "lead": "Ovi korisnici su se registrovali sa PIB-om ili matičnim brojem kompanije koja već postoji. Odobrite samo ako ste potvrdili da rade u toj kompaniji.",
+      "wantsToJoin": "želi pristup kompaniji {company}",
+      "approve": "Odobri",
+      "reject": "Odbij"
     }
   },
   "Admin": {
@@ -961,6 +976,11 @@
     "CITY_SLUG_UNKNOWN": "Taj grad nije pronađen.",
     "CATEGORY_SLUG_UNKNOWN": "Ta kategorija nije pronađena.",
     "EMPLOYER_NOT_SETUP": "Profil poslodavca još nije podešen.",
+    "EMPLOYER_PENDING_APPROVAL": "Vaš zahtev za pristup kompaniji čeka odobrenje.",
+    "EMPLOYER_JOIN_REJECTED": "Zahtev za pristup kompaniji je odbijen.",
+    "COMPANY_JOIN_REQUEST_NOT_FOUND": "Zahtev nije pronađen.",
+    "COMPANY_JOIN_REQUEST_FORBIDDEN": "Ova kompanija nije dodeljena vama niti je u bazi slobodnih kontakata.",
+    "COMPANY_JOIN_REQUEST_NOT_PENDING": "O ovom zahtevu je već odlučeno.",
     "JOB_NOT_FOUND": "Taj posao nije pronađen.",
     "JOB_FORBIDDEN_COMPANY": "Taj posao pripada drugoj kompaniji.",
     "JOB_NOT_DRAFT": "Ta radnja važi samo za nacrte poslova.",

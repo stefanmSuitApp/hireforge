@@ -2,7 +2,10 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 import { Button } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
-import { ModeratorCompaniesSection } from '@/features/moderator';
+import {
+  ModeratorCompaniesSection,
+  ModeratorJoinRequestsPanel,
+} from '@/features/moderator';
 import { loadModeratorSessionOrRedirect } from '@/lib/moderator-workspace-load';
 
 export default async function ModeratorCompaniesPage({
@@ -35,6 +38,8 @@ export default async function ModeratorCompaniesPage({
           </Button>
         </div>
       </section>
+
+      <ModeratorJoinRequestsPanel />
 
       <section className="rounded-2xl border border-border/70 bg-card p-5 shadow-sm">
         <ModeratorCompaniesSection

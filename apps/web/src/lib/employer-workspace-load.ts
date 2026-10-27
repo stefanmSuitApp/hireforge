@@ -38,6 +38,13 @@ export async function loadEmployerSessionOrRedirect(): Promise<EmployerSession> 
   }
   const workspace = await loadWorkspaceForAccessToken(access);
   if (!workspace.ok) {
+    // Signed in, but the company link awaits (or was refused) staff approval.
+    if (
+      workspace.body.includes('"EMPLOYER_PENDING_APPROVAL"') ||
+      workspace.body.includes('"EMPLOYER_JOIN_REJECTED"')
+    ) {
+      redirect(`/${locale}/employer/pending`);
+    }
     redirect(`/${locale}/employer/login`);
   }
   return {
