@@ -1030,6 +1030,7 @@
     "RESUME_IN_USE": "This CV is attached to an application and cannot be deleted.",
     "STAFF_COMPANY_LIST_VIEW_FORBIDDEN": "You cannot open that company list view.",
     "STAFF_COMPANY_PATCH_FORBIDDEN": "You cannot edit this company in its current state.",
+    "STAFF_COMPANY_VIEW_FORBIDDEN": "This company is not assigned to you and is not in the lead pool.",
     "STAFF_COMPANY_PICKUP_FORBIDDEN": "This company cannot be picked up right now.",
     "STAFF_COMPANY_CLOSE_FORBIDDEN": "You cannot change the sales status for this company.",
     "COMPANY_IDENTIFIER_TAKEN": "Another company already uses this PIB, MB, VAT ID, or identifier.",

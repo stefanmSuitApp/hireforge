@@ -1030,6 +1030,7 @@
     "RESUME_IN_USE": "Ovaj CV je vezan za prijavu i ne može se obrisati.",
     "STAFF_COMPANY_LIST_VIEW_FORBIDDEN": "Ne možete otvoriti taj prikaz liste kompanija.",
     "STAFF_COMPANY_PATCH_FORBIDDEN": "Ne možete menjati ovu kompaniju u ovom stanju.",
+    "STAFF_COMPANY_VIEW_FORBIDDEN": "Ova kompanija nije dodeljena vama niti je u bazi slobodnih kontakata.",
     "STAFF_COMPANY_PICKUP_FORBIDDEN": "Ova kompanija se trenutno ne može preuzeti.",
     "STAFF_COMPANY_CLOSE_FORBIDDEN": "Ne možete menjati prodajni status ove kompanije.",
     "COMPANY_IDENTIFIER_TAKEN": "Druga kompanija već koristi ovaj PIB, MB, PDV ili identifikator.",
