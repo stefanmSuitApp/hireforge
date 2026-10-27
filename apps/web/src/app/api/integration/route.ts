@@ -6,6 +6,10 @@ export const dynamic = 'force-dynamic';
  * Server-side aggregation: Nest `/api/integration` (DB, Redis, BullMQ enqueue, Sanity).
  */
 export async function GET() {
+  // Dev-only diagnostics: exposes infra status and enqueues a BullMQ job per hit.
+  if (process.env.NODE_ENV !== 'development') {
+    return new Response(null, { status: 404 });
+  }
   const base = process.env.NEXT_PUBLIC_API_URL;
   if (!base) {
     return Response.json(

@@ -159,12 +159,19 @@ docker compose -f compose.prod.yml logs --tail=100 web
 docker compose -f compose.prod.yml logs --tail=100 worker
 ```
 
-Check public routes:
+Check public routes and the private integration probe (the web `/api/integration`
+route is dev-only and returns 404 in production):
 
 ```bash
 curl -I https://sljakam.com
-curl -fsS https://sljakam.com/api/integration
+curl -o /dev/null -w '%{http_code}\n' https://sljakam.com/api/integration   # expect 404
+docker compose -f compose.prod.yml exec api node -e "fetch('http://127.0.0.1:4000/api/integration').then(r=>r.text()).then(console.log)"
 ```
+
+The API refuses to boot in production when `AUTH_DEV_HEADERS=1` or when
+`AUTH_JWT_SECRET` / `CMS_SYNC_SECRET` / `SANITY_WEBHOOK_SECRET` still hold a
+placeholder (`replace-with…`) or are shorter than 32 characters. Check
+`docker compose -f compose.prod.yml logs api` if the api container restarts.
 
 Then smoke test:
 
