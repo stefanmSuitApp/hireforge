@@ -239,7 +239,7 @@ export class SubscriptionsService {
       let priceMinorSnapshot = priceRow.amountMinor;
       let proformaTotalMinor = priceRow.amountMinor;
       let appliedPromoCode: string | null = null;
-      let promoForRedeem: (typeof promoCodes.$inferSelect) | null = null;
+      let promoForRedeem: typeof promoCodes.$inferSelect | null = null;
 
       if (req.promoCode) {
         const [promoRow] = await tx

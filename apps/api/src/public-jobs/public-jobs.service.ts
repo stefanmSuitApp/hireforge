@@ -65,7 +65,9 @@ type PublicJobListJoinRow = {
   catNameEn: string | null;
 };
 
-function mapJoinRowToPublicListItem(r: PublicJobListJoinRow): PublicJobListItem {
+function mapJoinRowToPublicListItem(
+  r: PublicJobListJoinRow,
+): PublicJobListItem {
   return {
     id: r.id,
     title: r.title,
@@ -577,7 +579,10 @@ export class PublicJobsService {
     }
   }
 
-  async listSimilar(jobId: string, limit = 6): Promise<PublicSimilarJobsResponse> {
+  async listSimilar(
+    jobId: string,
+    limit = 6,
+  ): Promise<PublicSimilarJobsResponse> {
     const database = getDb();
     if (!database) {
       throw new ServiceUnavailableException(

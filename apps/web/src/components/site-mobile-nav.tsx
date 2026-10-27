@@ -143,7 +143,9 @@ export function SiteMobileNav({
             </nav>
 
             <div className="mt-3 border-t border-border/60 pt-3">
-              {isAuthenticated && authRole === 'candidate' && inCandidateContext ? (
+              {isAuthenticated &&
+              authRole === 'candidate' &&
+              inCandidateContext ? (
                 <div className="flex flex-col gap-1">
                   {CANDIDATE_WORKSPACE_LINKS.map(
                     ({ href, navKey, messageKey }) => {
@@ -195,47 +197,51 @@ export function SiteMobileNav({
                 </div>
               ) : isAuthenticated && authRole === 'moderator' ? (
                 <div className="flex flex-col gap-1">
-                  {MODERATOR_WORKSPACE_LINKS.map(({ href, navKey, messageKey }) => {
-                    const active = moderatorNavCurrent === navKey;
-                    return (
-                      <Link
-                        key={href}
-                        href={href}
-                        locale={locale}
-                        className={cn(
-                          'rounded-xl px-3 py-2 text-sm font-medium transition-colors',
-                          active
-                            ? 'bg-foreground text-background'
-                            : 'text-foreground hover:bg-muted',
-                        )}
-                        onClick={() => setOpen(false)}
-                      >
-                        {tModerator(messageKey)}
-                      </Link>
-                    );
-                  })}
+                  {MODERATOR_WORKSPACE_LINKS.map(
+                    ({ href, navKey, messageKey }) => {
+                      const active = moderatorNavCurrent === navKey;
+                      return (
+                        <Link
+                          key={href}
+                          href={href}
+                          locale={locale}
+                          className={cn(
+                            'rounded-xl px-3 py-2 text-sm font-medium transition-colors',
+                            active
+                              ? 'bg-foreground text-background'
+                              : 'text-foreground hover:bg-muted',
+                          )}
+                          onClick={() => setOpen(false)}
+                        >
+                          {tModerator(messageKey)}
+                        </Link>
+                      );
+                    },
+                  )}
                 </div>
               ) : isAuthenticated && authRole === 'admin' ? (
                 <div className="flex flex-col gap-1">
-                  {MODERATOR_WORKSPACE_LINKS.map(({ href, navKey, messageKey }) => {
-                    const active = moderatorNavCurrent === navKey;
-                    return (
-                      <Link
-                        key={href}
-                        href={href}
-                        locale={locale}
-                        className={cn(
-                          'rounded-xl px-3 py-2 text-sm font-medium transition-colors',
-                          active
-                            ? 'bg-foreground text-background'
-                            : 'text-foreground hover:bg-muted',
-                        )}
-                        onClick={() => setOpen(false)}
-                      >
-                        {tModerator(messageKey)}
-                      </Link>
-                    );
-                  })}
+                  {MODERATOR_WORKSPACE_LINKS.map(
+                    ({ href, navKey, messageKey }) => {
+                      const active = moderatorNavCurrent === navKey;
+                      return (
+                        <Link
+                          key={href}
+                          href={href}
+                          locale={locale}
+                          className={cn(
+                            'rounded-xl px-3 py-2 text-sm font-medium transition-colors',
+                            active
+                              ? 'bg-foreground text-background'
+                              : 'text-foreground hover:bg-muted',
+                          )}
+                          onClick={() => setOpen(false)}
+                        >
+                          {tModerator(messageKey)}
+                        </Link>
+                      );
+                    },
+                  )}
                   <div className="my-2 border-t border-border/60" />
                   {ADMIN_WORKSPACE_LINKS.map(({ href, navKey, messageKey }) => {
                     const active = adminNavCurrent === navKey;

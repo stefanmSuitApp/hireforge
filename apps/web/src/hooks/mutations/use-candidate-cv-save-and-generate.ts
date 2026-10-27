@@ -1,6 +1,10 @@
 'use client';
 
-import type { CandidateProfilePatch, CandidateResumeItem, CvTemplateCode } from 'contracts';
+import type {
+  CandidateProfilePatch,
+  CandidateResumeItem,
+  CvTemplateCode,
+} from 'contracts';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';

@@ -1,8 +1,5 @@
 import type { PublicJobListItem, PublicJobTaxonomyResponse } from 'contracts';
-import {
-  getTranslations,
-  setRequestLocale,
-} from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 import { HomeAudiencePaths } from '@/features/home/home-audience-paths';
 import { HomeFeaturedJobsStrip } from '@/features/home/home-featured-jobs-strip';
@@ -12,7 +9,10 @@ import { HomePopularJobsStrip } from '@/features/home/home-popular-jobs-strip';
 import { HomeRecentJobsStrip } from '@/features/home/home-recent-jobs-strip';
 import { HomeSpotlightRail } from '@/features/home/home-spotlight-rail';
 import { buildListQuery } from '@/features/jobs/lib/jobs-list-query';
-import { fetchCmsHomeJobsDiscovery, fetchCmsHomePromoBanner } from '@/lib/cms-content';
+import {
+  fetchCmsHomeJobsDiscovery,
+  fetchCmsHomePromoBanner,
+} from '@/lib/cms-content';
 import {
   buildCmsCategorySpotlightTiles,
   buildCmsCitySpotlightTiles,
@@ -48,9 +48,8 @@ export default async function HomePage({
   const base = resolveNestPublicOrigin();
   let allItems: PublicJobListItem[] = [];
   let taxonomy: PublicJobTaxonomyResponse = emptyTaxonomy;
-  let cmsHomeDiscovery: Awaited<
-    ReturnType<typeof fetchCmsHomeJobsDiscovery>
-  > = null;
+  let cmsHomeDiscovery: Awaited<ReturnType<typeof fetchCmsHomeJobsDiscovery>> =
+    null;
 
   if (base) {
     const qp = buildListQuery({}, 1, 48);
@@ -140,7 +139,11 @@ export default async function HomePage({
               </p>
             </header>
 
-            <HomeHeroSearch action={heroSearchAction} taxonomy={taxonomy} isAuthenticated={isAuthenticated} />
+            <HomeHeroSearch
+              action={heroSearchAction}
+              taxonomy={taxonomy}
+              isAuthenticated={isAuthenticated}
+            />
           </div>
         </div>
       </section>
@@ -203,7 +206,9 @@ export default async function HomePage({
           s3Body={t('howStep3Body')}
         />
 
-        {!isAuthenticated && <HomeAudiencePaths locale={locale} t={audienceDict} />}
+        {!isAuthenticated && (
+          <HomeAudiencePaths locale={locale} t={audienceDict} />
+        )}
       </div>
     </main>
   );

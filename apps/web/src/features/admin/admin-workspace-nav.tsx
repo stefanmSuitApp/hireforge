@@ -43,7 +43,10 @@ export function AdminWorkspaceNav() {
             </Link>
           );
         })}
-        <span aria-hidden="true" className="mx-1 self-stretch border-l border-border/70" />
+        <span
+          aria-hidden="true"
+          className="mx-1 self-stretch border-l border-border/70"
+        />
         {ADMIN_WORKSPACE_LINKS.map(({ href, navKey, messageKey }) => {
           const isActive = adminCurrent === navKey;
           return (

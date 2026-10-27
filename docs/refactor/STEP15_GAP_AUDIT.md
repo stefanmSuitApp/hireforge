@@ -4,15 +4,15 @@ Cross-check of [`MIGRATION_PLAN.md`](./MIGRATION_PLAN.md) §15 against the repo 
 
 ## Already present
 
-| Area | Location | Notes |
-|------|-----------|--------|
-| Locale prefix | [`apps/web/src/i18n/routing.ts`](../../apps/web/src/i18n/routing.ts) | `localePrefix: 'always'`, `defaultLocale: 'sr'`. |
-| Canonical alternates helper | [`apps/web/src/i18n/metadata.ts`](../../apps/web/src/i18n/metadata.ts) | `buildLocaleAlternates` → `canonical` + `languages` per locale. |
-| Jobs list + filters | [`apps/web/src/features/jobs`](../../apps/web/src/features/jobs) | Server-fed list, `JobsFilterForm`, taxonomy from `GET public/jobs/filters`. |
-| Job detail + slug | [`apps/web/src/app/[locale]/jobs/[jobRef]/page.tsx`](../../apps/web/src/app/[locale]/jobs/[jobRef]/page.tsx) | UUID or slug fetch via Nest. |
-| Company page + CMS branding | [`apps/web/src/features/companies/components/public-company-page.tsx`](../../apps/web/src/features/companies/components/public-company-page.tsx) | Basic header + jobs list; not yet full Glassdoor snapshot + shared chip rail. |
-| Glassdoor-style excerpt | List API | `PublicJobListItem.excerpt` exists; list UI did not surface excerpt on cards (aligned with §15.4). |
-| External apply telemetry | `POST public/jobs/:id/external-click` | Wired from `JobListingPreview`. |
+| Area                        | Location                                                                                                                                         | Notes                                                                                              |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| Locale prefix               | [`apps/web/src/i18n/routing.ts`](../../apps/web/src/i18n/routing.ts)                                                                             | `localePrefix: 'always'`, `defaultLocale: 'sr'`.                                                   |
+| Canonical alternates helper | [`apps/web/src/i18n/metadata.ts`](../../apps/web/src/i18n/metadata.ts)                                                                           | `buildLocaleAlternates` → `canonical` + `languages` per locale.                                    |
+| Jobs list + filters         | [`apps/web/src/features/jobs`](../../apps/web/src/features/jobs)                                                                                 | Server-fed list, `JobsFilterForm`, taxonomy from `GET public/jobs/filters`.                        |
+| Job detail + slug           | [`apps/web/src/app/[locale]/jobs/[jobRef]/page.tsx`](../../apps/web/src/app/[locale]/jobs/[jobRef]/page.tsx)                                     | UUID or slug fetch via Nest.                                                                       |
+| Company page + CMS branding | [`apps/web/src/features/companies/components/public-company-page.tsx`](../../apps/web/src/features/companies/components/public-company-page.tsx) | Basic header + jobs list; not yet full Glassdoor snapshot + shared chip rail.                      |
+| Glassdoor-style excerpt     | List API                                                                                                                                         | `PublicJobListItem.excerpt` exists; list UI did not surface excerpt on cards (aligned with §15.4). |
+| External apply telemetry    | `POST public/jobs/:id/external-click`                                                                                                            | Wired from `JobListingPreview`.                                                                    |
 
 ## Gaps closed in this pass
 
@@ -28,8 +28,8 @@ Cross-check of [`MIGRATION_PLAN.md`](./MIGRATION_PLAN.md) §15 against the repo 
 
 ## Intentional deferrals / follow-ups
 
-| Item | Reason |
-|------|--------|
-| Salary range chip & “salary disclosed” | No salary fields on `jobs` in Drizzle schema; add when product ships compensation disclosure. |
-| Playwright slug redirect spec | No Playwright setup in repo yet; redirect behaviour remains covered by Next route + manual smoke. |
-| Lighthouse ≥ 95 CI | Not wired as automated gate; run manually per verification checklist. |
+| Item                                   | Reason                                                                                            |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Salary range chip & “salary disclosed” | No salary fields on `jobs` in Drizzle schema; add when product ships compensation disclosure.     |
+| Playwright slug redirect spec          | No Playwright setup in repo yet; redirect behaviour remains covered by Next route + manual smoke. |
+| Lighthouse ≥ 95 CI                     | Not wired as automated gate; run manually per verification checklist.                             |

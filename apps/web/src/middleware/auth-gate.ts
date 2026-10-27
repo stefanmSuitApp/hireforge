@@ -65,10 +65,7 @@ export function isProtectedJobsPath(pathname: string): boolean {
   // Exact match for jobs list page
   if (pathname === jobsBase) return true;
   // Jobs detail page (but not /apply which has its own auth)
-  if (
-    pathname.startsWith(`${jobsBase}/`) &&
-    !pathname.endsWith('/apply')
-  ) {
+  if (pathname.startsWith(`${jobsBase}/`) && !pathname.endsWith('/apply')) {
     return true;
   }
   return false;
@@ -116,7 +113,9 @@ export function getJobsAuthRedirectUrl(request: NextRequest): string | null {
 /**
  * Returns sign-in URL with returnTo when unauthenticated user accesses protected employers route.
  */
-export function getEmployersAuthRedirectUrl(request: NextRequest): string | null {
+export function getEmployersAuthRedirectUrl(
+  request: NextRequest,
+): string | null {
   const { pathname } = request.nextUrl;
   if (!isProtectedEmployersPath(pathname)) return null;
   if (hasAnySession(request)) return null;

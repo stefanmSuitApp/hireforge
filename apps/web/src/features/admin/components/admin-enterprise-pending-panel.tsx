@@ -119,7 +119,9 @@ export function AdminEnterprisePendingPanel({ initialItems }: Props) {
             <DropdownMenuContent align="end">
               <DropdownMenuItem onSelect={() => void activate(row)}>
                 <Check className="size-3.5 text-muted-foreground" />
-                {busyId === row.subscriptionId ? t('activating') : t('activate')}
+                {busyId === row.subscriptionId
+                  ? t('activating')
+                  : t('activate')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

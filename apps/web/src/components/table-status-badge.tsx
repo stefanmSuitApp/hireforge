@@ -8,15 +8,13 @@ export type TableStatusTone =
   | 'danger';
 
 const toneClass: Record<TableStatusTone, string> = {
-  neutral:
-    'border-border/80 bg-muted/60 text-foreground dark:bg-muted/40',
+  neutral: 'border-border/80 bg-muted/60 text-foreground dark:bg-muted/40',
   info: 'border-primary/35 bg-primary/10 text-primary',
   success:
     'border-emerald-600/25 bg-emerald-500/10 text-emerald-900 dark:border-emerald-500/30 dark:text-emerald-100',
   warning:
     'border-amber-600/35 bg-amber-500/10 text-amber-950 dark:border-amber-500/35 dark:text-amber-100',
-  danger:
-    'border-destructive/35 bg-destructive/10 text-destructive',
+  danger: 'border-destructive/35 bg-destructive/10 text-destructive',
 };
 
 type Props = {
@@ -74,9 +72,7 @@ export function applicationPipelineStatusTone(status: string): TableStatusTone {
   }
 }
 
-export function staffSalesStatusTone(
-  status: string,
-): TableStatusTone {
+export function staffSalesStatusTone(status: string): TableStatusTone {
   switch (status) {
     case 'closed_won':
       return 'success';

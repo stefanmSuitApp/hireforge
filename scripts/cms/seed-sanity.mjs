@@ -409,23 +409,91 @@ async function main() {
     _id: 'homeJobsDiscovery',
     _type: 'homeJobsDiscovery',
     categorySpotlights: [
-      { _key: 'cat-1', categorySlug: 'it', label: { _type: 'localeString', sr: 'IT', en: 'IT' } },
-      { _key: 'cat-2', categorySlug: 'marketing', label: { _type: 'localeString', sr: 'Marketing', en: 'Marketing' } },
-      { _key: 'cat-3', categorySlug: 'finansije', label: { _type: 'localeString', sr: 'Finansije', en: 'Finance' } },
-      { _key: 'cat-4', categorySlug: 'pravo', label: { _type: 'localeString', sr: 'Pravo', en: 'Law' } },
-      { _key: 'cat-5', categorySlug: 'administracija', label: { _type: 'localeString', sr: 'Administracija', en: 'Administration' } },
-      { _key: 'cat-6', categorySlug: 'inzenjerstvo', label: { _type: 'localeString', sr: 'Inženjerstvo', en: 'Engineering' } },
-      { _key: 'cat-7', categorySlug: 'prodaja', label: { _type: 'localeString', sr: 'Prodaja', en: 'Sales' } },
-      { _key: 'cat-8', categorySlug: 'dizajn', label: { _type: 'localeString', sr: 'Dizajn', en: 'Design' } },
-      { _key: 'cat-9', categorySlug: 'zdravstvo', label: { _type: 'localeString', sr: 'Zdravstvo', en: 'Healthcare' } },
-      { _key: 'cat-10', categorySlug: 'ugostiteljstvo', label: { _type: 'localeString', sr: 'Ugostiteljstvo', en: 'Hospitality' } },
+      {
+        _key: 'cat-1',
+        categorySlug: 'it',
+        label: { _type: 'localeString', sr: 'IT', en: 'IT' },
+      },
+      {
+        _key: 'cat-2',
+        categorySlug: 'marketing',
+        label: { _type: 'localeString', sr: 'Marketing', en: 'Marketing' },
+      },
+      {
+        _key: 'cat-3',
+        categorySlug: 'finansije',
+        label: { _type: 'localeString', sr: 'Finansije', en: 'Finance' },
+      },
+      {
+        _key: 'cat-4',
+        categorySlug: 'pravo',
+        label: { _type: 'localeString', sr: 'Pravo', en: 'Law' },
+      },
+      {
+        _key: 'cat-5',
+        categorySlug: 'administracija',
+        label: {
+          _type: 'localeString',
+          sr: 'Administracija',
+          en: 'Administration',
+        },
+      },
+      {
+        _key: 'cat-6',
+        categorySlug: 'inzenjerstvo',
+        label: { _type: 'localeString', sr: 'Inženjerstvo', en: 'Engineering' },
+      },
+      {
+        _key: 'cat-7',
+        categorySlug: 'prodaja',
+        label: { _type: 'localeString', sr: 'Prodaja', en: 'Sales' },
+      },
+      {
+        _key: 'cat-8',
+        categorySlug: 'dizajn',
+        label: { _type: 'localeString', sr: 'Dizajn', en: 'Design' },
+      },
+      {
+        _key: 'cat-9',
+        categorySlug: 'zdravstvo',
+        label: { _type: 'localeString', sr: 'Zdravstvo', en: 'Healthcare' },
+      },
+      {
+        _key: 'cat-10',
+        categorySlug: 'ugostiteljstvo',
+        label: {
+          _type: 'localeString',
+          sr: 'Ugostiteljstvo',
+          en: 'Hospitality',
+        },
+      },
     ],
     citySpotlights: [
-      { _key: 'city-1', citySlug: 'beograd', label: { _type: 'localeString', sr: 'Beograd', en: 'Belgrade' } },
-      { _key: 'city-2', citySlug: 'novi-sad', label: { _type: 'localeString', sr: 'Novi Sad', en: 'Novi Sad' } },
-      { _key: 'city-3', citySlug: 'nis', label: { _type: 'localeString', sr: 'Niš', en: 'Niš' } },
-      { _key: 'city-4', citySlug: 'kragujevac', label: { _type: 'localeString', sr: 'Kragujevac', en: 'Kragujevac' } },
-      { _key: 'city-5', citySlug: 'subotica', label: { _type: 'localeString', sr: 'Subotica', en: 'Subotica' } },
+      {
+        _key: 'city-1',
+        citySlug: 'beograd',
+        label: { _type: 'localeString', sr: 'Beograd', en: 'Belgrade' },
+      },
+      {
+        _key: 'city-2',
+        citySlug: 'novi-sad',
+        label: { _type: 'localeString', sr: 'Novi Sad', en: 'Novi Sad' },
+      },
+      {
+        _key: 'city-3',
+        citySlug: 'nis',
+        label: { _type: 'localeString', sr: 'Niš', en: 'Niš' },
+      },
+      {
+        _key: 'city-4',
+        citySlug: 'kragujevac',
+        label: { _type: 'localeString', sr: 'Kragujevac', en: 'Kragujevac' },
+      },
+      {
+        _key: 'city-5',
+        citySlug: 'subotica',
+        label: { _type: 'localeString', sr: 'Subotica', en: 'Subotica' },
+      },
     ],
   });
 

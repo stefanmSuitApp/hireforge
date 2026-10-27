@@ -1,4 +1,7 @@
-import { buildListQuery, JOBS_LIST_PAGE_SIZE } from '@/features/jobs/lib/jobs-list-query';
+import {
+  buildListQuery,
+  JOBS_LIST_PAGE_SIZE,
+} from '@/features/jobs/lib/jobs-list-query';
 
 export type CmsDiscoverySpotlightRow = {
   slug: string;

@@ -236,7 +236,9 @@ export function EmployerPackagesPanel({
                     <div className="flex flex-col justify-start space-y-1">
                       {!isEnterprise && priceOptions.length > 1 ? (
                         <>
-                          <Label className="text-xs">{t('durationLabel')}</Label>
+                          <Label className="text-xs">
+                            {t('durationLabel')}
+                          </Label>
                           <SelectField
                             options={priceOptions.map((p) => ({
                               value: `${String(p.durationDays)}|${p.currency}`,

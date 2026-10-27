@@ -17,7 +17,9 @@ export async function EmployerJobsList({ addListingHref }: Props) {
       <section className="rounded-2xl border border-border/70 bg-card p-6 shadow-sm">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0 space-y-2">
-            <h2 className="text-xl font-semibold text-foreground">{t('title')}</h2>
+            <h2 className="text-xl font-semibold text-foreground">
+              {t('title')}
+            </h2>
             <p className="text-sm text-muted-foreground">
               {t('addListingHint')}{' '}
               <Link

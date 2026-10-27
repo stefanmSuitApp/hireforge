@@ -27,7 +27,9 @@ export default async function EmployerPackagesPage({
   const header = (
     <section className="rounded-2xl border border-border/70 bg-card p-6 shadow-sm">
       <h2 className="text-xl font-semibold text-foreground">{t('heading')}</h2>
-      <p className="mt-2 max-w-2xl text-sm text-muted-foreground">{t('lead')}</p>
+      <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+        {t('lead')}
+      </p>
     </section>
   );
 
@@ -58,7 +60,7 @@ export default async function EmployerPackagesPage({
         {staleApiHint ? (
           <p className="mt-2 text-sm text-muted-foreground">{staleApiHint}</p>
         ) : null}
-      </div >
+      </div>
     );
   }
 
@@ -70,7 +72,9 @@ export default async function EmployerPackagesPage({
         {subscriptionsBlock}
         <section className="rounded-2xl border border-border/70 bg-card p-5 shadow-sm">
           <p className="text-sm text-muted-foreground">{t('catalogEmpty')}</p>
-          <p className="mt-2 text-sm text-muted-foreground">{t('catalogEmptyHint')}</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {t('catalogEmptyHint')}
+          </p>
         </section>
       </div>
     );

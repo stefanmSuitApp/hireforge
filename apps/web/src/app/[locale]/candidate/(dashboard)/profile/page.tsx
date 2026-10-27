@@ -19,7 +19,9 @@ export default async function CandidateProfilePage({
   return (
     <div className="space-y-6">
       <section className="rounded-2xl border border-border/70 bg-card p-6 shadow-sm">
-        <h2 className="text-xl font-semibold text-foreground">{t('heading')}</h2>
+        <h2 className="text-xl font-semibold text-foreground">
+          {t('heading')}
+        </h2>
         <p className="mt-1 text-sm text-muted-foreground">{t('subheading')}</p>
       </section>
       <CandidateProfilePanel

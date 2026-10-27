@@ -36,7 +36,9 @@ export async function SiteFooter() {
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-6">
           <div className="sm:col-span-2 lg:col-span-1">
             <BrandWordmark text={brandText} size="sm" />
-            <p className="m-0 mt-2 text-xs text-muted-foreground">{t('copyright')}</p>
+            <p className="m-0 mt-2 text-xs text-muted-foreground">
+              {t('copyright')}
+            </p>
             {siteSettings?.footerTagline?.trim() ? (
               <p className="m-0 mt-2 max-w-xs text-sm leading-relaxed text-muted-foreground/90">
                 {siteSettings.footerTagline}
@@ -141,7 +143,9 @@ export async function SiteFooter() {
                 ))}
               </ul>
             ) : (
-              <p className="m-0 text-sm text-muted-foreground">{t('listFallback')}</p>
+              <p className="m-0 text-sm text-muted-foreground">
+                {t('listFallback')}
+              </p>
             )}
           </div>
 
@@ -164,7 +168,9 @@ export async function SiteFooter() {
                 ))}
               </ul>
             ) : (
-              <p className="m-0 text-sm text-muted-foreground">{t('listFallback')}</p>
+              <p className="m-0 text-sm text-muted-foreground">
+                {t('listFallback')}
+              </p>
             )}
           </div>
         </div>

@@ -697,16 +697,12 @@ export const savedJobSearches = pgTable(
     candidateId: uuid('candidate_id')
       .notNull()
       .references(() => candidates.id, { onDelete: 'cascade' }),
-    queryJson: jsonb('query_json')
-      .notNull()
-      .$type<Record<string, string>>(),
+    queryJson: jsonb('query_json').notNull().$type<Record<string, string>>(),
     createdAt: timestamp('created_at', { withTimezone: true })
       .notNull()
       .defaultNow(),
   },
-  (t) => [
-    index('saved_job_searches_candidate_id_idx').on(t.candidateId),
-  ],
+  (t) => [index('saved_job_searches_candidate_id_idx').on(t.candidateId)],
 );
 
 // --- Packages, subscriptions, billing (Step 4) ---

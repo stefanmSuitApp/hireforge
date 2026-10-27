@@ -31,19 +31,10 @@ export const publicJobListQuerySchema = z.object({
   employmentType: z.preprocess(
     emptyToUndefined,
     z
-      .enum([
-        'full_time',
-        'part_time',
-        'contract',
-        'internship',
-        'temporary',
-      ])
+      .enum(['full_time', 'part_time', 'contract', 'internship', 'temporary'])
       .optional(),
   ),
-  postedWithin: z.preprocess(
-    emptyToUndefined,
-    postedWithinSchema.optional(),
-  ),
+  postedWithin: z.preprocess(emptyToUndefined, postedWithinSchema.optional()),
   easyApply: easyApplySchema,
 });
 

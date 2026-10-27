@@ -65,9 +65,7 @@ export function PublicJobCard({
         selected
           ? 'border-l-4 border-l-primary border-t-border/60 border-r-border/60 border-b-border/60 bg-primary/[0.02]'
           : 'border-border/60',
-        job.featured &&
-          !selected &&
-          'border-primary/30 bg-primary/[0.02]',
+        job.featured && !selected && 'border-primary/30 bg-primary/[0.02]',
       )}
     >
       <Link

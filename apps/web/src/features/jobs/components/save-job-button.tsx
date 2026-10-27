@@ -121,7 +121,12 @@ export function SaveJobLoginHint({
 }) {
   const t = useTranslations('Jobs');
   return (
-    <Button variant="ghost" size="sm" className={cn('shrink-0 px-2', className)} asChild>
+    <Button
+      variant="ghost"
+      size="sm"
+      className={cn('shrink-0 px-2', className)}
+      asChild
+    >
       <Link
         href={`/candidate/login?returnTo=${encodeURIComponent(returnToPath)}`}
       >

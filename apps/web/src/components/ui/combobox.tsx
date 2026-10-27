@@ -209,10 +209,7 @@ export function Combobox(props: ComboboxProps) {
             )}
           >
             <span
-              className={cn(
-                'truncate',
-                !selected && 'text-muted-foreground',
-              )}
+              className={cn('truncate', !selected && 'text-muted-foreground')}
             >
               {selected ? selected.label : placeholder}
             </span>

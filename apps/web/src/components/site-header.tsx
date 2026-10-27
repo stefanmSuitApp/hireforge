@@ -47,15 +47,16 @@ export async function SiteHeader() {
           <div className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/70 shadow-sm">
             <span className="text-lg font-bold text-primary-foreground">Š</span>
           </div>
-          <BrandWordmark text={brandText} size="md" className="hidden sm:block" />
+          <BrandWordmark
+            text={brandText}
+            size="md"
+            className="hidden sm:block"
+          />
         </Link>
 
         {/* Center: Navigation */}
         <nav className="hidden flex-1 justify-center md:flex">
-          <SiteMainNav
-            ariaLabel={t('mainNav')}
-            items={visibleNavItems}
-          />
+          <SiteMainNav ariaLabel={t('mainNav')} items={visibleNavItems} />
         </nav>
 
         {/* Right: Actions */}

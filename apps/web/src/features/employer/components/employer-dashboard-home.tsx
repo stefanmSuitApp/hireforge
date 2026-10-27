@@ -17,8 +17,12 @@ export async function EmployerDashboardHome({ workspace }: Props) {
   return (
     <div className="space-y-6">
       <section className="rounded-2xl border border-border/70 bg-card p-6 shadow-sm">
-        <h2 className="text-xl font-semibold text-foreground">{t('dashboardTitle')}</h2>
-        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">{t('dashboardBody')}</p>
+        <h2 className="text-xl font-semibold text-foreground">
+          {t('dashboardTitle')}
+        </h2>
+        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+          {t('dashboardBody')}
+        </p>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
           {t('dashboardPackagesHint')}
         </p>
@@ -28,7 +32,11 @@ export async function EmployerDashboardHome({ workspace }: Props) {
               {t('workspaceNavAddListing')}
             </Link>
           </Button>
-          <Button variant="outline" asChild className="h-auto justify-center py-3">
+          <Button
+            variant="outline"
+            asChild
+            className="h-auto justify-center py-3"
+          >
             <Link href="/employer/jobs" locale={locale}>
               {th('ctaListings')}
             </Link>
@@ -41,13 +49,17 @@ export async function EmployerDashboardHome({ workspace }: Props) {
           <p className="text-xs uppercase tracking-wide text-muted-foreground">
             {th('cardListingsLabel')}
           </p>
-          <p className="mt-2 text-sm text-foreground">{th('cardListingsBody')}</p>
+          <p className="mt-2 text-sm text-foreground">
+            {th('cardListingsBody')}
+          </p>
         </article>
         <article className="rounded-xl border border-border/70 bg-card p-4">
           <p className="text-xs uppercase tracking-wide text-muted-foreground">
             {th('cardPackagesLabel')}
           </p>
-          <p className="mt-2 text-sm text-foreground">{th('cardPackagesBody')}</p>
+          <p className="mt-2 text-sm text-foreground">
+            {th('cardPackagesBody')}
+          </p>
         </article>
         <article className="rounded-xl border border-border/70 bg-card p-4">
           <p className="text-xs uppercase tracking-wide text-muted-foreground">
@@ -58,36 +70,54 @@ export async function EmployerDashboardHome({ workspace }: Props) {
       </section>
 
       <section className="rounded-2xl border border-border/70 bg-card p-6 shadow-sm">
-        <h3 className="text-base font-semibold text-foreground">{t('contactCard.title')}</h3>
+        <h3 className="text-base font-semibold text-foreground">
+          {t('contactCard.title')}
+        </h3>
         <div className="mt-4 space-y-2 text-sm">
           {mod ? (
             <>
               {mod.displayName ? (
                 <p>
-                  <span className="text-muted-foreground">{t('contactCard.name')}</span>{' '}
+                  <span className="text-muted-foreground">
+                    {t('contactCard.name')}
+                  </span>{' '}
                   {mod.displayName}
                 </p>
               ) : null}
               <p>
-                <span className="text-muted-foreground">{t('contactCard.email')}</span>{' '}
-                <a className="text-primary underline" href={`mailto:${mod.email}`}>
+                <span className="text-muted-foreground">
+                  {t('contactCard.email')}
+                </span>{' '}
+                <a
+                  className="text-primary underline"
+                  href={`mailto:${mod.email}`}
+                >
                   {mod.email}
                 </a>
               </p>
               {mod.phone ? (
                 <p>
-                  <span className="text-muted-foreground">{t('contactCard.phone')}</span>{' '}
-                  <a className="text-primary underline" href={`tel:${mod.phone}`}>
+                  <span className="text-muted-foreground">
+                    {t('contactCard.phone')}
+                  </span>{' '}
+                  <a
+                    className="text-primary underline"
+                    href={`tel:${mod.phone}`}
+                  >
                     {mod.phone}
                   </a>
                 </p>
               ) : null}
               {!mod.displayName && !mod.phone ? (
-                <p className="text-muted-foreground">{t('contactCard.partial')}</p>
+                <p className="text-muted-foreground">
+                  {t('contactCard.partial')}
+                </p>
               ) : null}
             </>
           ) : (
-            <p className="text-muted-foreground">{t('contactCard.unassigned')}</p>
+            <p className="text-muted-foreground">
+              {t('contactCard.unassigned')}
+            </p>
           )}
         </div>
       </section>
