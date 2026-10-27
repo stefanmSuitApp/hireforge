@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NX_DAEMON: 'false'
+      NX_NO_CLOUD: 'true'
+      NEXT_TELEMETRY_DISABLED: '1'
+      # Public, non-secret build-time values (same as compose.prod.yml defaults).
+      NEXT_PUBLIC_APP_URL: https://sljakam.com
+      NEXT_PUBLIC_API_URL: http://api:4000
+      NEXT_PUBLIC_DEFAULT_LOCALE: sr
+      NEXT_PUBLIC_SUPPORTED_LOCALES: sr,en
+      NEXT_PUBLIC_SANITY_PROJECT_ID: 845zdl9k
+      NEXT_PUBLIC_SANITY_DATASET: production
+      SANITY_STUDIO_PROJECT_ID: 845zdl9k
+      SANITY_STUDIO_DATASET: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # cms targets declare `envFile: .env`; values come from `env:` above.
+      - run: touch .env
+
+      - run: pnpm lint
+      - run: pnpm format
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
