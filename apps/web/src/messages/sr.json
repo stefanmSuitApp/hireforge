@@ -1023,6 +1023,7 @@
     "APPLICATION_REAPPLY_COOLDOWN": "Nedavno ste povukli prijavu. Sačekajte 24 sata pre ponovne prijave na ovaj posao.",
     "APPLICATION_RESUME_REQUIRED": "Otpremite CV na profilu (ili ga ovde izaberite) pre prijave.",
     "APPLICATION_SUBMIT_RATE_LIMITED": "Previše prijava u jednom danu. Probajte sutra.",
+    "AUTH_RATE_LIMITED": "Previše pokušaja. Sačekajte nekoliko minuta i pokušajte ponovo.",
     "APPLICATION_WITHDRAW_FORBIDDEN": "Ovu prijavu više ne možete povući.",
     "CANDIDATE_EMAIL_NOT_VERIFIED": "Potvrdite e-poštu pre slanja prijave.",
     "RESUME_NOT_FOUND": "Taj CV nije pronađen.",

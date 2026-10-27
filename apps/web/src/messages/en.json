@@ -1023,6 +1023,7 @@
     "APPLICATION_REAPPLY_COOLDOWN": "You withdrew recently. Wait 24 hours before applying to this job again.",
     "APPLICATION_RESUME_REQUIRED": "Upload a CV on your profile (or choose one here) before applying.",
     "APPLICATION_SUBMIT_RATE_LIMITED": "Too many applications in one day. Try again tomorrow.",
+    "AUTH_RATE_LIMITED": "Too many attempts. Wait a few minutes and try again.",
     "APPLICATION_WITHDRAW_FORBIDDEN": "This application can no longer be withdrawn.",
     "CANDIDATE_EMAIL_NOT_VERIFIED": "Verify your email before submitting an application.",
     "RESUME_NOT_FOUND": "That CV could not be found.",

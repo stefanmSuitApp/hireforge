@@ -1,8 +1,14 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Req } from '@nestjs/common';
 import { employerSelfSignupBodySchema } from 'contracts';
+import type { Request } from 'express';
 import { z } from 'zod';
 
 import { codedBadRequest } from '../http/coded-http';
+import {
+  assertLoginRateLimit,
+  assertRefreshRateLimit,
+  assertRegisterRateLimit,
+} from './auth-rate-limit';
 import { AuthService } from './auth.service';
 
 const registerSchema = employerSelfSignupBodySchema;
@@ -27,7 +33,8 @@ export class AuthController {
   constructor(private readonly auth: AuthService) {}
 
   @Post('employer/register')
-  async registerEmployer(@Body() body: unknown) {
+  async registerEmployer(@Body() body: unknown, @Req() req: Request) {
+    await assertRegisterRateLimit(req);
     const parsed = registerSchema.safeParse(body);
     if (!parsed.success) {
       throw codedBadRequest(
@@ -40,7 +47,8 @@ export class AuthController {
   }
 
   @Post('candidate/register')
-  async registerCandidate(@Body() body: unknown) {
+  async registerCandidate(@Body() body: unknown, @Req() req: Request) {
+    await assertRegisterRateLimit(req);
     const parsed = candidateRegisterSchema.safeParse(body);
     if (!parsed.success) {
       throw codedBadRequest(
@@ -53,7 +61,7 @@ export class AuthController {
   }
 
   @Post('candidate/login')
-  async loginCandidate(@Body() body: unknown) {
+  async loginCandidate(@Body() body: unknown, @Req() req: Request) {
     const parsed = loginSchema.safeParse(body);
     if (!parsed.success) {
       throw codedBadRequest(
@@ -62,11 +70,12 @@ export class AuthController {
         z.flattenError(parsed.error),
       );
     }
+    await assertLoginRateLimit(req, 'candidate', parsed.data.email);
     return this.auth.loginCandidate(parsed.data);
   }
 
   @Post('employer/login')
-  async loginEmployer(@Body() body: unknown) {
+  async loginEmployer(@Body() body: unknown, @Req() req: Request) {
     const parsed = loginSchema.safeParse(body);
     if (!parsed.success) {
       throw codedBadRequest(
@@ -75,11 +84,12 @@ export class AuthController {
         z.flattenError(parsed.error),
       );
     }
+    await assertLoginRateLimit(req, 'employer', parsed.data.email);
     return this.auth.loginEmployer(parsed.data);
   }
 
   @Post('staff/login')
-  async loginStaff(@Body() body: unknown) {
+  async loginStaff(@Body() body: unknown, @Req() req: Request) {
     const parsed = loginSchema.safeParse(body);
     if (!parsed.success) {
       throw codedBadRequest(
@@ -88,11 +98,13 @@ export class AuthController {
         z.flattenError(parsed.error),
       );
     }
+    await assertLoginRateLimit(req, 'staff', parsed.data.email);
     return this.auth.loginStaff(parsed.data);
   }
 
   @Post('refresh')
-  async refresh(@Body() body: unknown) {
+  async refresh(@Body() body: unknown, @Req() req: Request) {
+    await assertRefreshRateLimit(req);
     const parsed = refreshSchema.safeParse(body);
     if (!parsed.success) {
       throw codedBadRequest(

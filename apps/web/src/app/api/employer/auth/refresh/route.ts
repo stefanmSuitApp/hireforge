@@ -8,9 +8,10 @@ import {
   EMPLOYER_REFRESH_COOKIE,
   EMPLOYER_REFRESH_COOKIE_MAX_AGE,
 } from '@/lib/employer-session';
+import { forwardClientIpHeaders } from '@/lib/client-ip';
 
 /** Rotates employer session cookies using the HttpOnly refresh token (optional client-triggered refresh). */
-export async function POST() {
+export async function POST(req: Request) {
   const cookieStore = await cookies();
   const refresh = cookieStore.get(EMPLOYER_REFRESH_COOKIE)?.value;
   if (!refresh) {
@@ -28,7 +29,11 @@ export async function POST() {
 
   const upstream = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      ...forwardClientIpHeaders(req.headers),
+    },
     body: JSON.stringify({ refreshToken: refresh }),
   });
   const text = await upstream.text();
