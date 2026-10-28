@@ -95,17 +95,26 @@ export const subscriptionStatusEnum = pgEnum('subscription_status', [
 
 // --- Transactional outbox ---
 
-export const outboxEvents = pgTable('outbox_events', {
-  id: serial('id').primaryKey(),
-  eventType: text('event_type').notNull(),
-  payload: jsonb('payload').notNull().$type<Record<string, unknown>>(),
-  /** HTTP request id from API ingress (Phase 7.4); propagated to BullMQ `outbox-dispatch` payload. */
-  correlationId: text('correlation_id'),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  processedAt: timestamp('processed_at', { withTimezone: true }),
-});
+export const outboxEvents = pgTable(
+  'outbox_events',
+  {
+    id: serial('id').primaryKey(),
+    eventType: text('event_type').notNull(),
+    payload: jsonb('payload').notNull().$type<Record<string, unknown>>(),
+    /** HTTP request id from API ingress (Phase 7.4); propagated to BullMQ `outbox-dispatch` payload. */
+    correlationId: text('correlation_id'),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    processedAt: timestamp('processed_at', { withTimezone: true }),
+  },
+  (t) => [
+    /** The worker polls unprocessed rows by id every few seconds. */
+    index('outbox_events_unprocessed_idx')
+      .on(t.id)
+      .where(sql`${t.processedAt} IS NULL`),
+  ],
+);
 
 /** Terminal BullMQ failures for `outbox-dispatch` (replay / ops visibility). */
 export const outboxDeadLetters = pgTable(

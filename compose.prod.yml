@@ -81,6 +81,8 @@ services:
 
   worker:
     <<: *app-env
+    # Matches the worker's SIGTERM handler (drains jobs, 25s hard stop).
+    stop_grace_period: 30s
     build:
       context: .
       dockerfile: Dockerfile.worker
