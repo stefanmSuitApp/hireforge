@@ -15,8 +15,9 @@ import {
 } from './support/db';
 import { expectEmail } from './support/mail';
 import { resetRateLimits, seedNbsRateCache } from './support/redis';
+import { API_ORIGIN } from './support/ports';
 
-const API = 'http://127.0.0.1:4100/api/';
+const API = `${API_ORIGIN}/api/`;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 test.beforeEach(async () => {

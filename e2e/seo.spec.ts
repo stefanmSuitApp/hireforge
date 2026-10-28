@@ -1,7 +1,8 @@
 import { expect, test } from './support/fixtures';
 import { createPublishedJob } from './support/db';
+import { WEB_ORIGIN } from './support/ports';
 
-const origin = () => `http://127.0.0.1:${process.env['E2E_WEB_PORT'] ?? 3100}`;
+const origin = () => WEB_ORIGIN;
 
 test('robots.txt opens public pages and hides private ones', async ({
   request,

@@ -1,6 +1,11 @@
 import { expect } from '@playwright/test';
 
+import { MAIL_ORIGIN } from './ports';
+
 type FakeEmail = { to: string[]; subject: string; text: string };
+
+/** e2e/support/fake-resend.mjs */
+const FAKE_RESEND = MAIL_ORIGIN;
 
 /** Waits until the fake Resend received a mail for `to` whose subject matches. */
 export async function expectEmail(
@@ -12,7 +17,7 @@ export async function expectEmail(
     .poll(
       async () => {
         const res = await fetch(
-          `http://127.0.0.1:4300/emails?to=${encodeURIComponent(to)}`,
+          `${FAKE_RESEND}/emails?to=${encodeURIComponent(to)}`,
         );
         const list = (await res.json()) as FakeEmail[];
         found = list.find((e) => subject.test(e.subject));
@@ -35,7 +40,7 @@ export async function expectEmails(
     .poll(
       async () => {
         const res = await fetch(
-          `http://127.0.0.1:4300/emails?to=${encodeURIComponent(to)}`,
+          `${FAKE_RESEND}/emails?to=${encodeURIComponent(to)}`,
         );
         found = ((await res.json()) as FakeEmail[]).filter((e) =>
           subject.test(e.subject),

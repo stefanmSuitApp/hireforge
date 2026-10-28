@@ -18,7 +18,8 @@ const webMode = process.env['E2E_WEB'] === 'start' ? 'start' : 'dev';
 const databaseUrl = process.env['E2E_DATABASE_URL'] ?? '';
 const redisUrl = process.env['E2E_REDIS_URL'] ?? '';
 
-export const FAKE_RESEND_ORIGIN = 'http://127.0.0.1:4300';
+const MAIL_PORT = Number(process.env['E2E_MAIL_PORT'] ?? 4300);
+export const FAKE_RESEND_ORIGIN = `http://127.0.0.1:${MAIL_PORT}`;
 
 /**
  * Email goes to the local fake (e2e/support/fake-resend.mjs), never to Resend:
@@ -49,6 +50,7 @@ export default defineConfig({
     {
       command: 'node e2e/support/fake-resend.mjs',
       cwd: '..',
+      env: { FAKE_RESEND_PORT: String(MAIL_PORT) },
       url: `${FAKE_RESEND_ORIGIN}/health`,
       reuseExistingServer: false,
       timeout: 10_000,

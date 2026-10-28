@@ -1,6 +1,7 @@
 import { expect, expectNoA11yViolations, test } from './support/fixtures';
 import { createPublishedJob, renameJobSlug, SEED_PASSWORD } from './support/db';
 import { resetRateLimits } from './support/redis';
+import { WEB_ORIGIN } from './support/ports';
 import { waitHydrated } from './support/ui';
 
 test.beforeEach(async () => {
@@ -53,7 +54,7 @@ test('the server sends the page language and a self canonical', async ({
   const html = await (await request.get(`/en/jobs/${job.slug}`)).text();
   expect(html).toMatch(/<html lang="en"/);
   expect(html).toContain(
-    `<link rel="canonical" href="http://127.0.0.1:${process.env['E2E_WEB_PORT'] ?? 3100}/en/jobs/${job.slug}"/>`,
+    `<link rel="canonical" href="${WEB_ORIGIN}/en/jobs/${job.slug}"/>`,
   );
   expect(html).toMatch(/hrefLang="sr"/i);
 });

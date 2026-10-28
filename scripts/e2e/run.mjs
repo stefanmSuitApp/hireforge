@@ -2,12 +2,13 @@
 /**
  * E2E runner: recreates an isolated `<db>_e2e` database (migrate + seed) in the
  * local Postgres from `.env`, flushes a dedicated Redis DB index, builds the
- * API, then runs Playwright (which boots the API on :4100 and Next on :3100).
+ * API, then runs Playwright (which boots the API, worker, fake Resend and Next).
  * Never touches the dev database. Extra args are passed to `playwright test`.
  *
  * Two checkouts sharing one Postgres/Redis must not collide; override per
  * checkout in `.env`: `E2E_DB_NAME`, `E2E_REDIS_DB`, `E2E_API_PORT`,
- * `E2E_WEB_PORT` (defaults: `<db>_e2e`, 15, 4100, 3100).
+ * `E2E_WEB_PORT`, `E2E_MAIL_PORT` (fake Resend) (defaults: `<db>_e2e`, 15,
+ * 4100, 3100, 4300).
  */
 import { spawnSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
@@ -39,6 +40,7 @@ if (!/^[a-z0-9_]+$/i.test(e2eDbName)) {
 const e2eRedisDb = process.env.E2E_REDIS_DB?.trim() || '15';
 const apiPort = process.env.E2E_API_PORT?.trim() || '4100';
 const webPort = process.env.E2E_WEB_PORT?.trim() || '3100';
+const mailPort = process.env.E2E_MAIL_PORT?.trim() || '4300';
 if (!['localhost', '127.0.0.1', 'postgres'].includes(dbUrl.hostname)) {
   console.error(
     `[e2e] Refusing to run against non-local Postgres host ${dbUrl.hostname}.`,
@@ -108,5 +110,6 @@ run(
     E2E_REDIS_URL: e2eEnv.REDIS_URL,
     E2E_API_PORT: apiPort,
     E2E_WEB_PORT: webPort,
+    E2E_MAIL_PORT: mailPort,
   },
 );
