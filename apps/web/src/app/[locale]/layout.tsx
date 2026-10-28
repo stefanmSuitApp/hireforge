@@ -1,4 +1,6 @@
-import type { Metadata } from 'next';
+import '../global.css';
+
+import type { Metadata, Viewport } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import {
   getMessages,
@@ -7,11 +9,26 @@ import {
 } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 
-import { HtmlLang } from '../../components/html-lang';
+import { AppQueryProvider } from '../../components/providers/app-query-provider';
 import { SiteShell } from '../../components/site-shell';
 import { AppToaster } from '../../components/app-toaster';
-import { buildLocaleAlternates } from '../../i18n/metadata';
+import { buildLocaleAlternates, SITE_NAME } from '../../i18n/metadata';
+import { absoluteSiteOrigin } from '../../lib/site-origin';
 import { routing } from '../../i18n/routing';
+
+function siteVerification(): Metadata['verification'] {
+  const google = process.env.GOOGLE_SITE_VERIFICATION?.trim();
+  const bing = process.env.BING_SITE_VERIFICATION?.trim();
+  const yandex = process.env.YANDEX_SITE_VERIFICATION?.trim();
+  return {
+    ...(google ? { google } : {}),
+    ...(yandex ? { yandex } : {}),
+    ...(bing ? { other: { 'msvalidate.01': bing } } : {}),
+  };
+}
+
+/** Browser UI colour: the brand teal (`--primary`, see make-icons.mjs). */
+export const viewport: Viewport = { themeColor: '#007767' };
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -28,26 +45,38 @@ export async function generateMetadata({
   }
   setRequestLocale(locale);
   const t = await getTranslations('Metadata');
-  const base = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
 
   return {
-    metadataBase: new URL(base),
+    metadataBase: new URL(absoluteSiteOrigin()),
+    applicationName: SITE_NAME,
     title: {
       default: t('title'),
-      template: '%s · Šljakam',
+      template: `%s · ${SITE_NAME}`,
     },
     description: t('description'),
+    // People type the name without the diacritic; both spellings + domain.
+    keywords: [SITE_NAME, 'Sljakam', 'sljakam.com'],
+    // SVG for current browsers, PNG fallback, Apple touch icon (make-icons.mjs).
+    icons: {
+      icon: [
+        { url: '/icon.svg', type: 'image/svg+xml' },
+        { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      ],
+      apple: '/apple-touch-icon.png',
+    },
     alternates: buildLocaleAlternates(locale, '/'),
     openGraph: {
       type: 'website',
       locale: locale === 'sr' ? 'sr_RS' : 'en_US',
-      siteName: 'Šljakam',
+      siteName: SITE_NAME,
     },
     twitter: {
       card: 'summary_large_image',
       title: t('title'),
       description: t('description'),
     },
+    // Search Console / Bing / Yandex ownership tags; unset → no tag.
+    verification: siteVerification(),
     robots: {
       index: true,
       follow: true,
@@ -70,12 +99,15 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <>
-      <HtmlLang locale={locale} />
-      <NextIntlClientProvider locale={locale} messages={messages}>
-        <AppToaster />
-        <SiteShell>{children}</SiteShell>
-      </NextIntlClientProvider>
-    </>
+    <html lang={locale} suppressHydrationWarning>
+      <body className="min-h-dvh font-sans antialiased">
+        <AppQueryProvider>
+          <NextIntlClientProvider locale={locale} messages={messages}>
+            <AppToaster />
+            <SiteShell>{children}</SiteShell>
+          </NextIntlClientProvider>
+        </AppQueryProvider>
+      </body>
+    </html>
   );
 }

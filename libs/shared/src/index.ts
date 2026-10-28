@@ -6,3 +6,4 @@ export * from './lib/correlation';
 export * from './lib/structured-log';
 export * from './lib/http-errors';
 export * from './lib/transliteration';
+export * from './lib/public-jobs-flag';

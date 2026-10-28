@@ -2,11 +2,7 @@ import createMiddleware from 'next-intl/middleware';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-import {
-  getEmployersAuthRedirectUrl,
-  getAuthRedirectPathname,
-  getJobsAuthRedirectUrl,
-} from './src/middleware/auth-gate';
+import { getAuthRedirectPathname } from './src/middleware/auth-gate';
 import { mergeCandidateRefreshIntoResponse } from './src/middleware/candidate-refresh';
 import { mergeEmployerRefreshIntoResponse } from './src/middleware/employer-refresh';
 import { mergeStaffRefreshIntoResponse } from './src/middleware/staff-refresh';
@@ -24,27 +20,8 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Protect /jobs routes - redirect unauthenticated users to sign-in
-  const jobsAuthRedirect = getJobsAuthRedirectUrl(request);
-  if (jobsAuthRedirect) {
-    const url = request.nextUrl.clone();
-    url.pathname = jobsAuthRedirect.split('?')[0];
-    url.search = jobsAuthRedirect.includes('?')
-      ? '?' + jobsAuthRedirect.split('?')[1]
-      : '';
-    return NextResponse.redirect(url);
-  }
-
-  // Protect /employers route - redirect unauthenticated users to sign-in
-  const employersAuthRedirect = getEmployersAuthRedirectUrl(request);
-  if (employersAuthRedirect) {
-    const url = request.nextUrl.clone();
-    url.pathname = employersAuthRedirect.split('?')[0];
-    url.search = employersAuthRedirect.includes('?')
-      ? '?' + employersAuthRedirect.split('?')[1]
-      : '';
-    return NextResponse.redirect(url);
-  }
+  // /jobs and /employers are public unless PUBLIC_JOBS=false; the pages
+  // themselves enforce that (runtime env), not the middleware.
 
   if (request.nextUrl.pathname === '/') {
     const locale = pickLocaleFromAcceptLanguage(

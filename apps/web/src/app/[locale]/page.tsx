@@ -1,3 +1,5 @@
+import type { Metadata } from 'next';
+import { publicJobsEnabled } from 'shared';
 import type { PublicJobListItem, PublicJobTaxonomyResponse } from 'contracts';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
@@ -21,12 +23,37 @@ import { resolveNestPublicOrigin } from '@/lib/nest-api-url';
 import { fetchPublicJobsList, fetchPublicJobTaxonomy } from '@/lib/public-jobs';
 import { getUnifiedAuthSession } from '@/lib/unified-auth';
 import { Link } from '@/i18n/navigation';
+import { buildPublicPageMetadata } from '@/i18n/metadata';
+import { JsonLd } from '@/components/json-ld';
+import { organizationJsonLd, websiteJsonLd } from '@/lib/seo/json-ld';
+import { absoluteSiteOrigin } from '@/lib/site-origin';
 
 const emptyTaxonomy: PublicJobTaxonomyResponse = {
   cities: [],
   cityGroups: [],
   categories: [],
 };
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations('Metadata');
+  const title = t('title');
+  return {
+    ...buildPublicPageMetadata({
+      locale,
+      path: '/',
+      title,
+      description: t('description'),
+    }),
+    // Already carries the brand; skip the layout's "%s · Šljakam" template.
+    title: { absolute: title },
+  };
+}
 
 export default async function HomePage({
   params,
@@ -44,6 +71,11 @@ export default async function HomePage({
   ]);
   /** Valid access token (not merely cookie presence), so guest CTAs show when truly signed out. */
   const isAuthenticated = authSession.isAuthenticated;
+  /**
+   * Job links go straight to the jobs when they are public (`PUBLIC_JOBS`),
+   * else through sign-in. The home components call this `isAuthenticated`.
+   */
+  const jobsOpen = isAuthenticated || publicJobsEnabled();
 
   const base = resolveNestPublicOrigin();
   let allItems: PublicJobListItem[] = [];
@@ -98,6 +130,12 @@ export default async function HomePage({
 
   return (
     <main>
+      <JsonLd
+        data={[
+          organizationJsonLd(absoluteSiteOrigin()),
+          websiteJsonLd(absoluteSiteOrigin(), locale),
+        ]}
+      />
       {/* Hero Section */}
       <section className="relative overflow-hidden pb-16 pt-12 md:pb-32 md:pt-28">
         {/* Decorative gradient orbs - more visible */}
@@ -120,7 +158,7 @@ export default async function HomePage({
               <Link
                 href={promoBanner.href}
                 locale={locale}
-                className="inline-flex items-center gap-2 rounded-full bg-primary/[0.08] px-4 py-2 text-sm font-medium text-primary no-underline transition-colors hover:bg-primary/[0.12]"
+                className="inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-medium text-accent-foreground no-underline transition-colors hover:bg-accent/80"
               >
                 {promoBanner.text}
               </Link>
@@ -142,7 +180,7 @@ export default async function HomePage({
             <HomeHeroSearch
               action={heroSearchAction}
               taxonomy={taxonomy}
-              isAuthenticated={isAuthenticated}
+              isAuthenticated={jobsOpen}
             />
           </div>
         </div>
@@ -159,7 +197,7 @@ export default async function HomePage({
             subtitle={t('featuredSpotlightSubtitle')}
             viewAllLabel={t('viewAllJobs')}
             featuredRibbonLabel={featuredRibbonLabel}
-            isAuthenticated={isAuthenticated}
+            isAuthenticated={jobsOpen}
           />
 
           <HomePopularJobsStrip
@@ -167,13 +205,13 @@ export default async function HomePage({
             items={moreOpeningJobs}
             title={t('moreListingsTitle')}
             featuredRibbonLabel={featuredRibbonLabel}
-            isAuthenticated={isAuthenticated}
+            isAuthenticated={jobsOpen}
           />
 
           <HomeRecentJobsStrip
             locale={locale}
             featuredRibbonLabel={featuredRibbonLabel}
-            isAuthenticated={isAuthenticated}
+            isAuthenticated={jobsOpen}
           />
         </div>
 
@@ -183,7 +221,7 @@ export default async function HomePage({
           subtitle={t('spotlightCategoriesSubtitle')}
           tiles={categorySpotlightTiles}
           exploreLabelPrefix={t('spotlightExplorePrefix')}
-          isAuthenticated={isAuthenticated}
+          isAuthenticated={jobsOpen}
         />
 
         <HomeSpotlightRail
@@ -193,7 +231,7 @@ export default async function HomePage({
           tiles={citySpotlightTiles}
           initialOpenIndex={Math.max(0, citySpotlightTiles.length - 1)}
           exploreLabelPrefix={t('spotlightExplorePrefix')}
-          isAuthenticated={isAuthenticated}
+          isAuthenticated={jobsOpen}
         />
 
         <HomeHowItWorks

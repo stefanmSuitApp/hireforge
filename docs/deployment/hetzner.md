@@ -242,6 +242,15 @@ docker compose -f compose.prod.yml up -d --no-build --remove-orphans
 docker compose -f compose.prod.yml exec -T caddy caddy reload --config /etc/caddy/Caddyfile
 ```
 
+After every deploy, from the build machine (report only, never blocks):
+
+```bash
+pnpm seo:audit https://sljakam.com   # robots, sitemaps, canonical/hreflang, JSON-LD, www → apex
+pnpm lighthouse https://sljakam.com  # scores vs scripts/perf-budgets.json; HTML in dist/lighthouse/
+```
+
+or re-run the "quality report" GitHub workflow by hand.
+
 Rollback: before shipping, record the running image ids
 (`docker inspect --format '{{.Image}}' hireforge-production-api-1`, same for
 `worker` / `web`), then `docker tag <id> hireforge-production-<svc>:latest`

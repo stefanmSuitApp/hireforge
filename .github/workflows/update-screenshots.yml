@@ -1,0 +1,58 @@
+name: update screenshots
+
+# By hand only: re-render the visual baselines (e2e/visual/__screenshots__)
+# in the Playwright Linux image and commit them to the chosen branch. Review
+# the commit's images before merging.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  NX_DAEMON: 'false'
+  NX_NO_CLOUD: 'true'
+  NEXT_TELEMETRY_DISABLED: '1'
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    container: mcr.microsoft.com/playwright:v1.64.1-noble
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: hireforge
+          POSTGRES_PASSWORD: hireforge
+          POSTGRES_DB: hireforge
+        options: >-
+          --health-cmd "pg_isready -U hireforge" --health-interval 5s
+          --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s
+          --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://hireforge:hireforge@postgres:5432/hireforge
+      REDIS_URL: redis://redis:6379
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: touch .env
+      - run: pnpm e2e:visual:update
+      - name: Commit baselines
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add e2e/visual/__screenshots__
+          git diff --cached --quiet && { echo "No baseline changes."; exit 0; }
+          git commit -m "test(visual): update screenshot baselines"
+          git push

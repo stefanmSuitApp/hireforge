@@ -5,10 +5,13 @@ const BASE_SLUG_MAX_LEN = 55;
 const SHORT_ID_ALPHABET = 'abcdefghijklmnopqrstuvwxyz0123456789';
 
 /**
- * Remove Latin diacritics (Serbian Latin, etc.) for URL-safe ASCII.
+ * Remove Latin diacritics (Serbian Latin, etc.) for URL-safe ASCII. `đ` has no
+ * NFD decomposition, so it is mapped to `dj` first (else it was dropped).
  */
 export function transliterateToAsciiBasic(input: string): string {
   return input
+    .replace(/đ/g, 'dj')
+    .replace(/Đ/g, 'Dj')
     .normalize('NFD')
     .replace(/\p{M}/gu, '')
     .replace(/ß/g, 'ss')

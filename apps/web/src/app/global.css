@@ -44,6 +44,7 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-brand-accent: var(--brand-accent);
 }
 
 :root {
@@ -54,8 +55,9 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  /* Šljakam brand: teal primary (aligned with prior Tailwind teal-700 feel) */
-  --primary: oklch(0.52 0.11 181);
+  /* Šljakam brand: teal primary (aligned with prior Tailwind teal-700 feel).
+     L 0.50 (was 0.52) so primary text passes WCAG AA on primary/10 tints. */
+  --primary: oklch(0.5 0.11 181);
   --primary-foreground: oklch(0.99 0.01 181);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -75,12 +77,14 @@
   --chart-5: oklch(0.769 0.188 70.08);
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.52 0.11 181);
+  --sidebar-primary: oklch(0.5 0.11 181);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.55 0.09 181);
+  /* Logo check mark (BrandMark, app icons): gold on the teal. */
+  --brand-accent: oklch(0.83 0.15 80);
   /* Button gradients (hue aligned with `--primary` / neutrals) */
   --gradient-primary-from: oklch(0.43 0.125 178);
   --gradient-primary-via: oklch(0.52 0.115 181);

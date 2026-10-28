@@ -1,7 +1,4 @@
-import {
-  buildListQuery,
-  JOBS_LIST_PAGE_SIZE,
-} from '@/features/jobs/lib/jobs-list-query';
+import { landingPath } from '@/lib/seo/sitemap';
 
 export type CmsDiscoverySpotlightRow = {
   slug: string;
@@ -32,12 +29,11 @@ export function buildCmsCategorySpotlightTiles(
   rows: CmsDiscoverySpotlightRow[],
 ): HomeJobsSpotlightTile[] {
   return rows.map((row) => {
-    const q = buildListQuery({ category: row.slug }, 1, JOBS_LIST_PAGE_SIZE);
     return {
       slug: row.slug,
       label: row.labelOverride?.trim() || slugToLabel(row.slug),
       imageUrl: row.imageUrl,
-      jobsHref: `/jobs?${q.toString()}`,
+      jobsHref: landingPath(null, row.slug) ?? '/jobs',
     };
   });
 }
@@ -50,12 +46,11 @@ export function buildCmsCitySpotlightTiles(
   rows: CmsDiscoverySpotlightRow[],
 ): HomeJobsSpotlightTile[] {
   return rows.map((row) => {
-    const q = buildListQuery({ city: row.slug }, 1, JOBS_LIST_PAGE_SIZE);
     return {
       slug: row.slug,
       label: row.labelOverride?.trim() || slugToLabel(row.slug),
       imageUrl: row.imageUrl,
-      jobsHref: `/jobs?${q.toString()}`,
+      jobsHref: landingPath(row.slug, null) ?? '/jobs',
     };
   });
 }

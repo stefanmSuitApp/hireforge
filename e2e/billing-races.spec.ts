@@ -8,13 +8,14 @@ import {
   SEED_PASSWORD,
 } from './support/db';
 import { resetRateLimits, seedNbsRateCache } from './support/redis';
+import { API_ORIGIN } from './support/ports';
 
 test.beforeEach(async () => {
   await resetRateLimits();
 });
 
 /** Talks to Nest directly (same origin as the e2e API web server). */
-const API = 'http://127.0.0.1:4100/api/';
+const API = `${API_ORIGIN}/api/`;
 
 async function login(
   path: 'auth/employer/login' | 'auth/staff/login',

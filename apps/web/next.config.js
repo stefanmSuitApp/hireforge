@@ -40,6 +40,19 @@ const nextConfig = {
       'next-intl/config': nextIntlRequestPath,
     },
   },
+  /**
+   * IndexNow key file at `/<INDEXNOW_KEY>.txt`. The key is runtime env, so any
+   * key-shaped `.txt` goes to the handler, which 404s unless it matches.
+   * (`afterFiles`: robots.txt / llms.txt routes win first.)
+   */
+  async rewrites() {
+    return [
+      {
+        source: '/:key([A-Za-z0-9-]{8,128}).txt',
+        destination: '/api/indexnow-key/:key',
+      },
+    ];
+  },
 };
 
 const plugins = [withNx, withNextIntl];

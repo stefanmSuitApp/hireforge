@@ -365,9 +365,12 @@ export function AdminPromoCodesPanel({
                   value={createCurrency}
                   onChange={(e) => setCreateCurrency(e.target.value)}
                 >
-                  <option value="RSD">RSD</option>
-                  <option value="EUR">EUR</option>
-                  <option value="USD">USD</option>
+                  {/* ISO 4217 codes: data, not UI text. */}
+                  {['RSD', 'EUR', 'USD'].map((code) => (
+                    <option key={code} value={code}>
+                      {code}
+                    </option>
+                  ))}
                 </select>
               </div>
             ) : null}

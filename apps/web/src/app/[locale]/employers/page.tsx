@@ -1,15 +1,15 @@
 import type { Metadata } from 'next';
-import { redirect } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 import { EmployersDirectoryView } from '@/features/employers/components/employers-directory-view';
-import { buildLocaleAlternates } from '@/i18n/metadata';
+import { buildPublicPageMetadata } from '@/i18n/metadata';
 import { getCandidateAccessToken } from '@/lib/candidate-access-cookie';
 import { getEmployerAccessToken } from '@/lib/employer-access-cookie';
 import { getStaffAccessToken } from '@/lib/moderator-access-cookie';
 import { resolveNestPublicOrigin } from '@/lib/nest-api-url';
 import { fetchPublicEmployersDirectory } from '@/lib/public-jobs';
-import { hasAnyAuthSession } from '@/lib/unified-auth';
+import { requireSessionUnlessPublicJobs } from '@/lib/public-jobs-gate';
+import { publicJobsEnabled } from 'shared';
 
 export async function generateMetadata({
   params,
@@ -19,11 +19,12 @@ export async function generateMetadata({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations('EmployersPage');
-  return {
+  return buildPublicPageMetadata({
+    locale,
+    path: '/employers',
     title: t('metaTitle'),
     description: t('metaDescription'),
-    alternates: buildLocaleAlternates(locale, '/employers'),
-  };
+  });
 }
 
 export default async function EmployersPage({
@@ -32,24 +33,15 @@ export default async function EmployersPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const isAuthenticated = await hasAnyAuthSession();
+  await requireSessionUnlessPublicJobs(locale, '/employers');
 
-  if (!isAuthenticated) {
-    redirect(
-      `/${locale}/sign-in?returnTo=${encodeURIComponent(`/${locale}/employers`)}`,
-    );
-  }
-
-  const accessToken =
-    (await getStaffAccessToken()) ??
-    (await getEmployerAccessToken()) ??
-    (await getCandidateAccessToken());
-
-  if (!accessToken) {
-    redirect(
-      `/${locale}/sign-in?returnTo=${encodeURIComponent(`/${locale}/employers`)}`,
-    );
-  }
+  // The API needs a token for the directory only while jobs are not public.
+  const accessToken = publicJobsEnabled()
+    ? undefined
+    : ((await getStaffAccessToken()) ??
+      (await getEmployerAccessToken()) ??
+      (await getCandidateAccessToken()) ??
+      undefined);
 
   setRequestLocale(locale);
 

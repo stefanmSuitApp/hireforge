@@ -171,16 +171,22 @@ export function HomeSpotlightRail({
                   : 'flex-[0.5] hover:bg-muted/60 md:flex-[0.4]',
               )}
               onClick={() => setActiveIdx(idx)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  setActiveIdx(idx);
-                }
-              }}
-              aria-expanded={isOpen}
-              aria-label={tile.label}
+              // Only collapsed tiles act as a button: the open one holds a
+              // link, and interactive controls must not be nested.
+              {...(isOpen
+                ? {}
+                : {
+                    role: 'button',
+                    tabIndex: 0,
+                    'aria-expanded': false,
+                    'aria-label': tile.label,
+                    onKeyDown: (e: React.KeyboardEvent) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setActiveIdx(idx);
+                      }
+                    },
+                  })}
             >
               {isOpen ? (
                 /* Expanded card: image + label + button */

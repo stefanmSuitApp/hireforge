@@ -63,13 +63,18 @@ const PdfPreview = dynamic(
   },
   {
     ssr: false,
-    loading: () => (
-      <div className="flex h-[520px] items-center justify-center rounded-md border border-dashed border-border text-sm text-muted-foreground">
-        Loading preview
-      </div>
-    ),
+    loading: () => <PdfPreviewLoading />,
   },
 );
+
+function PdfPreviewLoading() {
+  const t = useTranslations('Candidate.cvBuild');
+  return (
+    <div className="flex h-[520px] items-center justify-center rounded-md border border-dashed border-border text-sm text-muted-foreground">
+      {t('previewLoading')}
+    </div>
+  );
+}
 
 function emptyExperience(): CvExperienceEntry {
   return {

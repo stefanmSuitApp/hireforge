@@ -203,7 +203,9 @@
     "listStatusPartial": "Prikazano {loaded} od {total} oglasa",
     "listStatusComplete": "Učitano {total} odgovarajućih oglasa",
     "scrollForMore": "Skroluj nadole da učitaš još",
-    "endOfList": "Svi odgovarajući oglasi su učitani"
+    "endOfList": "Svi odgovarajući oglasi su učitani",
+    "pagerPrevious": "Prethodna strana",
+    "pagerNext": "Sledeća strana ({page})"
   },
   "JobDetail": {
     "fallbackTitle": "Detalji posla",
@@ -228,7 +230,12 @@
     "errorGeneric": "Trenutno nije moguce ucitati ovaj oglas.",
     "similarJobsTitle": "Slični poslovi",
     "companySnapshotTitle": "O poslodavcu",
-    "companySnapshotCta": "Otvori profil kompanije"
+    "companySnapshotCta": "Otvori profil kompanije",
+    "expiredBanner": "Ovaj oglas je istekao. Poslodavac više ne prima prijave preko njega.",
+    "applyClosed": "Prijave su zatvorene.",
+    "expiredBrowseLive": "Pogledaj aktuelne oglase",
+    "metaDescriptionLead": "{hasCity, select, yes {Posao u kompaniji {company}, {city}.} other {Posao u kompaniji {company}.}}",
+    "moreFromCompany": "Još oglasa kompanije {company}"
   },
   "Company": {
     "fallbackTitle": "Kompanija",
@@ -246,7 +253,9 @@
     "errorGeneric": "Trenutno nije moguce ucitati ovu kompaniju.",
     "snapshotOpenJobs": "Svi otvoreni oglasi",
     "snapshotBrowseJobs": "Pregledaj oglase",
-    "verifiedBadge": "Verifikovan poslodavac"
+    "verifiedBadge": "Verifikovan poslodavac",
+    "whyJoin": "Zašto kod nas",
+    "testimonials": "Utisci zaposlenih"
   },
   "EmployersPage": {
     "metaTitle": "Poslodavci",
@@ -809,7 +818,14 @@
       "adminOverrideTitle": "Admin nadređivanje",
       "adminOverrideHint": "Odmah arhivira posao bez obzira na status. Koristiti retko.",
       "forceArchive": "Prisilno arhiviraj",
-      "forceArchiving": "Arhiviranje…"
+      "forceArchiving": "Arhiviranje…",
+      "rawJobId": "ID oglasa",
+      "rawCompanyId": "ID kompanije",
+      "rawSlugShortId": "Slug / kratki ID",
+      "rawPrimaryLanguage": "Primarni jezik",
+      "rawCity": "Grad",
+      "rawCategory": "Kategorija",
+      "rawUpdatedAt": "Ažurirano"
     },
     "joinRequests": {
       "heading": "Zahtevi za pristup kompaniji",
@@ -1079,7 +1095,9 @@
     "SUBSCRIPTION_NOT_FOUND": "Pretplata nije pronađena.",
     "SUBSCRIPTION_INVALID_STATE": "Ova radnja nije dozvoljena u trenutnom statusu pretplate.",
     "SUBSCRIPTION_FORBIDDEN": "Nemate pravo da upravljate ovom pretplatom.",
-    "PROMO_CURRENCY_MISMATCH": "Promo kod ne važi za kupovinu u ovoj valuti."
+    "PROMO_CURRENCY_MISMATCH": "Promo kod ne važi za kupovinu u ovoj valuti.",
+    "tableRenderFailed": "Tabelu trenutno nije moguće prikazati.",
+    "apiNotConfigured": "Adresa API-ja nije podešena (NEXT_PUBLIC_API_URL)."
   },
   "Candidate": {
     "workspaceLabel": "Kandidatski nalog",
@@ -1222,7 +1240,8 @@
       "validationError": "Ispravite iskustvo, obrazovanje i veštine (datumi i obavezna polja).",
       "pickTemplateError": "Izaberite šablon pre generisanja.",
       "back": "Nazad",
-      "next": "Dalje"
+      "next": "Dalje",
+      "previewLoading": "Učitavanje pregleda"
     }
   },
   "Integration": {
@@ -1258,5 +1277,16 @@
     "forgotPasswordLink": "Zaboravili ste lozinku?",
     "passwordShow": "Prikaži lozinku",
     "passwordHide": "Sakrij lozinku"
+  },
+  "Landing": {
+    "cityTitle": "Poslovi — {city}",
+    "categoryTitle": "{category} poslovi",
+    "pairTitle": "{category} poslovi — {city}",
+    "intro": "{count, plural, =0 {Trenutno nema aktivnih oglasa.} one {Trenutno # aktivan oglas.} few {Trenutno # aktivna oglasa.} other {Trenutno # aktivnih oglasa.}}",
+    "metaDescription": "{title}: {count, plural, =0 {trenutno nema aktivnih oglasa} one {# aktivan oglas} few {# aktivna oglasa} other {# aktivnih oglasa}} na Šljakamu. Pogledaj oglase i prijavi se na one koji ti odgovaraju.",
+    "page": "strana {page}",
+    "otherCities": "Drugi gradovi",
+    "otherCategories": "Druge oblasti",
+    "breadcrumb": "Putanja"
   }
 }

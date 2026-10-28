@@ -4,6 +4,7 @@ import type {
   PublicJobDetailResponse,
   PublicJobListResponse,
   PublicJobTaxonomyResponse,
+  PublicSitemapResponse,
 } from 'contracts';
 
 import { isUuidString } from './job-public-segment';
@@ -178,6 +179,39 @@ export async function fetchPublicCompanyDetail(
     }
     const data = (await res.json()) as PublicCompanyDetailResponse;
     return { ok: true, data };
+  } catch (e) {
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : 'fetch_failed',
+    };
+  }
+}
+
+export type PublicSitemapResult =
+  | { ok: true; data: PublicSitemapResponse }
+  | { ok: false; error: string; status?: number };
+
+/** Live jobs, companies and city/category counts (sitemaps, landing pages). */
+export async function fetchPublicSitemap(
+  apiBaseUrl: string,
+  /** Sitemaps read fresh data (crawlers fetch them rarely); pages use the cache. */
+  { fresh = false }: { fresh?: boolean } = {},
+): Promise<PublicSitemapResult> {
+  const url = nestApiUrl(apiBaseUrl, 'public/jobs/sitemap');
+  if (!url) {
+    return { ok: false, error: 'missing_api_url' };
+  }
+  try {
+    const res = await fetch(url, {
+      ...(fresh
+        ? { cache: 'no-store' as const }
+        : { next: { revalidate: 300 } }),
+      headers: { accept: 'application/json' },
+    });
+    if (!res.ok) {
+      return { ok: false, status: res.status, error: `HTTP ${res.status}` };
+    }
+    return { ok: true, data: (await res.json()) as PublicSitemapResponse };
   } catch (e) {
     return {
       ok: false,

@@ -1,4 +1,5 @@
 import { setRequestLocale } from 'next-intl/server';
+import type { ReactNode } from 'react';
 
 import type { PublicJobTaxonomyResponse } from 'contracts';
 
@@ -17,12 +18,25 @@ import { JobsListScreen, type JobsListBody } from './jobs-list-screen';
 type Props = {
   params: Promise<{ locale: string }>;
   searchParams: Promise<JobsSearchParams>;
+  /** Landing pages: filters fixed by the path (`/jobs/city/beograd`). */
+  fixed?: { city?: string; category?: string };
+  heading?: { title: string; intro: string };
+  /** Rendered above the heading (breadcrumbs) and below the list (related links). */
+  before?: ReactNode;
+  after?: ReactNode;
 };
 
 /** Server entry: loads data, renders {@link JobsListScreen} (client UI + translations). */
-export async function JobsListRoute({ params, searchParams }: Props) {
+export async function JobsListRoute({
+  params,
+  searchParams,
+  fixed,
+  heading,
+  before,
+  after,
+}: Props) {
   const { locale } = await params;
-  const sp = await searchParams;
+  const sp = { ...(await searchParams), ...fixed };
   setRequestLocale(locale);
 
   const pageSize = Math.min(
@@ -34,8 +48,12 @@ export async function JobsListRoute({ params, searchParams }: Props) {
     ),
   );
 
-  /** First page only; further pages load via client infinite scroll. */
-  const qp = buildListQuery(sp, 1, pageSize);
+  /**
+   * The requested page (`?page=N`, so crawlers can paginate through real
+   * links); later pages load via client infinite scroll.
+   */
+  const page = Math.max(1, parseInt(sp.page ?? '1', 10) || 1);
+  const qp = buildListQuery(sp, page, pageSize);
   const base = resolveNestPublicOrigin();
 
   const emptyTaxonomy: PublicJobTaxonomyResponse = {
@@ -95,6 +113,9 @@ export async function JobsListRoute({ params, searchParams }: Props) {
       apiBasePresent={Boolean(base)}
       taxonomy={taxonomy}
       body={body}
+      heading={heading}
+      before={before}
+      after={after}
     />
   );
 }

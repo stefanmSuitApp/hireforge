@@ -1,6 +1,10 @@
+import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 
+import { JsonLd } from '@/components/json-ld';
 import { Link } from '@/i18n/navigation';
+import { breadcrumbJsonLd, companyJsonLd } from '@/lib/seo/json-ld';
+import { absoluteSiteOrigin } from '@/lib/site-origin';
 import { fetchCmsEmployerBranding } from '@/lib/cms-content';
 import { publicJobUrlSegment } from '@/lib/job-public-segment';
 import { resolveNestPublicOrigin } from '@/lib/nest-api-url';
@@ -54,7 +58,10 @@ export async function PublicCompanyPage({
 
   const result = await fetchPublicCompanyDetail(base, slug);
   if (!result.ok) {
-    const msg = result.status === 404 ? t('errorNotFound') : t('errorGeneric');
+    if (result.status === 404 || result.status === 400) {
+      notFound();
+    }
+    const msg = t('errorGeneric');
     return (
       <main className="mx-auto max-w-5xl px-4 py-12 pb-16 md:py-14">
         <div className="rounded-xl border border-dashed border-red-200 bg-red-50 px-6 py-10 text-center">
@@ -67,8 +74,22 @@ export async function PublicCompanyPage({
   const { company, jobs } = result.data;
   const branding = await fetchCmsEmployerBranding(company.slug, locale);
 
+  const origin = absoluteSiteOrigin();
+  const pageUrl = `${origin}/${locale}/companies/${company.slug}`;
+  const tNav = await getTranslations('Nav');
+
   return (
     <main className="mx-auto max-w-5xl px-4 py-12 pb-16 md:py-14">
+      <JsonLd
+        data={[
+          companyJsonLd({ name: company.name, pageUrl }),
+          breadcrumbJsonLd([
+            { name: tNav('home'), url: `${origin}/${locale}` },
+            { name: tNav('employer'), url: `${origin}/${locale}/employers` },
+            { name: company.name, url: pageUrl },
+          ]),
+        ]}
+      />
       {backHref ? (
         <Link
           href={backHref}
@@ -104,7 +125,7 @@ export async function PublicCompanyPage({
           {branding.benefits && branding.benefits.length > 0 ? (
             <>
               <h2 className="m-0 mb-3 text-lg font-semibold text-gray-900">
-                Why join
+                {t('whyJoin')}
               </h2>
               <ul className="m-0 mb-4 list-disc space-y-1 pl-5 text-sm text-gray-700">
                 {branding.benefits
@@ -119,7 +140,7 @@ export async function PublicCompanyPage({
           {branding.testimonials && branding.testimonials.length > 0 ? (
             <div className="space-y-3">
               <h3 className="m-0 text-base font-semibold text-gray-900">
-                Testimonials
+                {t('testimonials')}
               </h3>
               {branding.testimonials
                 .filter((x) => x.quote?.trim())

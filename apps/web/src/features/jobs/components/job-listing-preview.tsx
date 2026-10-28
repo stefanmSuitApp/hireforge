@@ -42,6 +42,8 @@ export function moderatorJobToPublicPreviewShape(
     pngCreativeUrl: job.pngCreativeUrl,
     publishedAt: job.publishedAt,
     expiresAt: null,
+    updatedAt: job.updatedAt,
+    live: false,
     workModel: job.workModel,
     employmentType: job.employmentType,
     seniority: job.seniority,
@@ -125,14 +127,20 @@ const descriptionHtmlClass = cn(
 
 export type JobListingPreviewProps = {
   job: PublicJobDetailResponse;
-  /** `live` = public job page; `preview` = staff preview before go-live. */
-  listingState: 'live' | 'preview';
+  /**
+   * `live` = public job page; `expired` = public page of an ad that ended
+   * (banner, no apply); `preview` = staff preview before go-live.
+   */
+  listingState: 'live' | 'expired' | 'preview';
+  /** `h2` when embedded in a page that has its own `<h1>` (list preview pane). */
+  titleAs?: 'h1' | 'h2';
   className?: string;
 };
 
 export function JobListingPreview({
   job,
   listingState,
+  titleAs: Title = 'h1',
   className,
 }: JobListingPreviewProps) {
   const t = useTranslations('JobDetail');
@@ -164,6 +172,14 @@ export function JobListingPreview({
         className,
       )}
     >
+      {listingState === 'expired' ? (
+        <p
+          className="m-0 mb-4 rounded-lg border border-border bg-muted px-3 py-2 text-sm font-medium text-foreground"
+          role="status"
+        >
+          {t('expiredBanner')}
+        </p>
+      ) : null}
       {listingState === 'live' && job.featured ? (
         <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 px-3 py-2 text-sm font-semibold text-white shadow-sm">
           <Sparkles className="h-4 w-4 shrink-0 opacity-95" aria-hidden />
@@ -173,9 +189,9 @@ export function JobListingPreview({
           </span>
         </div>
       ) : null}
-      <h1 className="m-0 mb-2 text-[clamp(1.45rem,3vw,1.9rem)] font-normal leading-snug text-gray-900">
+      <Title className="m-0 mb-2 text-[clamp(1.45rem,3vw,1.9rem)] font-normal leading-snug text-gray-900">
         {job.title}
-      </h1>
+      </Title>
       <p className="m-0 text-[0.9375rem] leading-normal text-gray-600">
         <Link
           href={`/companies/${job.company.slug}`}
@@ -262,7 +278,7 @@ export function JobListingPreview({
         </p>
       </section>
 
-      {listingState === 'live' ? (
+      {listingState !== 'preview' ? (
         <SimilarJobsSection jobId={job.id} listLocale={locale} />
       ) : null}
 
@@ -271,6 +287,16 @@ export function JobListingPreview({
         {listingState === 'preview' ? (
           <p className="mb-0 mt-0 text-sm text-gray-600">
             {t('applyPreviewNote')}
+          </p>
+        ) : listingState === 'expired' ? (
+          <p className="mb-0 mt-0 text-sm text-gray-600">
+            {t('applyClosed')}{' '}
+            <Link
+              href="/jobs"
+              className="font-medium text-teal-700 underline-offset-2 hover:underline"
+            >
+              {t('expiredBrowseLive')}
+            </Link>
           </p>
         ) : job.applyMode === 'external' ? (
           <>

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
-import { buildLocaleAlternates } from '@/i18n/metadata';
+import { buildPublicPageMetadata } from '@/i18n/metadata';
 
 import { fetchCmsEditorialPage } from './cms-content';
 
@@ -24,12 +24,10 @@ export async function buildEditorialPublicMetadata(
   const rawDesc = doc.seoDescription?.trim() || doc.excerpt?.trim() || '';
   const description = rawDesc ? rawDesc.slice(0, 320) : t('defaultDescription');
 
-  return {
+  return buildPublicPageMetadata({
+    locale,
+    path: slug === 'about-hireforge' ? '/about' : `/p/${slug}`,
     title: titleBase,
     description,
-    alternates: buildLocaleAlternates(
-      locale,
-      slug === 'about-hireforge' ? '/about' : `/p/${slug}`,
-    ),
-  };
+  });
 }

@@ -4,8 +4,9 @@ import { expect, request, test } from '@playwright/test';
 
 import { expectEmails, linkFrom } from './support/mail';
 import { resetRateLimits } from './support/redis';
+import { API_ORIGIN } from './support/ports';
 
-const API = 'http://127.0.0.1:4100/api/';
+const API = `${API_ORIGIN}/api/`;
 
 test.beforeEach(async () => {
   await resetRateLimits();

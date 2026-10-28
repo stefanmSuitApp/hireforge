@@ -85,3 +85,44 @@ A separate session is preparing `feat/seo-quality-gates` (clone at
 `~/Dev/DEVLEGION/hireforge-seo`) that makes job list/detail public behind
 `PUBLIC_JOBS`. Claude's phases do not touch SEO to avoid conflicts; merge
 it when you are ready.
+
+## SEO branch: decisions
+
+- [ ] **Confirm or flip `PUBLIC_JOBS`** (SEO branch, 2026-10-28). Job list,
+      job detail and the employers pages are now public so search engines can
+      index them; apply and save still need login. This reverses the
+      2026-10-27 "jobs behind login" decision, as discussed at handoff.
+      To go back: `PUBLIC_JOBS=false` in `deploy/.env.production` and restart
+      `web` and `api` (no rebuild). That also turns off job sitemaps,
+      JobPosting JSON-LD and indexing pings.
+
+- [ ] **Logo** (you asked for a designed mark on 2026-10-28). Picked concept A:
+      an "S" whose caron is a gold check mark ("the job is yours"), on the
+      brand teal. Concepts A/B/C side by side: `docs/design/logo-concepts.png`
+      (B: caron as a spark, C: location pin). Header mark:
+      `apps/web/src/components/brand-mark.tsx`; icons and favicon:
+      `node scripts/design/make-icons.mjs`. Say the word to switch.
+
+## Values
+
+- [ ] **Social profiles** for Organization `sameAs` (JSON-LD): official
+      Instagram / LinkedIn / Facebook URLs, if any. Code:
+      `SOCIAL_PROFILES` in `apps/web/src/lib/seo/json-ld.ts`.
+- [ ] **Search engine verification codes** (Search Console, Bing Webmaster
+      Tools, Yandex Webmaster): add the site, choose the HTML meta tag method,
+      and put each code in `deploy/.env.production` as
+      `GOOGLE_SITE_VERIFICATION`, `BING_SITE_VERIFICATION`,
+      `YANDEX_SITE_VERIFICATION`; restart `web`. Then submit
+      `https://sljakam.com/sitemap.xml` in each.
+- [ ] **Google Indexing API**: in Google Cloud create a service account,
+      enable the "Web Search Indexing API", download its JSON key, add the
+      account's email as an **Owner** of sljakam.com in Search Console, and
+      put the key base64-encoded (`base64 -i key.json`) in
+      `deploy/.env.production` as `GOOGLE_INDEXING_SA_JSON`; restart
+      `worker`. Not in chat.
+- [ ] **`INDEXNOW_KEY`**: any 32 hex chars work (e.g. `openssl rand -hex 16`);
+      set it in `deploy/.env.production` and restart `web` and `worker`.
+      Not secret (it is served publicly at `/<key>.txt`).
+- [ ] **Analytics**: none is installed (by design in this branch). Choose GA4
+      (needs the cookie consent banner) or a cookieless tool (Plausible,
+      Umami, Cloudflare Web Analytics: no banner needed).

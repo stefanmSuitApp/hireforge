@@ -149,6 +149,13 @@ export type PublicJobDetailResponse = {
   pngCreativeUrl: string | null;
   publishedAt: string | null;
   expiresAt: string | null;
+  /** Last change to the row (sitemap `lastmod`, JSON-LD). */
+  updatedAt: string;
+  /**
+   * Published and not past `expiresAt`. False for an ad that ended by expiry:
+   * still shown (with a banner, noindex, no apply), never in lists.
+   */
+  live: boolean;
   workModel: string;
   employmentType: string;
   seniority: string;
@@ -227,4 +234,18 @@ export type PublicSimilarJobsResponse = {
 /** `GET /api/public/jobs/previews` — compact cards for home strips (≤ 8 refs). */
 export type PublicJobPreviewsResponse = {
   items: PublicJobListItem[];
+};
+
+/** `GET /api/public/jobs/sitemap` — what is live, for sitemaps and landing pages. */
+export type PublicSitemapResponse = {
+  jobs: Array<{ id: string; slug: string | null; lastmod: string }>;
+  /** Companies with at least one live job. */
+  companies: Array<{ slug: string; liveJobs: number; lastmod: string | null }>;
+  /** Live job counts per (city, category) pair; null = job has none. */
+  facets: Array<{
+    city: string | null;
+    category: string | null;
+    liveJobs: number;
+    lastmod: string | null;
+  }>;
 };

@@ -18,8 +18,23 @@ import type {
   PublicJobTaxonomyItem,
   PublicJobTaxonomyResponse,
   PublicSimilarJobsResponse,
+  PublicSitemapResponse,
 } from 'contracts';
-import { and, asc, count, desc, eq, ne, sql, type SQL } from 'drizzle-orm';
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  gt,
+  inArray,
+  isNull,
+  max,
+  ne,
+  or,
+  sql,
+  type SQL,
+} from 'drizzle-orm';
 import { cities, companies, districts, jobCategories, jobs } from 'database';
 import { effectiveJobDescriptionHtml, shortIdFromJobSlug } from 'server-jobs';
 
@@ -28,6 +43,23 @@ import { codedBadRequest, codedTooManyRequests } from '../http/coded-http';
 import { getRedis } from '../redis';
 
 const EXCERPT_MAX_CHARS = 200;
+
+/**
+ * A job candidates can see and apply to: published and not past its expiry.
+ * Phase B moves expired rows to `status = 'expired'`; until then (and between
+ * sweeps) `expires_at` alone decides.
+ */
+function liveJob(): SQL {
+  return and(
+    eq(jobs.status, 'published'),
+    or(isNull(jobs.expiresAt), gt(jobs.expiresAt, sql`now()`)),
+  ) as SQL;
+}
+
+/** Live, or ended by expiry: the detail page still shows it (noindex, no apply). */
+function publicJobDetailVisible(): SQL {
+  return inArray(jobs.status, ['published', 'expired']);
+}
 
 function isUuidSegment(ref: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
@@ -119,10 +151,7 @@ export class PublicJobsService {
           publishedJobCount: count(jobs.id),
         })
         .from(companies)
-        .innerJoin(
-          jobs,
-          and(eq(jobs.companyId, companies.id), eq(jobs.status, 'published')),
-        )
+        .innerJoin(jobs, and(eq(jobs.companyId, companies.id), liveJob()))
         .groupBy(companies.id)
         .orderBy(asc(companies.legalName));
 
@@ -182,7 +211,7 @@ export class PublicJobsService {
         .innerJoin(companies, eq(jobs.companyId, companies.id))
         .leftJoin(cities, eq(jobs.cityId, cities.id))
         .leftJoin(jobCategories, eq(jobs.categoryId, jobCategories.id))
-        .where(and(eq(companies.slug, slug), eq(jobs.status, 'published')))
+        .where(and(eq(companies.slug, slug), liveJob()))
         .orderBy(desc(jobs.publishedAt), desc(jobs.createdAt));
 
       return {
@@ -220,6 +249,73 @@ export class PublicJobsService {
     }
   }
 
+  /**
+   * Everything a sitemap or landing page needs to know about what is live:
+   * job URLs, companies, and city / category (and pair) counts. One cheap
+   * grouped query each; the web app caches the result.
+   */
+  async sitemap(): Promise<PublicSitemapResponse> {
+    const database = getDb();
+    if (!database) {
+      throw new ServiceUnavailableException(
+        'Database is not configured (DATABASE_URL)',
+      );
+    }
+    const { db } = database;
+    try {
+      const jobRows = await db
+        .select({ id: jobs.id, slug: jobs.slug, updatedAt: jobs.updatedAt })
+        .from(jobs)
+        .where(liveJob())
+        .orderBy(desc(jobs.publishedAt), asc(jobs.id));
+
+      const companyRows = await db
+        .select({
+          slug: companies.slug,
+          lastmod: max(jobs.updatedAt),
+          liveJobs: count(jobs.id),
+        })
+        .from(companies)
+        .innerJoin(jobs, and(eq(jobs.companyId, companies.id), liveJob()))
+        .groupBy(companies.slug)
+        .orderBy(asc(companies.slug));
+
+      const facetRows = await db
+        .select({
+          city: cities.slug,
+          category: jobCategories.slug,
+          liveJobs: count(jobs.id),
+          lastmod: max(jobs.updatedAt),
+        })
+        .from(jobs)
+        .leftJoin(cities, eq(jobs.cityId, cities.id))
+        .leftJoin(jobCategories, eq(jobs.categoryId, jobCategories.id))
+        .where(liveJob())
+        .groupBy(cities.slug, jobCategories.slug);
+
+      return {
+        jobs: jobRows.map((r) => ({
+          id: r.id,
+          slug: r.slug ?? null,
+          lastmod: r.updatedAt.toISOString(),
+        })),
+        companies: companyRows.map((r) => ({
+          slug: r.slug,
+          liveJobs: Number(r.liveJobs),
+          lastmod: r.lastmod?.toISOString() ?? null,
+        })),
+        facets: facetRows.map((r) => ({
+          city: r.city ?? null,
+          category: r.category ?? null,
+          liveJobs: Number(r.liveJobs),
+          lastmod: r.lastmod?.toISOString() ?? null,
+        })),
+      };
+    } catch (e) {
+      mapPublicJobsDbError(e);
+    }
+  }
+
   async getById(id: string): Promise<PublicJobDetailResponse> {
     return this.loadPublishedJobDetail(eq(jobs.id, id));
   }
@@ -241,7 +337,7 @@ export class PublicJobsService {
       const matches = await database.db
         .select({ id: jobs.id })
         .from(jobs)
-        .where(and(eq(jobs.shortId, shortId), eq(jobs.status, 'published')))
+        .where(and(eq(jobs.shortId, shortId), publicJobDetailVisible()))
         .limit(2);
       if (matches.length !== 1 || !matches[0]) {
         throw error;
@@ -278,6 +374,8 @@ export class PublicJobsService {
           pngCreativeUrl: jobs.pngCreativeUrl,
           publishedAt: jobs.publishedAt,
           expiresAt: jobs.expiresAt,
+          updatedAt: jobs.updatedAt,
+          live: sql<boolean>`(${liveJob()})`,
           workModel: jobs.workModel,
           employmentType: jobs.employmentType,
           seniority: jobs.seniority,
@@ -295,7 +393,8 @@ export class PublicJobsService {
         .innerJoin(companies, eq(jobs.companyId, companies.id))
         .leftJoin(cities, eq(jobs.cityId, cities.id))
         .leftJoin(jobCategories, eq(jobs.categoryId, jobCategories.id))
-        .where(and(eq(jobs.status, 'published'), jobKey))
+        .where(and(publicJobDetailVisible(), jobKey))
+        .orderBy(desc(jobs.publishedAt))
         .limit(1);
 
       if (!row) {
@@ -320,6 +419,8 @@ export class PublicJobsService {
         pngCreativeUrl: row.pngCreativeUrl ?? null,
         publishedAt: row.publishedAt?.toISOString() ?? null,
         expiresAt: row.expiresAt?.toISOString() ?? null,
+        updatedAt: row.updatedAt.toISOString(),
+        live: row.live === true,
         workModel: row.workModel,
         employmentType: row.employmentType,
         seniority: row.seniority,
@@ -450,7 +551,7 @@ export class PublicJobsService {
     const { db } = database;
     const offset = (params.page - 1) * params.pageSize;
 
-    const conditions = [eq(jobs.status, 'published')];
+    const conditions = [liveJob()];
 
     if (params.city) {
       conditions.push(eq(cities.slug, params.city));
@@ -589,7 +690,7 @@ export class PublicJobsService {
           .innerJoin(companies, eq(jobs.companyId, companies.id))
           .leftJoin(cities, eq(jobs.cityId, cities.id))
           .leftJoin(jobCategories, eq(jobs.categoryId, jobCategories.id))
-          .where(and(eq(jobs.status, 'published'), jobKey))
+          .where(and(liveJob(), jobKey))
           .limit(1);
         if (row) {
           items.push(mapJoinRowToPublicListItem(row));
@@ -620,7 +721,7 @@ export class PublicJobsService {
           description: jobs.description,
         })
         .from(jobs)
-        .where(and(eq(jobs.id, jobId), eq(jobs.status, 'published')))
+        .where(and(eq(jobs.id, jobId), publicJobDetailVisible()))
         .limit(1);
 
       if (!src) {
@@ -633,7 +734,7 @@ export class PublicJobsService {
       }
 
       const similarWhere = and(
-        eq(jobs.status, 'published'),
+        liveJob(),
         ne(jobs.id, jobId),
         sql`to_tsvector('simple', ${jobs.title} || ' ' || coalesce(${jobs.descriptionPlain}, ${jobs.description}, '')) @@ websearch_to_tsquery('simple', ${qText})`,
       );

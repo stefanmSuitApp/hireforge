@@ -5,14 +5,29 @@ import {
   fetchCmsHomeJobsDiscovery,
   fetchCmsSiteSettings,
 } from '@/lib/cms-content';
+import { topLandingLinks } from '@/features/jobs/lib/landing';
 import {
   buildCmsCategorySpotlightTiles,
   buildCmsCitySpotlightTiles,
 } from '@/lib/home-jobs-discovery';
+import { resolveNestPublicOrigin } from '@/lib/nest-api-url';
+import { fetchPublicJobTaxonomy, fetchPublicSitemap } from '@/lib/public-jobs';
 
 import { Link } from '@/i18n/navigation';
+import { absoluteSiteOrigin } from '@/lib/site-origin';
 
 import { BrandWordmark } from './brand-wordmark';
+
+async function footerLandingLinks(locale: string) {
+  const base = resolveNestPublicOrigin();
+  if (!base) return { cities: [], categories: [] };
+  const [taxonomy, live] = await Promise.all([
+    fetchPublicJobTaxonomy(base),
+    fetchPublicSitemap(base),
+  ]);
+  if (!taxonomy.ok || !live.ok) return { cities: [], categories: [] };
+  return topLandingLinks(locale, taxonomy.data, live.data.facets);
+}
 
 export async function SiteFooter() {
   const locale = await getLocale();
@@ -22,12 +37,22 @@ export async function SiteFooter() {
     fetchCmsSiteSettings(locale),
     fetchCmsHomeJobsDiscovery(locale),
   ]);
+  // CMS spotlights first; else the places / fields with the most live jobs.
+  const live = await footerLandingLinks(locale);
   const cityTiles = discovery?.citySpotlights?.length
     ? buildCmsCitySpotlightTiles(discovery.citySpotlights).slice(0, 8)
-    : [];
+    : live.cities.map((l) => ({
+        slug: l.href,
+        label: l.label,
+        jobsHref: l.href,
+      }));
   const categoryTiles = discovery?.categorySpotlights?.length
     ? buildCmsCategorySpotlightTiles(discovery.categorySpotlights).slice(0, 8)
-    : [];
+    : live.categories.map((l) => ({
+        slug: l.href,
+        label: l.label,
+        jobsHref: l.href,
+      }));
   const brandText = navT('brand');
 
   return (
@@ -38,6 +63,14 @@ export async function SiteFooter() {
             <BrandWordmark text={brandText} size="sm" />
             <p className="m-0 mt-2 text-xs text-muted-foreground">
               {t('copyright')}
+            </p>
+            {/* The domain spells the brand without "Š", as people search it. */}
+            {/* Masked in screenshots: the e2e host differs per checkout. */}
+            <p
+              className="m-0 mt-1 text-xs text-muted-foreground"
+              data-visual-mask
+            >
+              {new URL(absoluteSiteOrigin()).host}
             </p>
             {siteSettings?.footerTagline?.trim() ? (
               <p className="m-0 mt-2 max-w-xs text-sm leading-relaxed text-muted-foreground/90">
@@ -189,11 +222,11 @@ export async function SiteFooter() {
               </Link>
             </Button>
           ) : null}
-          <p className="m-0 text-xs text-muted-foreground/70">
+          <p className="m-0 text-xs text-muted-foreground">
             <Link
               href="/moderator/login"
               locale={locale}
-              className="underline-offset-2 hover:text-muted-foreground hover:underline"
+              className="underline-offset-2 hover:text-foreground hover:underline"
             >
               {t('moderatorPortal')}
             </Link>

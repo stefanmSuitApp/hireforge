@@ -2,10 +2,10 @@ import { defineConfig, devices } from '@playwright/test';
 
 /**
  * Run via `pnpm e2e` (scripts/e2e/run.mjs), which prepares the isolated e2e
- * database and passes E2E_DATABASE_URL / E2E_REDIS_URL.
+ * database and passes E2E_DATABASE_URL / E2E_REDIS_URL / E2E_*_PORT.
  */
-const API_PORT = 4100;
-const WEB_PORT = 3100;
+const API_PORT = Number(process.env['E2E_API_PORT'] ?? 4100);
+const WEB_PORT = Number(process.env['E2E_WEB_PORT'] ?? 3100);
 const apiOrigin = `http://127.0.0.1:${API_PORT}`;
 
 /**
@@ -18,7 +18,10 @@ const webMode = process.env['E2E_WEB'] === 'start' ? 'start' : 'dev';
 const databaseUrl = process.env['E2E_DATABASE_URL'] ?? '';
 const redisUrl = process.env['E2E_REDIS_URL'] ?? '';
 
-export const FAKE_RESEND_ORIGIN = 'http://127.0.0.1:4300';
+export const E2E_INDEXNOW_KEY = 'e2e-indexnow-key-0001';
+
+const MAIL_PORT = Number(process.env['E2E_MAIL_PORT'] ?? 4300);
+export const FAKE_RESEND_ORIGIN = `http://127.0.0.1:${MAIL_PORT}`;
 
 /**
  * Email goes to the local fake (e2e/support/fake-resend.mjs), never to Resend:
@@ -49,6 +52,7 @@ export default defineConfig({
     {
       command: 'node e2e/support/fake-resend.mjs',
       cwd: '..',
+      env: { FAKE_RESEND_PORT: String(MAIL_PORT) },
       url: `${FAKE_RESEND_ORIGIN}/health`,
       reuseExistingServer: false,
       timeout: 10_000,
@@ -94,6 +98,9 @@ export default defineConfig({
         NEXT_PUBLIC_API_URL: apiOrigin,
         NEST_API_URL: apiOrigin,
         NEXT_PUBLIC_APP_URL: `http://127.0.0.1:${WEB_PORT}`,
+        // Discovery integrations (e2e/discovery.spec.ts); test values only.
+        INDEXNOW_KEY: E2E_INDEXNOW_KEY,
+        GOOGLE_SITE_VERIFICATION: 'e2e-google-verification',
       },
     },
   ],
