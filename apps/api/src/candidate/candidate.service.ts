@@ -47,6 +47,8 @@ import {
 import { getDb } from '../database';
 import { getCorrelationId } from '../observability/correlation-storage';
 import { getRedis } from '../redis';
+import { isUniqueViolation } from '../database-errors';
+import { consumeRateLimit } from '../http/rate-limit';
 
 const MAX_RESUME_BYTES = 5 * 1024 * 1024;
 
@@ -165,19 +167,14 @@ export class CandidateService {
   private async assertApplicationSubmitRateLimit(
     candidateId: string,
   ): Promise<void> {
-    const redis = getRedis();
-    if (!redis) {
-      this.logger.warn(
-        'REDIS_URL not set — skipping application submit rate limit (fail-open)',
-      );
-      return;
-    }
-    const key = `hf:cappl:rl:24h:${candidateId}`;
-    const n = await redis.incr(key);
-    if (n === 1) {
-      await redis.expire(key, 86400);
-    }
-    if (n > 50) {
+    // Atomic INCR+EXPIRE (the old INCR-then-EXPIRE could leave a key with no
+    // TTL that blocked the candidate forever); fails open without Redis.
+    const result = await consumeRateLimit(
+      `cappl:24h:${candidateId}`,
+      50,
+      24 * 60 * 60,
+    );
+    if (!result.allowed) {
       throw codedTooManyRequests(
         'APPLICATION_SUBMIT_RATE_LIMITED',
         'Too many applications in the last 24 hours',
@@ -573,7 +570,35 @@ export class CandidateService {
     const coverLetterText = body.coverLetterText?.trim() || null;
     const { candidateId } = ctx;
 
-    return database.db.transaction(async (tx) => {
+    try {
+      return await this.insertApplication(database.db, {
+        body,
+        candidateId,
+        coverLetterText,
+      });
+    } catch (error) {
+      // Two simultaneous submits both pass the existence check; the partial
+      // unique index rejects the second one.
+      if (isUniqueViolation(error)) {
+        throw codedConflict(
+          'APPLICATION_ALREADY_EXISTS',
+          'You have already applied to this job',
+        );
+      }
+      throw error;
+    }
+  }
+
+  private async insertApplication(
+    db: NonNullable<ReturnType<typeof getDb>>['db'],
+    input: {
+      body: CandidateApplyBody;
+      candidateId: string;
+      coverLetterText: string | null;
+    },
+  ): Promise<{ id: string }> {
+    const { body, candidateId, coverLetterText } = input;
+    return db.transaction(async (tx) => {
       const [jobRow] = await tx
         .select({
           id: jobs.id,
@@ -864,10 +889,23 @@ export class CandidateService {
         'Only submitted applications can be withdrawn',
       );
     }
-    await database.db
+    const updated = await database.db
       .update(applications)
       .set({ status: 'withdrawn', updatedAt: new Date() })
-      .where(eq(applications.id, applicationId));
+      .where(
+        and(
+          eq(applications.id, applicationId),
+          // The employer may have moved it on since the read above.
+          eq(applications.status, 'submitted'),
+        ),
+      )
+      .returning({ id: applications.id });
+    if (updated.length === 0) {
+      throw codedBadRequest(
+        'APPLICATION_WITHDRAW_FORBIDDEN',
+        'Only submitted applications can be withdrawn',
+      );
+    }
     return { ok: true };
   }
 
