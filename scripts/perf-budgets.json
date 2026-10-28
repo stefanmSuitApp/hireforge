@@ -4,7 +4,7 @@
       "seo": 1,
       "accessibility": 0.95,
       "best-practices": 0.95,
-      "performance": null
+      "performance": 0.9
     },
     "metricsMs": {
       "largest-contentful-paint": 2500,
