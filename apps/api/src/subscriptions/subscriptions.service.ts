@@ -261,6 +261,10 @@ export class SubscriptionsService {
           .select()
           .from(promoCodes)
           .where(eq(promoCodes.code, req.promoCode))
+          // Serializes purchases using this code, so the per-company count
+          // below sees committed redemptions (parallel requests could each
+          // pass the max_per_company check before).
+          .for('update')
           .limit(1);
 
         if (!promoRow) {
@@ -313,6 +317,15 @@ export class SubscriptionsService {
           }
         }
 
+        if (
+          promoRow.discountType === 'fixed' &&
+          promoRow.currency !== req.currency
+        ) {
+          throw codedBadRequest(
+            'PROMO_CURRENCY_MISMATCH',
+            'This promo code does not apply to purchases in this currency',
+          );
+        }
         promoForRedeem = promoRow;
         appliedPromoCode = promoRow.code;
         priceMinorSnapshot = discountedMinorFromPromo(
@@ -468,6 +481,7 @@ export class SubscriptionsService {
   async markPaidByModeratorOrAdmin(
     actor: { id: string; role: 'moderator' | 'admin' },
     subscriptionId: string,
+    paymentReference?: string,
   ): Promise<SubscriptionMarkPaidResponse> {
     const { db } = await this.requireDb();
     const now = new Date();
@@ -604,6 +618,18 @@ export class SubscriptionsService {
           subscriptionId: row.sub.id,
           companyId: row.sub.companyId,
           invoiceLanguage: row.companyInvoiceLanguage === 'en' ? 'en' : 'sr',
+        },
+      });
+      await tx.insert(staffAuditLog).values({
+        actorUserId: actor.id,
+        action: 'subscription.mark_paid',
+        entityType: 'subscription',
+        entityId: subscriptionId,
+        metadata: {
+          invoiceId: inv.id,
+          invoiceNumber,
+          companyId: row.sub.companyId,
+          ...(paymentReference ? { paymentReference } : {}),
         },
       });
 
@@ -835,6 +861,17 @@ export class SubscriptionsService {
           invoiceLanguage: row.companyInvoiceLanguage === 'en' ? 'en' : 'sr',
         },
       });
+      await tx.insert(staffAuditLog).values({
+        actorUserId: adminUserId,
+        action: 'subscription.enterprise_activate',
+        entityType: 'subscription',
+        entityId: subscriptionId,
+        metadata: {
+          invoiceId: inv.id,
+          invoiceNumber,
+          companyId: row.sub.companyId,
+        },
+      });
 
       return {
         subscription: this.toSubscriptionResponse(updated),
@@ -858,8 +895,9 @@ export class SubscriptionsService {
   }
 
   async cancelByAdmin(
-    _adminUserId: string,
+    adminUserId: string,
     subscriptionId: string,
+    reason?: string,
   ): Promise<SubscriptionResponse> {
     const { db } = await this.requireDb();
     const now = new Date();
@@ -892,6 +930,17 @@ export class SubscriptionsService {
           'Subscription update failed',
         );
       }
+      await tx.insert(staffAuditLog).values({
+        actorUserId: adminUserId,
+        action: 'subscription.cancel',
+        entityType: 'subscription',
+        entityId: subscriptionId,
+        metadata: {
+          fromStatus: row.status,
+          companyId: row.companyId,
+          ...(reason ? { reason } : {}),
+        },
+      });
       return this.toSubscriptionResponse(updated);
     });
   }

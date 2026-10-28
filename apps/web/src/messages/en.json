@@ -940,7 +940,7 @@
       "fieldMaxRedemptions": "Max redemptions (global)",
       "fieldMaxPerCompany": "Max redemptions per company",
       "discountPercent": "Percent off",
-      "discountFixed": "Fixed amount (minor units)",
+      "discountFixed": "Fixed amount (minor units of the chosen currency)",
       "discountFullFree": "Full free",
       "pickDate": "Pick date",
       "create": "Create",
@@ -954,7 +954,8 @@
       "colType": "Type",
       "colValue": "Value",
       "colRedemptions": "Uses",
-      "colWindow": "Window"
+      "colWindow": "Window",
+      "fieldCurrency": "Currency"
     },
     "billingEnterprise": {
       "heading": "GAZDA subscriptions awaiting activation",
@@ -1077,7 +1078,8 @@
     "PROMO_CODE_DUPLICATE": "A promo with that code already exists.",
     "SUBSCRIPTION_NOT_FOUND": "That subscription could not be found.",
     "SUBSCRIPTION_INVALID_STATE": "This action is not allowed for the subscription’s current status.",
-    "SUBSCRIPTION_FORBIDDEN": "You are not allowed to manage this subscription."
+    "SUBSCRIPTION_FORBIDDEN": "You are not allowed to manage this subscription.",
+    "PROMO_CURRENCY_MISMATCH": "This promo code does not apply to purchases in this currency."
   },
   "Candidate": {
     "workspaceLabel": "Candidate account",

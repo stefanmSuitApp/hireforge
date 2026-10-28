@@ -1134,6 +1134,8 @@ export const promoCodes = pgTable(
     discountType: text('discount_type').notNull(),
     /** Discount magnitude. Interpretation depends on `discount_type`. */
     value: integer('value').notNull().default(0),
+    /** ISO-4217 of `value` for `fixed` discounts (null for percent / full_free). */
+    currency: text('currency'),
     validFrom: timestamp('valid_from', { withTimezone: true }),
     validTo: timestamp('valid_to', { withTimezone: true }),
     /** `NULL` ⇒ all packages eligible. */

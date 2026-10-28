@@ -940,7 +940,7 @@
       "fieldMaxRedemptions": "Maks. iskorišćenja (globalno)",
       "fieldMaxPerCompany": "Maks. po kompaniji",
       "discountPercent": "Procenat popusta",
-      "discountFixed": "Fiksni iznos (manji jedinici)",
+      "discountFixed": "Fiksni iznos (u para/centima izabrane valute)",
       "discountFullFree": "Potpuno besplatno",
       "pickDate": "Izaberite datum",
       "create": "Kreiraj",
@@ -954,7 +954,8 @@
       "colType": "Tip",
       "colValue": "Vrednost",
       "colRedemptions": "Upotrebe",
-      "colWindow": "Period"
+      "colWindow": "Period",
+      "fieldCurrency": "Valuta"
     },
     "billingEnterprise": {
       "heading": "GAZDA pretplate koje čekaju aktivaciju",
@@ -1077,7 +1078,8 @@
     "PROMO_CODE_DUPLICATE": "Promo sa tim kodom već postoji.",
     "SUBSCRIPTION_NOT_FOUND": "Pretplata nije pronađena.",
     "SUBSCRIPTION_INVALID_STATE": "Ova radnja nije dozvoljena u trenutnom statusu pretplate.",
-    "SUBSCRIPTION_FORBIDDEN": "Nemate pravo da upravljate ovom pretplatom."
+    "SUBSCRIPTION_FORBIDDEN": "Nemate pravo da upravljate ovom pretplatom.",
+    "PROMO_CURRENCY_MISMATCH": "Promo kod ne važi za kupovinu u ovoj valuti."
   },
   "Candidate": {
     "workspaceLabel": "Kandidatski nalog",

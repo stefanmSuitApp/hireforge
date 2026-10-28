@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { currencyCodeSchema } from './companies';
 import { packageCodeSchema } from './packages';
 
 // --- Discount type ---------------------------------------------------------
@@ -41,7 +42,7 @@ const positiveIntOrNull = z
  *
  * `value` semantics depend on `discountType`:
  *   * `percent`   — integer 0..100
- *   * `fixed`     — integer minor units (matches package_prices)
+ *   * `fixed`     — integer minor units of `currency` (matches package_prices)
  *   * `full_free` — value ignored; service may persist 0
  */
 export const promoCodeCreateBodySchema = z
@@ -49,6 +50,8 @@ export const promoCodeCreateBodySchema = z
     code: promoCodeStringSchema,
     discountType: promoDiscountTypeSchema,
     value: z.number().int().min(0).default(0),
+    /** Required for `fixed`; ignored otherwise. Immutable after create. */
+    currency: currencyCodeSchema.optional().nullable(),
     validFrom: z.iso.datetime({ offset: true }).optional().nullable(),
     validTo: z.iso.datetime({ offset: true }).optional().nullable(),
     /** When provided, only listed package codes are eligible. */
@@ -59,6 +62,13 @@ export const promoCodeCreateBodySchema = z
     maxPerCompany: positiveIntOrNull,
   })
   .superRefine((val, ctx) => {
+    if (val.discountType === 'fixed' && !val.currency) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['currency'],
+        message: 'A fixed-amount promo needs a currency',
+      });
+    }
     if (val.discountType === 'percent' && (val.value < 0 || val.value > 100)) {
       ctx.addIssue({
         code: 'custom',
@@ -128,6 +138,7 @@ export const promoCodeResponseSchema = z.object({
   code: z.string(),
   discountType: promoDiscountTypeSchema,
   value: z.number().int().nonnegative(),
+  currency: z.string().nullable(),
   validFrom: z.string().nullable(),
   validTo: z.string().nullable(),
   applicablePackages: z.array(packageCodeSchema).nullable(),

@@ -112,6 +112,7 @@ export const apiErrorCodes = [
   'PROMO_INVALID_VALUE',
   'PROMO_INVALID_WINDOW',
   'PROMO_CODE_DUPLICATE',
+  'PROMO_CURRENCY_MISMATCH',
 ] as const;
 
 export type ApiErrorCode = (typeof apiErrorCodes)[number];

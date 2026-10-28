@@ -164,3 +164,28 @@ export async function jobPublishTimes(jobId: string): Promise<{
     };
   });
 }
+
+export async function auditRows(
+  entityId: string,
+): Promise<{ action: string; metadata: Record<string, unknown> | null }[]> {
+  return withDb(async (db) => {
+    const r = await db.query<{
+      action: string;
+      metadata: Record<string, unknown> | null;
+    }>(
+      'SELECT action, metadata FROM staff_audit_log WHERE entity_id = $1 ORDER BY created_at',
+      [entityId],
+    );
+    return r.rows;
+  });
+}
+
+export async function promoRedemptionCount(code: string): Promise<number> {
+  return withDb(async (db) => {
+    const r = await db.query<{ n: string }>(
+      'SELECT count(*) AS n FROM promo_redemptions WHERE code = $1',
+      [code],
+    );
+    return Number(r.rows[0]?.n ?? 0);
+  });
+}

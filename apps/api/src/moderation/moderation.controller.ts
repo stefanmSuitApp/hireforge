@@ -220,6 +220,7 @@ export class ModerationController {
     return this.subscriptions.markPaidByModeratorOrAdmin(
       { id: this.userId(req), role },
       id,
+      parsed.data.paymentReference?.trim() || undefined,
     );
   }
 }

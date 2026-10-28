@@ -58,13 +58,24 @@ describe('promoCodeCreateBodySchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('accepts fixed with arbitrary positive value', () => {
+  it('accepts fixed with arbitrary positive value and a currency', () => {
+    const result = promoCodeCreateBodySchema.safeParse({
+      code: 'FIXED-1000',
+      discountType: 'fixed',
+      value: 1000,
+      currency: 'rsd',
+    });
+    expect(result.success).toBe(true);
+    expect(result.data?.currency).toBe('RSD');
+  });
+
+  it('rejects fixed without a currency (minor units of what?)', () => {
     const result = promoCodeCreateBodySchema.safeParse({
       code: 'FIXED-1000',
       discountType: 'fixed',
       value: 1000,
     });
-    expect(result.success).toBe(true);
+    expect(result.success).toBe(false);
   });
 
   it('accepts full_free regardless of value', () => {

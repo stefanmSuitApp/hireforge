@@ -1,6 +1,7 @@
 import { expect, request, test } from '@playwright/test';
 
 import {
+  auditRows,
   liveInvoiceCount,
   SEED_EMPLOYER_VERIFIED,
   SEED_MODERATOR,
@@ -64,16 +65,23 @@ test('double "mark paid" issues exactly one invoice', async () => {
   // Two staff clicks landing at the same time.
   const [a, b] = await Promise.all([
     moderator.post(`moderator/subscriptions/${subscriptionId}/mark-paid`, {
-      data: {},
+      data: { paymentReference: 'RS-UPLATA-0001' },
     }),
     moderator.post(`moderator/subscriptions/${subscriptionId}/mark-paid`, {
-      data: {},
+      data: { paymentReference: 'RS-UPLATA-0001' },
     }),
   ]);
   const statuses = [a.status(), b.status()].sort();
   expect(statuses[0], await a.text()).toBeLessThan(300);
   expect(statuses[1]).toBeGreaterThanOrEqual(400);
   expect(await liveInvoiceCount(subscriptionId)).toBe(1);
+
+  // Exactly one audit entry, carrying the bank reference staff entered.
+  const audit = (await auditRows(subscriptionId)).filter(
+    (r) => r.action === 'subscription.mark_paid',
+  );
+  expect(audit).toHaveLength(1);
+  expect(audit[0]?.metadata?.['paymentReference']).toBe('RS-UPLATA-0001');
 
   await employer.dispose();
   await moderator.dispose();

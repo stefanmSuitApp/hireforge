@@ -26,6 +26,7 @@ function rowToResponse(row: typeof promoCodes.$inferSelect): PromoCodeResponse {
     code: row.code,
     discountType: row.discountType as PromoDiscountType,
     value: row.value,
+    currency: row.currency ?? null,
     validFrom: row.validFrom?.toISOString() ?? null,
     validTo: row.validTo?.toISOString() ?? null,
     applicablePackages: (row.applicablePackages ?? null) as
@@ -92,6 +93,8 @@ export class AdminPromoCodesService {
           code: body.code,
           discountType: body.discountType,
           value: body.discountType === 'full_free' ? 0 : body.value,
+          currency:
+            body.discountType === 'fixed' ? (body.currency ?? null) : null,
           validFrom: body.validFrom ? new Date(body.validFrom) : null,
           validTo: body.validTo ? new Date(body.validTo) : null,
           applicablePackages: body.applicablePackages ?? null,
@@ -167,6 +170,16 @@ export class AdminPromoCodesService {
           ? 0
           : body.value
         : existing.value;
+
+    // Currency is set at create time only; a code turned into `fixed` later
+    // would have none and could never be redeemed.
+    if (discountType === 'fixed' && !existing.currency) {
+      throw codedBadRequest(
+        'PROMO_INVALID_VALUE',
+        'Fixed-amount promos need a currency: create a new code instead',
+        undefined,
+      );
+    }
 
     if (discountType === 'percent' && (value < 0 || value > 100)) {
       throw codedBadRequest(

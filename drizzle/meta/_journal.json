@@ -204,6 +204,13 @@
       "when": 1777700000000,
       "tag": "0028_invoices_one_live_per_subscription",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1777800000000,
+      "tag": "0029_promo_codes_currency",
+      "breakpoints": true
     }
   ]
 }
