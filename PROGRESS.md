@@ -5,7 +5,7 @@ Living status file. **Trust this over the `Status:` lines in
 which went stale during the Cursor phase (Steps 4, 5, 14, 15 say "pending"
 but shipped). Update this file in the same PR as the work.
 
-Last updated: 2026-10-28 (Phase C). Open items for Stefan:
+Last updated: 2026-10-28 (SEO & quality gates). Open items for Stefan:
 [`NEEDS_STEFAN.md`](./NEEDS_STEFAN.md) — **#1 is urgent (seed passwords on prod).**
 
 ## Current state
@@ -17,8 +17,13 @@ Last updated: 2026-10-28 (Phase C). Open items for Stefan:
   locally, `docker save | ssh … docker load`, then
   `docker compose up -d --no-build`.
 - **Checks:** `pnpm lint && pnpm format && pnpm typecheck && pnpm test &&
-pnpm build`; CI runs it on PRs. `apps/api` / `apps/worker` have no
-  `typecheck` target, so their type errors surface in `build`.
+pnpm build` (+ `pnpm check:i18n`); CI runs it on PRs. Husky: pre-commit
+  lint-staged, pre-push lint/typecheck/test/i18n (blocking) + design and
+  contrast reports (warn-only). `pnpm test` covers api and worker and the
+  merged-migration guard.
+- **Warn-only reports:** `pnpm check:design`, `pnpm check:contrast`,
+  `pnpm e2e:visual`, `pnpm lighthouse <url>`, `pnpm seo:audit <url>`;
+  on CI in `quality-report.yml` (push to main / dispatch, never PRs).
 - **E2E:** `pnpm e2e` (Playwright) recreates an isolated `<db>_e2e`
   database + Redis DB 15, builds API + worker, starts a fake Resend
   (`e2e/support/fake-resend.mjs`) and the worker, and serves web with
@@ -34,14 +39,16 @@ pnpm build`; CI runs it on PRs. `apps/api` / `apps/worker` have no
 | 9 Billing             | Core done + race-safe. Missing: credit notes, invoice PDF download, GAZDA creation, proforma expiry  |
 | 12 Apply              | Done; verify-before-first-apply gate now satisfiable                                                 |
 | 14 Promo              | Done exc. `full_free` auto-activation; currency + per-company cap fixed                              |
-| 15 Discovery          | Partial; SEO work lives on the separate `feat/seo-quality-gates` branch                              |
+| 15 Discovery          | Done: public jobs, sitemaps, JSON-LD, landing pages, IndexNow / Indexing API (see SEO section)       |
 | 16 GDPR / 17 CI gates | GDPR not started (needs legal copy); CI with checks + e2e exists                                     |
 | 18 Hardening          | Auth limits, prod env guard, verification, reset, notifications done; no Sentry, no token revocation |
 
 ## Decisions (2026-10-27/28, Stefan)
 
-- Jobs list/detail **stay behind login** for now; sign-up as easy as
-  possible. (SEO branch may flip this behind `PUBLIC_JOBS`.)
+- ~~Jobs list/detail stay behind login~~ → **public since the SEO branch**
+  (2026-10-28, "max out SEO"): list, detail, employers and landing pages are
+  public behind `PUBLIC_JOBS` (default on); apply and save need login.
+  Reversible without a rebuild; confirm or flip in NEEDS_STEFAN.md.
 - Employer signup matching an existing company (PIB/MB/VAT/name) →
   **pending join request, moderator/admin approves**.
 - Auth emails are sent directly by the API (raw tokens never stored);
@@ -101,10 +108,57 @@ daemon in Docker builds, output asserted, sequential builds.
 5. Search: FTS expression/index mismatch, diacritic + Cyrillic folding,
    slug transliteration of `đ`.
 
+## SEO & quality gates ✅ (branch `feat/seo-quality-gates`)
+
+Plan and per-item log: [`docs/plans/SEO_AND_QUALITY_GATES.md`](./docs/plans/SEO_AND_QUALITY_GATES.md).
+
+- **Public jobs** behind `PUBLIC_JOBS` (runtime env, default on): job list,
+  detail, employers, company and landing pages need no login; apply/save do.
+  Expired ads stay reachable (banner, noindex, no JobPosting, similar jobs).
+  Missing job/company → 404; old slugs → 308 (Phase B's short-id fallback).
+- **Crawling:** `robots.txt` (workspaces/API/apply disallowed; non-prod hosts
+  `Disallow: /`), sitemap index (`pages`, `landing-N`, `companies-N`,
+  `jobs-N`; hreflang sr/en/x-default; live jobs only), canonical + hreflang +
+  OG on public pages, noindex on sign-in / filtered / empty / expired,
+  server-rendered `<html lang>`, crawlable `?page=N` links.
+- **Structured data:** Organization (+ `Sljakam`, `sljakam.com`), WebSite +
+  SearchAction, JobPosting, BreadcrumbList, company Organization.
+- **Landing pages:** `/jobs/city/{city}`, `/jobs/category/{category}`,
+  `/jobs/category/{category}/city/{city}`; internal links in the footer, on
+  landing pages and on job detail. City slugs: `đ → dj` (migration `0032`).
+- **Discovery (env-gated, off until set):** verification meta tags,
+  IndexNow key file + worker pings, Google Indexing API, manifest, `/llms.txt`.
+- **Logo:** new mark ("S" with a check-mark caron) in the header and as all
+  app icons / favicon (Stefan's request; concepts in `docs/design/`).
+- **Quality gates:** migration guard, `check:i18n`, Husky, api/worker tests,
+  axe in e2e (blocking); design tokens, contrast, visual baselines,
+  Lighthouse, SEO audit (warn-only). e2e ports all configurable
+  (`E2E_DB_NAME`, `E2E_REDIS_DB`, `E2E_API_PORT`, `E2E_WEB_PORT`,
+  `E2E_MAIL_PORT`) so two checkouts can run e2e side by side.
+
+Deferred (and why):
+
+- `baseSalary` in JobPosting: no salary fields exist yet (Phase C didn't add
+  them).
+- Full-page ISR: the site header reads auth cookies (`noStore`), so every
+  page renders per request; data fetches are cached (15 s–5 min).
+- Visual baselines in dark mode: the UI has no dark theme yet.
+- Company `logo` / `sameAs` in JSON-LD: we store no company logo or website.
+
+Ideas (not in code):
+
+- Render the header's auth state client-side so public pages can be cached
+  (ISR) and revalidated on job publish/expire.
+- A salary filter and salary landing pages once salary fields exist.
+- Cyrillic (`/sr-Cyrl`) pages, for searches typed in Cyrillic (worth
+  checking Search Console query data first).
+
+Live verification: _filled in after the deploy._
+
 ## Known issues not yet scheduled
 
 - Search: query expression doesn't match the FTS index (seq scan); no
-  diacritic/Cyrillic folding; slug transliteration drops `đ`.
+  diacritic/Cyrillic folding. (`đ` in slugs fixed by the SEO branch.)
 - `drizzle/meta` only has the `0000` snapshot → `pnpm db:generate` would
   emit a bogus full-schema migration; keep hand-writing migrations.
 - Bank details for invoices are editable in Sanity (payment redirection risk).
