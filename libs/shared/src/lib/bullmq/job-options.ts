@@ -58,3 +58,11 @@ export const NBS_MIDDLE_RATE_REFRESH_JOB_OPTIONS: JobsOptions = {
   removeOnComplete: 14,
   removeOnFail: 10,
 };
+
+/** Notification email: external provider; retry with backoff, idempotency key dedupes. */
+export const NOTIFICATION_EMAIL_JOB_OPTIONS: JobsOptions = {
+  attempts: 6,
+  backoff: { type: 'exponential', delay: 10_000 },
+  removeOnComplete: 500,
+  removeOnFail: 200,
+};

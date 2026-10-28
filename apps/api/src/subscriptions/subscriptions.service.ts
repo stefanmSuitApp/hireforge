@@ -30,6 +30,7 @@ import {
   promoRedemptions,
   staffAuditLog,
   subscriptions,
+  users,
 } from 'database';
 import {
   BillingNumberingService,
@@ -168,6 +169,20 @@ export class SubscriptionsService {
     const { db } = await this.requireDb();
     const now = new Date();
 
+    // PRODUCT_SSOT Step 7: package purchase requires a verified email (the UI
+    // already blocks it; enforce server-side too).
+    const [buyer] = await db
+      .select({ emailVerifiedAt: users.emailVerifiedAt })
+      .from(users)
+      .where(eq(users.id, employerUserId))
+      .limit(1);
+    if (!buyer?.emailVerifiedAt) {
+      throw codedForbidden(
+        'EMPLOYER_EMAIL_NOT_VERIFIED',
+        'Verify your email before purchasing a package',
+      );
+    }
+
     const result = await db.transaction(async (tx) => {
       const [pkg] = await tx
         .select({
@@ -246,6 +261,10 @@ export class SubscriptionsService {
           .select()
           .from(promoCodes)
           .where(eq(promoCodes.code, req.promoCode))
+          // Serializes purchases using this code, so the per-company count
+          // below sees committed redemptions (parallel requests could each
+          // pass the max_per_company check before).
+          .for('update')
           .limit(1);
 
         if (!promoRow) {
@@ -298,6 +317,15 @@ export class SubscriptionsService {
           }
         }
 
+        if (
+          promoRow.discountType === 'fixed' &&
+          promoRow.currency !== req.currency
+        ) {
+          throw codedBadRequest(
+            'PROMO_CURRENCY_MISMATCH',
+            'This promo code does not apply to purchases in this currency',
+          );
+        }
         promoForRedeem = promoRow;
         appliedPromoCode = promoRow.code;
         priceMinorSnapshot = discountedMinorFromPromo(
@@ -453,6 +481,7 @@ export class SubscriptionsService {
   async markPaidByModeratorOrAdmin(
     actor: { id: string; role: 'moderator' | 'admin' },
     subscriptionId: string,
+    paymentReference?: string,
   ): Promise<SubscriptionMarkPaidResponse> {
     const { db } = await this.requireDb();
     const now = new Date();
@@ -471,6 +500,9 @@ export class SubscriptionsService {
         .innerJoin(packages, eq(subscriptions.packageCode, packages.code))
         .innerJoin(companies, eq(subscriptions.companyId, companies.id))
         .where(eq(subscriptions.id, subscriptionId))
+        // Serializes concurrent mark-paid / activate / cancel on this row, so
+        // a double click cannot issue two invoices.
+        .for('update', { of: subscriptions })
         .limit(1);
 
       if (!row) {
@@ -516,14 +548,16 @@ export class SubscriptionsService {
         );
       }
 
+      // Fetch the NBS rate (network, up to 20s) before taking the global
+      // invoice-numbering lock, so a slow NBS cannot stall all invoicing.
+      const rsCompany = row.companyCountry === 'RS';
+      const nbs = rsCompany ? await getCachedNbsMiddleRateOrFetch(redis) : null;
+
       const { number: invoiceNumber } = await BillingNumberingService.allocate(
         tx,
         'invoice',
         subscriptionYearUtc(now),
       );
-
-      const rsCompany = row.companyCountry === 'RS';
-      const nbs = rsCompany ? await getCachedNbsMiddleRateOrFetch(redis) : null;
 
       const [inv] = await tx
         .insert(invoices)
@@ -584,6 +618,18 @@ export class SubscriptionsService {
           subscriptionId: row.sub.id,
           companyId: row.sub.companyId,
           invoiceLanguage: row.companyInvoiceLanguage === 'en' ? 'en' : 'sr',
+        },
+      });
+      await tx.insert(staffAuditLog).values({
+        actorUserId: actor.id,
+        action: 'subscription.mark_paid',
+        entityType: 'subscription',
+        entityId: subscriptionId,
+        metadata: {
+          invoiceId: inv.id,
+          invoiceNumber,
+          companyId: row.sub.companyId,
+          ...(paymentReference ? { paymentReference } : {}),
         },
       });
 
@@ -719,6 +765,9 @@ export class SubscriptionsService {
         .innerJoin(packages, eq(subscriptions.packageCode, packages.code))
         .innerJoin(companies, eq(subscriptions.companyId, companies.id))
         .where(eq(subscriptions.id, subscriptionId))
+        // Serializes concurrent mark-paid / activate / cancel on this row, so
+        // a double click cannot issue two invoices.
+        .for('update', { of: subscriptions })
         .limit(1);
 
       if (!row) {
@@ -737,14 +786,16 @@ export class SubscriptionsService {
         );
       }
 
+      // Fetch the NBS rate (network, up to 20s) before taking the global
+      // invoice-numbering lock, so a slow NBS cannot stall all invoicing.
+      const rsCompany = row.companyCountry === 'RS';
+      const nbs = rsCompany ? await getCachedNbsMiddleRateOrFetch(redis) : null;
+
       const { number: invoiceNumber } = await BillingNumberingService.allocate(
         tx,
         'invoice',
         subscriptionYearUtc(now),
       );
-
-      const rsCompany = row.companyCountry === 'RS';
-      const nbs = rsCompany ? await getCachedNbsMiddleRateOrFetch(redis) : null;
 
       const [inv] = await tx
         .insert(invoices)
@@ -810,6 +861,17 @@ export class SubscriptionsService {
           invoiceLanguage: row.companyInvoiceLanguage === 'en' ? 'en' : 'sr',
         },
       });
+      await tx.insert(staffAuditLog).values({
+        actorUserId: adminUserId,
+        action: 'subscription.enterprise_activate',
+        entityType: 'subscription',
+        entityId: subscriptionId,
+        metadata: {
+          invoiceId: inv.id,
+          invoiceNumber,
+          companyId: row.sub.companyId,
+        },
+      });
 
       return {
         subscription: this.toSubscriptionResponse(updated),
@@ -833,8 +895,9 @@ export class SubscriptionsService {
   }
 
   async cancelByAdmin(
-    _adminUserId: string,
+    adminUserId: string,
     subscriptionId: string,
+    reason?: string,
   ): Promise<SubscriptionResponse> {
     const { db } = await this.requireDb();
     const now = new Date();
@@ -844,6 +907,7 @@ export class SubscriptionsService {
         .select()
         .from(subscriptions)
         .where(eq(subscriptions.id, subscriptionId))
+        .for('update')
         .limit(1);
       if (!row) {
         throw codedNotFound('SUBSCRIPTION_NOT_FOUND', 'Subscription not found');
@@ -866,6 +930,17 @@ export class SubscriptionsService {
           'Subscription update failed',
         );
       }
+      await tx.insert(staffAuditLog).values({
+        actorUserId: adminUserId,
+        action: 'subscription.cancel',
+        entityType: 'subscription',
+        entityId: subscriptionId,
+        metadata: {
+          fromStatus: row.status,
+          companyId: row.companyId,
+          ...(reason ? { reason } : {}),
+        },
+      });
       return this.toSubscriptionResponse(updated);
     });
   }

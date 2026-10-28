@@ -2,7 +2,13 @@ import { Injectable } from '@nestjs/common';
 import type { StaffCompanyJoinRequestListResponse, UserRole } from 'contracts';
 import { and, asc, eq, inArray, or } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
-import { companies, companyJoinRequests, employers, users } from 'database';
+import {
+  companies,
+  companyJoinRequests,
+  employers,
+  outboxEvents,
+  users,
+} from 'database';
 
 import {
   codedConflict,
@@ -11,6 +17,7 @@ import {
   codedServiceUnavailable,
 } from '../http/coded-http';
 import { getDb } from '../database';
+import { getCorrelationId } from '../observability/correlation-storage';
 import { StaffAuditService } from './staff-audit.service';
 import { staffCanAccessCompany } from './staff-company-access';
 
@@ -138,6 +145,16 @@ export class StaffJoinRequestsService {
           .values({ userId: request.userId, companyId: request.companyId })
           .onConflictDoNothing();
       }
+      // Worker emails the requester (notification-email job).
+      await tx.insert(outboxEvents).values({
+        eventType: 'company_join_request_decided',
+        correlationId: getCorrelationId() ?? null,
+        payload: {
+          joinRequestId: request.id,
+          companyId: request.companyId,
+          decision,
+        },
+      });
       return request;
     });
 

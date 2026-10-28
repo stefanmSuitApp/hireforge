@@ -8,6 +8,8 @@ export const PlatformJobName = {
   CmsPackagesReconcile: 'cms-packages-reconcile',
   /** Refresh NBS EUR/RSD middle rate in Redis (Step 9.3); default 24h. */
   NbsMiddleRateRefresh: 'nbs-middle-rate-refresh',
+  /** One email notification per notifiable outbox event (retried; Resend-idempotent). */
+  NotificationEmail: 'notification-email',
 } as const;
 
 export type PlatformJobName =

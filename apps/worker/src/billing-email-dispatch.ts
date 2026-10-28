@@ -4,6 +4,8 @@ import type { DrizzleDb } from 'database';
 import { employers, users } from 'database';
 import type { OutboxEventType } from 'shared';
 
+import { sendEmail } from 'server-email';
+
 import { workerLog } from './worker-log';
 
 function billingTestMode(): boolean {
@@ -80,11 +82,6 @@ export async function sendBillingTransactionalEmail(opts: {
     }
   }
 
-  const fromEmail =
-    process.env.EMAIL_FROM_ADDRESS?.trim() || 'noreply@sljakam.com';
-  const fromDisplay = process.env.EMAIL_FROM_NAME?.trim() || 'Šljakam';
-  const from = `${fromDisplay} <${fromEmail}>`;
-
   const origin = dashOrigin();
   const loc = billingEmailLocale(pl);
   const dashSeg = loc === 'en' ? 'en' : 'sr';
@@ -133,28 +130,14 @@ export async function sendBillingTransactionalEmail(opts: {
     }
   }
 
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      from,
-      to: [to],
-      subject,
-      text,
-      html,
-    }),
-  });
-
-  if (!res.ok) {
-    const errBody = await res.text().catch(() => '');
+  // Shared sender: honours RESEND_API_URL (e2e fake) and timeouts.
+  try {
+    await sendEmail({ to, subject, text, html });
+  } catch (e) {
     workerLog('error', 'billing_email_resend_failed', {
       service: 'worker',
       eventType: opts.eventType,
-      status: String(res.status),
-      bodySnippet: errBody.slice(0, 500),
+      err: e instanceof Error ? e.message.slice(0, 500) : String(e),
     });
     return;
   }

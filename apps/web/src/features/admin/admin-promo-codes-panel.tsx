@@ -139,6 +139,8 @@ export function AdminPromoCodesPanel({
   const [createDiscountType, setCreateDiscountType] =
     React.useState<PromoDiscountType>('percent');
   const [createValue, setCreateValue] = React.useState('0');
+  /** Currency of a fixed-amount discount (value is minor units of it). */
+  const [createCurrency, setCreateCurrency] = React.useState('RSD');
   const [createValidFrom, setCreateValidFrom] = React.useState('');
   const [createValidTo, setCreateValidTo] = React.useState('');
   const [createPackageCodes, setCreatePackageCodes] = React.useState<string[]>(
@@ -239,6 +241,7 @@ export function AdminPromoCodesPanel({
             : Number.isFinite(parsedValue)
               ? Math.max(0, Math.floor(parsedValue))
               : 0,
+        currency: createDiscountType === 'fixed' ? createCurrency : undefined,
         validFrom: utcBoundaryIso(createValidFrom, false) ?? undefined,
         validTo: utcBoundaryIso(createValidTo, true) ?? undefined,
         applicablePackages,
@@ -353,6 +356,21 @@ export function AdminPromoCodesPanel({
                 onChange={(e) => setCreateValue(e.target.value)}
               />
             </div>
+            {createDiscountType === 'fixed' ? (
+              <div className="space-y-1">
+                <Label htmlFor="promo-currency">{t('fieldCurrency')}</Label>
+                <select
+                  id="promo-currency"
+                  className="flex h-10 w-full rounded-[var(--radius-3xl,1.125rem)] border border-input bg-background px-3 py-2 text-sm"
+                  value={createCurrency}
+                  onChange={(e) => setCreateCurrency(e.target.value)}
+                >
+                  <option value="RSD">RSD</option>
+                  <option value="EUR">EUR</option>
+                  <option value="USD">USD</option>
+                </select>
+              </div>
+            ) : null}
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1">
@@ -456,7 +474,12 @@ export function AdminPromoCodesPanel({
                 >
                   <td className="px-3 py-2 font-mono text-xs">{row.code}</td>
                   <td className="px-3 py-2">{row.discountType}</td>
-                  <td className="px-3 py-2 tabular-nums">{row.value}</td>
+                  <td className="px-3 py-2 tabular-nums">
+                    {row.value}
+                    {row.discountType === 'fixed' && row.currency
+                      ? ` ${row.currency}`
+                      : ''}
+                  </td>
                   <td className="px-3 py-2 tabular-nums">
                     {row.redemptionsCount}
                     {row.maxRedemptions != null

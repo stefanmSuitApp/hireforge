@@ -10,6 +10,8 @@ export type CandidateRegisterBody = {
   email: string;
   password: string;
   fullName?: string;
+  /** Language of the verification email. */
+  locale?: 'sr' | 'en';
 };
 
 export type CandidateAuthOkResponse = { ok: true };

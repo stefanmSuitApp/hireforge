@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { loadEmployerWorkspaceOrRedirect } from '@/lib/employer-workspace-load';
 
 import { EmployerWorkspaceNav } from './employer-workspace-nav';
+import { ResendVerificationButton } from '@/features/auth';
 
 type Props = { children: ReactNode };
 
@@ -42,6 +43,7 @@ export async function EmployerWorkspaceShell({ children }: Props) {
           role="status"
         >
           {t('emailVerificationBanner')}
+          <ResendVerificationButton />
         </div>
       ) : null}
       <EmployerWorkspaceNav />

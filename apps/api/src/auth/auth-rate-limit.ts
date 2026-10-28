@@ -11,8 +11,13 @@ const MINUTE = 60;
 const LIMITS = {
   loginPerIp: { limit: 20, windowSec: 15 * MINUTE },
   loginPerEmail: { limit: 10, windowSec: 15 * MINUTE },
-  registerPerIp: { limit: 10, windowSec: 60 * MINUTE },
+  // Generous: mobile carriers put many users behind one shared IP (CGNAT).
+  registerPerIp: { limit: 30, windowSec: 60 * MINUTE },
   refreshPerIp: { limit: 300, windowSec: 15 * MINUTE },
+  emailLinkPerIp: { limit: 30, windowSec: 15 * MINUTE },
+  resetRequestPerIp: { limit: 10, windowSec: 60 * MINUTE },
+  resetRequestPerEmail: { limit: 5, windowSec: 60 * MINUTE },
+  resendVerificationPerUser: { limit: 5, windowSec: 60 * MINUTE },
 } as const;
 
 /**
@@ -75,4 +80,35 @@ export async function assertRefreshRateLimit(req: Request): Promise<void> {
   if (ip) {
     await enforce(`auth:refresh:ip:${ip}`, LIMITS.refreshPerIp);
   }
+}
+
+/** Token-bearing links (verify email, reset confirm): limits token guessing. */
+export async function assertEmailLinkRateLimit(req: Request): Promise<void> {
+  const ip = forwardedClientIp(req);
+  if (ip) {
+    await enforce(`auth:link:ip:${ip}`, LIMITS.emailLinkPerIp);
+  }
+}
+
+export async function assertPasswordResetRequestRateLimit(
+  req: Request,
+  email: string,
+): Promise<void> {
+  const ip = forwardedClientIp(req);
+  if (ip) {
+    await enforce(`auth:reset:ip:${ip}`, LIMITS.resetRequestPerIp);
+  }
+  await enforce(
+    `auth:reset:email:${emailKey(email)}`,
+    LIMITS.resetRequestPerEmail,
+  );
+}
+
+export async function assertResendVerificationRateLimit(
+  userId: string,
+): Promise<void> {
+  await enforce(
+    `auth:resend-verify:user:${userId}`,
+    LIMITS.resendVerificationPerUser,
+  );
 }

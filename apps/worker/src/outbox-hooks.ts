@@ -14,6 +14,7 @@ const JOB_LISTING_TOUCH_EVENTS: ReadonlySet<OutboxEventType> = new Set([
   'job_rejected',
   'job_unpublished',
   'job_force_archived',
+  'job_expired',
   'application_submitted',
 ]);
 
@@ -47,8 +48,11 @@ const EMAIL_TEMPLATE_BY_EVENT: Record<OutboxEventType, string> = {
   job_published: 'employer_job_live',
   job_unpublished: 'employer_job_archived',
   job_force_archived: 'staff_job_force_archived',
+  job_expired: 'employer_job_expired',
+  job_expiring_soon: 'employer_job_expiring_soon',
   proforma_issued: 'employer_proforma_issued',
   invoice_issued: 'employer_invoice_issued',
+  company_join_request_decided: 'employer_company_join_decided',
 };
 
 function emailTemplateFor(eventType: OutboxEventType): string {

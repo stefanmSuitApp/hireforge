@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useState, type SubmitEvent } from 'react';
 
 import { Button, Input, Label, PasswordInput } from '@/components/ui';
@@ -12,6 +12,7 @@ import {
 
 export function CandidateRegisterForm() {
   const t = useTranslations('Candidate');
+  const locale = useLocale();
   const tErrors = useTranslations('Errors');
   const register = useCandidateRegisterMutation();
   const [email, setEmail] = useState('');
@@ -23,7 +24,12 @@ export function CandidateRegisterForm() {
     e.preventDefault();
     setError(null);
     register.mutate(
-      { email, password, fullName: fullName.trim() || undefined },
+      {
+        email,
+        password,
+        fullName: fullName.trim() || undefined,
+        locale: locale === 'en' ? 'en' : 'sr',
+      },
       {
         onError: (err) => {
           setError(
@@ -35,7 +41,7 @@ export function CandidateRegisterForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-4">
+    <form method="post" onSubmit={onSubmit} className="flex flex-col gap-4">
       <div className="space-y-2">
         <Label
           htmlFor="candidate-reg-name"

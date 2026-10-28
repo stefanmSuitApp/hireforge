@@ -7,9 +7,12 @@ export const OUTBOX_EVENT_TYPES = [
   'job_rejected',
   'job_unpublished',
   'job_force_archived',
+  'job_expired',
+  'job_expiring_soon',
   'application_submitted',
   'proforma_issued',
   'invoice_issued',
+  'company_join_request_decided',
 ] as const;
 
 export type OutboxEventType = (typeof OUTBOX_EVENT_TYPES)[number];

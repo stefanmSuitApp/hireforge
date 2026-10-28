@@ -635,7 +635,7 @@
       "foreignBankHint": "Required for companies outside Serbia.",
       "validationFailed": "Please fix the highlighted fields."
     },
-    "emailVerificationBanner": "Confirm your email to unlock purchases. In development, the API logs a one-time verification token for your account.",
+    "emailVerificationBanner": "Confirm your email to unlock package purchases. We sent a confirmation link to your address.",
     "signIn": "Sign in",
     "signingIn": "Signing in…",
     "createAccount": "Create account",
@@ -940,7 +940,7 @@
       "fieldMaxRedemptions": "Max redemptions (global)",
       "fieldMaxPerCompany": "Max redemptions per company",
       "discountPercent": "Percent off",
-      "discountFixed": "Fixed amount (minor units)",
+      "discountFixed": "Fixed amount (minor units of the chosen currency)",
       "discountFullFree": "Full free",
       "pickDate": "Pick date",
       "create": "Create",
@@ -954,7 +954,8 @@
       "colType": "Type",
       "colValue": "Value",
       "colRedemptions": "Uses",
-      "colWindow": "Window"
+      "colWindow": "Window",
+      "fieldCurrency": "Currency"
     },
     "billingEnterprise": {
       "heading": "GAZDA subscriptions awaiting activation",
@@ -1010,6 +1011,7 @@
     "JOB_DESCRIPTION_IMAGE_PROCESS_FAILED": "Could not process that image. Try another PNG or JPEG.",
     "SUBSCRIPTION_SLOT_OVERRIDE_FORBIDDEN": "Listing slot overrides are only available for ŠEF or GAZDA subscriptions.",
     "JOB_INVALID_STATE": "That action is not allowed for this job’s current status.",
+    "JOB_SUBSCRIPTION_NOT_ACTIVE": "The package for this listing is not active (expired, cancelled or unpaid), so it cannot be published.",
     "JOB_SLUG_COLLISION": "Could not allocate a unique URL for this job. Try again.",
     "JOB_ENTERPRISE_DIRECT_PUBLISH_FORBIDDEN": "Direct publish through this admin path requires an active enterprise (GAZDA) subscription for the company.",
     "JOB_TRIVIAL_PATCH_EXCEEDED": "That change is too large for a trivial listing correction. Use the normal edit flow instead.",
@@ -1044,8 +1046,11 @@
     "APPLICATION_RESUME_REQUIRED": "Upload a CV on your profile (or choose one here) before applying.",
     "APPLICATION_SUBMIT_RATE_LIMITED": "Too many applications in one day. Try again tomorrow.",
     "AUTH_RATE_LIMITED": "Too many attempts. Wait a few minutes and try again.",
+    "AUTH_TOKEN_INVALID": "This link is invalid or has expired. Request a new one.",
+    "AUTH_EMAIL_SEND_FAILED": "We could not send the email right now. Try again in a few minutes.",
     "APPLICATION_WITHDRAW_FORBIDDEN": "This application can no longer be withdrawn.",
     "CANDIDATE_EMAIL_NOT_VERIFIED": "Verify your email before submitting an application.",
+    "EMPLOYER_EMAIL_NOT_VERIFIED": "Confirm your email before buying a package. The confirmation link is in your inbox.",
     "RESUME_NOT_FOUND": "That CV could not be found.",
     "RESUME_INVALID_TYPE": "Invalid file type or size for your CV.",
     "RESUME_IN_USE": "This CV is attached to an application and cannot be deleted.",
@@ -1073,7 +1078,8 @@
     "PROMO_CODE_DUPLICATE": "A promo with that code already exists.",
     "SUBSCRIPTION_NOT_FOUND": "That subscription could not be found.",
     "SUBSCRIPTION_INVALID_STATE": "This action is not allowed for the subscription’s current status.",
-    "SUBSCRIPTION_FORBIDDEN": "You are not allowed to manage this subscription."
+    "SUBSCRIPTION_FORBIDDEN": "You are not allowed to manage this subscription.",
+    "PROMO_CURRENCY_MISMATCH": "This promo code does not apply to purchases in this currency."
   },
   "Candidate": {
     "workspaceLabel": "Candidate account",
@@ -1225,5 +1231,32 @@
     "localeLabel": "Active locale",
     "upstreamHeading": "GET /api/integration (Nest)",
     "hint": "Open /sr/integration and /en/integration. With worker running, enqueue from API should log integration_ping_job in worker stdout."
+  },
+  "AccountEmail": {
+    "eyebrow": "Account",
+    "email": "Email",
+    "forgotTitle": "Forgot password",
+    "forgotSubtitle": "Enter your account email and we will send you a link to set a new password.",
+    "resetRequestSubmit": "Send link",
+    "resetRequestSent": "If an account with that address exists, we sent a password reset link. Check your spam folder too.",
+    "resetTitle": "New password",
+    "newPassword": "New password",
+    "confirmPassword": "Repeat password",
+    "passwordHint": "At least 8 characters.",
+    "passwordMismatch": "Passwords do not match.",
+    "resetSubmit": "Save password",
+    "resetDone": "Your password has been changed. You can sign in now.",
+    "linkMissing": "The link is incomplete. Request a new password reset link.",
+    "requestNewLink": "Request a new link",
+    "goToSignIn": "Go to sign in",
+    "verifiedTitle": "Email confirmed",
+    "verifiedBody": "Thanks! Your account is confirmed.",
+    "verifyFailedTitle": "Link is not valid",
+    "verifyFailedBody": "The link has expired or was already used. Sign in and request a new confirmation link.",
+    "resendVerification": "Resend confirmation email",
+    "resendVerificationSent": "Sent. Check your inbox and spam folder.",
+    "forgotPasswordLink": "Forgot your password?",
+    "passwordShow": "Show password",
+    "passwordHide": "Hide password"
   }
 }

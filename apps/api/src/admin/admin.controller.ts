@@ -311,6 +311,10 @@ export class AdminController {
         z.flattenError(parsed.error),
       );
     }
-    return this.subscriptions.cancelByAdmin(this.userId(req), id);
+    return this.subscriptions.cancelByAdmin(
+      this.userId(req),
+      id,
+      parsed.data.reason?.trim() || undefined,
+    );
   }
 }

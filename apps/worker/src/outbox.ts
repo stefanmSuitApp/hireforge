@@ -64,9 +64,20 @@ export async function pollOutboxToPlatformQueue(
 export async function processOutboxDispatchJob(
   db: DrizzleDb,
   outboxEventId: number,
+  options: {
+    /** Runs after the claim commits (e.g. enqueue a notification email job). */
+    afterCommit?: (row: {
+      id: number;
+      eventType: string;
+      payload: unknown;
+    }) => Promise<void>;
+  } = {},
 ): Promise<void> {
   let billingHook:
     | { eventType: 'proforma_issued' | 'invoice_issued'; payload: unknown }
+    | undefined;
+  let committedRow:
+    | { id: number; eventType: string; payload: unknown }
     | undefined;
 
   await db.transaction(async (tx) => {
@@ -96,6 +107,7 @@ export async function processOutboxDispatchJob(
     }
 
     await dispatchOutboxHooks(tx, row);
+    committedRow = row;
 
     if (
       row.eventType === 'proforma_issued' ||
@@ -107,6 +119,10 @@ export async function processOutboxDispatchJob(
       };
     }
   });
+
+  if (committedRow && options.afterCommit) {
+    await options.afterCommit(committedRow);
+  }
 
   if (billingHook) {
     try {

@@ -114,7 +114,7 @@ export type EmployerSubscriptionPurchaseResponse = z.infer<
 >;
 
 export const moderatorMarkSubscriptionPaidBodySchema = z.object({
-  /** Optional bank reference / note (not persisted in MVP schema; reserved). */
+  /** Optional bank reference / note; recorded in the staff audit log. */
   paymentReference: z.string().max(500).optional(),
 });
 

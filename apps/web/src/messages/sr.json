@@ -635,7 +635,7 @@
       "foreignBankHint": "Obavezno za kompanije van Srbije.",
       "validationFailed": "Ispravite označena polja."
     },
-    "emailVerificationBanner": "Potvrdite e-poštu da biste otključali kupovinu. U razvoju API beleži jednokratni token u konzoli.",
+    "emailVerificationBanner": "Potvrdite e-poštu da biste otključali kupovinu paketa. Link za potvrdu smo poslali na vašu adresu.",
     "signIn": "Prijavi se",
     "signingIn": "Prijava…",
     "createAccount": "Napravi nalog",
@@ -940,7 +940,7 @@
       "fieldMaxRedemptions": "Maks. iskorišćenja (globalno)",
       "fieldMaxPerCompany": "Maks. po kompaniji",
       "discountPercent": "Procenat popusta",
-      "discountFixed": "Fiksni iznos (manji jedinici)",
+      "discountFixed": "Fiksni iznos (u para/centima izabrane valute)",
       "discountFullFree": "Potpuno besplatno",
       "pickDate": "Izaberite datum",
       "create": "Kreiraj",
@@ -954,7 +954,8 @@
       "colType": "Tip",
       "colValue": "Vrednost",
       "colRedemptions": "Upotrebe",
-      "colWindow": "Period"
+      "colWindow": "Period",
+      "fieldCurrency": "Valuta"
     },
     "billingEnterprise": {
       "heading": "GAZDA pretplate koje čekaju aktivaciju",
@@ -1010,6 +1011,7 @@
     "JOB_DESCRIPTION_IMAGE_PROCESS_FAILED": "Otpremanje slike nije uspelo. Probajte drugi PNG ili JPEG.",
     "SUBSCRIPTION_SLOT_OVERRIDE_FORBIDDEN": "Ručno povećanje broja oglasa važi samo za ŠEF ili GAZDA pretplate.",
     "JOB_INVALID_STATE": "Ta radnja nije dozvoljena za trenutni status posla.",
+    "JOB_SUBSCRIPTION_NOT_ACTIVE": "Paket za ovaj oglas nije aktivan (istekao, otkazan ili neplaćen), pa oglas ne može biti objavljen.",
     "JOB_SLUG_COLLISION": "Nije moguće dodeliti jedinstvenu adresu ovog oglasa. Pokušajte ponovo.",
     "JOB_ENTERPRISE_DIRECT_PUBLISH_FORBIDDEN": "Objava ovim administratorskim putem zahteva aktivnu enterprise (GAZDA) pretplatu za kompaniju.",
     "JOB_TRIVIAL_PATCH_EXCEEDED": "Izmena je prevelika za sitnu korekciju oglasa. Koristite uobičajen tok izmene.",
@@ -1044,8 +1046,11 @@
     "APPLICATION_RESUME_REQUIRED": "Otpremite CV na profilu (ili ga ovde izaberite) pre prijave.",
     "APPLICATION_SUBMIT_RATE_LIMITED": "Previše prijava u jednom danu. Probajte sutra.",
     "AUTH_RATE_LIMITED": "Previše pokušaja. Sačekajte nekoliko minuta i pokušajte ponovo.",
+    "AUTH_TOKEN_INVALID": "Link je neispravan ili je istekao. Zatražite novi.",
+    "AUTH_EMAIL_SEND_FAILED": "Slanje e-pošte trenutno nije uspelo. Pokušajte ponovo za nekoliko minuta.",
     "APPLICATION_WITHDRAW_FORBIDDEN": "Ovu prijavu više ne možete povući.",
     "CANDIDATE_EMAIL_NOT_VERIFIED": "Potvrdite e-poštu pre slanja prijave.",
+    "EMPLOYER_EMAIL_NOT_VERIFIED": "Potvrdite e-poštu pre kupovine paketa. Link za potvrdu je u vašem inboxu.",
     "RESUME_NOT_FOUND": "Taj CV nije pronađen.",
     "RESUME_INVALID_TYPE": "Neispravan tip ili veličina fajla za CV.",
     "RESUME_IN_USE": "Ovaj CV je vezan za prijavu i ne može se obrisati.",
@@ -1073,7 +1078,8 @@
     "PROMO_CODE_DUPLICATE": "Promo sa tim kodom već postoji.",
     "SUBSCRIPTION_NOT_FOUND": "Pretplata nije pronađena.",
     "SUBSCRIPTION_INVALID_STATE": "Ova radnja nije dozvoljena u trenutnom statusu pretplate.",
-    "SUBSCRIPTION_FORBIDDEN": "Nemate pravo da upravljate ovom pretplatom."
+    "SUBSCRIPTION_FORBIDDEN": "Nemate pravo da upravljate ovom pretplatom.",
+    "PROMO_CURRENCY_MISMATCH": "Promo kod ne važi za kupovinu u ovoj valuti."
   },
   "Candidate": {
     "workspaceLabel": "Kandidatski nalog",
@@ -1225,5 +1231,32 @@
     "localeLabel": "Aktivna lokalizacija",
     "upstreamHeading": "GET /api/integration (Nest)",
     "hint": "Otvori /sr/integration i /en/integration. Sa pokrenutim worker-om, API enqueue treba da zabeleži integration_ping_job u worker stdout."
+  },
+  "AccountEmail": {
+    "eyebrow": "Nalog",
+    "email": "E-pošta",
+    "forgotTitle": "Zaboravljena lozinka",
+    "forgotSubtitle": "Unesite e-poštu naloga i poslaćemo vam link za novu lozinku.",
+    "resetRequestSubmit": "Pošalji link",
+    "resetRequestSent": "Ako nalog sa tom adresom postoji, poslali smo link za promenu lozinke. Proverite i folder za neželjenu poštu.",
+    "resetTitle": "Nova lozinka",
+    "newPassword": "Nova lozinka",
+    "confirmPassword": "Ponovite lozinku",
+    "passwordHint": "Najmanje 8 karaktera.",
+    "passwordMismatch": "Lozinke se ne poklapaju.",
+    "resetSubmit": "Sačuvaj lozinku",
+    "resetDone": "Lozinka je promenjena. Možete da se prijavite.",
+    "linkMissing": "Link nije potpun. Zatražite novi link za promenu lozinke.",
+    "requestNewLink": "Zatraži novi link",
+    "goToSignIn": "Idi na prijavu",
+    "verifiedTitle": "E-pošta je potvrđena",
+    "verifiedBody": "Hvala! Vaš nalog je potvrđen.",
+    "verifyFailedTitle": "Link nije važeći",
+    "verifyFailedBody": "Link je istekao ili je već iskorišćen. Prijavite se i zatražite novi link za potvrdu.",
+    "resendVerification": "Pošalji ponovo e-poruku za potvrdu",
+    "resendVerificationSent": "Poslato. Proverite inbox i folder za neželjenu poštu.",
+    "forgotPasswordLink": "Zaboravili ste lozinku?",
+    "passwordShow": "Prikaži lozinku",
+    "passwordHide": "Sakrij lozinku"
   }
 }

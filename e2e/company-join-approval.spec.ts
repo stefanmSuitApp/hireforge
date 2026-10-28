@@ -10,6 +10,7 @@ import {
   SEED_MODERATOR,
   SEED_PASSWORD,
 } from './support/db';
+import { expectEmail } from './support/mail';
 import { resetRateLimits } from './support/redis';
 import { gotoHydrated } from './support/ui';
 
@@ -108,6 +109,9 @@ test.describe('employer signup matching an existing company', () => {
     await row.getByRole('button', { name: 'Odobri' }).click();
     await expect(row).toHaveCount(0);
 
+    // The requester is told by email, with a link back in.
+    await expectEmail(email, /pristup kompaniji .* je odobren/);
+
     // Employer now gets the workspace.
     await employer.goto('/sr/employer');
     await expect(employer).toHaveURL(/\/sr\/employer$/);
@@ -133,6 +137,8 @@ test.describe('employer signup matching an existing company', () => {
       .filter({ hasText: email });
     await row.getByRole('button', { name: 'Odbij' }).click();
     await expect(row).toHaveCount(0);
+
+    await expectEmail(email, /pristup kompaniji .* nije odobren/);
 
     await employer.goto('/sr/employer');
     await expect(employer).toHaveURL(/\/sr\/employer\/pending/);
