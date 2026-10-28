@@ -211,3 +211,9 @@ backup first, migration `0032` applied, `PUBLIC_JOBS` at its default):
   Phase A; keep only if approval should fill blank company fields.
 - Admin has no join-request queue on `/admin` (admins can use the moderator
   companies page).
+- TypeScript 6 upgrade: TS 6 deprecates `baseUrl`, but the API webpack build
+  (`NxAppWebpackPlugin` → `tsconfig-paths`) needs it to resolve `database`,
+  `contracts`, `server-*`. Before upgrading, resolve those aliases in
+  `apps/api/webpack.config.js` (from `tsconfig.base.json` paths), then drop
+  `baseUrl` from `tsconfig.base.json` and `apps/web/tsconfig.json`. Until
+  then the editor uses the workspace TS 5.9 (`.vscode/settings.json`).
