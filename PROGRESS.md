@@ -168,9 +168,41 @@ Ideas (not in code):
 - Cyrillic (`/sr-Cyrl`) pages, for searches typed in Cyrillic (worth
   checking Search Console query data first).
 
-Live verification: _filled in after the deploy._
+Live verification (deployed `main@0d41284` on 2026-10-28, off-VM images,
+backup first, migration `0032` applied, `PUBLIC_JOBS` at its default):
+
+- Logged out: `/sr/jobs`, `/en/jobs`, `/sr/employers`, a job page and
+  `/sr/jobs/city/beograd` answer 200; "apply" → 307 to
+  `/sr/candidate/login?returnTo=/sr/jobs/…/apply`. `<html lang="sr">`, self
+  canonical, `index, follow`.
+- `robots.txt` as designed; sitemap index → `pages`, `landing-0`,
+  `companies-0`, `jobs-0` (18 URLs); no sign-in URL; `www` → 301 → apex with
+  the path; `/` → `/sr`.
+- JobPosting on the live job parses: title = H1, description, datePosted,
+  employmentType, hiringOrganization, jobLocation, identifier, directApply
+  (no `validThrough`: that legacy row has no `expires_at`).
+- `pnpm seo:audit https://sljakam.com`: 1 warning — `/sr/employers`
+  description is 48 chars.
+- `pnpm lighthouse https://sljakam.com` (mobile, median of 2):
+
+  | Page                    | SEO  | A11y | Best pr. | Perf | Budget misses |
+  | ----------------------- | ---- | ---- | -------- | ---- | ------------- |
+  | `/sr`                   | 1.00 | 0.97 | 1.00     | 1.00 | —             |
+  | `/sr/jobs`              | 1.00 | 0.96 | 0.96     | 0.93 | CLS 0.160     |
+  | `/sr/jobs/city/beograd` | 1.00 | 0.96 | 0.96     | 0.93 | CLS 0.156     |
+  | job page                | 1.00 | 0.96 | 1.00     | 1.00 | —             |
+
+  Performance budget set to 0.90 from this run. To look at: layout shift on
+  the job list (filter chips / list loading in), and the remaining
+  colour-contrast audit item Lighthouse names on every page.
 
 ## Known issues not yet scheduled
+
+- SEO: while the API is down or restarting, job and company pages render an
+  error screen with **200** and `noindex` metadata (no canonical). A crawl in
+  that window may drop the page. Fix: answer 503 (throw) when the API fails
+  with anything but 404, in the route and in `generateMetadata`. Seen right
+  after the Phase D restart (2026-10-28), gone on the next fetch.
 
 - `drizzle/meta` only has the `0000` snapshot → `pnpm db:generate` would
   emit a bogus full-schema migration; keep hand-writing migrations.

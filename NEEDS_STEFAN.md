@@ -126,3 +126,11 @@ it when you are ready.
 - [ ] **Analytics**: none is installed (by design in this branch). Choose GA4
       (needs the cookie consent banner) or a cookieless tool (Plausible,
       Umami, Cloudflare Web Analytics: no banner needed).
+
+- [ ] **Unpublish the seed sample job on prod** before submitting the
+      sitemap: "Senior TypeScript developer" (DEVLEGION,
+      `20000000-0000-4000-8000-000000000001`, from
+      `scripts/db/seed-domain-baseline.sql`) is the only live job, and since
+      the SEO deploy it is public, in `jobs-0.xml` and carries JobPosting
+      markup. Archive it from the moderator/admin UI (or say so and it gets
+      archived).
