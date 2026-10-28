@@ -5,7 +5,7 @@ Living status file. **Trust this over the `Status:` lines in
 which went stale during the Cursor phase (Steps 4, 5, 14, 15 say "pending"
 but shipped). Update this file in the same PR as the work.
 
-Last updated: 2026-10-28 (Phase C). Open items for Stefan:
+Last updated: 2026-10-28 (Phase D). Open items for Stefan:
 [`NEEDS_STEFAN.md`](./NEEDS_STEFAN.md) — **#1 is urgent (seed passwords on prod).**
 
 ## Current state
@@ -88,23 +88,36 @@ daemon in Docker builds, output asserted, sequential builds.
 - `AGENTS.md` (shared rules), `CLAUDE.md` and Cursor rules fixed for this
   repo.
 
-## Phase D — candidates (needs Stefan for most)
+## Phase D — quality & abuse hardening ✅ (owner: Claude Code)
+
+Worked in a separate worktree (`../hireforge-phase-d`) because another
+agent was editing the main checkout at the same time.
+
+- Applications: double submit → clean 409 (was a 500); withdraw is
+  state-checked; employers don't see withdrawn applications and see the
+  CV filename snapshotted at submission; atomic apply limiter.
+- Security: BFF refuses `..` path segments (encoded params reached other
+  Nest routes, e.g. staff login); external-click counter uses the trusted
+  client IP; CV generation 20/h; saved searches deduped, cap 50.
+- Search (0032): Serbian folding (Cyrillic, č/ć/š/ž/đ) on an index the
+  query can use; list search now covers editor-authored descriptions.
+  Slugs keep `đ` as `dj` and transliterate Cyrillic.
+- Unpaid checkouts are cancelled after 14 days: proforma voided, promo
+  redemption released, audited (worker scheduled tick).
+
+## Phase E — candidates (mostly needs Stefan)
 
 1. Legal pages (privacy, terms, refund) + footer links + account erasure
    request — needs legal copy.
 2. Invoices: legal fields, credit notes, invoice PDF download, SEF — needs
-   the accountant's answers.
-3. Observability: Sentry (api, worker, web) — needs a DSN; offsite backups —
-   needs storage credentials.
-4. Product: salary fields on jobs; `full_free` promo auto-activation; GAZDA
-   (enterprise) subscription creation by admin; unpaid proforma expiry.
-5. Search: FTS expression/index mismatch, diacritic + Cyrillic folding,
-   slug transliteration of `đ`.
+   the accountant's answers. `full_free` promo auto-activation (zero-value
+   invoices) — same question.
+3. Observability: Sentry — needs a DSN; offsite backups — needs storage.
+4. Product: salary fields on jobs; GAZDA (enterprise) creation by admin;
+   employer application status workflow (viewed / shortlisted / rejected).
 
 ## Known issues not yet scheduled
 
-- Search: query expression doesn't match the FTS index (seq scan); no
-  diacritic/Cyrillic folding; slug transliteration drops `đ`.
 - `drizzle/meta` only has the `0000` snapshot → `pnpm db:generate` would
   emit a bogus full-schema migration; keep hand-writing migrations.
 - Bank details for invoices are editable in Sanity (payment redirection risk).

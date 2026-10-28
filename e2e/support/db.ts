@@ -199,3 +199,54 @@ export async function jobSlug(jobId: string): Promise<string | null> {
     return r.rows[0]?.slug ?? null;
   });
 }
+
+/** Moves a subscription's creation back in time (for expiry sweeps). */
+export async function backdateSubscription(
+  subscriptionId: string,
+  days: number,
+): Promise<void> {
+  await withDb(async (db) => {
+    await db.query(
+      `UPDATE subscriptions SET created_at = now() - make_interval(days => $2)
+       WHERE id = $1`,
+      [subscriptionId, days],
+    );
+  });
+}
+
+export async function subscriptionState(subscriptionId: string): Promise<{
+  status: string;
+  proformaVoided: boolean;
+  promoRedemptions: number;
+}> {
+  return withDb(async (db) => {
+    const r = await db.query<{
+      status: string;
+      proforma_voided: boolean;
+      promo_redemptions: string;
+    }>(
+      `SELECT s.status,
+              (p.voided_at IS NOT NULL) AS proforma_voided,
+              (SELECT count(*) FROM promo_redemptions pr WHERE pr.subscription_id = s.id) AS promo_redemptions
+       FROM subscriptions s LEFT JOIN proformas p ON p.id = s.proforma_id
+       WHERE s.id = $1`,
+      [subscriptionId],
+    );
+    const row = r.rows[0];
+    return {
+      status: row?.status ?? '',
+      proformaVoided: row?.proforma_voided ?? false,
+      promoRedemptions: Number(row?.promo_redemptions ?? 0),
+    };
+  });
+}
+
+export async function promoRedemptionsCounter(code: string): Promise<number> {
+  return withDb(async (db) => {
+    const r = await db.query<{ redemptions_count: number }>(
+      'SELECT redemptions_count FROM promo_codes WHERE code = $1',
+      [code],
+    );
+    return r.rows[0]?.redemptions_count ?? -1;
+  });
+}
