@@ -51,6 +51,18 @@ export async function dropTestDatabase(
   const server = new Client({ connectionString: pgUrl(ctx, 'postgres') });
   await server.connect();
   try {
+    // pg's pool.end() resolves before its sockets close. A FORCE drop then
+    // kills a connection that is still closing, and its pool (the API's, the
+    // worker's) reports 57P01 as an unhandled error. Let them leave first;
+    // FORCE only clears what is really left behind.
+    for (let i = 0; i < 50; i++) {
+      const { rows } = await server.query<{ n: number }>(
+        'select count(*)::int as n from pg_stat_activity where datname = $1',
+        [name],
+      );
+      if (rows[0]?.n === 0) break;
+      await new Promise((r) => setTimeout(r, 100));
+    }
     await server.query(`drop database if exists ${name} with (force)`);
   } finally {
     await server.end();
