@@ -336,3 +336,20 @@ jobs-N}.xml` with `sr`/`en`/`x-default` alternates, ≤ 5 000 URLs per
 - [x] Logo (Stefan's request mid-run): new mark — "S" with a check-mark
       caron — in the header (`BrandMark`) and as app icons / favicon
       (`scripts/design/make-icons.mjs`). Token `--brand-accent`.
+- [x] W3.1 · Landing pages `/jobs/city/{city}`, `/jobs/category/{category}`,
+      `/jobs/category/{category}/city/{city}` (the STEP15 contract only covers
+      query params; these paths sit beside `/jobs/[jobRef]`, whose slugs
+      always end in `-<shortId>`). Slugs from the taxonomy; unknown → 404;
+      title/H1/intro from i18n templates with the live count; breadcrumbs
+      (visible + JSON-LD); links to neighbouring cities/categories with live
+      jobs. Zero live jobs → noindex and not in the sitemap (`landing-N.xml`).
+      Transliteration: city slugs had lost `đ` (`aran-elovac`, `in-ija`,
+      `mali-i-os`, `medve-a`, `zitora-a`, also on prod): migration `0032`
+      rebuilds them with `đ → dj`; the RS seed and job slugs now map `đ` too.
+- [x] W3.2 · Internal links: footer cities/categories (CMS spotlights, else
+      the places and fields with the most live jobs) and the home spotlight
+      rails now point at landing pages; "similar jobs" already existed; new
+      "more jobs at {company}" on job detail. Home job links no longer detour
+      through sign-in while jobs are public.
+- [x] W3.3 · Expired job page (done with W1): banner, noindex, no
+      JobPosting, links to similar live jobs.

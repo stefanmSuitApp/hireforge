@@ -16,7 +16,13 @@ import { TrackRecentlyViewedJob } from './track-recently-viewed-job';
 export type JobDetailScreenProps =
   | { kind: 'no-api' }
   | { kind: 'error' }
-  | { kind: 'ok'; job: PublicJobDetailResponse; viewedSegment: string };
+  | {
+      kind: 'ok';
+      job: PublicJobDetailResponse;
+      viewedSegment: string;
+      /** Other live jobs of the same company (internal links). */
+      moreFromCompany?: Array<{ title: string; href: string }>;
+    };
 
 export function JobDetailScreen(props: JobDetailScreenProps) {
   const t = useTranslations('JobDetail');
@@ -41,7 +47,7 @@ export function JobDetailScreen(props: JobDetailScreenProps) {
     );
   }
 
-  const { job, viewedSegment } = props;
+  const { job, viewedSegment, moreFromCompany = [] } = props;
 
   return (
     <PublicSurfaceMain narrow>
@@ -58,6 +64,26 @@ export function JobDetailScreen(props: JobDetailScreenProps) {
         job={job}
         listingState={job.live ? 'live' : 'expired'}
       />
+
+      {moreFromCompany.length > 0 ? (
+        <section className="mt-6 rounded-xl border border-border bg-card p-5">
+          <h2 className="m-0 mb-3 text-base font-semibold text-foreground">
+            {t('moreFromCompany', { company: job.company.name })}
+          </h2>
+          <ul className="m-0 flex list-none flex-col gap-2 p-0">
+            {moreFromCompany.map((j) => (
+              <li key={j.href}>
+                <Link
+                  href={j.href}
+                  className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+                >
+                  {j.title}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
     </PublicSurfaceMain>
   );
 }

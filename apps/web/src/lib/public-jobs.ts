@@ -194,6 +194,8 @@ export type PublicSitemapResult =
 /** Live jobs, companies and city/category counts (sitemaps, landing pages). */
 export async function fetchPublicSitemap(
   apiBaseUrl: string,
+  /** Sitemaps read fresh data (crawlers fetch them rarely); pages use the cache. */
+  { fresh = false }: { fresh?: boolean } = {},
 ): Promise<PublicSitemapResult> {
   const url = nestApiUrl(apiBaseUrl, 'public/jobs/sitemap');
   if (!url) {
@@ -201,7 +203,9 @@ export async function fetchPublicSitemap(
   }
   try {
     const res = await fetch(url, {
-      next: { revalidate: 300 },
+      ...(fresh
+        ? { cache: 'no-store' as const }
+        : { next: { revalidate: 300 } }),
       headers: { accept: 'application/json' },
     });
     if (!res.ok) {

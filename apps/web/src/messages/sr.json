@@ -234,7 +234,8 @@
     "expiredBanner": "Ovaj oglas je istekao. Poslodavac više ne prima prijave preko njega.",
     "applyClosed": "Prijave su zatvorene.",
     "expiredBrowseLive": "Pogledaj aktuelne oglase",
-    "metaDescriptionLead": "{hasCity, select, yes {Posao u kompaniji {company}, {city}.} other {Posao u kompaniji {company}.}}"
+    "metaDescriptionLead": "{hasCity, select, yes {Posao u kompaniji {company}, {city}.} other {Posao u kompaniji {company}.}}",
+    "moreFromCompany": "Još oglasa kompanije {company}"
   },
   "Company": {
     "fallbackTitle": "Kompanija",
@@ -1276,5 +1277,16 @@
     "forgotPasswordLink": "Zaboravili ste lozinku?",
     "passwordShow": "Prikaži lozinku",
     "passwordHide": "Sakrij lozinku"
+  },
+  "Landing": {
+    "cityTitle": "Poslovi — {city}",
+    "categoryTitle": "{category} poslovi",
+    "pairTitle": "{category} poslovi — {city}",
+    "intro": "{count, plural, =0 {Trenutno nema aktivnih oglasa.} one {Trenutno # aktivan oglas.} few {Trenutno # aktivna oglasa.} other {Trenutno # aktivnih oglasa.}}",
+    "metaDescription": "{title}: {count, plural, =0 {trenutno nema aktivnih oglasa} one {# aktivan oglas} few {# aktivna oglasa} other {# aktivnih oglasa}} na Šljakamu. Pogledaj oglase i prijavi se na one koji ti odgovaraju.",
+    "page": "strana {page}",
+    "otherCities": "Drugi gradovi",
+    "otherCategories": "Druge oblasti",
+    "breadcrumb": "Putanja"
   }
 }

@@ -41,6 +41,10 @@ export type JobsListScreenProps = {
   apiBasePresent: boolean;
   taxonomy: PublicJobTaxonomyResponse;
   body: JobsListBody;
+  /** Landing pages replace the generic heading and add breadcrumbs / links. */
+  heading?: { title: string; intro: string };
+  before?: ReactNode;
+  after?: ReactNode;
 };
 
 function JobsFilterChipsFallback() {
@@ -59,6 +63,9 @@ export function JobsListScreen({
   apiBasePresent,
   taxonomy,
   body,
+  heading,
+  before,
+  after,
 }: JobsListScreenProps) {
   const t = useTranslations('Jobs');
 
@@ -138,12 +145,13 @@ export function JobsListScreen({
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 pb-14 md:py-12 md:pb-16">
+      {before}
       <header className="mb-8">
         <h1 className="m-0 mb-2 text-[clamp(1.45rem,6vw,2.25rem)] font-bold tracking-tight text-foreground">
-          {t('title')}
+          {heading?.title ?? t('title')}
         </h1>
         <p className="m-0 max-w-xl text-sm leading-relaxed text-muted-foreground md:text-base">
-          {t('listDescription')}
+          {heading?.intro ?? t('listDescription')}
         </p>
       </header>
 
@@ -176,6 +184,7 @@ export function JobsListScreen({
         <div>{main}</div>
         {previewPane}
       </div>
+      {after}
     </main>
   );
 }

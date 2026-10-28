@@ -20,8 +20,11 @@ const dataPath = join(
   'rs-municipalities.json',
 );
 
+/** Same rules as shared `toAsciiSlug`: đ has no NFD decomposition → dj. */
 function slugify(s) {
   return String(s ?? '')
+    .replace(/đ/g, 'dj')
+    .replace(/Đ/g, 'Dj')
     .normalize('NFKD')
     .replace(/\p{M}/gu, '')
     .toLowerCase()

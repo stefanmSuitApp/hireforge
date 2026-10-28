@@ -29,7 +29,7 @@ test('robots.txt on any other host disallows everything', async ({
   expect(body).not.toContain('Sitemap:');
 });
 
-test('the sitemap index lists live jobs and companies, and no sign-in', async ({
+test('the sitemap index lists live jobs, companies and landing pages, no sign-in', async ({
   request,
 }) => {
   const live = await createPublishedJob();
@@ -39,7 +39,12 @@ test('the sitemap index lists live jobs and companies, and no sign-in', async ({
 
   const index = await (await request.get('/sitemap.xml')).text();
   expect(index).toContain('<sitemapindex');
-  for (const name of ['pages.xml', 'companies-0.xml', 'jobs-0.xml']) {
+  for (const name of [
+    'pages.xml',
+    'landing-0.xml',
+    'companies-0.xml',
+    'jobs-0.xml',
+  ]) {
     expect(index).toContain(`${origin()}/sitemaps/${name}`);
   }
 
@@ -54,6 +59,11 @@ test('the sitemap index lists live jobs and companies, and no sign-in', async ({
   const pages = await (await request.get('/sitemaps/pages.xml')).text();
   expect(pages).toContain(`<loc>${origin()}/sr/jobs</loc>`);
   expect(pages).not.toContain('sign-in');
+
+  const landing = await (await request.get('/sitemaps/landing-0.xml')).text();
+  expect(landing).toContain(`<loc>${origin()}/sr/jobs/city/beograd</loc>`);
+  expect(landing).toContain(`<loc>${origin()}/sr/jobs/category/it</loc>`);
+  expect(landing).not.toContain('novi-sad');
 
   for (const url of [...jobs.matchAll(/<loc>([^<]+)<\/loc>/g)].slice(0, 4)) {
     expect((await request.get(url[1] ?? '')).status(), url[1]).toBe(200);

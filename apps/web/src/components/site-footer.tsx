@@ -5,15 +5,29 @@ import {
   fetchCmsHomeJobsDiscovery,
   fetchCmsSiteSettings,
 } from '@/lib/cms-content';
+import { topLandingLinks } from '@/features/jobs/lib/landing';
 import {
   buildCmsCategorySpotlightTiles,
   buildCmsCitySpotlightTiles,
 } from '@/lib/home-jobs-discovery';
+import { resolveNestPublicOrigin } from '@/lib/nest-api-url';
+import { fetchPublicJobTaxonomy, fetchPublicSitemap } from '@/lib/public-jobs';
 
 import { Link } from '@/i18n/navigation';
 import { absoluteSiteOrigin } from '@/lib/site-origin';
 
 import { BrandWordmark } from './brand-wordmark';
+
+async function footerLandingLinks(locale: string) {
+  const base = resolveNestPublicOrigin();
+  if (!base) return { cities: [], categories: [] };
+  const [taxonomy, live] = await Promise.all([
+    fetchPublicJobTaxonomy(base),
+    fetchPublicSitemap(base),
+  ]);
+  if (!taxonomy.ok || !live.ok) return { cities: [], categories: [] };
+  return topLandingLinks(locale, taxonomy.data, live.data.facets);
+}
 
 export async function SiteFooter() {
   const locale = await getLocale();
@@ -23,12 +37,22 @@ export async function SiteFooter() {
     fetchCmsSiteSettings(locale),
     fetchCmsHomeJobsDiscovery(locale),
   ]);
+  // CMS spotlights first; else the places / fields with the most live jobs.
+  const live = await footerLandingLinks(locale);
   const cityTiles = discovery?.citySpotlights?.length
     ? buildCmsCitySpotlightTiles(discovery.citySpotlights).slice(0, 8)
-    : [];
+    : live.cities.map((l) => ({
+        slug: l.href,
+        label: l.label,
+        jobsHref: l.href,
+      }));
   const categoryTiles = discovery?.categorySpotlights?.length
     ? buildCmsCategorySpotlightTiles(discovery.categorySpotlights).slice(0, 8)
-    : [];
+    : live.categories.map((l) => ({
+        slug: l.href,
+        label: l.label,
+        jobsHref: l.href,
+      }));
   const brandText = navT('brand');
 
   return (

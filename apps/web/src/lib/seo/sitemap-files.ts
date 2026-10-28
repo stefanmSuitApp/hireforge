@@ -8,6 +8,7 @@ import {
   chunk,
   companyEntries,
   jobEntries,
+  landingEntries,
   type SitemapEntry,
 } from './sitemap';
 
@@ -15,7 +16,7 @@ import {
 const ABOUT_SLUGS = new Set(['about-hireforge', 'about']);
 
 /**
- * Every child sitemap by file name. Job and company files exist only
+ * Every child sitemap by file name. Job, company and landing files exist only
  * while `PUBLIC_JOBS` is on (otherwise those pages redirect to sign-in).
  * Sign-in and other noindex/redirecting URLs are never listed.
  */
@@ -39,7 +40,7 @@ export async function loadSitemapFiles(): Promise<Map<string, SitemapEntry[]>> {
 
   const base = resolveNestPublicOrigin();
   if (!publicJobs || !base) return files;
-  const live = await fetchPublicSitemap(base);
+  const live = await fetchPublicSitemap(base, { fresh: true });
   if (!live.ok) {
     // Fail loud: an empty job sitemap would tell crawlers every job is gone.
     throw new Error(`sitemap data unavailable: ${live.error}`);
@@ -47,6 +48,7 @@ export async function loadSitemapFiles(): Promise<Map<string, SitemapEntry[]>> {
 
   const add = (prefix: string, entries: SitemapEntry[]) =>
     chunk(entries).forEach((part, i) => files.set(`${prefix}-${i}.xml`, part));
+  add('landing', landingEntries(live.data.facets));
   add('companies', companyEntries(live.data.companies));
   add('jobs', jobEntries(live.data.jobs));
   return files;
