@@ -103,15 +103,10 @@
     "subhead": "Pretraži oglase poslodavaca iz cele Srbije — brzo i jednostavno.",
     "ctaJobs": "Pogledaj poslove",
     "trustStrip": "Poslovi iz cele Srbije, na jednom mestu.",
-    "heroTabKeyword": "Po reči",
-    "heroTabCity": "Po gradu",
-    "heroTabCategory": "Po kategoriji",
     "heroSearchKeywords": "Reči",
     "heroSearchKeywordPlaceholder": "Naziv posla, veština ili firma…",
     "heroSearchCity": "Grad",
     "heroSearchCityAny": "Bilo koji grad",
-    "heroSearchCategory": "Kategorija",
-    "heroSearchCategoryAny": "Bilo koja kategorija",
     "heroSearchSubmit": "Pretraži",
     "candidatePortalTitle": "Za kandidate",
     "candidatePortalBody": "Napravi profil, otpremi CV, sačuvaj oglase i konkuriši — sve na jednom mestu.",
@@ -200,7 +195,6 @@
     "browseEmployers": "Pregledaj poslodavce",
     "popularCategories": "Popularne kategorije",
     "emptyClearFilters": "Obriši filtere",
-    "twoColumnNavHint": "Savet: na desktopu izaberi oglas da ga vidiš pored liste.",
     "cardOpenJobAria": "Otvori oglas: {title}",
     "lockedCompany": "Prijavi se da vidiš poslodavca",
     "lockedMoreTitle": "{count, plural, one {Još # oglas te čeka} few {Još # oglasa te čeka} other {Još # oglasa te čeka}}",
@@ -214,7 +208,8 @@
     "scrollForMore": "Skroluj nadole da učitaš još",
     "endOfList": "Svi odgovarajući oglasi su učitani",
     "pagerPrevious": "Prethodna strana",
-    "pagerNext": "Sledeća strana ({page})"
+    "pagerNext": "Sledeća strana ({page})",
+    "filtersToggle": "{count, plural, =0 {Filteri} other {Filteri (#)}}"
   },
   "JobDetail": {
     "fallbackTitle": "Detalji posla",
@@ -628,7 +623,10 @@
       "responsiblePerson": "Zakonski zastupnik (opciono)",
       "responsiblePosition": "Funkcija zastupnika (opciono)",
       "foreignBankHint": "Obavezno za kompanije van Srbije.",
-      "validationFailed": "Ispravi označena polja."
+      "validationFailed": "Ispravi označena polja.",
+      "fieldRequired": "Ovo polje je obavezno.",
+      "fieldEmail": "Unesi ispravnu adresu e-pošte.",
+      "fieldPassword": "Lozinka mora da ima bar 8 znakova."
     },
     "emailVerificationBanner": "Potvrdi e-poštu da otključaš kupovinu paketa. Link za potvrdu smo poslali na tvoju adresu.",
     "signIn": "Prijavi se",
@@ -1141,7 +1139,10 @@
       "colApplied": "Datum prijave",
       "colActions": "Akcije",
       "withdraw": "Povuci",
-      "withdrawing": "Povlačenje…"
+      "withdrawing": "Povlačenje…",
+      "withdrawConfirmTitle": "Povući prijavu?",
+      "withdrawConfirmBody": "Prijava za „{title}” biće povučena. Za isti posao možeš ponovo da konkurišeš tek posle 24 sata.",
+      "withdrawConfirmAction": "Povuci prijavu"
     },
     "profile": {
       "heading": "Profil i CV",
@@ -1299,5 +1300,20 @@
       "lead": "Vođa tima",
       "executive": "Rukovodilac"
     }
+  },
+  "NotFound": {
+    "title": "Ova stranica ne postoji",
+    "body": "Možda je oglas istekao ili je adresa pogrešno ukucana. Pogledaj aktuelne oglase ili se vrati na početnu.",
+    "browseJobs": "Pogledaj oglase",
+    "goHome": "Početna"
+  },
+  "ErrorPage": {
+    "title": "Nešto nije u redu",
+    "body": "Stranica trenutno ne može da se učita. Pokušaj ponovo za nekoliko trenutaka.",
+    "retry": "Pokušaj ponovo",
+    "goHome": "Početna"
+  },
+  "Common": {
+    "cancel": "Otkaži"
   }
 }

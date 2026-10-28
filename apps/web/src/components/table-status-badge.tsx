@@ -9,12 +9,10 @@ export type TableStatusTone =
 
 const toneClass: Record<TableStatusTone, string> = {
   neutral: 'border-border/80 bg-muted/60 text-foreground dark:bg-muted/40',
-  info: 'border-primary/35 bg-primary/10 text-primary',
-  success:
-    'border-emerald-600/25 bg-emerald-500/10 text-emerald-900 dark:border-emerald-500/30 dark:text-emerald-100',
-  warning:
-    'border-amber-600/35 bg-amber-500/10 text-amber-950 dark:border-amber-500/35 dark:text-amber-100',
-  danger: 'border-destructive/35 bg-destructive/10 text-destructive',
+  info: 'border-info/30 bg-info-soft text-info',
+  success: 'border-success/30 bg-success-soft text-success',
+  warning: 'border-warning/30 bg-warning-soft text-warning',
+  danger: 'border-destructive/30 bg-destructive-soft text-destructive',
 };
 
 type Props = {

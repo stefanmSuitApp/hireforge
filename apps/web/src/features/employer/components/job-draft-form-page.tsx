@@ -593,7 +593,7 @@ export function JobDraftFormPage({
       (mode === 'create' ||
         (mode === 'edit' && initial?.status === 'draft')) ? (
         <p
-          className="mb-6 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-foreground"
+          className="mb-6 rounded-lg border border-warning/30 bg-warning-soft px-4 py-3 text-sm text-foreground"
           role="status"
         >
           {t('publishSlotsFullBanner')}
@@ -602,7 +602,7 @@ export function JobDraftFormPage({
 
       {applyLocked ? (
         <p
-          className="mb-6 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-foreground"
+          className="mb-6 rounded-lg border border-warning/30 bg-warning-soft px-4 py-3 text-sm text-foreground"
           role="status"
         >
           {t('liveEditBanner')}

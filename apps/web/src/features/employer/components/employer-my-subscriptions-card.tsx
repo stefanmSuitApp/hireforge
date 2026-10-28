@@ -23,9 +23,9 @@ type Props = {
 function statusPillClass(status: EmployerSubscriptionListItem['status']) {
   switch (status) {
     case 'active':
-      return 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-400';
+      return 'bg-success-soft text-success';
     case 'pending_payment':
-      return 'bg-amber-500/15 text-amber-900 dark:text-amber-400';
+      return 'bg-warning-soft text-warning';
     default:
       return 'bg-muted text-muted-foreground';
   }
@@ -63,7 +63,7 @@ export async function EmployerMySubscriptionsCard({
       <CardContent className="space-y-4">
         {anySlotsFull ? (
           <p
-            className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-950 dark:text-amber-200"
+            className="rounded-md border border-warning/30 bg-warning-soft px-3 py-2 text-sm text-warning"
             role="status"
           >
             {t('slotsFullBanner')}

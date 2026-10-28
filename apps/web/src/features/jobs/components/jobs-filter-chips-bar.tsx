@@ -83,7 +83,7 @@ export function JobsFilterChipsBar() {
   }
 
   return (
-    <div className="mb-4 space-y-3 border-b border-gray-200 pb-4">
+    <div className="mb-4 space-y-3 border-b border-border pb-4">
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           {t('filtersChipBarLabel')}

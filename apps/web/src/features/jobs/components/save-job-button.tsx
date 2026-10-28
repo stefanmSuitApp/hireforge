@@ -98,7 +98,7 @@ export function SaveJobButton({ jobId, className, returnToPath }: Props) {
       size="icon"
       className={cn(
         'shrink-0',
-        saved ? 'text-teal-700' : 'text-muted-foreground',
+        saved ? 'text-primary' : 'text-muted-foreground',
         className,
       )}
       aria-pressed={saved}

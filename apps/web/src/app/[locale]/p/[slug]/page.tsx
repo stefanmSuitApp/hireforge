@@ -46,9 +46,7 @@ export default async function EditorialCmsPage({
           <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
             {t('headerEyebrow')}
           </span>
-          <h1 className="text-[clamp(2rem,4.6vw,3.1rem)] font-extrabold tracking-tight text-foreground">
-            {doc.title}
-          </h1>
+          <h1 className="text-h1 text-foreground">{doc.title}</h1>
           {doc.excerpt?.trim() ? (
             <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
               {doc.excerpt}

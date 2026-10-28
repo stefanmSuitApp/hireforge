@@ -1,6 +1,7 @@
 import '../global.css';
 
 import type { Metadata, Viewport } from 'next';
+import { Inter } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import {
   getMessages,
@@ -26,6 +27,13 @@ function siteVerification(): Metadata['verification'] {
     ...(bing ? { other: { 'msvalidate.01': bing } } : {}),
   };
 }
+
+// Self-hosted at build time (no request to Google); latin-ext covers š đ č ć ž.
+const inter = Inter({
+  subsets: ['latin', 'latin-ext'],
+  display: 'swap',
+  variable: '--font-inter',
+});
 
 /** Browser UI colour: the brand teal (`--primary`, see make-icons.mjs). */
 export const viewport: Viewport = { themeColor: '#007767' };
@@ -99,7 +107,7 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} className={inter.variable} suppressHydrationWarning>
       <body className="min-h-dvh font-sans antialiased">
         <AppQueryProvider>
           <NextIntlClientProvider locale={locale} messages={messages}>

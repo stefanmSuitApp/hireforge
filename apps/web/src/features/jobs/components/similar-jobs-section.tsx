@@ -53,8 +53,8 @@ export function SimilarJobsSection({
   }
 
   return (
-    <section className="mt-6 border-t border-gray-200 pt-5">
-      <h2 className="m-0 mb-3 text-base font-semibold text-gray-900">
+    <section className="mt-6 border-t border-border pt-5">
+      <h2 className="m-0 mb-3 text-base font-semibold text-foreground">
         {t('similarJobsTitle')}
       </h2>
       <ul className="m-0 flex list-none flex-col gap-2 p-0">
@@ -65,10 +65,10 @@ export function SimilarJobsSection({
             <li key={job.id}>
               <Link
                 href={publicJobCardHref(job, locale)}
-                className="block rounded-lg border border-gray-100 bg-gray-50/80 px-3 py-2 text-sm font-medium text-teal-800 hover:bg-gray-100"
+                className="block rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm font-medium text-primary hover:bg-muted"
               >
-                <span className="block text-gray-900">{job.title}</span>
-                <span className="mt-0.5 block text-xs font-normal text-gray-600">
+                <span className="block text-foreground">{job.title}</span>
+                <span className="mt-0.5 block text-xs font-normal text-muted-foreground">
                   {job.company?.name ?? tJobs('lockedCompany')}
                   {city ? ` · ${city}` : ''}
                   {cat ? ` · ${cat}` : ''}

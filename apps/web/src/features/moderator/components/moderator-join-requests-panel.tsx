@@ -49,7 +49,7 @@ export function ModeratorJoinRequestsPanel() {
   }
 
   return (
-    <section className="rounded-2xl border border-amber-500/40 bg-amber-500/5 p-5 shadow-sm">
+    <section className="rounded-2xl border border-warning/30 bg-warning-soft p-5 shadow-sm">
       <h2 className="text-base font-semibold text-foreground">
         {t('heading')}
       </h2>

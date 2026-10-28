@@ -250,9 +250,6 @@ export function JobsInfiniteList({
 
   return (
     <>
-      <p className="mb-3 hidden text-xs text-muted-foreground md:block">
-        {t('twoColumnNavHint')}
-      </p>
       <div
         ref={parentRef}
         className={

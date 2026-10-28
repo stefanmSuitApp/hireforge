@@ -1,7 +1,8 @@
 'use client';
 
+import { SlidersHorizontal } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 
 import type {
   PublicJobListResponse,
@@ -63,26 +64,37 @@ export function JobsListScreen({
   const pathname = usePathname();
 
   const selectedSegment = defaults.job.trim();
+  const activeFilters = [
+    defaults.q,
+    defaults.city,
+    defaults.category,
+    defaults.workModel,
+    defaults.employmentType,
+    defaults.postedWithin,
+    defaults.easyApply ? '1' : '',
+  ].filter(Boolean).length;
+  // Phones: results first; the filters open from one button.
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   let main: ReactNode;
   if (body.kind === 'no-api') {
     main = (
-      <div className="rounded-xl border border-dashed border-red-200 bg-red-50 px-6 py-10 text-center">
-        <h2 className="m-0 mb-2 text-lg font-semibold text-red-900">
+      <div className="rounded-xl border border-dashed border-destructive/30 bg-destructive-soft px-6 py-10 text-center">
+        <h2 className="m-0 mb-2 text-lg font-semibold text-destructive">
           {t('errorTitle')}
         </h2>
-        <p className="m-0 mx-auto max-w-md text-[0.9375rem] text-gray-700">
+        <p className="m-0 mx-auto max-w-md text-[0.9375rem] text-foreground">
           {t('errorNoApi')}
         </p>
       </div>
     );
   } else if (body.kind === 'error') {
     main = (
-      <div className="rounded-xl border border-dashed border-red-200 bg-red-50 px-6 py-10 text-center">
-        <h2 className="m-0 mb-2 text-lg font-semibold text-red-900">
+      <div className="rounded-xl border border-dashed border-destructive/30 bg-destructive-soft px-6 py-10 text-center">
+        <h2 className="m-0 mb-2 text-lg font-semibold text-destructive">
           {t('errorTitle')}
         </h2>
-        <p className="m-0 mx-auto max-w-md text-[0.9375rem] text-gray-700">
+        <p className="m-0 mx-auto max-w-md text-[0.9375rem] text-foreground">
           {t('errorBody')}
         </p>
       </div>
@@ -98,11 +110,11 @@ export function JobsListScreen({
         defaults.easyApply,
     );
     main = (
-      <div className="rounded-xl border border-dashed border-gray-300 bg-neutral-50 px-6 py-10 text-center">
-        <h2 className="m-0 mb-2 text-lg font-semibold text-gray-700">
+      <div className="rounded-xl border border-dashed border-border bg-muted/50 px-6 py-10 text-center">
+        <h2 className="m-0 mb-2 text-lg font-semibold text-foreground">
           {filtered ? t('emptyFilteredTitle') : t('emptyTitle')}
         </h2>
-        <p className="m-0 mx-auto max-w-md text-[0.9375rem] text-gray-500">
+        <p className="m-0 mx-auto max-w-md text-[0.9375rem] text-muted-foreground">
           {filtered ? t('emptyFilteredBody') : t('emptyBody')}
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
@@ -141,7 +153,7 @@ export function JobsListScreen({
     <main className="mx-auto max-w-6xl px-4 py-8 pb-14 md:py-12 md:pb-16">
       {before}
       <header className="mb-8">
-        <h1 className="m-0 mb-2 text-[clamp(1.45rem,6vw,2.25rem)] font-bold tracking-tight text-foreground">
+        <h1 className="m-0 mb-2 text-h1 text-foreground">
           {heading?.title ?? t('title')}
         </h1>
         <p className="m-0 max-w-xl text-sm leading-relaxed text-muted-foreground md:text-base">
@@ -151,10 +163,26 @@ export function JobsListScreen({
 
       {apiBasePresent ? (
         <>
+          <Button
+            type="button"
+            variant="outline"
+            className="mb-4 min-h-11 w-full justify-center md:hidden"
+            aria-expanded={filtersOpen}
+            aria-controls="jobs-filters"
+            onClick={() => setFiltersOpen((v) => !v)}
+          >
+            <SlidersHorizontal aria-hidden />
+            {t('filtersToggle', { count: activeFilters })}
+          </Button>
           {/* No Suspense: these pages render per request, so the bar is in
               the first HTML; a streamed swap pushed the form down (CLS). */}
-          <JobsFilterChipsBar />
-          <div className="mb-8">
+          <div
+            id="jobs-filters"
+            className={filtersOpen ? 'block' : 'hidden md:block'}
+          >
+            <JobsFilterChipsBar />
+          </div>
+          <div className={filtersOpen ? 'mb-8' : 'mb-8 hidden md:block'}>
             <JobsFilterForm
               action={formAction}
               pageSize={pageSize}

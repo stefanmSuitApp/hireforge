@@ -39,7 +39,7 @@ export async function EmployerWorkspaceShell({ children }: Props) {
       </div>
       {!workspace.user.emailVerified ? (
         <div
-          className="my-6 rounded-xl border border-amber-600/40 bg-amber-500/10 px-4 py-3 text-sm text-foreground"
+          className="my-6 rounded-xl border border-warning/30 bg-warning-soft px-4 py-3 text-sm text-foreground"
           role="status"
         >
           {t('emailVerificationBanner')}

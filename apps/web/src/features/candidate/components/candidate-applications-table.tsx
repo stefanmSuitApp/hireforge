@@ -6,6 +6,7 @@ import { MoreHorizontal, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
+import { useConfirm } from '@/components/ui/confirm-dialog';
 import { patchCandidateApplicationWithdraw } from '@/api/candidate-auth';
 import {
   applicationPipelineStatusTone,
@@ -44,7 +45,9 @@ export function CandidateApplicationsTable({ items }: Props) {
   const tErrors = useTranslations('Errors');
   const queryClient = useQueryClient();
 
+  const tCommon = useTranslations('Common');
   const [withdrawError, setWithdrawError] = React.useState<string | null>(null);
+  const [confirmDialog, confirm] = useConfirm();
 
   const withdrawMutation = useMutation({
     mutationFn: patchCandidateApplicationWithdraw,
@@ -130,7 +133,19 @@ export function CandidateApplicationsTable({ items }: Props) {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem
-                  onSelect={() => withdrawMutation.mutate(row.id)}
+                  onSelect={async () => {
+                    // Withdrawing can't be undone and blocks re-applying for a day.
+                    const ok = await confirm({
+                      title: t('withdrawConfirmTitle'),
+                      description: t('withdrawConfirmBody', {
+                        title: row.jobTitle,
+                      }),
+                      confirmLabel: t('withdrawConfirmAction'),
+                      cancelLabel: tCommon('cancel'),
+                      destructive: true,
+                    });
+                    if (ok) withdrawMutation.mutate(row.id);
+                  }}
                 >
                   <X className="size-3.5 text-muted-foreground" />
                   {withdrawMutation.isPending
@@ -144,11 +159,12 @@ export function CandidateApplicationsTable({ items }: Props) {
           ),
       },
     ],
-    [t, tStatus, withdrawMutation],
+    [t, tStatus, tCommon, confirm, withdrawMutation],
   );
 
   return (
     <div className="space-y-3">
+      {confirmDialog}
       {withdrawError ? (
         <p className="text-sm text-destructive" role="alert">
           {withdrawError}

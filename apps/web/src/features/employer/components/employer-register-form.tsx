@@ -9,6 +9,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState, type SubmitEvent } from 'react';
 
 import { Button, Input, Label, PasswordInput } from '@/components/ui';
+import { FieldError, fieldErrorProps } from '@/components/ui/field-error';
 import { SelectField } from '@/components/ui/select';
 import { useEmployerRegisterMutation } from '@/hooks/mutations';
 import {
@@ -192,6 +193,7 @@ export function EmployerRegisterForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [clientError, setClientError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const saved = readDraft();
@@ -237,70 +239,55 @@ export function EmployerRegisterForm() {
     tReg('stepBilling'),
   ];
 
-  function validateStep(step: number): boolean {
-    setClientError(null);
+  /** Errors per field id for a step; empty when the step is valid. */
+  function stepErrors(step: number): Record<string, string> {
+    const errors: Record<string, string> = {};
+    const required = (id: string, value: string) => {
+      if (!value.trim()) errors[id] = tReg('fieldRequired');
+    };
     if (step === 0) {
-      if (!draft.email.includes('@')) {
-        setClientError(tReg('validationFailed'));
-        return false;
-      }
-      if (password.length < 8) {
-        setClientError(tReg('validationFailed'));
-        return false;
-      }
-      return true;
+      if (!draft.email.includes('@')) errors['reg-email'] = tReg('fieldEmail');
+      if (password.length < 8) errors['reg-password'] = tReg('fieldPassword');
     }
     if (step === 1) {
-      if (!draft.legalName.trim()) {
-        setClientError(tReg('validationFailed'));
-        return false;
-      }
+      required('reg-legal', draft.legalName);
       if (isDomestic) {
-        if (!draft.pib.trim() || !draft.mb.trim()) {
-          setClientError(tReg('validationFailed'));
-          return false;
-        }
+        required('reg-pib', draft.pib);
+        required('reg-mb', draft.mb);
       } else if (isEUCountry(draft.countryCode)) {
-        if (!draft.vatId.trim()) {
-          setClientError(tReg('validationFailed'));
-          return false;
-        }
-      } else if (!draft.taxId.trim()) {
-        setClientError(tReg('validationFailed'));
-        return false;
+        required('reg-vat', draft.vatId);
+      } else {
+        required('reg-tax', draft.taxId);
       }
-      return true;
     }
     if (step === 2) {
-      if (
-        !draft.addressLine1.trim() ||
-        !draft.addressPostalCode.trim() ||
-        !draft.addressCity.trim()
-      ) {
-        setClientError(tReg('validationFailed'));
-        return false;
-      }
-      return true;
+      required('reg-a1', draft.addressLine1);
+      required('reg-zip', draft.addressPostalCode);
+      required('reg-city', draft.addressCity);
     }
     if (step === 3) {
-      if (!draft.billingEmail.trim() || !draft.billingContactName.trim()) {
-        setClientError(tReg('validationFailed'));
-        return false;
-      }
+      required('reg-bille', draft.billingEmail);
+      required('reg-billn', draft.billingContactName);
       if (!isDomestic) {
-        if (
-          !draft.bankName.trim() ||
-          !draft.iban.trim() ||
-          !draft.swiftBic.trim() ||
-          !draft.bankCountryCode.trim()
-        ) {
-          setClientError(tReg('validationFailed'));
-          return false;
-        }
+        required('reg-bank', draft.bankName);
+        required('reg-iban', draft.iban);
+        required('reg-swift', draft.swiftBic);
+        required('reg-bcc', draft.bankCountryCode);
       }
-      return true;
     }
-    return true;
+    return errors;
+  }
+
+  function validateStep(step: number): boolean {
+    setClientError(null);
+    const errors = stepErrors(step);
+    setFieldErrors(errors);
+    const first = Object.keys(errors)[0];
+    if (!first) return true;
+    setClientError(tReg('validationFailed'));
+    // Take the user to the first field to fix.
+    requestAnimationFrame(() => document.getElementById(first)?.focus());
+    return false;
   }
 
   function goNext() {
@@ -310,6 +297,7 @@ export function EmployerRegisterForm() {
 
   function goBack() {
     setClientError(null);
+    setFieldErrors({});
     setDraft((d) => ({ ...d, step: Math.max(d.step - 1, 0) }));
   }
 
@@ -374,6 +362,7 @@ export function EmployerRegisterForm() {
             </Label>
             <Input
               id="reg-email"
+              {...fieldErrorProps('reg-email', fieldErrors['reg-email'])}
               name="email"
               type="email"
               autoComplete="email"
@@ -383,6 +372,7 @@ export function EmployerRegisterForm() {
                 setDraft((d) => ({ ...d, email: e.target.value }))
               }
             />
+            <FieldError id="reg-email" message={fieldErrors['reg-email']} />
           </div>
           <div className="space-y-2">
             <Label
@@ -393,6 +383,7 @@ export function EmployerRegisterForm() {
             </Label>
             <PasswordInput
               id="reg-password"
+              {...fieldErrorProps('reg-password', fieldErrors['reg-password'])}
               name="password"
               autoComplete="new-password"
               required
@@ -402,6 +393,10 @@ export function EmployerRegisterForm() {
               showLabel={t('passwordShow')}
               hideLabel={t('passwordHide')}
               className="h-11 rounded-xl"
+            />
+            <FieldError
+              id="reg-password"
+              message={fieldErrors['reg-password']}
             />
             <p className="text-xs text-muted-foreground">{t('passwordHint')}</p>
           </div>
@@ -439,12 +434,14 @@ export function EmployerRegisterForm() {
             </Label>
             <Input
               id="reg-legal"
+              {...fieldErrorProps('reg-legal', fieldErrors['reg-legal'])}
               value={draft.legalName}
               onChange={(e) =>
                 setDraft((d) => ({ ...d, legalName: e.target.value }))
               }
               required
             />
+            <FieldError id="reg-legal" message={fieldErrors['reg-legal']} />
           </div>
           <div className="space-y-2">
             <Label
@@ -476,6 +473,7 @@ export function EmployerRegisterForm() {
                 </Label>
                 <Input
                   id="reg-pib"
+                  {...fieldErrorProps('reg-pib', fieldErrors['reg-pib'])}
                   inputMode="numeric"
                   value={draft.pib}
                   onChange={(e) =>
@@ -483,6 +481,7 @@ export function EmployerRegisterForm() {
                   }
                   required
                 />
+                <FieldError id="reg-pib" message={fieldErrors['reg-pib']} />
               </div>
               <div className="space-y-2">
                 <Label
@@ -493,6 +492,7 @@ export function EmployerRegisterForm() {
                 </Label>
                 <Input
                   id="reg-mb"
+                  {...fieldErrorProps('reg-mb', fieldErrors['reg-mb'])}
                   inputMode="numeric"
                   value={draft.mb}
                   onChange={(e) =>
@@ -500,6 +500,7 @@ export function EmployerRegisterForm() {
                   }
                   required
                 />
+                <FieldError id="reg-mb" message={fieldErrors['reg-mb']} />
               </div>
             </>
           ) : isEUCountry(draft.countryCode) ? (
@@ -512,6 +513,7 @@ export function EmployerRegisterForm() {
               </Label>
               <Input
                 id="reg-vat"
+                {...fieldErrorProps('reg-vat', fieldErrors['reg-vat'])}
                 value={draft.vatId}
                 onChange={(e) =>
                   setDraft((d) => ({
@@ -521,6 +523,7 @@ export function EmployerRegisterForm() {
                 }
                 required
               />
+              <FieldError id="reg-vat" message={fieldErrors['reg-vat']} />
             </div>
           ) : (
             <div className="space-y-2">
@@ -532,12 +535,14 @@ export function EmployerRegisterForm() {
               </Label>
               <Input
                 id="reg-tax"
+                {...fieldErrorProps('reg-tax', fieldErrors['reg-tax'])}
                 value={draft.taxId}
                 onChange={(e) =>
                   setDraft((d) => ({ ...d, taxId: e.target.value }))
                 }
                 required
               />
+              <FieldError id="reg-tax" message={fieldErrors['reg-tax']} />
             </div>
           )}
           <div className="space-y-2">
@@ -572,12 +577,14 @@ export function EmployerRegisterForm() {
             </Label>
             <Input
               id="reg-a1"
+              {...fieldErrorProps('reg-a1', fieldErrors['reg-a1'])}
               value={draft.addressLine1}
               onChange={(e) =>
                 setDraft((d) => ({ ...d, addressLine1: e.target.value }))
               }
               required
             />
+            <FieldError id="reg-a1" message={fieldErrors['reg-a1']} />
           </div>
           <div className="space-y-2">
             <Label
@@ -604,6 +611,7 @@ export function EmployerRegisterForm() {
               </Label>
               <Input
                 id="reg-zip"
+                {...fieldErrorProps('reg-zip', fieldErrors['reg-zip'])}
                 value={draft.addressPostalCode}
                 onChange={(e) =>
                   setDraft((d) => ({
@@ -613,6 +621,7 @@ export function EmployerRegisterForm() {
                 }
                 required
               />
+              <FieldError id="reg-zip" message={fieldErrors['reg-zip']} />
             </div>
             <div className="space-y-2">
               <Label
@@ -623,12 +632,14 @@ export function EmployerRegisterForm() {
               </Label>
               <Input
                 id="reg-city"
+                {...fieldErrorProps('reg-city', fieldErrors['reg-city'])}
                 value={draft.addressCity}
                 onChange={(e) =>
                   setDraft((d) => ({ ...d, addressCity: e.target.value }))
                 }
                 required
               />
+              <FieldError id="reg-city" message={fieldErrors['reg-city']} />
             </div>
           </div>
           <div className="space-y-2">
@@ -670,12 +681,14 @@ export function EmployerRegisterForm() {
                 </Label>
                 <Input
                   id="reg-bank"
+                  {...fieldErrorProps('reg-bank', fieldErrors['reg-bank'])}
                   value={draft.bankName}
                   onChange={(e) =>
                     setDraft((d) => ({ ...d, bankName: e.target.value }))
                   }
                   required={!isDomestic}
                 />
+                <FieldError id="reg-bank" message={fieldErrors['reg-bank']} />
               </div>
               <div className="space-y-2">
                 <Label
@@ -686,12 +699,14 @@ export function EmployerRegisterForm() {
                 </Label>
                 <Input
                   id="reg-iban"
+                  {...fieldErrorProps('reg-iban', fieldErrors['reg-iban'])}
                   value={draft.iban}
                   onChange={(e) =>
                     setDraft((d) => ({ ...d, iban: e.target.value }))
                   }
                   required={!isDomestic}
                 />
+                <FieldError id="reg-iban" message={fieldErrors['reg-iban']} />
               </div>
               <div className="space-y-2">
                 <Label
@@ -702,12 +717,14 @@ export function EmployerRegisterForm() {
                 </Label>
                 <Input
                   id="reg-swift"
+                  {...fieldErrorProps('reg-swift', fieldErrors['reg-swift'])}
                   value={draft.swiftBic}
                   onChange={(e) =>
                     setDraft((d) => ({ ...d, swiftBic: e.target.value }))
                   }
                   required={!isDomestic}
                 />
+                <FieldError id="reg-swift" message={fieldErrors['reg-swift']} />
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
@@ -719,6 +736,7 @@ export function EmployerRegisterForm() {
                   </Label>
                   <Input
                     id="reg-bcc"
+                    {...fieldErrorProps('reg-bcc', fieldErrors['reg-bcc'])}
                     value={draft.bankCountryCode}
                     onChange={(e) =>
                       setDraft((d) => ({
@@ -729,6 +747,7 @@ export function EmployerRegisterForm() {
                     required={!isDomestic}
                     maxLength={2}
                   />
+                  <FieldError id="reg-bcc" message={fieldErrors['reg-bcc']} />
                 </div>
                 <div className="space-y-2">
                   <Label
@@ -837,6 +856,7 @@ export function EmployerRegisterForm() {
             </Label>
             <Input
               id="reg-bille"
+              {...fieldErrorProps('reg-bille', fieldErrors['reg-bille'])}
               type="email"
               value={draft.billingEmail}
               onChange={(e) =>
@@ -844,6 +864,7 @@ export function EmployerRegisterForm() {
               }
               required
             />
+            <FieldError id="reg-bille" message={fieldErrors['reg-bille']} />
           </div>
           <div className="space-y-2">
             <Label
@@ -869,6 +890,7 @@ export function EmployerRegisterForm() {
             </Label>
             <Input
               id="reg-billn"
+              {...fieldErrorProps('reg-billn', fieldErrors['reg-billn'])}
               value={draft.billingContactName}
               onChange={(e) =>
                 setDraft((d) => ({
@@ -878,6 +900,7 @@ export function EmployerRegisterForm() {
               }
               required
             />
+            <FieldError id="reg-billn" message={fieldErrors['reg-billn']} />
           </div>
           <div className="space-y-2">
             <Label
@@ -917,7 +940,14 @@ export function EmployerRegisterForm() {
       ) : null}
 
       {clientError ? (
-        <p className="text-sm text-amber-700 dark:text-amber-400" role="status">
+        <p
+          className={
+            Object.keys(fieldErrors).length > 0
+              ? 'text-sm text-destructive'
+              : 'text-sm text-muted-foreground'
+          }
+          role={Object.keys(fieldErrors).length > 0 ? 'alert' : 'status'}
+        >
           {clientError}
         </p>
       ) : null}

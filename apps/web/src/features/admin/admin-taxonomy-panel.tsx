@@ -4,6 +4,7 @@ import type { AdminJobCategoryItem } from 'contracts';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
+import { useConfirm } from '@/components/ui/confirm-dialog';
 import {
   deleteAdminJobCategory,
   postAdminJobCategory,
@@ -18,6 +19,8 @@ type Props = { categories: AdminJobCategoryItem[] };
 
 export function AdminTaxonomyPanel({ categories: initial }: Props) {
   const t = useTranslations('Admin.taxonomy');
+  const tCommon = useTranslations('Common');
+  const [confirmDialog, confirm] = useConfirm();
   const tErrors = useTranslations('Errors');
   const [categories, setCategories] = React.useState(initial);
   const [slug, setSlug] = React.useState('');
@@ -58,6 +61,7 @@ export function AdminTaxonomyPanel({ categories: initial }: Props) {
 
   return (
     <div className="space-y-6">
+      {confirmDialog}
       {error ? (
         <p className="text-sm text-destructive" role="alert">
           {error}
@@ -125,7 +129,13 @@ export function AdminTaxonomyPanel({ categories: initial }: Props) {
                 size="sm"
                 disabled={pending === c.id}
                 onClick={async () => {
-                  if (!globalThis.confirm(t('deleteConfirm'))) return;
+                  const ok = await confirm({
+                    title: t('deleteConfirm'),
+                    confirmLabel: t('delete'),
+                    cancelLabel: tCommon('cancel'),
+                    destructive: true,
+                  });
+                  if (!ok) return;
                   setPending(c.id);
                   setError(null);
                   try {

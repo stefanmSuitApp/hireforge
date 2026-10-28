@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
+import { useConfirm } from '@/components/ui/confirm-dialog';
 import {
   postStaffCompanyCloseLost,
   postStaffCompanyCloseWon,
@@ -32,6 +33,8 @@ export function ModeratorCompanySalesActions({
   currentUserId,
 }: Props) {
   const t = useTranslations('Moderator.companies');
+  const tCommon = useTranslations('Common');
+  const [confirmDialog, confirm] = useConfirm();
   const tErrors = useTranslations('Errors');
   const router = useRouter();
   const qc = useQueryClient();
@@ -97,6 +100,7 @@ export function ModeratorCompanySalesActions({
 
   return (
     <section className="space-y-4 rounded-2xl border border-border/70 bg-card p-5 shadow-sm">
+      {confirmDialog}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h3 className="text-base font-semibold text-foreground">
@@ -141,13 +145,13 @@ export function ModeratorCompanySalesActions({
               size="sm"
               variant="secondary"
               disabled={wonMu.isPending}
-              onClick={() => {
-                if (
-                  typeof window !== 'undefined' &&
-                  window.confirm(t('confirmCloseWon'))
-                ) {
-                  wonMu.mutate();
-                }
+              onClick={async () => {
+                const ok = await confirm({
+                  title: t('confirmCloseWon'),
+                  confirmLabel: t('closeWon'),
+                  cancelLabel: tCommon('cancel'),
+                });
+                if (ok) wonMu.mutate();
               }}
             >
               {wonMu.isPending ? t('closeWonPending') : t('closeWon')}
@@ -180,13 +184,14 @@ export function ModeratorCompanySalesActions({
             size="sm"
             variant="destructive"
             disabled={lostMu.isPending}
-            onClick={() => {
-              if (
-                typeof window !== 'undefined' &&
-                window.confirm(t('confirmCloseLost'))
-              ) {
-                lostMu.mutate();
-              }
+            onClick={async () => {
+              const ok = await confirm({
+                title: t('confirmCloseLost'),
+                confirmLabel: t('confirmCloseLostSubmit'),
+                cancelLabel: tCommon('cancel'),
+                destructive: true,
+              });
+              if (ok) lostMu.mutate();
             }}
           >
             {lostMu.isPending

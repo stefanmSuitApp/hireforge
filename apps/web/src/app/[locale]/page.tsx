@@ -168,7 +168,7 @@ export default async function HomePage({
           {/* Hero card container (JoinBrands-style) */}
           <div className="rounded-3xl border border-border/40 bg-card/70 px-5 py-8 backdrop-blur-sm md:px-14 md:py-16">
             <header className="max-w-3xl">
-              <h1 className="m-0 text-[clamp(2rem,7.2vw,3.75rem)] font-extrabold leading-[1.08] tracking-tight text-foreground">
+              <h1 className="m-0 text-display text-foreground">
                 {t('headline').replace(t('headlineAccent'), '').trim()}{' '}
                 <span className="hf-gradient-text">{t('headlineAccent')}</span>
               </h1>
