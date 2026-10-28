@@ -15,6 +15,7 @@ import {
   getTranslatedApiErrorMessage,
   type ErrorsTranslator,
 } from '@/lib/http/api-error-message';
+import { ResendVerificationButton } from '@/features/auth';
 
 const NONE = '__none__';
 
@@ -112,6 +113,7 @@ export function CandidateJobApplyForm({ job, emailVerified = true }: Props) {
           <p className="mt-1 text-muted-foreground">
             {t('emailNotVerifiedLead')}
           </p>
+          <ResendVerificationButton />
         </div>
       ) : null}
 

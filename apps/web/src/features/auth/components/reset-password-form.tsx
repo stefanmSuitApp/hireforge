@@ -1,0 +1,102 @@
+'use client';
+
+import { useMutation } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
+import { useState, type SubmitEvent } from 'react';
+
+import { Button, Label, PasswordInput } from '@/components/ui';
+import { Link } from '@/i18n/navigation';
+import {
+  getTranslatedApiErrorMessage,
+  type ErrorsTranslator,
+} from '@/lib/http/api-error-message';
+import { webHttp } from '@/lib/http/web-axios';
+
+/** Token comes from the emailed link; nothing is consumed until the form is submitted. */
+export function ResetPasswordForm({ token }: { token: string }) {
+  const t = useTranslations('AccountEmail');
+  const tErrors = useTranslations('Errors');
+  const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [mismatch, setMismatch] = useState(false);
+
+  const reset = useMutation({
+    mutationFn: () =>
+      webHttp.post('/api/auth/password-reset/confirm', { token, password }),
+  });
+
+  function onSubmit(e: SubmitEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (password !== confirm) {
+      setMismatch(true);
+      return;
+    }
+    setMismatch(false);
+    reset.mutate();
+  }
+
+  if (reset.isSuccess) {
+    return (
+      <div className="flex flex-col gap-4 text-sm">
+        <p role="status" className="m-0 text-foreground">
+          {t('resetDone')}
+        </p>
+        <Button asChild className="h-11 rounded-full">
+          <Link href="/sign-in">{t('goToSignIn')}</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={onSubmit} className="flex flex-col gap-4">
+      <div className="space-y-2">
+        <Label htmlFor="reset-password">{t('newPassword')}</Label>
+        <PasswordInput
+          id="reset-password"
+          autoComplete="new-password"
+          showLabel={t('passwordShow')}
+          hideLabel={t('passwordHide')}
+          minLength={8}
+          required
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <p className="m-0 text-xs text-muted-foreground">{t('passwordHint')}</p>
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="reset-password-confirm">{t('confirmPassword')}</Label>
+        <PasswordInput
+          id="reset-password-confirm"
+          autoComplete="new-password"
+          showLabel={t('passwordShow')}
+          hideLabel={t('passwordHide')}
+          minLength={8}
+          required
+          value={confirm}
+          onChange={(e) => setConfirm(e.target.value)}
+        />
+      </div>
+      {mismatch ? (
+        <p role="alert" className="text-sm text-destructive">
+          {t('passwordMismatch')}
+        </p>
+      ) : null}
+      {reset.isError ? (
+        <p role="alert" className="text-sm text-destructive">
+          {getTranslatedApiErrorMessage(
+            reset.error,
+            tErrors as ErrorsTranslator,
+          )}
+        </p>
+      ) : null}
+      <Button
+        type="submit"
+        disabled={reset.isPending}
+        className="h-11 rounded-full"
+      >
+        {t('resetSubmit')}
+      </Button>
+    </form>
+  );
+}

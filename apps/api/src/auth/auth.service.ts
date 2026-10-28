@@ -1,5 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { randomBytes } from 'crypto';
+import { Injectable } from '@nestjs/common';
 import { and, eq, inArray } from 'drizzle-orm';
 import type { EmployerSelfSignupBody } from 'contracts';
 import {
@@ -23,6 +22,7 @@ import {
 } from '../http/coded-http';
 import { getDb } from '../database';
 import { hashPassword, verifyPassword } from './password';
+import { AuthEmailService } from './auth-email.service';
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from './jwt';
 
 function slugify(input: string): string {
@@ -47,6 +47,8 @@ function assertSlugFormat(slug: string): void {
 
 @Injectable()
 export class AuthService {
+  constructor(private readonly authEmail: AuthEmailService) {}
+
   async registerEmployer(
     input: EmployerSelfSignupBody,
   ): Promise<{ accessToken: string; refreshToken: string }> {
@@ -61,7 +63,7 @@ export class AuthService {
     const passwordHash = await hashPassword(input.password);
     const companyPayload = input.company;
 
-    return database.db.transaction(async (tx) => {
+    const created = await database.db.transaction(async (tx) => {
       const existingUser = await tx
         .select({ id: users.id })
         .from(users)
@@ -142,13 +144,6 @@ export class AuthService {
         })
         .returning({ id: users.id, role: users.role });
 
-      const devVerifyToken = randomBytes(32).toString('base64url');
-      if (process.env.NODE_ENV !== 'production') {
-        Logger.warn(
-          `[hireforge] Employer email verification dev token userId=${user.id} email=${email} token=${devVerifyToken}`,
-        );
-      }
-
       const existingEmployer = await tx
         .select({ id: employers.id })
         .from(employers)
@@ -175,14 +170,25 @@ export class AuthService {
 
       const accessToken = await signAccessToken(user.id, user.role);
       const refreshToken = await signRefreshToken(user.id);
-      return { accessToken, refreshToken };
+      return { userId: user.id, accessToken, refreshToken };
     });
+
+    await this.authEmail.sendVerificationAfterSignup(
+      created.userId,
+      email,
+      input.locale ?? 'sr',
+    );
+    return {
+      accessToken: created.accessToken,
+      refreshToken: created.refreshToken,
+    };
   }
 
   async registerCandidate(input: {
     email: string;
     password: string;
     fullName?: string;
+    locale?: 'sr' | 'en';
   }): Promise<{ accessToken: string; refreshToken: string }> {
     const database = getDb();
     if (!database) {
@@ -195,7 +201,7 @@ export class AuthService {
     const passwordHash = await hashPassword(input.password);
     const fullName = input.fullName?.trim() || null;
 
-    return database.db.transaction(async (tx) => {
+    const created = await database.db.transaction(async (tx) => {
       const existing = await tx
         .select({ id: users.id })
         .from(users)
@@ -224,8 +230,18 @@ export class AuthService {
 
       const accessToken = await signAccessToken(user.id, user.role);
       const refreshToken = await signRefreshToken(user.id);
-      return { accessToken, refreshToken };
+      return { userId: user.id, accessToken, refreshToken };
     });
+
+    await this.authEmail.sendVerificationAfterSignup(
+      created.userId,
+      email,
+      input.locale ?? 'sr',
+    );
+    return {
+      accessToken: created.accessToken,
+      refreshToken: created.refreshToken,
+    };
   }
 
   async loginCandidate(input: {

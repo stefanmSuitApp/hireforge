@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useState, type SubmitEvent } from 'react';
 
 import { Button, Input, Label, PasswordInput } from '@/components/ui';
+import { Link } from '@/i18n/navigation';
 import { useCandidateLoginMutation } from '@/hooks/mutations';
 import {
   getTranslatedApiErrorMessage,
@@ -15,6 +16,7 @@ type Props = { returnTo?: string | null };
 export function CandidateLoginForm({ returnTo }: Props) {
   const t = useTranslations('Candidate');
   const tErrors = useTranslations('Errors');
+  const tAccount = useTranslations('AccountEmail');
   const login = useCandidateLoginMutation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -86,6 +88,14 @@ export function CandidateLoginForm({ returnTo }: Props) {
       >
         {login.isPending ? t('signingIn') : t('signIn')}
       </Button>
+      <p className="m-0 text-center text-sm">
+        <Link
+          href="/forgot-password"
+          className="text-muted-foreground underline-offset-4 hover:underline"
+        >
+          {tAccount('forgotPasswordLink')}
+        </Link>
+      </p>
     </form>
   );
 }

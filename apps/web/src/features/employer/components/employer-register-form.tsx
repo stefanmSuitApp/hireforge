@@ -5,7 +5,7 @@ import {
   isEUCountry,
   type EmployerSelfSignupBody,
 } from 'contracts';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState, type SubmitEvent } from 'react';
 
 import { Button, Input, Label, PasswordInput } from '@/components/ui';
@@ -184,6 +184,7 @@ function readDraft(): DraftFields | null {
 export function EmployerRegisterForm() {
   const t = useTranslations('Employer');
   const tReg = useTranslations('Employer.register');
+  const locale = useLocale();
   const tErrors = useTranslations('Errors');
   const register = useEmployerRegisterMutation();
   const draftReady = useRef(false);
@@ -320,7 +321,10 @@ export function EmployerRegisterForm() {
     }
     if (!validateStep(3)) return;
     setError(null);
-    const body = buildSignupBody(draft, password);
+    const body = {
+      ...buildSignupBody(draft, password),
+      locale: locale === 'en' ? ('en' as const) : ('sr' as const),
+    };
     const parsed = employerSelfSignupBodySchema.safeParse(body);
     if (!parsed.success) {
       setError(tReg('validationFailed'));

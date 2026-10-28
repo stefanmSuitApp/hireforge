@@ -347,6 +347,38 @@ export const employers = pgTable(
 );
 
 /**
+ * Single-use email links (verify email, reset password). Only the SHA-256 of
+ * the token is stored; the raw token exists only in the sent email.
+ */
+export const authTokens = pgTable(
+  'auth_tokens',
+  {
+    id: uuid('id')
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    /** `email_verify | password_reset` (`text + CHECK`). */
+    purpose: text('purpose').notNull(),
+    tokenHash: text('token_hash').notNull(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    usedAt: timestamp('used_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    check(
+      'auth_tokens_purpose_check',
+      sql`${t.purpose} IN ('email_verify', 'password_reset')`,
+    ),
+    uniqueIndex('auth_tokens_token_hash_unique').on(t.tokenHash),
+    index('auth_tokens_user_purpose_idx').on(t.userId, t.purpose),
+  ],
+);
+
+/**
  * Employer self-signup that matched an existing company (PIB / MB / VAT / name).
  * No `employers` row exists until staff approve, so every employer route stays
  * closed while `pending` or after `rejected`.

@@ -25,6 +25,7 @@
         "libs/server/pdf/src/lib/locale-pdf-fonts.ts"
       ],
       "server-jobs": ["libs/server/jobs/src/index.ts"],
+      "server-email": ["libs/server/email/src/index.ts"],
       "server-employers": ["libs/server/employers/src/index.ts"],
       "server-applications": ["libs/server/applications/src/index.ts"],
       "server-cv-templates": ["libs/server/cv-templates/src/index.ts"],

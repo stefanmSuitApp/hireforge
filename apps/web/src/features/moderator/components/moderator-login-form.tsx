@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useState, type SubmitEvent } from 'react';
 
 import { Button, Input, Label, PasswordInput } from '@/components/ui';
+import { Link } from '@/i18n/navigation';
 import { useModeratorLoginMutation } from '@/hooks/mutations';
 import {
   getTranslatedApiErrorMessage,
@@ -13,6 +14,7 @@ import {
 export function ModeratorLoginForm() {
   const t = useTranslations('Moderator');
   const tErrors = useTranslations('Errors');
+  const tAccount = useTranslations('AccountEmail');
   const login = useModeratorLoginMutation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -83,6 +85,14 @@ export function ModeratorLoginForm() {
       >
         {login.isPending ? t('signingIn') : t('signIn')}
       </Button>
+      <p className="m-0 text-center text-sm">
+        <Link
+          href="/forgot-password"
+          className="text-muted-foreground underline-offset-4 hover:underline"
+        >
+          {tAccount('forgotPasswordLink')}
+        </Link>
+      </p>
     </form>
   );
 }
