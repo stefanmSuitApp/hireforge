@@ -19,7 +19,7 @@ import { createReadStream, existsSync } from 'node:fs';
 import { mkdir, unlink, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
 
-import { and, desc, eq, ne } from 'drizzle-orm';
+import { and, count, desc, eq, ne, sql } from 'drizzle-orm';
 import { isWithinReapplicationCooldown } from 'server-applications';
 import { renderCvPdfBuffer } from 'server-cv-templates';
 import {
@@ -46,7 +46,6 @@ import {
 } from '../http/coded-http';
 import { getDb } from '../database';
 import { getCorrelationId } from '../observability/correlation-storage';
-import { getRedis } from '../redis';
 import { isUniqueViolation } from '../database-errors';
 import { consumeRateLimit } from '../http/rate-limit';
 
@@ -155,6 +154,9 @@ function safeGeneratedCvFilename(
       .slice(0, 40) || 'CV';
   return `CV-${templateCode}-${slug}.pdf`;
 }
+
+/** Saved searches per candidate (stored filter snapshots for future alerts). */
+const MAX_SAVED_SEARCHES = 50;
 
 @Injectable()
 export class CandidateService {
@@ -765,6 +767,18 @@ export class CandidateService {
       );
     }
     const base = await this.requireCandidate(userId);
+    // Each run renders a PDF in the API process and stores a file.
+    const limit = await consumeRateLimit(
+      `cvgen:1h:${base.candidateId}`,
+      20,
+      60 * 60,
+    );
+    if (!limit.allowed) {
+      throw codedTooManyRequests(
+        'CV_GENERATE_RATE_LIMITED',
+        'Too many CVs generated in the last hour',
+      );
+    }
     const [row] = await database.db
       .select({
         fullName: candidates.fullName,
@@ -1057,6 +1071,30 @@ export class CandidateService {
       );
     }
     const { candidateId } = await this.requireCandidate(userId);
+    // Same filters saved again → reuse the row instead of piling up copies.
+    const [same] = await database.db
+      .select({ id: savedJobSearches.id })
+      .from(savedJobSearches)
+      .where(
+        and(
+          eq(savedJobSearches.candidateId, candidateId),
+          sql`${savedJobSearches.queryJson} = ${JSON.stringify(body.query)}::jsonb`,
+        ),
+      )
+      .limit(1);
+    if (same) {
+      return { id: same.id };
+    }
+    const [{ n } = { n: 0 }] = await database.db
+      .select({ n: count() })
+      .from(savedJobSearches)
+      .where(eq(savedJobSearches.candidateId, candidateId));
+    if (Number(n) >= MAX_SAVED_SEARCHES) {
+      throw codedBadRequest(
+        'SAVED_SEARCH_LIMIT_REACHED',
+        `You can keep at most ${MAX_SAVED_SEARCHES} saved searches`,
+      );
+    }
     const [row] = await database.db
       .insert(savedJobSearches)
       .values({

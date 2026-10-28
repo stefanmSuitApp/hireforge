@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { nestApiUrl, resolveNestServerOrigin } from '@/lib/nest-api-url';
+import { forwardClientIpHeaders } from '@/lib/client-ip';
 
 export async function POST(
   req: Request,
@@ -16,12 +17,12 @@ export async function POST(
     );
   }
   const body = await req.text();
-  const xf = req.headers.get('x-forwarded-for');
   const upstream = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      ...(xf ? { 'X-Forwarded-For': xf } : {}),
+      // Right-most hop only: left entries are client-supplied and spoofable.
+      ...forwardClientIpHeaders(req.headers),
     },
     body,
   });
