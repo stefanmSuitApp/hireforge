@@ -210,6 +210,18 @@ Follow-up fixes (`fix/seo-leftovers`, 2026-10-28):
 - `GET /api/candidate/saved-jobs` answers `{items: []}` to guests instead of
   a 401 per job card (console errors on public pages).
 
+Deployed `main@e2da182` (2026-10-28 15:16 UTC, attempt 1; backup first,
+rollback tags `rollback-pre-leftovers`; no migrations). Live: api health ok,
+worker `worker_started` (the #12 module change boots), no API errors;
+unknown job / landing → 404; guest saved-jobs → `{items: []}`, guest save → 401. `seo:audit`: no warnings (two runs). Lighthouse, all four pages: SEO,
+accessibility, best practices 1.00 or within budget; performance ≥ 0.9; CLS
+0.000.
+
+Note on `seo:audit`: one run right after the restart reported a company page
+without canonical/description; it did not reproduce. Likely Next's streamed
+metadata (tags sent after `<head>` to non-crawler user agents while the
+first CMS fetch is slow); crawlers get them in `<head>`.
+
 ## Known issues not yet scheduled
 
 - `drizzle/meta` only has the `0000` snapshot → `pnpm db:generate` would
