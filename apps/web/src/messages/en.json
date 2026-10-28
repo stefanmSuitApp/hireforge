@@ -246,7 +246,9 @@
     "errorGeneric": "Could not load this company right now.",
     "snapshotOpenJobs": "All open jobs",
     "snapshotBrowseJobs": "Browse listings",
-    "verifiedBadge": "Verified employer"
+    "verifiedBadge": "Verified employer",
+    "whyJoin": "Why join",
+    "testimonials": "Testimonials"
   },
   "EmployersPage": {
     "metaTitle": "Employers",
@@ -809,7 +811,14 @@
       "adminOverrideTitle": "Admin override",
       "adminOverrideHint": "Immediately archives this job regardless of status. Use sparingly for policy or legal reasons.",
       "forceArchive": "Force archive",
-      "forceArchiving": "Archiving…"
+      "forceArchiving": "Archiving…",
+      "rawJobId": "Job ID",
+      "rawCompanyId": "Company ID",
+      "rawSlugShortId": "Slug / short ID",
+      "rawPrimaryLanguage": "Primary language",
+      "rawCity": "City",
+      "rawCategory": "Category",
+      "rawUpdatedAt": "Updated at"
     },
     "joinRequests": {
       "heading": "Company access requests",
@@ -1079,7 +1088,9 @@
     "SUBSCRIPTION_NOT_FOUND": "That subscription could not be found.",
     "SUBSCRIPTION_INVALID_STATE": "This action is not allowed for the subscription’s current status.",
     "SUBSCRIPTION_FORBIDDEN": "You are not allowed to manage this subscription.",
-    "PROMO_CURRENCY_MISMATCH": "This promo code does not apply to purchases in this currency."
+    "PROMO_CURRENCY_MISMATCH": "This promo code does not apply to purchases in this currency.",
+    "tableRenderFailed": "Could not render this table right now.",
+    "apiNotConfigured": "The API address is not configured (NEXT_PUBLIC_API_URL)."
   },
   "Candidate": {
     "workspaceLabel": "Candidate account",
@@ -1222,7 +1233,8 @@
       "validationError": "Please fix your experience, education, and skills (dates and required fields).",
       "pickTemplateError": "Pick a template before generating.",
       "back": "Back",
-      "next": "Next"
+      "next": "Next",
+      "previewLoading": "Loading preview"
     }
   },
   "Integration": {

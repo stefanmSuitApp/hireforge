@@ -189,11 +189,11 @@ export async function SiteFooter() {
               </Link>
             </Button>
           ) : null}
-          <p className="m-0 text-xs text-muted-foreground/70">
+          <p className="m-0 text-xs text-muted-foreground">
             <Link
               href="/moderator/login"
               locale={locale}
-              className="underline-offset-2 hover:text-muted-foreground hover:underline"
+              className="underline-offset-2 hover:text-foreground hover:underline"
             >
               {t('moderatorPortal')}
             </Link>

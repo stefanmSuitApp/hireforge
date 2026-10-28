@@ -1,0 +1,3 @@
+# Blocking: the same cheap gates as CI `checks` (Nx caches unchanged projects).
+# `pnpm test` includes the merged-migration guard (libs/database).
+pnpm lint && pnpm typecheck && pnpm test && pnpm check:i18n || exit 1

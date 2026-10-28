@@ -3,6 +3,8 @@
 import type { ReactNode } from 'react';
 import { Component } from 'react';
 
+import { useTranslations } from 'next-intl';
+
 type Props = {
   children: ReactNode;
   fallback?: ReactNode;
@@ -10,7 +12,7 @@ type Props = {
 
 type State = { hasError: boolean };
 
-export class TableErrorBoundary extends Component<Props, State> {
+class TableErrorBoundaryInner extends Component<Props, State> {
   override state: State = { hasError: false };
 
   static getDerivedStateFromError(): State {
@@ -23,14 +25,25 @@ export class TableErrorBoundary extends Component<Props, State> {
 
   override render() {
     if (this.state.hasError) {
-      return (
-        this.props.fallback ?? (
-          <p className="text-sm text-destructive" role="alert">
-            Could not render this table right now.
-          </p>
-        )
-      );
+      return this.props.fallback;
     }
     return this.props.children;
   }
+}
+
+export function TableErrorBoundary({ children, fallback }: Props) {
+  const t = useTranslations('Errors');
+  return (
+    <TableErrorBoundaryInner
+      fallback={
+        fallback ?? (
+          <p className="text-sm text-destructive" role="alert">
+            {t('tableRenderFailed')}
+          </p>
+        )
+      }
+    >
+      {children}
+    </TableErrorBoundaryInner>
+  );
 }

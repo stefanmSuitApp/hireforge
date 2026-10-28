@@ -104,7 +104,7 @@ export async function PublicCompanyPage({
           {branding.benefits && branding.benefits.length > 0 ? (
             <>
               <h2 className="m-0 mb-3 text-lg font-semibold text-gray-900">
-                Why join
+                {t('whyJoin')}
               </h2>
               <ul className="m-0 mb-4 list-disc space-y-1 pl-5 text-sm text-gray-700">
                 {branding.benefits
@@ -119,7 +119,7 @@ export async function PublicCompanyPage({
           {branding.testimonials && branding.testimonials.length > 0 ? (
             <div className="space-y-3">
               <h3 className="m-0 text-base font-semibold text-gray-900">
-                Testimonials
+                {t('testimonials')}
               </h3>
               {branding.testimonials
                 .filter((x) => x.quote?.trim())

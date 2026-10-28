@@ -120,7 +120,7 @@ export default async function HomePage({
               <Link
                 href={promoBanner.href}
                 locale={locale}
-                className="inline-flex items-center gap-2 rounded-full bg-primary/[0.08] px-4 py-2 text-sm font-medium text-primary no-underline transition-colors hover:bg-primary/[0.12]"
+                className="inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-medium text-accent-foreground no-underline transition-colors hover:bg-accent/80"
               >
                 {promoBanner.text}
               </Link>

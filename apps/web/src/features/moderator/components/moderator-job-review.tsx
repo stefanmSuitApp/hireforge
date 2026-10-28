@@ -152,33 +152,33 @@ export function ModeratorJobReview({ job, jobId, isAdmin = false }: Props) {
             {rawOpen ? (
               <dl className="mt-3 space-y-2 font-mono text-xs text-muted-foreground">
                 <div>
-                  <dt className="text-foreground">job id</dt>
+                  <dt className="text-foreground">{t('rawJobId')}</dt>
                   <dd>{currentJob.id}</dd>
                 </div>
                 <div>
-                  <dt className="text-foreground">company id</dt>
+                  <dt className="text-foreground">{t('rawCompanyId')}</dt>
                   <dd>{currentJob.company.id}</dd>
                 </div>
                 <div>
-                  <dt className="text-foreground">slug / shortId</dt>
+                  <dt className="text-foreground">{t('rawSlugShortId')}</dt>
                   <dd>
                     {currentJob.slug ?? '—'} / {currentJob.shortId ?? '—'}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-foreground">primaryLanguage</dt>
+                  <dt className="text-foreground">{t('rawPrimaryLanguage')}</dt>
                   <dd>{currentJob.primaryLanguage}</dd>
                 </div>
                 <div>
-                  <dt className="text-foreground">city</dt>
+                  <dt className="text-foreground">{t('rawCity')}</dt>
                   <dd>{currentJob.city?.slug ?? '—'}</dd>
                 </div>
                 <div>
-                  <dt className="text-foreground">category</dt>
+                  <dt className="text-foreground">{t('rawCategory')}</dt>
                   <dd>{currentJob.category?.slug ?? '—'}</dd>
                 </div>
                 <div>
-                  <dt className="text-foreground">updatedAt</dt>
+                  <dt className="text-foreground">{t('rawUpdatedAt')}</dt>
                   <dd>{currentJob.updatedAt}</dd>
                 </div>
               </dl>

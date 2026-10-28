@@ -24,11 +24,13 @@ export function LocaleSwitcher() {
     <Link
       href={{ pathname, query }}
       locale={otherLocale}
-      aria-label={ariaLabel}
+      hrefLang={otherLocale}
       className="flex items-center gap-1.5 rounded-full border border-border/60 bg-card/50 px-3 py-1.5 text-xs font-medium text-muted-foreground transition-all hover:border-primary/40 hover:bg-primary/5 hover:text-foreground"
     >
-      <Globe className="size-3.5" />
-      <span>{targetLabel}</span>
+      <Globe className="size-3.5" aria-hidden />
+      {/* Accessible name keeps the visible "EN"/"SR" (WCAG 2.5.3). */}
+      <span className="sr-only">{ariaLabel}</span>
+      <span aria-hidden>{targetLabel}</span>
     </Link>
   );
 }

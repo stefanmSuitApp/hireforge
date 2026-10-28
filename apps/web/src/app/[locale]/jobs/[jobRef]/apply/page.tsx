@@ -1,5 +1,5 @@
 import { notFound, permanentRedirect, redirect } from 'next/navigation';
-import { setRequestLocale } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 import { CandidateJobApplyForm } from '@/features/candidate';
 import { getCandidateAccessToken } from '@/lib/candidate-access-cookie';
@@ -38,10 +38,11 @@ export default async function JobApplyPage({
   }
 
   if (!base) {
+    const tErrors = await getTranslations('Errors');
     return (
       <main className="mx-auto max-w-4xl px-4 py-10">
         <p className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-destructive">
-          NEXT_PUBLIC_API_URL is not configured.
+          {tErrors('apiNotConfigured')}
         </p>
       </main>
     );

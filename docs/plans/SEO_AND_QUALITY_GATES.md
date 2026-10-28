@@ -266,3 +266,20 @@ Ticked as each step lands on the branch. Skipped items say why.
 - [x] W6 · Parallel-safe e2e stacks: `E2E_DB_NAME`, `E2E_REDIS_DB`,
       `E2E_API_PORT`, `E2E_WEB_PORT` (defaults unchanged; documented in
       `.env.example`).
+- [x] W5.1 · Merged-migration guard: `libs/database/src/migrations.test.ts`
+      (journal order, SQL ↔ journal, files and journal entries on main
+      unchanged). CI `checks` fetches `origin/main` first.
+- [x] W5.2 · `pnpm check:i18n` (`scripts/check-i18n.mjs`). The 17 existing
+      hits were fixed, so no allowlist file was needed. Entities (`&rarr;`)
+      and URL placeholders (`https://…`) don't count as text. Runs in CI
+      `checks`.
+- [x] W5.3 · Husky: `pre-commit` = lint-staged (eslint --fix, prettier),
+      `pre-push` = lint + typecheck + test (incl. migration guard) +
+      check:i18n.
+- [x] W5.4 · `pnpm test` includes api and worker (vitest, `passWithNoTests`),
+      with a first real test each. They also gain a `typecheck` target.
+- [x] W5.5 · `expectNoA11yViolations` (`e2e/support/fixtures.ts`, WCAG 2.1
+      A/AA) on public pages and the three workspaces (`e2e/a11y.spec.ts`).
+      Fixed: footer link contrast, home promo chip contrast, `--primary`
+      L 0.52 → 0.50, locale switcher accessible name, nested buttons in the
+      home spotlight rail. No rules skipped.

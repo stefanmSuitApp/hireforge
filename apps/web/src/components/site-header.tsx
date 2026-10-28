@@ -45,7 +45,12 @@ export async function SiteHeader() {
           className="flex shrink-0 items-center gap-2 transition-opacity hover:opacity-80"
         >
           <div className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/70 shadow-sm">
-            <span className="text-lg font-bold text-primary-foreground">Š</span>
+            <span
+              className="text-lg font-bold text-primary-foreground"
+              aria-hidden
+            >
+              {brandText.charAt(0)}
+            </span>
           </div>
           <BrandWordmark
             text={brandText}
