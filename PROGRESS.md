@@ -74,7 +74,7 @@ daemon in Docker builds, output asserted, sequential builds.
 - E2E: 10 specs incl. emails through a fake Resend; each new spec shown to
   fail without its fix.
 
-## Phase C — security & operations hardening (next)
+## Phase C — security & operations hardening (owner: Claude Code, in progress)
 
 1. Refresh-token revocation (`users.token_version`): password reset and
    "sign out everywhere" kill existing sessions.

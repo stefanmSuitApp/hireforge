@@ -75,15 +75,7 @@ marked `TODO(Stefan)`.
 
 ## 🟡 Decide when convenient
 
-### 6. Untracked files from another tool
-
-`CLAUDE.md`, `.cursor/rules/claude-cursor-workflow.mdc` and
-`.cursor/rules/project.mdc` appeared during the session. `project.mdc`
-describes a different project ("autofind-platform") and `CLAUDE.md` refers
-to `AGENTS.md` / `BUILD_PLAN.md`, which do not exist here. Claude left them
-untracked and untouched: commit, adapt or delete them.
-
-### 7. SEO branch
+### 6. SEO branch
 
 A separate session is preparing `feat/seo-quality-gates` (clone at
 `~/Dev/DEVLEGION/hireforge-seo`) that makes job list/detail public behind
