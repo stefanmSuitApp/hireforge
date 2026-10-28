@@ -140,3 +140,27 @@ export async function liveInvoiceCount(
     return Number(r.rows[0]?.n ?? 0);
   });
 }
+
+export const SEED_ADMIN_EMAIL = 'admin@hireforge.local';
+
+export async function jobPublishTimes(jobId: string): Promise<{
+  status: string;
+  publishedAt: Date | null;
+  expiresAt: Date | null;
+}> {
+  return withDb(async (db) => {
+    const r = await db.query<{
+      status: string;
+      published_at: Date | null;
+      expires_at: Date | null;
+    }>('SELECT status, published_at, expires_at FROM jobs WHERE id = $1', [
+      jobId,
+    ]);
+    const row = r.rows[0];
+    return {
+      status: row?.status ?? '',
+      publishedAt: row?.published_at ?? null,
+      expiresAt: row?.expires_at ?? null,
+    };
+  });
+}

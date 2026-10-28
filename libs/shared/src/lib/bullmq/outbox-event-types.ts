@@ -7,6 +7,8 @@ export const OUTBOX_EVENT_TYPES = [
   'job_rejected',
   'job_unpublished',
   'job_force_archived',
+  'job_expired',
+  'job_expiring_soon',
   'application_submitted',
   'proforma_issued',
   'invoice_issued',

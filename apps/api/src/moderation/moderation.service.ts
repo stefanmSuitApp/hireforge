@@ -34,6 +34,7 @@ import { getCorrelationId } from '../observability/correlation-storage';
 import { assertPromoJobCategoryAllowed } from '../promo/assert-promo-job-category';
 import { EmployerService } from '../employer/employer.service';
 import { StaffAuditService } from '../staff/staff-audit.service';
+import { publishFailure } from './publish-failure';
 
 @Injectable()
 export class ModerationService {
@@ -412,11 +413,9 @@ export class ModerationService {
         correlationId: getCorrelationId() ?? null,
       },
     );
-    if (!result.ok) {
-      throw codedBadRequest(
-        'JOB_SLUG_COLLISION',
-        'Could not allocate a unique job slug; retry publish',
-      );
+    // `=== false` narrows even without strictNullChecks (apps/api tsconfig).
+    if (result.ok === false) {
+      throw publishFailure(result.code);
     }
 
     return { ok: true };
@@ -490,11 +489,9 @@ export class ModerationService {
         ...(prev === 'draft' ? { setSubmittedAtIfDraft: now } : {}),
       },
     );
-    if (!result.ok) {
-      throw codedBadRequest(
-        'JOB_SLUG_COLLISION',
-        'Could not allocate a unique job slug; retry publish',
-      );
+    // `=== false` narrows even without strictNullChecks (apps/api tsconfig).
+    if (result.ok === false) {
+      throw publishFailure(result.code);
     }
 
     await this.audit.log({

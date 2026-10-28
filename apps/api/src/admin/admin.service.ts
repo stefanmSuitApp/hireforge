@@ -42,6 +42,7 @@ import {
   transitionJobToPublished,
   transliterateToAsciiBasic,
 } from 'server-jobs';
+import { publishFailure } from '../moderation/publish-failure';
 
 @Injectable()
 export class AdminService {
@@ -500,11 +501,9 @@ export class AdminService {
         ...(prev === 'draft' ? { setSubmittedAtIfDraft: now } : {}),
       },
     );
-    if (!result.ok) {
-      throw codedBadRequest(
-        'JOB_SLUG_COLLISION',
-        'Could not allocate a unique job slug; retry publish',
-      );
+    // `=== false` narrows even without strictNullChecks (apps/api tsconfig).
+    if (result.ok === false) {
+      throw publishFailure(result.code);
     }
 
     await this.audit.log({

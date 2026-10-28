@@ -1033,6 +1033,10 @@ export const invoices = pgTable(
   (t) => [
     uniqueIndex('invoices_number_unique').on(t.number),
     index('invoices_subscription_id_idx').on(t.subscriptionId),
+    /** At most one live (non-voided) invoice per subscription. */
+    uniqueIndex('invoices_subscription_live_unique')
+      .on(t.subscriptionId)
+      .where(sql`${t.voidedAt} IS NULL`),
     index('invoices_proforma_id_idx').on(t.proformaId),
   ],
 );
