@@ -104,8 +104,8 @@ export async function sendBillingTransactionalEmail(opts: {
       html = `<p>Hello,</p><p>Your pro forma invoice is ready on Šljakam.</p><p><a href="${safeUrl}">View pro forma</a></p>`;
     } else {
       subject = 'Šljakam — profaktura je spremna';
-      text = [`Profaktura je izadata.`, '', `Otvorite: ${url}`].join('\n');
-      html = `<p>Zdravo,</p><p>Profaktura je izadata na Šljakam.</p><p><a href="${safeUrl}">Otvori profakturu</a></p>`;
+      text = [`Profaktura je izdata.`, '', `Otvorite: ${url}`].join('\n');
+      html = `<p>Zdravo,</p><p>Profaktura je izdata na Šljakam.</p><p><a href="${safeUrl}">Otvori profakturu</a></p>`;
     }
   } else {
     const path = `/${dashSeg}/employer/packages`;
