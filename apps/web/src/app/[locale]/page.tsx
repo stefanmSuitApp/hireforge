@@ -23,6 +23,9 @@ import { fetchPublicJobsList, fetchPublicJobTaxonomy } from '@/lib/public-jobs';
 import { getUnifiedAuthSession } from '@/lib/unified-auth';
 import { Link } from '@/i18n/navigation';
 import { buildPublicPageMetadata } from '@/i18n/metadata';
+import { JsonLd } from '@/components/json-ld';
+import { organizationJsonLd, websiteJsonLd } from '@/lib/seo/json-ld';
+import { absoluteSiteOrigin } from '@/lib/site-origin';
 
 const emptyTaxonomy: PublicJobTaxonomyResponse = {
   cities: [],
@@ -121,6 +124,12 @@ export default async function HomePage({
 
   return (
     <main>
+      <JsonLd
+        data={[
+          organizationJsonLd(absoluteSiteOrigin()),
+          websiteJsonLd(absoluteSiteOrigin(), locale),
+        ]}
+      />
       {/* Hero Section */}
       <section className="relative overflow-hidden pb-16 pt-12 md:pb-32 md:pt-28">
         {/* Decorative gradient orbs - more visible */}

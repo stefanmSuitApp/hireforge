@@ -319,3 +319,20 @@ jobs-N}.xml` with `sr`/`en`/`x-default` alternates, ≤ 5 000 URLs per
   the HTML; job/company fetches revalidate (15–30 s). Not done: full-page
   ISR (the site header reads auth cookies, so every page is dynamic);
   revalidate-on-publish. Listed under "Ideas" in PROGRESS.md.
+- [x] W2.1 · Organization (`alternateName`: Sljakam, sljakam.com; logo
+      `/icon.png`; `sameAs` waits for Stefan) + WebSite with SearchAction, on
+      the home page.
+- [x] W2.2 · JobPosting on live job pages (title, HTML description,
+      datePosted, validThrough, employmentType, hiringOrganization, jobLocation
+      or TELECOMMUTE + applicantLocationRequirements, identifier, directApply).
+      Not emitted for ended ads or with `PUBLIC_JOBS=false`. `baseSalary`
+      waits for Phase C's salary fields. hiringOrganization has no
+      `sameAs`/`logo`: we store neither a company website nor a logo.
+- [x] W2.3 · BreadcrumbList on job and company pages (landing pages: W3).
+- [x] W2.4 · Company page: Organization tied to its Šljakam page by `@id`.
+- [x] W2.5 · Unit tests for every builder (required fields, no undefined,
+      expired → none, script-safe serialization); e2e parses the JSON-LD on a
+      real job page and matches the visible title.
+- [x] Logo (Stefan's request mid-run): new mark — "S" with a check-mark
+      caron — in the header (`BrandMark`) and as app icons / favicon
+      (`scripts/design/make-icons.mjs`). Token `--brand-accent`.

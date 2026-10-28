@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 
 import { JobDetailRoute, buildJobDetailMetadata } from '@/features/jobs';
+import { publicJobsEnabled } from 'shared';
+
 import { requireSessionUnlessPublicJobs } from '@/lib/public-jobs-gate';
 
 export async function generateMetadata({
@@ -19,5 +21,7 @@ export default async function JobDetailPage({
   const { locale, jobRef } = await params;
   await requireSessionUnlessPublicJobs(locale, `/jobs/${jobRef}`);
 
-  return <JobDetailRoute params={params} />;
+  return (
+    <JobDetailRoute params={params} structuredData={publicJobsEnabled()} />
+  );
 }

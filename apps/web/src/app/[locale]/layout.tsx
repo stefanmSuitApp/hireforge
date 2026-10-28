@@ -42,6 +42,14 @@ export async function generateMetadata({
     description: t('description'),
     // People type the name without the diacritic; both spellings + domain.
     keywords: [SITE_NAME, 'Sljakam', 'sljakam.com'],
+    // SVG for current browsers, PNG fallback, Apple touch icon (make-icons.mjs).
+    icons: {
+      icon: [
+        { url: '/icon.svg', type: 'image/svg+xml' },
+        { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      ],
+      apple: '/apple-touch-icon.png',
+    },
     alternates: buildLocaleAlternates(locale, '/'),
     openGraph: {
       type: 'website',

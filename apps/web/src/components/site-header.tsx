@@ -6,6 +6,7 @@ import { getUnifiedAuthSession } from '@/lib/unified-auth';
 
 import { Link } from '@/i18n/navigation';
 
+import { BrandMark } from './brand-mark';
 import { BrandWordmark } from './brand-wordmark';
 import { LocaleSwitcher } from './locale-switcher';
 import { SiteMobileNav } from './site-mobile-nav';
@@ -44,14 +45,7 @@ export async function SiteHeader() {
           locale={locale}
           className="flex shrink-0 items-center gap-2 transition-opacity hover:opacity-80"
         >
-          <div className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/70 shadow-sm">
-            <span
-              className="text-lg font-bold text-primary-foreground"
-              aria-hidden
-            >
-              {brandText.charAt(0)}
-            </span>
-          </div>
+          <BrandMark />
           <BrandWordmark
             text={brandText}
             size="md"

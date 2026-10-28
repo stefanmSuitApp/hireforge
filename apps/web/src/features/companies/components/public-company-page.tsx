@@ -1,7 +1,10 @@
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 
+import { JsonLd } from '@/components/json-ld';
 import { Link } from '@/i18n/navigation';
+import { breadcrumbJsonLd, companyJsonLd } from '@/lib/seo/json-ld';
+import { absoluteSiteOrigin } from '@/lib/site-origin';
 import { fetchCmsEmployerBranding } from '@/lib/cms-content';
 import { publicJobUrlSegment } from '@/lib/job-public-segment';
 import { resolveNestPublicOrigin } from '@/lib/nest-api-url';
@@ -71,8 +74,22 @@ export async function PublicCompanyPage({
   const { company, jobs } = result.data;
   const branding = await fetchCmsEmployerBranding(company.slug, locale);
 
+  const origin = absoluteSiteOrigin();
+  const pageUrl = `${origin}/${locale}/companies/${company.slug}`;
+  const tNav = await getTranslations('Nav');
+
   return (
     <main className="mx-auto max-w-5xl px-4 py-12 pb-16 md:py-14">
+      <JsonLd
+        data={[
+          companyJsonLd({ name: company.name, pageUrl }),
+          breadcrumbJsonLd([
+            { name: tNav('home'), url: `${origin}/${locale}` },
+            { name: tNav('employer'), url: `${origin}/${locale}/employers` },
+            { name: company.name, url: pageUrl },
+          ]),
+        ]}
+      />
       {backHref ? (
         <Link
           href={backHref}

@@ -95,3 +95,16 @@ it when you are ready.
       To go back: `PUBLIC_JOBS=false` in `deploy/.env.production` and restart
       `web` and `api` (no rebuild). That also turns off job sitemaps,
       JobPosting JSON-LD and indexing pings.
+
+- [ ] **Logo** (you asked for a designed mark on 2026-10-28). Picked concept A:
+      an "S" whose caron is a gold check mark ("the job is yours"), on the
+      brand teal. Concepts A/B/C side by side: `docs/design/logo-concepts.png`
+      (B: caron as a spark, C: location pin). Header mark:
+      `apps/web/src/components/brand-mark.tsx`; icons and favicon:
+      `node scripts/design/make-icons.mjs`. Say the word to switch.
+
+## Values
+
+- [ ] **Social profiles** for Organization `sameAs` (JSON-LD): official
+      Instagram / LinkedIn / Facebook URLs, if any. Code:
+      `SOCIAL_PROFILES` in `apps/web/src/lib/seo/json-ld.ts`.
