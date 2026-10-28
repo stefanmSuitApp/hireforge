@@ -133,6 +133,15 @@ function mapJoinRowToPublicListItem(
   };
 }
 
+/**
+ * Full-text match on title + description, Serbian-folded (migration 0033).
+ * The vector expression must stay identical to `jobs_fts_published_idx` so
+ * Postgres can use the index.
+ */
+function jobSearchMatches(query: string): SQL {
+  return sql`to_tsvector('simple', sr_search_fold(coalesce(${jobs.title}, '') || ' ' || coalesce(${jobs.descriptionPlain}, ${jobs.description}, ''))) @@ websearch_to_tsquery('simple', sr_search_fold(${query}))`;
+}
+
 @Injectable()
 export class PublicJobsService {
   async listEmployersDirectory(): Promise<PublicEmployerDirectoryResponse> {
@@ -579,9 +588,7 @@ export class PublicJobsService {
     }
     if (params.q) {
       const q = params.q;
-      conditions.push(
-        sql`to_tsvector('simple', ${jobs.title} || ' ' || coalesce(${jobs.description}, '')) @@ websearch_to_tsquery('simple', ${q})`,
-      );
+      conditions.push(jobSearchMatches(q));
     }
 
     const wherePublished = and(...conditions);
@@ -736,7 +743,7 @@ export class PublicJobsService {
       const similarWhere = and(
         liveJob(),
         ne(jobs.id, jobId),
-        sql`to_tsvector('simple', ${jobs.title} || ' ' || coalesce(${jobs.descriptionPlain}, ${jobs.description}, '')) @@ websearch_to_tsquery('simple', ${qText})`,
+        jobSearchMatches(qText),
       );
 
       const rows = await db

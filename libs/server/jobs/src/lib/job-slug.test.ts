@@ -4,6 +4,7 @@ import {
   buildPublishedJobFullSlug,
   jobSlugBaseFromTitleAndCity,
   shortIdFromJobSlug,
+  transliterateToAsciiBasic,
 } from './job-slug';
 
 describe('shortIdFromJobSlug', () => {
@@ -29,6 +30,26 @@ describe('job slugs', () => {
   it('strips the other Serbian diacritics and appends the short id', () => {
     expect(buildPublishedJobFullSlug('Šef kuhinje', 'Čačak', 'ab12')).toBe(
       'sef-kuhinje-cacak-ab12',
+    );
+  });
+});
+
+describe('transliterateToAsciiBasic', () => {
+  it('keeps đ readable instead of dropping it', () => {
+    expect(transliterateToAsciiBasic('Građevinski inženjer')).toBe(
+      'Gradjevinski inzenjer',
+    );
+    expect(
+      buildPublishedJobFullSlug('Građevinski inženjer', 'Niš', 'ab12'),
+    ).toBe('gradjevinski-inzenjer-nis-ab12');
+  });
+
+  it('transliterates Serbian Cyrillic', () => {
+    expect(transliterateToAsciiBasic('Програмер Љубљана Џак Ђорђе')).toBe(
+      'Programer Ljubljana Dzak Djordje',
+    );
+    expect(buildPublishedJobFullSlug('Возач', 'Београд', 'zz99')).toBe(
+      'vozac-beograd-zz99',
     );
   });
 });
