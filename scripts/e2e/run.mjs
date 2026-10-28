@@ -11,6 +11,7 @@
  * 4100, 3100, 4300).
  */
 import { spawnSync } from 'node:child_process';
+import { rmSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { config } from 'dotenv';
@@ -19,6 +20,16 @@ import IORedis from 'ioredis';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 config({ path: join(root, '.env'), quiet: true });
+
+// `--visual`: the screenshot suite (e2e/playwright.visual.config.ts). Pages
+// render without the CMS: live Sanity content (nav, footer spotlights, home
+// sections) changes the screenshots, and CI has no Sanity config anyway.
+const visual = process.argv.includes('--visual');
+if (visual) {
+  for (const key of Object.keys(process.env)) {
+    if (key.includes('SANITY_')) process.env[key] = '';
+  }
+}
 
 const base = process.env.DATABASE_URL?.trim();
 const redisBase = process.env.REDIS_URL?.trim();
@@ -83,6 +94,13 @@ if (!process.argv.includes('--skip-build')) {
   run('pnpm', ['build:api'], { NX_DAEMON: 'false' });
   run('pnpm', ['build:worker'], { NX_DAEMON: 'false' });
   if (process.env.E2E_WEB === 'start') {
+    // CMS answers cached by an earlier (CMS-enabled) build would leak in.
+    if (visual) {
+      rmSync(join(root, 'apps/web/.next/cache/fetch-cache'), {
+        recursive: true,
+        force: true,
+      });
+    }
     // NEXT_PUBLIC_* are inlined at build time: point them at the e2e servers
     // (playwright.config.ts), not the .env values.
     // Skip the Nx cache: its key does not include these env values.
@@ -94,8 +112,6 @@ if (!process.argv.includes('--skip-build')) {
   }
 }
 
-// `--visual`: the screenshot suite (e2e/playwright.visual.config.ts).
-const visual = process.argv.includes('--visual');
 const passThrough = process.argv
   .slice(2)
   .filter((a) => a !== '--skip-build' && a !== '--visual');
