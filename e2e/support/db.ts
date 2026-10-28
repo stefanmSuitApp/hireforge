@@ -1,4 +1,4 @@
-import { randomInt, randomUUID } from 'node:crypto';
+import { createHash, randomBytes, randomInt, randomUUID } from 'node:crypto';
 
 import { Client } from 'pg';
 
@@ -74,5 +74,69 @@ export async function companyBillingEmail(companyId: string): Promise<string> {
       [companyId],
     );
     return r.rows[0]?.billing_email ?? '';
+  });
+}
+
+/** Seeded published job (scripts/db/seed-domain-baseline.sql). */
+export const SEED_JOB_ID = '20000000-0000-4000-8000-000000000001';
+
+export async function authTokenCount(
+  email: string,
+  purpose: 'email_verify' | 'password_reset',
+): Promise<number> {
+  return withDb(async (db) => {
+    const r = await db.query<{ n: string }>(
+      `SELECT count(*) AS n FROM auth_tokens t JOIN users u ON u.id = t.user_id
+       WHERE u.email = $1 AND t.purpose = $2`,
+      [email, purpose],
+    );
+    return Number(r.rows[0]?.n ?? 0);
+  });
+}
+
+/**
+ * The real token only exists in the sent email, so tests plant their own
+ * (same storage format as the API: SHA-256 hex of the raw token).
+ */
+export async function plantAuthToken(
+  email: string,
+  purpose: 'email_verify' | 'password_reset',
+): Promise<string> {
+  const raw = randomBytes(32).toString('base64url');
+  await withDb(async (db) => {
+    await db.query(
+      `INSERT INTO auth_tokens (user_id, purpose, token_hash, expires_at)
+       SELECT id, $2, $3, now() + interval '1 hour' FROM users WHERE email = $1`,
+      [email, purpose, createHash('sha256').update(raw).digest('hex')],
+    );
+  });
+  return raw;
+}
+
+export async function emailVerifiedAt(email: string): Promise<Date | null> {
+  return withDb(async (db) => {
+    const r = await db.query<{ email_verified_at: Date | null }>(
+      'SELECT email_verified_at FROM users WHERE email = $1',
+      [email],
+    );
+    return r.rows[0]?.email_verified_at ?? null;
+  });
+}
+
+/** Seeded employer with a verified email whose company the seed moderator owns. */
+export const SEED_EMPLOYER_VERIFIED = {
+  email: 'maticstefan1996@gmail.com',
+  companyId: '10000000-0000-4000-8000-000000000002',
+};
+
+export async function liveInvoiceCount(
+  subscriptionId: string,
+): Promise<number> {
+  return withDb(async (db) => {
+    const r = await db.query<{ n: string }>(
+      'SELECT count(*) AS n FROM invoices WHERE subscription_id = $1 AND voided_at IS NULL',
+      [subscriptionId],
+    );
+    return Number(r.rows[0]?.n ?? 0);
   });
 }

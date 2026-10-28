@@ -10,6 +10,12 @@ import {
   SEED_MODERATOR,
   SEED_PASSWORD,
 } from './support/db';
+import { resetRateLimits } from './support/redis';
+import { gotoHydrated } from './support/ui';
+
+test.beforeEach(async () => {
+  await resetRateLimits();
+});
 
 /** Fills the 4-step employer signup with an existing company's PIB + MB. */
 async function registerEmployerClaiming(
@@ -17,13 +23,14 @@ async function registerEmployerClaiming(
   email: string,
   company: ExistingCompany,
 ): Promise<void> {
-  await page.goto('/sr/employer/register');
+  await gotoHydrated(page, '/sr/employer/register', '#reg-email');
 
   await page.locator('#reg-email').fill(email);
   await page.locator('#reg-password').fill('Lozinka123!');
   await page.getByRole('button', { name: 'Dalje' }).click();
 
-  await page.locator('#reg-legal').fill('Neka Firma d.o.o.');
+  // Unique per signup: the server also matches companies by legal name.
+  await page.locator('#reg-legal').fill(`Firma ${email.split('@')[0]} d.o.o.`);
   await page.locator('#reg-pib').fill(company.pib);
   await page.locator('#reg-mb').fill(company.mb);
   await page.getByRole('button', { name: 'Dalje' }).click();
@@ -39,7 +46,7 @@ async function registerEmployerClaiming(
 }
 
 async function loginModerator(page: Page): Promise<void> {
-  await page.goto('/sr/moderator/login');
+  await gotoHydrated(page, '/sr/moderator/login', '#mod-email');
   await page.locator('#mod-email').fill(SEED_MODERATOR.email);
   await page.locator('#mod-password').fill(SEED_PASSWORD);
   await page.locator('button[type="submit"]').click();

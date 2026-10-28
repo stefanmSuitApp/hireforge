@@ -16,10 +16,14 @@ RUN pnpm install --frozen-lockfile
 
 FROM deps AS builder
 
+# One-shot build: the Nx daemon only adds startup cost here, and under memory
+# pressure it has hung and exited 0 without producing output.
+ENV NX_DAEMON=false
+
 ENV NODE_ENV=production
 
 COPY . .
-RUN pnpm build:api
+RUN pnpm build:api && test -f dist/apps/api/main.js
 
 FROM base AS runner
 
