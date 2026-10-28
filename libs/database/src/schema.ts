@@ -143,6 +143,8 @@ export const users = pgTable(
     email: text('email').notNull(),
     /** Set when the user completes email verification (employer gate — Step 7). */
     emailVerifiedAt: timestamp('email_verified_at', { withTimezone: true }),
+    /** Bumped to revoke every refresh token (password reset, role change). */
+    tokenVersion: integer('token_version').notNull().default(0),
     /** bcrypt hash; null for legacy/seed users until they set a password. */
     passwordHash: text('password_hash'),
     /** Optional name shown to employers as “your Šljakam contact” (staff-editable later). */

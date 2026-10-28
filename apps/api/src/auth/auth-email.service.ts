@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { users } from 'database';
 import {
   appPublicOrigin,
@@ -199,6 +199,8 @@ export class AuthEmailService {
         .set({
           passwordHash,
           updatedAt: new Date(),
+          // Sign out every existing session (someone may know the old password).
+          tokenVersion: sql`${users.tokenVersion} + 1`,
           // Following the emailed link proves the mailbox, so verify too.
           ...(user && !user.verifiedAt ? { emailVerifiedAt: new Date() } : {}),
         })
