@@ -26,9 +26,9 @@ Compose + Caddy on one Hetzner VM.
   `E2E_WEB=start`)
 - whole-repo check before any commit:
   `pnpm lint && pnpm format && pnpm typecheck && pnpm test && pnpm build`
-- migrations: add `drizzle/NNNN_*.sql` (header with rollback) + journal entry
-  - `schema.ts`; apply with `pnpm db:migrate`. Do not use `pnpm db:generate`
-    (only the 0000 snapshot exists).
+- migrations: add `drizzle/NNNN_*.sql` (header with rollback), its journal
+  entry and the `schema.ts` change; apply with `pnpm db:migrate`. Do not use
+  `pnpm db:generate` (only the 0000 snapshot exists).
 
 ## Conventions
 
