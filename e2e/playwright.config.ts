@@ -2,10 +2,10 @@ import { defineConfig, devices } from '@playwright/test';
 
 /**
  * Run via `pnpm e2e` (scripts/e2e/run.mjs), which prepares the isolated e2e
- * database and passes E2E_DATABASE_URL / E2E_REDIS_URL.
+ * database and passes E2E_DATABASE_URL / E2E_REDIS_URL / E2E_*_PORT.
  */
-const API_PORT = 4100;
-const WEB_PORT = 3100;
+const API_PORT = Number(process.env['E2E_API_PORT'] ?? 4100);
+const WEB_PORT = Number(process.env['E2E_WEB_PORT'] ?? 3100);
 const apiOrigin = `http://127.0.0.1:${API_PORT}`;
 
 /**

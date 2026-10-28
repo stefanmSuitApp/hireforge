@@ -48,3 +48,6 @@ apps/cms/vite.config.mjs*
 /test-results/
 /playwright-report/
 /e2e/test-results/
+
+# Agent briefs (local, not committed)
+.agent/

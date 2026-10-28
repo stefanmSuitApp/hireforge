@@ -4,6 +4,10 @@
  * local Postgres from `.env`, flushes a dedicated Redis DB index, builds the
  * API, then runs Playwright (which boots the API on :4100 and Next on :3100).
  * Never touches the dev database. Extra args are passed to `playwright test`.
+ *
+ * Two checkouts sharing one Postgres/Redis must not collide; override per
+ * checkout in `.env`: `E2E_DB_NAME`, `E2E_REDIS_DB`, `E2E_API_PORT`,
+ * `E2E_WEB_PORT` (defaults: `<db>_e2e`, 15, 4100, 3100).
  */
 import { spawnSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
@@ -25,7 +29,16 @@ if (!base || !redisBase) {
 }
 
 const dbUrl = new URL(base);
-const e2eDbName = `${dbUrl.pathname.replace(/^\//, '') || 'hireforge'}_e2e`;
+const e2eDbName =
+  process.env.E2E_DB_NAME?.trim() ||
+  `${dbUrl.pathname.replace(/^\//, '') || 'hireforge'}_e2e`;
+if (!/^[a-z0-9_]+$/i.test(e2eDbName)) {
+  console.error(`[e2e] E2E_DB_NAME must be [a-z0-9_]+, got ${e2eDbName}.`);
+  process.exit(1);
+}
+const e2eRedisDb = process.env.E2E_REDIS_DB?.trim() || '15';
+const apiPort = process.env.E2E_API_PORT?.trim() || '4100';
+const webPort = process.env.E2E_WEB_PORT?.trim() || '3100';
 if (!['localhost', '127.0.0.1', 'postgres'].includes(dbUrl.hostname)) {
   console.error(
     `[e2e] Refusing to run against non-local Postgres host ${dbUrl.hostname}.`,
@@ -35,7 +48,7 @@ if (!['localhost', '127.0.0.1', 'postgres'].includes(dbUrl.hostname)) {
 const e2eDbUrl = new URL(base);
 e2eDbUrl.pathname = `/${e2eDbName}`;
 const e2eRedisUrl = new URL(redisBase);
-e2eRedisUrl.pathname = '/15';
+e2eRedisUrl.pathname = `/${e2eRedisDb}`;
 
 function run(cmd, args, env = {}) {
   const r = spawnSync(cmd, args, {
@@ -69,12 +82,12 @@ if (!process.argv.includes('--skip-build')) {
   run('pnpm', ['build:worker'], { NX_DAEMON: 'false' });
   if (process.env.E2E_WEB === 'start') {
     // NEXT_PUBLIC_* are inlined at build time: point them at the e2e servers
-    // (playwright.config.ts: API :4100, web :3100), not the .env values.
+    // (playwright.config.ts), not the .env values.
     // Skip the Nx cache: its key does not include these env values.
     run('pnpm', ['build:web', '--skip-nx-cache'], {
       NX_DAEMON: 'false',
-      NEXT_PUBLIC_API_URL: 'http://127.0.0.1:4100',
-      NEXT_PUBLIC_APP_URL: 'http://127.0.0.1:3100',
+      NEXT_PUBLIC_API_URL: `http://127.0.0.1:${apiPort}`,
+      NEXT_PUBLIC_APP_URL: `http://127.0.0.1:${webPort}`,
     });
   }
 }
@@ -90,5 +103,10 @@ run(
     'e2e/playwright.config.ts',
     ...passThrough,
   ],
-  { E2E_DATABASE_URL: e2eEnv.DATABASE_URL, E2E_REDIS_URL: e2eEnv.REDIS_URL },
+  {
+    E2E_DATABASE_URL: e2eEnv.DATABASE_URL,
+    E2E_REDIS_URL: e2eEnv.REDIS_URL,
+    E2E_API_PORT: apiPort,
+    E2E_WEB_PORT: webPort,
+  },
 );
