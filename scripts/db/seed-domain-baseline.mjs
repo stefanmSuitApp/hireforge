@@ -26,6 +26,17 @@ async function main() {
     console.error('[hireforge] DATABASE_URL is not set (check .env).');
     process.exit(1);
   }
+  // The seed creates admin/staff users with a password printed in the SQL
+  // header; it reached production once (2026-05). Never again by accident.
+  if (
+    process.env.NODE_ENV === 'production' &&
+    process.env.ALLOW_DEV_SEED !== '1'
+  ) {
+    console.error(
+      '[hireforge] Refusing to load dev seed users with NODE_ENV=production (set ALLOW_DEV_SEED=1 to override).',
+    );
+    process.exit(1);
+  }
 
   const sql = readFileSync(sqlPath, 'utf8');
   const client = new pg.Client({ connectionString: url });
