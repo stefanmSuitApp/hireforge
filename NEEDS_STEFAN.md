@@ -27,10 +27,16 @@ changing credentials on prod was blocked by the permission check.
   ```
 
   Expect `5` (rows rotated) at the end. Then store the passwords in your
-  password manager and delete both files in `~`.
+  password manager and delete the three `~/hireforge-*-2026-10-28.*` files.
 
-- Existing sessions are not revoked (refresh tokens are stateless for 14
-  days; see Phase C). Consider deleting the `@hireforge.local` accounts you
+- Existing sessions survive a password change made by SQL. Since Phase C
+  you can revoke them too — run this right after the rotation:
+
+  ```bash
+  ssh -i ~/.ssh/hetzner_hireforge deploy@178.105.128.190 'cd /opt/hireforge && docker compose -f compose.prod.yml exec -T postgres sh -c "psql -v ON_ERROR_STOP=1 -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\""' < ~/hireforge-revoke-sessions-2026-10-28.sql
+  ```
+
+  Expect `UPDATE 5`. Consider deleting the `@hireforge.local` accounts you
   do not need once you have a real admin account.
 
 ### 2. Confirm `sljakam.com` is a verified domain in Resend
@@ -59,7 +65,19 @@ echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 Optionally resize to a larger Hetzner plan, or let CI build images (needs
 a GHCR read token on the server — your call).
 
-### 4. Accountant: VAT status and invoice content (Phase C)
+### 4. Offsite backups
+
+Nightly dumps now run on the VM (see `docs/deployment/hetzner.md` §8) but
+sit on the same disk as the database. Create a Hetzner Storage Box or Object
+Storage bucket and share credentials (via the server env file, not chat) so
+dumps can be copied off the machine.
+
+### 5. Sentry
+
+Create a Sentry project (or say which error tracker you want) and put the
+DSN in `deploy/.env.production` as `SENTRY_DSN`; wiring is Phase D.
+
+### 6. Accountant: VAT status and invoice content (Phase D)
 
 The billing design assumes no VAT and in-house numbered PDFs. Confirm with
 an accountant: is the legal entity in the VAT system, does B2B invoicing
@@ -67,15 +85,15 @@ need SEF (eFaktura), and which fields the invoice must carry (seller/buyer
 PIB, MB, address, line items, date of supply). Code has `TODO(Stefan)`
 markers where this matters.
 
-### 5. Legal texts
+### 7. Legal texts
 
 Privacy policy, terms of use and refund policy pages need real legal copy
-(Serbian + English). Phase C adds the pages and links with placeholder text
-marked `TODO(Stefan)`.
+(Serbian + English). The pages and footer links are Phase D; send the texts
+(or publish them as Sanity editorial pages) and they can go live.
 
 ## 🟡 Decide when convenient
 
-### 6. SEO branch
+### 8. SEO branch
 
 A separate session is preparing `feat/seo-quality-gates` (clone at
 `~/Dev/DEVLEGION/hireforge-seo`) that makes job list/detail public behind
