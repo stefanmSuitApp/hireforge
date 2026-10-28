@@ -8,6 +8,13 @@ const API_PORT = 4100;
 const WEB_PORT = 3100;
 const apiOrigin = `http://127.0.0.1:${API_PORT}`;
 
+/**
+ * `E2E_WEB=start` serves a production build (`next start`, built by
+ * scripts/e2e/run.mjs) — used in CI, where `next dev` compiles every route on
+ * first visit and blows test timeouts. Default is `next dev` for local work.
+ */
+const webMode = process.env['E2E_WEB'] === 'start' ? 'start' : 'dev';
+
 const databaseUrl = process.env['E2E_DATABASE_URL'] ?? '';
 const redisUrl = process.env['E2E_REDIS_URL'] ?? '';
 
@@ -43,7 +50,7 @@ export default defineConfig({
     },
     {
       // next-intl resolves its request config relative to cwd (see next.config.js).
-      command: `node ../../node_modules/next/dist/bin/next dev --port ${WEB_PORT} --hostname 127.0.0.1`,
+      command: `node ../../node_modules/next/dist/bin/next ${webMode} --port ${WEB_PORT} --hostname 127.0.0.1`,
       cwd: '../apps/web',
       url: `http://127.0.0.1:${WEB_PORT}/sr/employer/login`,
       reuseExistingServer: false,

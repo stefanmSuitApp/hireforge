@@ -66,6 +66,16 @@ run('node', ['scripts/db/migrate.mjs'], e2eEnv);
 run('node', ['scripts/db/seed-domain-baseline.mjs'], e2eEnv);
 if (!process.argv.includes('--skip-build')) {
   run('pnpm', ['build:api'], { NX_DAEMON: 'false' });
+  if (process.env.E2E_WEB === 'start') {
+    // NEXT_PUBLIC_* are inlined at build time: point them at the e2e servers
+    // (playwright.config.ts: API :4100, web :3100), not the .env values.
+    // Skip the Nx cache: its key does not include these env values.
+    run('pnpm', ['build:web', '--skip-nx-cache'], {
+      NX_DAEMON: 'false',
+      NEXT_PUBLIC_API_URL: 'http://127.0.0.1:4100',
+      NEXT_PUBLIC_APP_URL: 'http://127.0.0.1:3100',
+    });
+  }
 }
 
 const passThrough = process.argv.slice(2).filter((a) => a !== '--skip-build');

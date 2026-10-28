@@ -74,6 +74,8 @@ jobs:
       # scripts/e2e/run.mjs derives an isolated hireforge_e2e DB and Redis DB 15.
       DATABASE_URL: postgresql://hireforge:hireforge@localhost:5432/hireforge
       REDIS_URL: redis://localhost:6379
+      # Production Next build: dev mode compiles routes on first hit (timeouts).
+      E2E_WEB: start
     steps:
       - uses: actions/checkout@v4
 
