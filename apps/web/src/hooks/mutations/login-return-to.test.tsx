@@ -6,9 +6,10 @@ import { renderAppHook } from '@/test/render';
 import { useCandidateLoginMutation } from './use-candidate-login-mutation';
 import { useEmployerLoginMutation } from './use-employer-login-mutation';
 
-const { replace } = vi.hoisted(() => ({ replace: vi.fn() }));
-vi.mock('@/i18n/navigation', () => ({
-  useRouter: () => ({ replace, refresh: vi.fn(), push: vi.fn() }),
+// A full page load (so the header sees the new session); jsdom can't navigate.
+const { navigate } = vi.hoisted(() => ({ navigate: vi.fn() }));
+vi.mock('@/lib/session-navigation', () => ({
+  navigateWithFreshSession: navigate,
 }));
 vi.mock('@/api/candidate-auth', () => ({
   postCandidateLogin: vi.fn(async () => ({ ok: true })),
@@ -17,7 +18,7 @@ vi.mock('@/api/employer-auth', () => ({
   postEmployerLogin: vi.fn(async () => ({ ok: true })),
 }));
 
-beforeEach(() => replace.mockClear());
+beforeEach(() => navigate.mockClear());
 
 const HOOKS = [
   ['candidate', useCandidateLoginMutation, '/candidate'],
@@ -33,8 +34,8 @@ describe.each(HOOKS)('%s sign-in', (_, useLogin, home) => {
         returnTo,
       } as never);
     });
-    await waitFor(() => expect(replace).toHaveBeenCalled());
-    return replace.mock.calls[0]?.[0];
+    await waitFor(() => expect(navigate).toHaveBeenCalled());
+    return navigate.mock.calls[0]?.[1];
   }
 
   it('goes back to the page that sent the user to sign in', async () => {
@@ -43,7 +44,7 @@ describe.each(HOOKS)('%s sign-in', (_, useLogin, home) => {
     );
   });
 
-  it('drops the locale of returnTo (the router adds it back)', async () => {
+  it('drops the locale of returnTo (navigation adds it back)', async () => {
     expect(await signInWith('/sr/jobs/pekar-x7k2/apply')).toBe(
       '/jobs/pekar-x7k2/apply',
     );
