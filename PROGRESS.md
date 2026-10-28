@@ -222,6 +222,12 @@ without canonical/description; it did not reproduce. Likely Next's streamed
 metadata (tags sent after `<head>` to non-crawler user agents while the
 first CMS fetch is slow); crawlers get them in `<head>`.
 
+## Design review
+
+`design/review-01.md` (2026-10-28): design system, UI/UX and accessibility
+review with a Now / Next / Later roadmap and open questions for Stefan.
+Not started yet.
+
 ## Known issues not yet scheduled
 
 - `drizzle/meta` only has the `0000` snapshot → `pnpm db:generate` would
