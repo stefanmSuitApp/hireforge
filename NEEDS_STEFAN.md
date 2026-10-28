@@ -65,12 +65,20 @@ echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 Optionally resize to a larger Hetzner plan, or let CI build images (needs
 a GHCR read token on the server — your call).
 
-### 4. Offsite backups
+### 4. Turn on nightly backups, then copy them off the VM
 
-Nightly dumps now run on the VM (see `docs/deployment/hetzner.md` §8) but
-sit on the same disk as the database. Create a Hetzner Storage Box or Object
-Storage bucket and share credentials (via the server env file, not chat) so
-dumps can be copied off the machine.
+The only Postgres dumps on the server are the ones taken by hand during
+deploys. Installing the nightly job was blocked by the permission check
+(adds a cron entry). It needs no sudo — run once:
+
+```bash
+ssh -i ~/.ssh/hetzner_hireforge deploy@178.105.128.190 'cd /opt/hireforge && ./scripts/deploy/install-backup-cron.sh'
+```
+
+It runs `backup-postgres.sh` at 02:17 server time and keeps 14 days. The
+dumps sit on the same disk as the database: create a Hetzner Storage Box or
+Object Storage bucket and put its credentials in `deploy/.env.production`
+(not chat) so dumps can be copied off the machine.
 
 ### 5. Sentry
 
