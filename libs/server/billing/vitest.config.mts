@@ -1,14 +1,7 @@
-/// <reference types="vitest" />
-import { defineConfig } from 'vitest/config';
-import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
+import { unitConfig } from '../../testing/src/vitest/preset';
 
-export default defineConfig({
-  root: import.meta.dirname,
-  plugins: [nxViteTsPaths()],
-  test: {
-    environment: 'node',
-    globals: true,
-    include: ['src/**/*.{test,spec}.{ts,tsx}'],
-    passWithNoTests: false,
-  },
+// Numbering and expiry talk to Postgres: billing-numbering.int.test.ts and the
+// worker / API suites cover them.
+export default unitConfig(import.meta.url, {
+  coverage: ['src/lib/nbs-middle-rate.ts'],
 });

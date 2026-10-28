@@ -1,0 +1,36 @@
+name: Integration
+
+# Real Postgres + Redis through Testcontainers (pnpm test:integration).
+# Decision 2 (Stefan, 2026-10-28): heavy suites run on main and by hand, not
+# on pull requests; locally, run it before pushing api/database/worker changes.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: integration-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NX_DAEMON: 'false'
+      NX_NO_CLOUD: 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: touch .env
+
+      # Testcontainers uses the runner's Docker; images match docker-compose.yml.
+      - run: pnpm test:integration

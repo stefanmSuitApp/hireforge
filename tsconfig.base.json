@@ -31,7 +31,13 @@
       "server-cv-templates": ["./libs/server/cv-templates/src/index.ts"],
       "server-search": ["./libs/server/search/src/index.ts"],
       "server-cms-sync": ["./libs/server/cms-sync/src/index.ts"],
-      "database": ["./libs/database/src/index.ts"]
+      "database": ["./libs/database/src/index.ts"],
+      "testing": ["./libs/testing/src/index.ts"],
+      "testing/api": ["./libs/testing/src/api/index.ts"],
+      "testing/db": ["./libs/testing/src/db/index.ts"],
+      "testing/pdf": ["./libs/testing/src/pdf.ts"],
+      "testing/redis": ["./libs/testing/src/redis/index.ts"],
+      "testing/vitest": ["./libs/testing/src/vitest/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

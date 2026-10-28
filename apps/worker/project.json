@@ -4,6 +4,7 @@
   "sourceRoot": "apps/worker/src",
   "projectType": "application",
   "tags": ["scope:worker", "type:app"],
+  "implicitDependencies": ["!testing"],
   "targets": {
     "build": {
       "executor": "@nx/esbuild:esbuild",
@@ -70,6 +71,14 @@
         "cwd": "{workspaceRoot}",
         "command": "node dist/apps/worker/main.js"
       }
+    },
+    "test:integration": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --config vitest.integration.config.mts",
+        "cwd": "apps/worker"
+      },
+      "dependsOn": ["build"]
     }
   }
 }
