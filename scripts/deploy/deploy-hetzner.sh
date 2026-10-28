@@ -18,7 +18,11 @@ set -a
 . "$ENV_FILE"
 set +a
 
-docker compose -f "$COMPOSE_FILE" build
+# Build one image at a time: parallel Next/Nx builds exhaust the VM's RAM
+# (3.8 GB, no swap) and starve the running site.
+for service in api worker web; do
+  docker compose -f "$COMPOSE_FILE" build "$service"
+done
 docker compose -f "$COMPOSE_FILE" up -d postgres redis
 docker compose -f "$COMPOSE_FILE" --profile tools run --rm migrate
 docker compose -f "$COMPOSE_FILE" up -d --remove-orphans

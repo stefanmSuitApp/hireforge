@@ -17,6 +17,10 @@ RUN pnpm install --frozen-lockfile
 
 FROM deps AS builder
 
+# One-shot build: the Nx daemon only adds startup cost here, and under memory
+# pressure it has hung and exited 0 without producing output.
+ENV NX_DAEMON=false
+
 ARG NEXT_PUBLIC_APP_URL
 ARG NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_DEFAULT_LOCALE
@@ -33,7 +37,7 @@ ENV NEXT_PUBLIC_SANITY_PROJECT_ID=$NEXT_PUBLIC_SANITY_PROJECT_ID
 ENV NEXT_PUBLIC_SANITY_DATASET=$NEXT_PUBLIC_SANITY_DATASET
 
 COPY . .
-RUN pnpm build:web
+RUN pnpm build:web && test -f apps/web/.next/BUILD_ID
 
 FROM base AS runner
 
