@@ -47,3 +47,15 @@ export const nbsMiddleRateRefreshJobPayloadSchema = z.object({
 export type NbsMiddleRateRefreshJobPayload = z.infer<
   typeof nbsMiddleRateRefreshJobPayloadSchema
 >;
+
+/** {@link PlatformJobName.NotificationEmail}: the outbox row it notifies about. */
+export const notificationEmailJobPayloadSchema = z.object({
+  outboxEventId: z.number().int().positive(),
+  eventType: z.string().min(1),
+  payload: z.unknown(),
+  correlationId: z.string().optional(),
+});
+
+export type NotificationEmailJobPayload = z.infer<
+  typeof notificationEmailJobPayloadSchema
+>;

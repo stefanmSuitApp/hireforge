@@ -32,7 +32,9 @@ export async function sendEmail(
   if (!apiKey) {
     return { status: 'skipped', reason: 'not_configured' };
   }
-  const res = await fetchImpl('https://api.resend.com/emails', {
+  // Overridable for tests (e2e points it at a local fake).
+  const base = env['RESEND_API_URL']?.trim() || 'https://api.resend.com';
+  const res = await fetchImpl(`${base.replace(/\/+$/, '')}/emails`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${apiKey}`,

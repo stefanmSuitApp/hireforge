@@ -12,6 +12,7 @@ import {
   SEED_MODERATOR,
   SEED_PASSWORD,
 } from './support/db';
+import { expectEmail } from './support/mail';
 import { resetRateLimits, seedNbsRateCache } from './support/redis';
 
 const API = 'http://127.0.0.1:4100/api/';
@@ -123,6 +124,12 @@ test('publishing needs an active package and sets expiry from its duration', asy
   expect(
     (times.expiresAt as Date).getTime() - (times.publishedAt as Date).getTime(),
   ).toBe(30 * DAY_MS);
+
+  // The employer is told the listing is live.
+  await expectEmail(
+    SEED_EMPLOYER_VERIFIED.email,
+    /oglas je objavljen: Programer B/,
+  );
 
   // 3) A second approval of the same job is refused, not re-applied.
   const again = await moderator.post(`moderator/jobs/${job}/publish`);

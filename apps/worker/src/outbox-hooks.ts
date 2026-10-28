@@ -52,6 +52,7 @@ const EMAIL_TEMPLATE_BY_EVENT: Record<OutboxEventType, string> = {
   job_expiring_soon: 'employer_job_expiring_soon',
   proforma_issued: 'employer_proforma_issued',
   invoice_issued: 'employer_invoice_issued',
+  company_join_request_decided: 'employer_company_join_decided',
 };
 
 function emailTemplateFor(eventType: OutboxEventType): string {

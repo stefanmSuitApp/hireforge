@@ -66,6 +66,7 @@ run('node', ['scripts/db/migrate.mjs'], e2eEnv);
 run('node', ['scripts/db/seed-domain-baseline.mjs'], e2eEnv);
 if (!process.argv.includes('--skip-build')) {
   run('pnpm', ['build:api'], { NX_DAEMON: 'false' });
+  run('pnpm', ['build:worker'], { NX_DAEMON: 'false' });
   if (process.env.E2E_WEB === 'start') {
     // NEXT_PUBLIC_* are inlined at build time: point them at the e2e servers
     // (playwright.config.ts: API :4100, web :3100), not the .env values.

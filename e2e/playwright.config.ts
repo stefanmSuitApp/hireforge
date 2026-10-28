@@ -18,6 +18,18 @@ const webMode = process.env['E2E_WEB'] === 'start' ? 'start' : 'dev';
 const databaseUrl = process.env['E2E_DATABASE_URL'] ?? '';
 const redisUrl = process.env['E2E_REDIS_URL'] ?? '';
 
+export const FAKE_RESEND_ORIGIN = 'http://127.0.0.1:4300';
+
+/**
+ * Email goes to the local fake (e2e/support/fake-resend.mjs), never to Resend:
+ * the key is bogus and the base URL is overridden (both set on purpose).
+ */
+const emailEnv = {
+  RESEND_API_KEY: 're_e2e_fake',
+  RESEND_API_URL: FAKE_RESEND_ORIGIN,
+  APP_PUBLIC_ORIGIN: `http://127.0.0.1:${WEB_PORT}`,
+};
+
 export default defineConfig({
   testDir: '.',
   testMatch: '**/*.spec.ts',
@@ -35,6 +47,13 @@ export default defineConfig({
   },
   webServer: [
     {
+      command: 'node e2e/support/fake-resend.mjs',
+      cwd: '..',
+      url: `${FAKE_RESEND_ORIGIN}/health`,
+      reuseExistingServer: false,
+      timeout: 10_000,
+    },
+    {
       command: 'node dist/apps/api/main.js',
       cwd: '..',
       url: `${apiOrigin}/api/health/live`,
@@ -44,8 +63,24 @@ export default defineConfig({
         API_PORT: String(API_PORT),
         DATABASE_URL: databaseUrl,
         REDIS_URL: redisUrl,
-        // Never send real email from tests.
-        RESEND_API_KEY: '',
+        ...emailEnv,
+      },
+    },
+    {
+      // Outbox → notification emails. Schedulers that call Sanity / NBS are off.
+      command: 'node dist/apps/worker/main.js',
+      cwd: '..',
+      wait: { stdout: /worker_started/ },
+      reuseExistingServer: false,
+      timeout: 60_000,
+      env: {
+        DATABASE_URL: databaseUrl,
+        REDIS_URL: redisUrl,
+        OUTBOX_POLL_INTERVAL_MS: '500',
+        WORKER_SCHEDULE_TICK_MS: '0',
+        WORKER_CMS_PACKAGES_RECONCILE_MS: '0',
+        WORKER_NBS_MIDDLE_RATE_MS: '0',
+        ...emailEnv,
       },
     },
     {

@@ -12,6 +12,7 @@ export const OUTBOX_EVENT_TYPES = [
   'application_submitted',
   'proforma_issued',
   'invoice_issued',
+  'company_join_request_decided',
 ] as const;
 
 export type OutboxEventType = (typeof OUTBOX_EVENT_TYPES)[number];

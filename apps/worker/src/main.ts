@@ -19,6 +19,9 @@ import {
   NBS_MIDDLE_RATE_REFRESH_JOB_OPTIONS,
   NBS_MIDDLE_RATE_REFRESH_SCHEDULER_ID,
   nbsMiddleRateRefreshJobPayloadSchema,
+  isKnownOutboxEventType,
+  NOTIFICATION_EMAIL_JOB_OPTIONS,
+  notificationEmailJobPayloadSchema,
   outboxDispatchJobPayloadSchema,
   PLATFORM_QUEUE_NAME,
   PlatformJobName,
@@ -40,6 +43,10 @@ import {
 } from 'server-jobs';
 
 import { runWithCorrelationId } from './correlation-context';
+import {
+  NOTIFICATION_EVENT_TYPES,
+  sendNotificationForOutboxEvent,
+} from './notification-email';
 import { recordOutboxDlqIfTerminalFailure } from './outbox-dlq';
 import {
   getWorkerDatabase,
@@ -64,6 +71,10 @@ function resolveJobCorrelationId(job: Job): string | undefined {
   }
   if (job.name === PlatformJobName.NbsMiddleRateRefresh) {
     const parsed = nbsMiddleRateRefreshJobPayloadSchema.safeParse(job.data);
+    return parsed.success ? parsed.data.correlationId : undefined;
+  }
+  if (job.name === PlatformJobName.NotificationEmail) {
+    const parsed = notificationEmailJobPayloadSchema.safeParse(job.data);
     return parsed.success ? parsed.data.correlationId : undefined;
   }
   return undefined;
@@ -285,7 +296,53 @@ const worker = new Worker(
         if (!database) {
           throw new Error('database_not_configured');
         }
-        await processOutboxDispatchJob(database.db, parsed.data.outboxEventId);
+        const correlationId = parsed.data.correlationId;
+        await processOutboxDispatchJob(database.db, parsed.data.outboxEventId, {
+          afterCommit: async (row) => {
+            if (
+              !isKnownOutboxEventType(row.eventType) ||
+              !NOTIFICATION_EVENT_TYPES.has(row.eventType)
+            ) {
+              return;
+            }
+            await platformQueue.add(
+              PlatformJobName.NotificationEmail,
+              {
+                outboxEventId: row.id,
+                eventType: row.eventType,
+                payload: row.payload,
+                ...(correlationId ? { correlationId } : {}),
+              },
+              {
+                jobId: `notify-${row.id}`,
+                ...NOTIFICATION_EMAIL_JOB_OPTIONS,
+              },
+            );
+          },
+        });
+        return { ok: true as const };
+      }
+
+      if (job.name === PlatformJobName.NotificationEmail) {
+        const parsed = notificationEmailJobPayloadSchema.safeParse(job.data);
+        if (!parsed.success || !isKnownOutboxEventType(parsed.data.eventType)) {
+          workerLog('warn', 'bullmq_job_payload_invalid', {
+            service: 'worker',
+            queue: PLATFORM_QUEUE_NAME,
+            jobId: job.id ?? '',
+            jobName: job.name,
+          });
+          throw new Error('invalid_job_payload');
+        }
+        const database = getWorkerDatabase();
+        if (!database) {
+          throw new Error('database_not_configured');
+        }
+        await sendNotificationForOutboxEvent(database.db, {
+          outboxEventId: parsed.data.outboxEventId,
+          eventType: parsed.data.eventType,
+          payload: parsed.data.payload,
+        });
         return { ok: true as const };
       }
 

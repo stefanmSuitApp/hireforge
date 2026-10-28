@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import { appPublicOrigin, sendEmail } from './send-email';
+import { notificationMessage } from './notification-templates';
 import { passwordResetMessage, verifyEmailMessage } from './templates';
 
 describe('templates', () => {
@@ -89,5 +90,37 @@ describe('appPublicOrigin', () => {
     expect(appPublicOrigin({ NEXT_PUBLIC_APP_URL: 'https://b.test' })).toBe(
       'https://b.test',
     );
+  });
+});
+
+describe('notificationMessage', () => {
+  it('renders the Serbian new-application email with an escaped link', () => {
+    const msg = notificationMessage('sr', {
+      kind: 'employer_new_application',
+      jobTitle: 'Programer <C#>',
+      applicationsUrl: 'https://sljakam.com/sr/employer/jobs/1/applications',
+    });
+    expect(msg.subject).toBe('Šljakam — nova prijava: Programer <C#>');
+    expect(msg.html).toContain('Programer &lt;C#&gt;');
+    expect(msg.text).toContain(
+      'Pogledaj prijave: https://sljakam.com/sr/employer/jobs/1/applications',
+    );
+  });
+
+  it('includes the rejection reason only when present', () => {
+    const withReason = notificationMessage('en', {
+      kind: 'employer_job_rejected',
+      jobTitle: 'Driver',
+      reason: 'Salary missing',
+      editUrl: 'https://x.test/e',
+    });
+    expect(withReason.text).toContain('Reason: Salary missing');
+    const without = notificationMessage('en', {
+      kind: 'employer_job_rejected',
+      jobTitle: 'Driver',
+      reason: null,
+      editUrl: 'https://x.test/e',
+    });
+    expect(without.text).not.toContain('Reason:');
   });
 });

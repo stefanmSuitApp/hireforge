@@ -2,12 +2,8 @@ import { randomInt } from 'node:crypto';
 
 import { expect, test, type Page } from '@playwright/test';
 
-import {
-  authTokenCount,
-  emailVerifiedAt,
-  plantAuthToken,
-  SEED_JOB_ID,
-} from './support/db';
+import { emailVerifiedAt, SEED_JOB_ID } from './support/db';
+import { expectEmails, linkFrom } from './support/mail';
 import { resetRateLimits } from './support/redis';
 import { gotoHydrated, waitHydrated } from './support/ui';
 
@@ -29,8 +25,8 @@ test('candidate verifies email from the emailed link and can then apply', async 
   const email = `cand-${randomInt(1e6, 9e6)}@example.com`;
   await registerCandidate(page, email, 'Lozinka123!');
 
-  // Signup issued a verification link.
-  expect(await authTokenCount(email, 'email_verify')).toBe(1);
+  // Signup sent a confirmation email.
+  await expectEmails(email, /potvrdite e-poštu/, 1);
 
   // Apply is gated, with a way to get a new email.
   await gotoHydrated(page, `/sr/jobs/${SEED_JOB_ID}/apply`, 'form');
@@ -41,18 +37,24 @@ test('candidate verifies email from the emailed link and can then apply', async 
     .getByRole('button', { name: 'Pošalji ponovo e-poruku za potvrdu' })
     .click();
   await expect(page.getByText('Poslato.', { exact: false })).toBeVisible();
-  expect(await authTokenCount(email, 'email_verify')).toBe(2);
+  const [first, latest] = await expectEmails(email, /potvrdite e-poštu/, 2);
 
-  // Clicking the link in the email confirms the address.
-  const token = await plantAuthToken(email, 'email_verify');
-  await page.goto(`/sr/verify-email?token=${token}`);
+  // Only the newest link works: resending voids the earlier one.
+  await page.goto(linkFrom(first, '/verify-email?token='));
+  await expect(
+    page.getByRole('heading', { name: 'Link nije važeći' }),
+  ).toBeVisible();
+
+  // Clicking the link in the newest email confirms the address.
+  const link = linkFrom(latest, '/verify-email?token=');
+  await page.goto(link);
   await expect(
     page.getByRole('heading', { name: 'E-pošta je potvrđena' }),
   ).toBeVisible();
   expect(await emailVerifiedAt(email)).not.toBeNull();
 
   // The same link does not work twice.
-  await page.goto(`/sr/verify-email?token=${token}`);
+  await page.goto(link);
   await expect(
     page.getByRole('heading', { name: 'Link nije važeći' }),
   ).toBeVisible();
@@ -83,12 +85,11 @@ test('forgotten password can be reset from the login page', async ({
   await expect(
     page.getByText('Ako nalog sa tom adresom postoji', { exact: false }),
   ).toBeVisible();
-  expect(await authTokenCount(email, 'password_reset')).toBe(1);
+  const [resetMail] = await expectEmails(email, /promena lozinke/, 1);
 
-  const token = await plantAuthToken(email, 'password_reset');
   await gotoHydrated(
     page,
-    `/sr/reset-password?token=${token}`,
+    linkFrom(resetMail, '/reset-password?token='),
     '#reset-password',
   );
   await page.getByLabel('Nova lozinka').fill('NovaLozinka9!');
