@@ -229,6 +229,7 @@ const outboxBatch = Math.min(
   Math.max(1, parseInt(process.env['OUTBOX_POLL_BATCH'] ?? '50', 10) || 50),
 );
 
+let outboxPoller: ReturnType<typeof setInterval> | undefined;
 const workerDb = getWorkerDatabase();
 if (workerDb) {
   void pollOutboxToPlatformQueue(platformQueue, workerDb.db, {
@@ -239,7 +240,7 @@ if (workerDb) {
       err: e instanceof Error ? e.message : String(e),
     });
   });
-  startOutboxPoller({
+  outboxPoller = startOutboxPoller({
     queue: platformQueue,
     getDb: getWorkerDatabase,
     intervalMs: outboxPollMs,
@@ -511,6 +512,46 @@ workerLog('info', 'worker_started', {
 });
 
 // Keep the process alive until shutdown.
-setInterval(() => {
+const keepAlive = setInterval(() => {
   // no-op
 }, 60_000);
+
+/**
+ * SIGTERM (docker stop / deploy): stop polling, let in-flight jobs finish,
+ * then close connections. Without this, node as PID 1 ignored SIGTERM and
+ * Docker SIGKILLed jobs mid-flight after the grace period.
+ */
+let shuttingDown = false;
+async function shutdown(signal: string): Promise<void> {
+  if (shuttingDown) {
+    return;
+  }
+  shuttingDown = true;
+  workerLog('info', 'worker_shutdown_started', { service: 'worker', signal });
+  if (outboxPoller) {
+    clearInterval(outboxPoller);
+  }
+  clearInterval(keepAlive);
+  // Hard stop if a job hangs (compose stop_grace_period is 30s).
+  setTimeout(() => process.exit(1), 25_000).unref();
+  try {
+    await worker.close();
+    await platformQueue.close();
+    await Promise.allSettled([
+      workerConnection.quit(),
+      producerConnection.quit(),
+      getWorkerDatabase()?.pool.end(),
+    ]);
+    workerLog('info', 'worker_shutdown_complete', { service: 'worker' });
+    process.exit(0);
+  } catch (e) {
+    workerLog('error', 'worker_shutdown_failed', {
+      service: 'worker',
+      err: e instanceof Error ? e.message : String(e),
+    });
+    process.exit(1);
+  }
+}
+
+process.on('SIGTERM', () => void shutdown('SIGTERM'));
+process.on('SIGINT', () => void shutdown('SIGINT'));

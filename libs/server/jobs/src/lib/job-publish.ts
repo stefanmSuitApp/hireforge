@@ -97,8 +97,17 @@ export async function transitionJobToPublished(
   let publishedOk = false;
   let expiresAt: Date | null = null;
 
+  // Re-approval after an edit keeps the job's short id (stable URLs); a new
+  // one is only drawn on first publish or after a slug collision.
+  const [existing] = await db
+    .select({ shortId: jobs.shortId })
+    .from(jobs)
+    .where(eq(jobs.id, input.jobId))
+    .limit(1);
+  const keptShortId = existing?.shortId ?? null;
+
   for (let attempt = 0; attempt < JOB_PUBLISH_SLUG_ATTEMPTS; attempt++) {
-    const shortId = makeShortId();
+    const shortId = attempt === 0 && keptShortId ? keptShortId : makeShortId();
     const slug = buildPublishedJobFullSlug(
       input.title,
       input.cityLatin,

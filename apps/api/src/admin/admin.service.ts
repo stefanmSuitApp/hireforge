@@ -141,7 +141,12 @@ export class AdminService {
     const now = new Date();
     await database.db
       .update(users)
-      .set({ role: body.role, updatedAt: now })
+      // A role change also revokes the user's sessions (refresh tokens).
+      .set({
+        role: body.role,
+        updatedAt: now,
+        tokenVersion: sql`${users.tokenVersion} + 1`,
+      })
       .where(eq(users.id, targetUserId));
 
     await this.audit.log({

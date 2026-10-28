@@ -26,4 +26,6 @@ done
 docker compose -f "$COMPOSE_FILE" up -d postgres redis
 docker compose -f "$COMPOSE_FILE" --profile tools run --rm migrate
 docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
+# Caddyfile is bind-mounted; config changes need an explicit reload.
+docker compose -f "$COMPOSE_FILE" exec -T caddy caddy reload --config /etc/caddy/Caddyfile
 docker compose -f "$COMPOSE_FILE" ps

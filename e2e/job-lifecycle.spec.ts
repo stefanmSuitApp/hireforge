@@ -7,6 +7,7 @@ import {
 
 import {
   jobPublishTimes,
+  jobSlug,
   SEED_ADMIN_EMAIL,
   SEED_EMPLOYER_VERIFIED,
   SEED_MODERATOR,
@@ -65,22 +66,25 @@ async function activeSubscription(
   return subscription.id;
 }
 
+function jobDraft(title: string) {
+  return {
+    title,
+    description: 'Tražimo iskusnog programera za rad u timu u Beogradu.',
+    citySlug: 'beograd',
+    categorySlug: 'it',
+    workModel: 'onsite',
+    employmentType: 'full_time',
+    seniority: 'mid',
+  };
+}
+
 async function submittedJob(
   employer: APIRequestContext,
   subscriptionId: string,
   title: string,
 ): Promise<string> {
   const draft = await employer.post('employer/jobs', {
-    data: {
-      title,
-      description: 'Tražimo iskusnog programera za rad u timu u Beogradu.',
-      citySlug: 'beograd',
-      categorySlug: 'it',
-      workModel: 'onsite',
-      employmentType: 'full_time',
-      seniority: 'mid',
-      subscriptionId,
-    },
+    data: { ...jobDraft(title), subscriptionId },
   });
   expect(draft.ok(), await draft.text()).toBeTruthy();
   const { id } = (await draft.json()) as { id: string };
@@ -131,7 +135,26 @@ test('publishing needs an active package and sets expiry from its duration', asy
     /oglas je objavljen: Programer B/,
   );
 
-  // 3) A second approval of the same job is refused, not re-applied.
+  // 3) Editing the live job sends it back to review; after re-approval the
+  //    short id is kept and the old URL still resolves to the job.
+  const firstSlug = (await jobSlug(job)) ?? '';
+  expect(firstSlug).toMatch(/-[a-z0-9]{4}$/);
+  const edited = await employer.patch(`employer/jobs/${job}`, {
+    data: { ...jobDraft('Programer B senior'), subscriptionId: sub },
+  });
+  expect(edited.ok(), await edited.text()).toBeTruthy();
+  const republished = await moderator.post(`moderator/jobs/${job}/publish`);
+  expect(republished.ok(), await republished.text()).toBeTruthy();
+  const secondSlug = (await jobSlug(job)) ?? '';
+  expect(secondSlug).not.toBe(firstSlug);
+  expect(secondSlug.slice(-5)).toBe(firstSlug.slice(-5));
+  const anon = await request.newContext({ baseURL: API });
+  const oldLink = await anon.get(`public/jobs/by-slug/${firstSlug}`);
+  expect(oldLink.ok(), await oldLink.text()).toBeTruthy();
+  expect(((await oldLink.json()) as { slug: string }).slug).toBe(secondSlug);
+  await anon.dispose();
+
+  // 4) A second approval of the same job is refused, not re-applied.
   const again = await moderator.post(`moderator/jobs/${job}/publish`);
   expect(again.status()).toBeGreaterThanOrEqual(400);
 

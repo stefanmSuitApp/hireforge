@@ -261,6 +261,7 @@ export class AuthService {
         id: users.id,
         role: users.role,
         passwordHash: users.passwordHash,
+        tokenVersion: users.tokenVersion,
       })
       .from(users)
       .where(and(eq(users.email, email), eq(users.role, 'candidate')))
@@ -276,7 +277,7 @@ export class AuthService {
       );
     }
     const accessToken = await signAccessToken(row.id, row.role);
-    const refreshToken = await signRefreshToken(row.id);
+    const refreshToken = await signRefreshToken(row.id, row.tokenVersion);
     return { accessToken, refreshToken };
   }
 
@@ -297,6 +298,7 @@ export class AuthService {
         id: users.id,
         role: users.role,
         passwordHash: users.passwordHash,
+        tokenVersion: users.tokenVersion,
       })
       .from(users)
       .where(and(eq(users.email, email), eq(users.role, 'employer')))
@@ -312,7 +314,7 @@ export class AuthService {
       );
     }
     const accessToken = await signAccessToken(row.id, row.role);
-    const refreshToken = await signRefreshToken(row.id);
+    const refreshToken = await signRefreshToken(row.id, row.tokenVersion);
     return { accessToken, refreshToken };
   }
 
@@ -328,13 +330,18 @@ export class AuthService {
       );
     }
     let sub: string;
+    let tokenVersion: number;
     try {
-      ({ sub } = await verifyRefreshToken(refreshToken));
+      ({ sub, tokenVersion } = await verifyRefreshToken(refreshToken));
     } catch {
       throw codedUnauthorized('AUTH_REFRESH_INVALID', 'Invalid refresh token');
     }
     const rows = await database.db
-      .select({ id: users.id, role: users.role })
+      .select({
+        id: users.id,
+        role: users.role,
+        tokenVersion: users.tokenVersion,
+      })
       .from(users)
       .where(eq(users.id, sub))
       .limit(1);
@@ -342,9 +349,16 @@ export class AuthService {
     if (!row) {
       throw codedUnauthorized('AUTH_USER_REMOVED', 'User no longer exists');
     }
+    // Revoked: password reset or role change since this token was issued.
+    if (row.tokenVersion !== tokenVersion) {
+      throw codedUnauthorized(
+        'AUTH_REFRESH_INVALID',
+        'Session has been revoked',
+      );
+    }
     return {
       accessToken: await signAccessToken(row.id, row.role),
-      refreshToken: await signRefreshToken(row.id),
+      refreshToken: await signRefreshToken(row.id, row.tokenVersion),
     };
   }
 
@@ -366,6 +380,7 @@ export class AuthService {
         id: users.id,
         role: users.role,
         passwordHash: users.passwordHash,
+        tokenVersion: users.tokenVersion,
       })
       .from(users)
       .where(
@@ -386,7 +401,7 @@ export class AuthService {
       );
     }
     const accessToken = await signAccessToken(row.id, row.role);
-    const refreshToken = await signRefreshToken(row.id);
+    const refreshToken = await signRefreshToken(row.id, row.tokenVersion);
     return { accessToken, refreshToken };
   }
 }

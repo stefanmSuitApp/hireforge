@@ -1,8 +1,8 @@
 import type { Queue } from 'bullmq';
-import { and, asc, eq, isNull } from 'drizzle-orm';
+import { and, asc, eq, isNull, notExists, sql } from 'drizzle-orm';
 
 import type { DrizzleDb } from 'database';
-import { createDb, outboxEvents } from 'database';
+import { createDb, outboxDeadLetters, outboxEvents } from 'database';
 import {
   OUTBOX_DISPATCH_JOB_OPTIONS,
   outboxDispatchBullmqJobId,
@@ -37,7 +37,19 @@ export async function pollOutboxToPlatformQueue(
       correlationId: outboxEvents.correlationId,
     })
     .from(outboxEvents)
-    .where(isNull(outboxEvents.processedAt))
+    .where(
+      and(
+        isNull(outboxEvents.processedAt),
+        // Dead-lettered rows (retries exhausted) must not occupy the batch
+        // forever and starve newer events; replay them from the DLQ.
+        notExists(
+          db
+            .select({ one: sql`1` })
+            .from(outboxDeadLetters)
+            .where(eq(outboxDeadLetters.outboxEventId, outboxEvents.id)),
+        ),
+      ),
+    )
     .orderBy(asc(outboxEvents.id))
     .limit(opts.batchSize);
 

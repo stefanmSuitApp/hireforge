@@ -95,17 +95,26 @@ export const subscriptionStatusEnum = pgEnum('subscription_status', [
 
 // --- Transactional outbox ---
 
-export const outboxEvents = pgTable('outbox_events', {
-  id: serial('id').primaryKey(),
-  eventType: text('event_type').notNull(),
-  payload: jsonb('payload').notNull().$type<Record<string, unknown>>(),
-  /** HTTP request id from API ingress (Phase 7.4); propagated to BullMQ `outbox-dispatch` payload. */
-  correlationId: text('correlation_id'),
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  processedAt: timestamp('processed_at', { withTimezone: true }),
-});
+export const outboxEvents = pgTable(
+  'outbox_events',
+  {
+    id: serial('id').primaryKey(),
+    eventType: text('event_type').notNull(),
+    payload: jsonb('payload').notNull().$type<Record<string, unknown>>(),
+    /** HTTP request id from API ingress (Phase 7.4); propagated to BullMQ `outbox-dispatch` payload. */
+    correlationId: text('correlation_id'),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    processedAt: timestamp('processed_at', { withTimezone: true }),
+  },
+  (t) => [
+    /** The worker polls unprocessed rows by id every few seconds. */
+    index('outbox_events_unprocessed_idx')
+      .on(t.id)
+      .where(sql`${t.processedAt} IS NULL`),
+  ],
+);
 
 /** Terminal BullMQ failures for `outbox-dispatch` (replay / ops visibility). */
 export const outboxDeadLetters = pgTable(
@@ -143,6 +152,8 @@ export const users = pgTable(
     email: text('email').notNull(),
     /** Set when the user completes email verification (employer gate — Step 7). */
     emailVerifiedAt: timestamp('email_verified_at', { withTimezone: true }),
+    /** Bumped to revoke every refresh token (password reset, role change). */
+    tokenVersion: integer('token_version').notNull().default(0),
     /** bcrypt hash; null for legacy/seed users until they set a password. */
     passwordHash: text('password_hash'),
     /** Optional name shown to employers as “your Šljakam contact” (staff-editable later). */

@@ -3,7 +3,6 @@ import { setRequestLocale } from 'next-intl/server';
 
 import { resolveNestPublicOrigin } from '@/lib/nest-api-url';
 import { fetchPublicJobDetail } from '@/lib/public-jobs';
-import { isUuidString } from '@/lib/job-public-segment';
 
 import { JobDetailScreen } from './job-detail-screen';
 
@@ -26,7 +25,8 @@ export async function JobDetailRoute({ params }: Props) {
     return <JobDetailScreen kind="error" notFound={result.status === 404} />;
   }
 
-  if (isUuidString(jobRef) && result.data.slug && result.data.slug !== jobRef) {
+  // UUID links and old slugs (title edited, same short id) → canonical slug.
+  if (result.data.slug && result.data.slug !== jobRef) {
     permanentRedirect(`/${locale}/jobs/${result.data.slug}`);
   }
 

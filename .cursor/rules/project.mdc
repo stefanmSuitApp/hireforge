@@ -1,0 +1,47 @@
+---
+description: Šljakam (hireforge) house rules — shared brain, scope, definition of done
+alwaysApply: true
+---
+
+# Šljakam (hireforge)
+
+Follow **@AGENTS.md** for stack, commands, conventions, definition of done,
+deploy rule and the "never" list.
+
+Shared brain (use what's present; don't invent the rest):
+
+- Product facts: @PRODUCT_SSOT_SLJAKAM.md
+- Technical background: @PROJECT_SSOT.md
+- Step plan: `docs/refactor/MIGRATION_PLAN.md` (its per-step status lines are
+  stale — trust PROGRESS.md)
+- Progress / handoff / next phase: @PROGRESS.md
+- Waiting on Stefan: @NEEDS_STEFAN.md
+
+## This phase of the project
+
+The product is live at https://sljakam.com without real users yet. Work is
+organised in phases in `PROGRESS.md` (A safety, B core loop, C hardening, …).
+Each finished phase is shipped: whole-repo check + e2e green, PR, CI green,
+merge, deploy, verify on the live site.
+
+## Cursor notes
+
+- Read `PROGRESS.md` at the start of a chat. Don't edit files in a phase that
+  Claude Code currently owns (recorded in `PROGRESS.md`).
+- Best for focused tasks inside a phase: in-editor edits, UI fine-tuning,
+  small fixes. For anything touching more than ~3 files, a new dependency or
+  a schema change, propose options and wait.
+- UI tweaks: change only the listed values, and name the exact classes/tokens
+  before editing.
+- Before saying "done": run the whole-repo check from AGENTS.md and show the
+  output.
+
+## Scope
+
+Only change what the task asks. If something else should change, say so —
+don't do it silently.
+
+## Facts
+
+Never invent product claims, prices, legal text, company or user data. Use
+`TODO(Stefan)` or ask.

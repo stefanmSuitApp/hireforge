@@ -20,4 +20,16 @@ docker compose -f "$COMPOSE_FILE" exec -T postgres sh -c \
   'pg_dump --clean --if-exists -U "$POSTGRES_USER" "$POSTGRES_DB"' \
   | gzip -9 > "$OUT_FILE"
 
+# A failed pg_dump inside the pipe still leaves a tiny gzip; refuse to keep it.
+if [[ "$(gzip -cd "$OUT_FILE" | head -c 4096 | wc -c)" -lt 100 ]]; then
+  echo "Backup looks empty: $OUT_FILE" >&2
+  rm -f "$OUT_FILE"
+  exit 1
+fi
+
 echo "Wrote Postgres backup: $OUT_FILE"
+
+# Retention: keep the last KEEP_DAYS days of dumps (default 14). Only files
+# this script created are touched.
+KEEP_DAYS="${HIREFORGE_BACKUP_KEEP_DAYS:-14}"
+find "$BACKUP_DIR" -maxdepth 1 -name 'hireforge-postgres-*.sql.gz' -mtime "+$KEEP_DAYS" -print -delete

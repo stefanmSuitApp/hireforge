@@ -34,8 +34,12 @@ export async function signAccessToken(
     .sign(getSecretKey());
 }
 
-export async function signRefreshToken(userId: string): Promise<string> {
-  return new jose.SignJWT({ typ: 'refresh' })
+/** `tokenVersion` must match `users.token_version` when the token is used. */
+export async function signRefreshToken(
+  userId: string,
+  tokenVersion = 0,
+): Promise<string> {
+  return new jose.SignJWT({ typ: 'refresh', tv: tokenVersion })
     .setProtectedHeader({ alg: 'HS256' })
     .setSubject(userId)
     .setIssuedAt()
@@ -63,12 +67,14 @@ export async function verifyAccessToken(
 
 export async function verifyRefreshToken(
   token: string,
-): Promise<{ sub: string }> {
+): Promise<{ sub: string; tokenVersion: number }> {
   const { payload } = await jose.jwtVerify(token, getSecretKey(), {
     algorithms: ['HS256'],
   });
   if (payload.typ !== 'refresh') {
     throw new Error('Invalid refresh token');
   }
-  return { sub: String(payload.sub) };
+  // Tokens issued before versioning carry no `tv`: treat as version 0.
+  const tokenVersion = typeof payload['tv'] === 'number' ? payload['tv'] : 0;
+  return { sub: String(payload.sub), tokenVersion };
 }

@@ -21,7 +21,7 @@ import type {
 } from 'contracts';
 import { and, asc, count, desc, eq, ne, sql, type SQL } from 'drizzle-orm';
 import { cities, companies, districts, jobCategories, jobs } from 'database';
-import { effectiveJobDescriptionHtml } from 'server-jobs';
+import { effectiveJobDescriptionHtml, shortIdFromJobSlug } from 'server-jobs';
 
 import { getDb } from '../database';
 import { codedBadRequest, codedTooManyRequests } from '../http/coded-http';
@@ -225,7 +225,29 @@ export class PublicJobsService {
   }
 
   async getBySlug(slug: string): Promise<PublicJobDetailResponse> {
-    return this.loadPublishedJobDetail(eq(jobs.slug, slug));
+    try {
+      return await this.loadPublishedJobDetail(eq(jobs.slug, slug));
+    } catch (error) {
+      if (!(error instanceof NotFoundException)) {
+        throw error;
+      }
+      // Old slug after a title edit: the short id survives re-approval, so
+      // resolve by it (only when unambiguous). The web 308s to `slug`.
+      const shortId = shortIdFromJobSlug(slug);
+      const database = getDb();
+      if (!shortId || !database) {
+        throw error;
+      }
+      const matches = await database.db
+        .select({ id: jobs.id })
+        .from(jobs)
+        .where(and(eq(jobs.shortId, shortId), eq(jobs.status, 'published')))
+        .limit(2);
+      if (matches.length !== 1 || !matches[0]) {
+        throw error;
+      }
+      return this.loadPublishedJobDetail(eq(jobs.id, matches[0].id));
+    }
   }
 
   private async loadPublishedJobDetail(

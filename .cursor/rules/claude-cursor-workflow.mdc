@@ -1,0 +1,55 @@
+---
+description: How Cursor and Claude Code collaborate on this repo
+alwaysApply: true
+---
+
+# Claude ↔ Cursor workflow
+
+Planning shape matches `~/Dev/ai-project-kit/WORKFLOW.md`, without treating
+every kit ceremony as mandatory.
+
+## Shared brain (non-negotiable)
+
+Both tools use repo files, not each other's chat history:
+
+`AGENTS.md` · `PRODUCT_SSOT_SLJAKAM.md` · `PROJECT_SSOT.md` · `PROGRESS.md` ·
+`NEEDS_STEFAN.md` · `docs/refactor/MIGRATION_PLAN.md`
+
+If a decision matters later, write it into one of those files (decisions go
+in `PROGRESS.md` → Decisions).
+
+## Ownership
+
+- **One owner per phase** (Cursor or Claude or Stefan), recorded in
+  `PROGRESS.md`.
+- Don't edit the same files in parallel without an explicit owner switch
+  recorded in `PROGRESS.md`.
+- Parallel agents need separate branches/worktrees and separate ports/DBs/
+  test users (`pnpm e2e` already uses its own `<db>_e2e` database and Redis
+  DB 15).
+
+## Default roles (flexible)
+
+| Role                                                                                                           | Usually                               |
+| -------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| Options, product trade-offs, schema, auth, billing, search, sync, test harness, acceptance tests, PR review, deploy | Claude Code                           |
+| UI phases, CRUD following an existing module, making Claude's acceptance tests pass, iteration, polish          | Cursor                                |
+| Serbian-language copy drafts and research (legal research, copy review)                                         | ChatGPT (draft only; Stefan approves) |
+| Full phase end-to-end                                                                                          | Either — only one                     |
+
+## Session hygiene
+
+- Prefer one chat per phase or clear topic.
+- End sessions by updating `PROGRESS.md`.
+- Every non-trivial request should state **done means** and **what must not
+  change** (or ask Stefan to confirm).
+
+## Quality bar
+
+- Show whole-repo check output before calling work done.
+- New behaviour gets a test that failed before the fix (`e2e/` for flows a
+  person clicks through, Vitest for pure logic).
+- UI checked at phone and desktop widths.
+- No commit/push on red checks. A finished phase is pushed, merged after
+  green CI and deployed (Stefan's standing instruction); otherwise commit
+  only when Stefan asks.

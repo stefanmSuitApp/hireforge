@@ -211,6 +211,20 @@
       "when": 1777800000000,
       "tag": "0029_promo_codes_currency",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1777900000000,
+      "tag": "0030_users_token_version",
+      "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1778000000000,
+      "tag": "0031_outbox_unprocessed_index",
+      "breakpoints": true
     }
   ]
 }

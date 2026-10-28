@@ -5,7 +5,7 @@ Living status file. **Trust this over the `Status:` lines in
 which went stale during the Cursor phase (Steps 4, 5, 14, 15 say "pending"
 but shipped). Update this file in the same PR as the work.
 
-Last updated: 2026-10-28 (Phase B). Open items for Stefan:
+Last updated: 2026-10-28 (Phase C). Open items for Stefan:
 [`NEEDS_STEFAN.md`](./NEEDS_STEFAN.md) — **#1 is urgent (seed passwords on prod).**
 
 ## Current state
@@ -74,25 +74,37 @@ daemon in Docker builds, output asserted, sequential builds.
 - E2E: 10 specs incl. emails through a fake Resend; each new spec shown to
   fail without its fix.
 
-## Phase C — security & operations hardening (next)
+## Phase C — security & operations hardening ✅
 
-1. Refresh-token revocation (`users.token_version`): password reset and
-   "sign out everywhere" kill existing sessions.
-2. Worker graceful shutdown; outbox rows that keep failing stop blocking
-   the queue (dead after N attempts) + partial index for the poll.
-3. Editing a published job keeps its URL (stable `short_id`, redirect).
-4. Docker: Node 24 base images (20 is EOL), log rotation; Caddy HSTS.
-5. Scheduled Postgres backups with retention (offsite needs Stefan).
+- Session revocation: `users.token_version` (0030); password reset and role
+  changes kill existing refresh tokens (old tokens count as version 0, so
+  the deploy logs nobody out).
+- Worker: graceful SIGTERM shutdown (compose grace 30s); dead-lettered
+  outbox rows no longer block the poll; partial index for the poll (0031).
+- Editing a live job keeps its URL (short id survives re-approval; old
+  slugs resolve by short id and 308 to the canonical slug).
+- Deploy: Node 24 images, log rotation, HSTS (1y), nightly backup cron with
+  14-day retention, runbook for off-VM image builds + rollback.
+- `AGENTS.md` (shared rules), `CLAUDE.md` and Cursor rules fixed for this
+  repo.
 
-Needs Stefan before it can start: legal pages copy, accountant (VAT, SEF,
-invoice fields, credit notes), Sentry DSN, offsite backup storage.
+## Phase D — candidates (needs Stefan for most)
+
+1. Legal pages (privacy, terms, refund) + footer links + account erasure
+   request — needs legal copy.
+2. Invoices: legal fields, credit notes, invoice PDF download, SEF — needs
+   the accountant's answers.
+3. Observability: Sentry (api, worker, web) — needs a DSN; offsite backups —
+   needs storage credentials.
+4. Product: salary fields on jobs; `full_free` promo auto-activation; GAZDA
+   (enterprise) subscription creation by admin; unpaid proforma expiry.
+5. Search: FTS expression/index mismatch, diacritic + Cyrillic folding,
+   slug transliteration of `đ`.
 
 ## Known issues not yet scheduled
 
-- Editing a published job drops its slug → old URLs 404.
 - Search: query expression doesn't match the FTS index (seq scan); no
   diacritic/Cyrillic folding; slug transliteration drops `đ`.
-- Outbox: a stuck event can block later ones; no worker SIGTERM handling.
 - `drizzle/meta` only has the `0000` snapshot → `pnpm db:generate` would
   emit a bogus full-schema migration; keep hand-writing migrations.
 - Bank details for invoices are editable in Sanity (payment redirection risk).
