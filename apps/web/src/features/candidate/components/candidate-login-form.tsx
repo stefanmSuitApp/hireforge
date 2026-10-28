@@ -38,7 +38,7 @@ export function CandidateLoginForm({ returnTo }: Props) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-4">
+    <form method="post" onSubmit={onSubmit} className="flex flex-col gap-4">
       <div className="space-y-2">
         <Label
           htmlFor="candidate-email"

@@ -8,9 +8,15 @@ import {
   plantAuthToken,
   SEED_JOB_ID,
 } from './support/db';
+import { resetRateLimits } from './support/redis';
+import { gotoHydrated, waitHydrated } from './support/ui';
+
+test.beforeEach(async () => {
+  await resetRateLimits();
+});
 
 async function registerCandidate(page: Page, email: string, password: string) {
-  await page.goto('/sr/candidate/register');
+  await gotoHydrated(page, '/sr/candidate/register', '#candidate-reg-email');
   await page.locator('#candidate-reg-email').fill(email);
   await page.locator('#candidate-reg-password').fill(password);
   await page.getByRole('button', { name: 'Napravi nalog' }).click();
@@ -27,7 +33,7 @@ test('candidate verifies email from the emailed link and can then apply', async 
   expect(await authTokenCount(email, 'email_verify')).toBe(1);
 
   // Apply is gated, with a way to get a new email.
-  await page.goto(`/sr/jobs/${SEED_JOB_ID}/apply`);
+  await gotoHydrated(page, `/sr/jobs/${SEED_JOB_ID}/apply`, 'form');
   await expect(
     page.getByText('Potvrdite e-poštu da biste se prijavili'),
   ).toBeVisible();
@@ -71,6 +77,7 @@ test('forgotten password can be reset from the login page', async ({
   await page.goto('/sr/candidate/login');
   await page.getByRole('link', { name: 'Zaboravili ste lozinku?' }).click();
   await expect(page).toHaveURL(/\/sr\/forgot-password$/);
+  await waitHydrated(page, '#forgot-email');
   await page.getByLabel('E-pošta').fill(email);
   await page.getByRole('button', { name: 'Pošalji link' }).click();
   await expect(
@@ -79,7 +86,11 @@ test('forgotten password can be reset from the login page', async ({
   expect(await authTokenCount(email, 'password_reset')).toBe(1);
 
   const token = await plantAuthToken(email, 'password_reset');
-  await page.goto(`/sr/reset-password?token=${token}`);
+  await gotoHydrated(
+    page,
+    `/sr/reset-password?token=${token}`,
+    '#reset-password',
+  );
   await page.getByLabel('Nova lozinka').fill('NovaLozinka9!');
   await page.getByLabel('Ponovite lozinku').fill('NovaLozinka9!');
   await page.getByRole('button', { name: 'Sačuvaj lozinku' }).click();
@@ -90,7 +101,7 @@ test('forgotten password can be reset from the login page', async ({
   expect(await emailVerifiedAt(email)).not.toBeNull();
 
   // Old password no longer works; the new one does.
-  await page.goto('/sr/candidate/login');
+  await gotoHydrated(page, '/sr/candidate/login', '#candidate-email');
   await page.locator('#candidate-email').fill(email);
   await page.locator('#candidate-password').fill('StaraLozinka1!');
   await page.getByRole('button', { name: 'Prijavi se' }).click();
@@ -99,12 +110,13 @@ test('forgotten password can be reset from the login page', async ({
   await page.locator('#candidate-password').fill('NovaLozinka9!');
   await page.getByRole('button', { name: 'Prijavi se' }).click();
   await expect(page).toHaveURL(/\/sr\/candidate$/);
+  await ctx.close();
 });
 
 test('reset request does not reveal whether an account exists', async ({
   page,
 }) => {
-  await page.goto('/sr/forgot-password');
+  await gotoHydrated(page, '/sr/forgot-password', '#forgot-email');
   await page
     .getByLabel('E-pošta')
     .fill(`nobody-${randomInt(1e6, 9e6)}@example.com`);

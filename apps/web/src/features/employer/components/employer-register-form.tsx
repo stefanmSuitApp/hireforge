@@ -344,6 +344,7 @@ export function EmployerRegisterForm() {
 
   return (
     <form
+      method="post"
       onSubmit={onSubmit}
       className="flex flex-col gap-5 [&_input]:h-11 [&_input]:rounded-xl [&_input]:border-border/70 [&_input]:bg-background/90"
     >

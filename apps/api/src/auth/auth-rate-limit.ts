@@ -11,7 +11,8 @@ const MINUTE = 60;
 const LIMITS = {
   loginPerIp: { limit: 20, windowSec: 15 * MINUTE },
   loginPerEmail: { limit: 10, windowSec: 15 * MINUTE },
-  registerPerIp: { limit: 10, windowSec: 60 * MINUTE },
+  // Generous: mobile carriers put many users behind one shared IP (CGNAT).
+  registerPerIp: { limit: 30, windowSec: 60 * MINUTE },
   refreshPerIp: { limit: 300, windowSec: 15 * MINUTE },
   emailLinkPerIp: { limit: 30, windowSec: 15 * MINUTE },
   resetRequestPerIp: { limit: 10, windowSec: 60 * MINUTE },
