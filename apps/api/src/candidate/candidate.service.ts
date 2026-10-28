@@ -19,7 +19,7 @@ import { createReadStream, existsSync } from 'node:fs';
 import { mkdir, unlink, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
 
-import { and, desc, eq, ne } from 'drizzle-orm';
+import { and, count, desc, eq, ne, sql } from 'drizzle-orm';
 import { isWithinReapplicationCooldown } from 'server-applications';
 import { renderCvPdfBuffer } from 'server-cv-templates';
 import {
@@ -46,7 +46,8 @@ import {
 } from '../http/coded-http';
 import { getDb } from '../database';
 import { getCorrelationId } from '../observability/correlation-storage';
-import { getRedis } from '../redis';
+import { isUniqueViolation } from '../database-errors';
+import { consumeRateLimit } from '../http/rate-limit';
 
 const MAX_RESUME_BYTES = 5 * 1024 * 1024;
 
@@ -154,6 +155,9 @@ function safeGeneratedCvFilename(
   return `CV-${templateCode}-${slug}.pdf`;
 }
 
+/** Saved searches per candidate (stored filter snapshots for future alerts). */
+const MAX_SAVED_SEARCHES = 50;
+
 @Injectable()
 export class CandidateService {
   private readonly logger = new Logger(CandidateService.name);
@@ -165,19 +169,14 @@ export class CandidateService {
   private async assertApplicationSubmitRateLimit(
     candidateId: string,
   ): Promise<void> {
-    const redis = getRedis();
-    if (!redis) {
-      this.logger.warn(
-        'REDIS_URL not set — skipping application submit rate limit (fail-open)',
-      );
-      return;
-    }
-    const key = `hf:cappl:rl:24h:${candidateId}`;
-    const n = await redis.incr(key);
-    if (n === 1) {
-      await redis.expire(key, 86400);
-    }
-    if (n > 50) {
+    // Atomic INCR+EXPIRE (the old INCR-then-EXPIRE could leave a key with no
+    // TTL that blocked the candidate forever); fails open without Redis.
+    const result = await consumeRateLimit(
+      `cappl:24h:${candidateId}`,
+      50,
+      24 * 60 * 60,
+    );
+    if (!result.allowed) {
       throw codedTooManyRequests(
         'APPLICATION_SUBMIT_RATE_LIMITED',
         'Too many applications in the last 24 hours',
@@ -573,7 +572,35 @@ export class CandidateService {
     const coverLetterText = body.coverLetterText?.trim() || null;
     const { candidateId } = ctx;
 
-    return database.db.transaction(async (tx) => {
+    try {
+      return await this.insertApplication(database.db, {
+        body,
+        candidateId,
+        coverLetterText,
+      });
+    } catch (error) {
+      // Two simultaneous submits both pass the existence check; the partial
+      // unique index rejects the second one.
+      if (isUniqueViolation(error)) {
+        throw codedConflict(
+          'APPLICATION_ALREADY_EXISTS',
+          'You have already applied to this job',
+        );
+      }
+      throw error;
+    }
+  }
+
+  private async insertApplication(
+    db: NonNullable<ReturnType<typeof getDb>>['db'],
+    input: {
+      body: CandidateApplyBody;
+      candidateId: string;
+      coverLetterText: string | null;
+    },
+  ): Promise<{ id: string }> {
+    const { body, candidateId, coverLetterText } = input;
+    return db.transaction(async (tx) => {
       const [jobRow] = await tx
         .select({
           id: jobs.id,
@@ -740,6 +767,18 @@ export class CandidateService {
       );
     }
     const base = await this.requireCandidate(userId);
+    // Each run renders a PDF in the API process and stores a file.
+    const limit = await consumeRateLimit(
+      `cvgen:1h:${base.candidateId}`,
+      20,
+      60 * 60,
+    );
+    if (!limit.allowed) {
+      throw codedTooManyRequests(
+        'CV_GENERATE_RATE_LIMITED',
+        'Too many CVs generated in the last hour',
+      );
+    }
     const [row] = await database.db
       .select({
         fullName: candidates.fullName,
@@ -864,10 +903,23 @@ export class CandidateService {
         'Only submitted applications can be withdrawn',
       );
     }
-    await database.db
+    const updated = await database.db
       .update(applications)
       .set({ status: 'withdrawn', updatedAt: new Date() })
-      .where(eq(applications.id, applicationId));
+      .where(
+        and(
+          eq(applications.id, applicationId),
+          // The employer may have moved it on since the read above.
+          eq(applications.status, 'submitted'),
+        ),
+      )
+      .returning({ id: applications.id });
+    if (updated.length === 0) {
+      throw codedBadRequest(
+        'APPLICATION_WITHDRAW_FORBIDDEN',
+        'Only submitted applications can be withdrawn',
+      );
+    }
     return { ok: true };
   }
 
@@ -1019,6 +1071,30 @@ export class CandidateService {
       );
     }
     const { candidateId } = await this.requireCandidate(userId);
+    // Same filters saved again → reuse the row instead of piling up copies.
+    const [same] = await database.db
+      .select({ id: savedJobSearches.id })
+      .from(savedJobSearches)
+      .where(
+        and(
+          eq(savedJobSearches.candidateId, candidateId),
+          sql`${savedJobSearches.queryJson} = ${JSON.stringify(body.query)}::jsonb`,
+        ),
+      )
+      .limit(1);
+    if (same) {
+      return { id: same.id };
+    }
+    const [{ n } = { n: 0 }] = await database.db
+      .select({ n: count() })
+      .from(savedJobSearches)
+      .where(eq(savedJobSearches.candidateId, candidateId));
+    if (Number(n) >= MAX_SAVED_SEARCHES) {
+      throw codedBadRequest(
+        'SAVED_SEARCH_LIMIT_REACHED',
+        `You can keep at most ${MAX_SAVED_SEARCHES} saved searches`,
+      );
+    }
     const [row] = await database.db
       .insert(savedJobSearches)
       .values({

@@ -232,6 +232,13 @@
       "when": 1778100000000,
       "tag": "0032_city_slugs_dj",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1778200000000,
+      "tag": "0033_jobs_search_serbian_fold",
+      "breakpoints": true
     }
   ]
 }

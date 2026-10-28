@@ -22,7 +22,7 @@ import {
   entitlementsBlobSchema,
   packageCodeSchema,
 } from 'contracts';
-import { and, count, desc, eq, inArray, isNotNull } from 'drizzle-orm';
+import { and, count, desc, eq, inArray, isNotNull, ne } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import {
   applications,
@@ -38,7 +38,6 @@ import {
   packagePrices,
   packages,
   proformas,
-  resumeAssets,
   subscriptions,
   users,
 } from 'database';
@@ -1594,13 +1593,19 @@ export class EmployerService {
         status: applications.status,
         createdAt: applications.createdAt,
         email: users.email,
-        resumeOriginalFilename: resumeAssets.originalFilename,
+        // Snapshot taken at submission (applications are immutable).
+        resumeOriginalFilename: applications.resumeFilename,
       })
       .from(applications)
       .innerJoin(candidates, eq(applications.candidateId, candidates.id))
       .innerJoin(users, eq(candidates.userId, users.id))
-      .leftJoin(resumeAssets, eq(applications.resumeAssetId, resumeAssets.id))
-      .where(eq(applications.jobId, jobId))
+      .where(
+        and(
+          eq(applications.jobId, jobId),
+          // Withdrawn = the candidate took it back; not shown to employers.
+          ne(applications.status, 'withdrawn'),
+        ),
+      )
       .orderBy(desc(applications.createdAt));
 
     return rows.map((r) => ({

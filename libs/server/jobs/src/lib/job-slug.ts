@@ -4,14 +4,61 @@ const SHORT_ID_LEN = 4;
 const BASE_SLUG_MAX_LEN = 55;
 const SHORT_ID_ALPHABET = 'abcdefghijklmnopqrstuvwxyz0123456789';
 
+/** Serbian Cyrillic → Serbian Latin (diacritics are stripped afterwards). */
+const SR_CYRILLIC_TO_LATIN: Record<string, string> = {
+  а: 'a',
+  б: 'b',
+  в: 'v',
+  г: 'g',
+  д: 'd',
+  ђ: 'đ',
+  е: 'e',
+  ж: 'ž',
+  з: 'z',
+  и: 'i',
+  ј: 'j',
+  к: 'k',
+  л: 'l',
+  љ: 'lj',
+  м: 'm',
+  н: 'n',
+  њ: 'nj',
+  о: 'o',
+  п: 'p',
+  р: 'r',
+  с: 's',
+  т: 't',
+  ћ: 'ć',
+  у: 'u',
+  ф: 'f',
+  х: 'h',
+  ц: 'c',
+  ч: 'č',
+  џ: 'dž',
+  ш: 'š',
+};
+
+function cyrillicToLatin(input: string): string {
+  return input.replace(/[\u0400-\u04FF]/g, (ch) => {
+    const lower = ch.toLowerCase();
+    const latin = SR_CYRILLIC_TO_LATIN[lower];
+    if (latin === undefined) {
+      return ch;
+    }
+    return ch === lower
+      ? latin
+      : latin.charAt(0).toUpperCase() + latin.slice(1);
+  });
+}
+
 /**
- * Remove Latin diacritics (Serbian Latin, etc.) for URL-safe ASCII. `đ` has no
- * NFD decomposition, so it is mapped to `dj` first (else it was dropped).
+ * URL-safe ASCII for Serbian text (Latin or Cyrillic): Cyrillic → Latin,
+ * `đ` → `dj` (it has no decomposition), then diacritics removed.
  */
 export function transliterateToAsciiBasic(input: string): string {
-  return input
-    .replace(/đ/g, 'dj')
+  return cyrillicToLatin(input)
     .replace(/Đ/g, 'Dj')
+    .replace(/đ/g, 'dj')
     .normalize('NFD')
     .replace(/\p{M}/gu, '')
     .replace(/ß/g, 'ss')

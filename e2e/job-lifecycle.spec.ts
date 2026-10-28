@@ -141,7 +141,7 @@ test('publishing needs an active package and sets expiry from its duration', asy
   const firstSlug = (await jobSlug(job)) ?? '';
   expect(firstSlug).toMatch(/-[a-z0-9]{4}$/);
   const edited = await employer.patch(`employer/jobs/${job}`, {
-    data: { ...jobDraft('Programer B senior'), subscriptionId: sub },
+    data: { ...jobDraft('Programer B senior inženjer'), subscriptionId: sub },
   });
   expect(edited.ok(), await edited.text()).toBeTruthy();
   const republished = await moderator.post(`moderator/jobs/${job}/publish`);
@@ -155,7 +155,20 @@ test('publishing needs an active package and sets expiry from its duration', asy
   expect(((await oldLink.json()) as { slug: string }).slug).toBe(secondSlug);
   await anon.dispose();
 
-  // 4) A second approval of the same job is refused, not re-applied.
+  // 4) Search finds the live job the way people type Serbian: without
+  //    diacritics and in Cyrillic (title is "Programer B senior inženjer").
+  const anonSearch = await request.newContext({ baseURL: API });
+  for (const q of ['inzenjer', 'ПРОГРАМЕР инжењер', 'INŽENJER']) {
+    const res = await anonSearch.get(`public/jobs?q=${encodeURIComponent(q)}`);
+    expect(res.ok(), await res.text()).toBeTruthy();
+    const ids = ((await res.json()) as { items: { id: string }[] }).items.map(
+      (i) => i.id,
+    );
+    expect(ids, `search "${q}"`).toContain(job);
+  }
+  await anonSearch.dispose();
+
+  // 5) A second approval of the same job is refused, not re-applied.
   const again = await moderator.post(`moderator/jobs/${job}/publish`);
   expect(again.status()).toBeGreaterThanOrEqual(400);
 

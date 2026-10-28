@@ -34,6 +34,7 @@ import {
   upsertPackageMirrorAndAudit,
 } from 'server-cms-sync';
 import {
+  cancelAbandonedUnpaidSubscriptions,
   expireSubscriptionsPastEndDate,
   refreshNbsMiddleRateCache,
 } from 'server-billing';
@@ -393,6 +394,16 @@ const worker = new Worker(
             workerLog('info', 'subscriptions_expired', {
               service: 'worker',
               count: String(expired),
+            });
+          }
+
+          const abandoned = await cancelAbandonedUnpaidSubscriptions(
+            database.db,
+          );
+          if (abandoned > 0) {
+            workerLog('info', 'unpaid_subscriptions_cancelled', {
+              service: 'worker',
+              count: String(abandoned),
             });
           }
 
