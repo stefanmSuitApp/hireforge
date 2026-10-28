@@ -108,3 +108,21 @@ it when you are ready.
 - [ ] **Social profiles** for Organization `sameAs` (JSON-LD): official
       Instagram / LinkedIn / Facebook URLs, if any. Code:
       `SOCIAL_PROFILES` in `apps/web/src/lib/seo/json-ld.ts`.
+- [ ] **Search engine verification codes** (Search Console, Bing Webmaster
+      Tools, Yandex Webmaster): add the site, choose the HTML meta tag method,
+      and put each code in `deploy/.env.production` as
+      `GOOGLE_SITE_VERIFICATION`, `BING_SITE_VERIFICATION`,
+      `YANDEX_SITE_VERIFICATION`; restart `web`. Then submit
+      `https://sljakam.com/sitemap.xml` in each.
+- [ ] **Google Indexing API**: in Google Cloud create a service account,
+      enable the "Web Search Indexing API", download its JSON key, add the
+      account's email as an **Owner** of sljakam.com in Search Console, and
+      put the key base64-encoded (`base64 -i key.json`) in
+      `deploy/.env.production` as `GOOGLE_INDEXING_SA_JSON`; restart
+      `worker`. Not in chat.
+- [ ] **`INDEXNOW_KEY`**: any 32 hex chars work (e.g. `openssl rand -hex 16`);
+      set it in `deploy/.env.production` and restart `web` and `worker`.
+      Not secret (it is served publicly at `/<key>.txt`).
+- [ ] **Analytics**: none is installed (by design in this branch). Choose GA4
+      (needs the cookie consent banner) or a cookieless tool (Plausible,
+      Umami, Cloudflare Web Analytics: no banner needed).

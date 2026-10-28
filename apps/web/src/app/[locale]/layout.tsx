@@ -1,6 +1,6 @@
 import '../global.css';
 
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import {
   getMessages,
@@ -15,6 +15,20 @@ import { AppToaster } from '../../components/app-toaster';
 import { buildLocaleAlternates, SITE_NAME } from '../../i18n/metadata';
 import { absoluteSiteOrigin } from '../../lib/site-origin';
 import { routing } from '../../i18n/routing';
+
+function siteVerification(): Metadata['verification'] {
+  const google = process.env.GOOGLE_SITE_VERIFICATION?.trim();
+  const bing = process.env.BING_SITE_VERIFICATION?.trim();
+  const yandex = process.env.YANDEX_SITE_VERIFICATION?.trim();
+  return {
+    ...(google ? { google } : {}),
+    ...(yandex ? { yandex } : {}),
+    ...(bing ? { other: { 'msvalidate.01': bing } } : {}),
+  };
+}
+
+/** Browser UI colour: the brand teal (`--primary`, see make-icons.mjs). */
+export const viewport: Viewport = { themeColor: '#007767' };
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -61,6 +75,8 @@ export async function generateMetadata({
       title: t('title'),
       description: t('description'),
     },
+    // Search Console / Bing / Yandex ownership tags; unset → no tag.
+    verification: siteVerification(),
     robots: {
       index: true,
       follow: true,

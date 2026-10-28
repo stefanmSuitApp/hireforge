@@ -54,6 +54,11 @@ import {
   processOutboxDispatchJob,
   startOutboxPoller,
 } from './outbox';
+import {
+  createSearchIndexingNotifier,
+  dbJobSegments,
+  searchIndexingConfigFromEnv,
+} from './search-indexing';
 import { workerLog } from './worker-log';
 
 function resolveJobCorrelationId(job: Job): string | undefined {
@@ -231,6 +236,23 @@ const outboxBatch = Math.min(
 
 let outboxPoller: ReturnType<typeof setInterval> | undefined;
 const workerDb = getWorkerDatabase();
+
+/** Search engine pings for job pages (IndexNow / Google); off unless configured. */
+const searchIndexingConfig = searchIndexingConfigFromEnv();
+const searchIndexing =
+  searchIndexingConfig && workerDb
+    ? createSearchIndexingNotifier(searchIndexingConfig, {
+        lookupSegments: dbJobSegments(workerDb.db),
+      })
+    : null;
+const searchIndexingTimer = searchIndexing
+  ? setInterval(() => void searchIndexing.flush(), 30_000)
+  : undefined;
+workerLog('info', 'search_indexing_config', {
+  service: 'worker',
+  indexNow: String(Boolean(searchIndexingConfig?.indexNowKey)),
+  google: String(Boolean(searchIndexingConfig?.google)),
+});
 if (workerDb) {
   void pollOutboxToPlatformQueue(platformQueue, workerDb.db, {
     batchSize: outboxBatch,
@@ -300,6 +322,7 @@ const worker = new Worker(
         const correlationId = parsed.data.correlationId;
         await processOutboxDispatchJob(database.db, parsed.data.outboxEventId, {
           afterCommit: async (row) => {
+            searchIndexing?.enqueue(row.eventType, row.payload);
             if (
               !isKnownOutboxEventType(row.eventType) ||
               !NOTIFICATION_EVENT_TYPES.has(row.eventType)
@@ -532,9 +555,11 @@ async function shutdown(signal: string): Promise<void> {
     clearInterval(outboxPoller);
   }
   clearInterval(keepAlive);
+  clearInterval(searchIndexingTimer);
   // Hard stop if a job hangs (compose stop_grace_period is 30s).
   setTimeout(() => process.exit(1), 25_000).unref();
   try {
+    await searchIndexing?.flush();
     await worker.close();
     await platformQueue.close();
     await Promise.allSettled([

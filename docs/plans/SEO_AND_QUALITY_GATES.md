@@ -353,3 +353,21 @@ jobs-N}.xml` with `sr`/`en`/`x-default` alternates, ≤ 5 000 URLs per
       through sign-in while jobs are public.
 - [x] W3.3 · Expired job page (done with W1): banner, noindex, no
       JobPosting, links to similar live jobs.
+- [x] W4.1 · `GOOGLE_SITE_VERIFICATION`, `BING_SITE_VERIFICATION`
+      (`msvalidate.01`), `YANDEX_SITE_VERIFICATION` → `metadata.verification`
+      (runtime env; unset → no tag).
+- [x] W4.2 · IndexNow: `/<INDEXNOW_KEY>.txt` (next.config rewrite → route
+      that 404s unless the key matches). Worker
+      (`apps/worker/src/search-indexing.ts`) queues job published / expired /
+      unpublished / force-archived events after the outbox commit, flushes
+      every 30 s (and on shutdown) in one batch, retries 5xx/429 three times,
+      logs and drops; never blocks the outbox.
+- [x] W4.3 · Google Indexing API from the same queue: service-account JWT
+      (jose) → token → `URL_UPDATED` (published, expired: the page stays,
+      noindex) / `URL_DELETED` (unpublished, archived: 404).
+- [x] W4.4 · `manifest.ts` (name, start_url `/sr`, standalone, theme colour,
+      192/512/maskable/SVG icons), `theme-color` meta, Apple touch icon.
+- [x] W4.5 · `/llms.txt`: site description (existing Metadata copy) and the
+      public sections; job sections only while `PUBLIC_JOBS` is on.
+- [x] W4.6 · No analytics added; the GA4 vs cookieless choice is in
+      NEEDS_STEFAN.md.

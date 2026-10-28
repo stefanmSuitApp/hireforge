@@ -18,6 +18,8 @@ const webMode = process.env['E2E_WEB'] === 'start' ? 'start' : 'dev';
 const databaseUrl = process.env['E2E_DATABASE_URL'] ?? '';
 const redisUrl = process.env['E2E_REDIS_URL'] ?? '';
 
+export const E2E_INDEXNOW_KEY = 'e2e-indexnow-key-0001';
+
 const MAIL_PORT = Number(process.env['E2E_MAIL_PORT'] ?? 4300);
 export const FAKE_RESEND_ORIGIN = `http://127.0.0.1:${MAIL_PORT}`;
 
@@ -96,6 +98,9 @@ export default defineConfig({
         NEXT_PUBLIC_API_URL: apiOrigin,
         NEST_API_URL: apiOrigin,
         NEXT_PUBLIC_APP_URL: `http://127.0.0.1:${WEB_PORT}`,
+        // Discovery integrations (e2e/discovery.spec.ts); test values only.
+        INDEXNOW_KEY: E2E_INDEXNOW_KEY,
+        GOOGLE_SITE_VERIFICATION: 'e2e-google-verification',
       },
     },
   ],
