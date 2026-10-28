@@ -38,7 +38,6 @@ import {
   packagePrices,
   packages,
   proformas,
-  resumeAssets,
   subscriptions,
   users,
 } from 'database';

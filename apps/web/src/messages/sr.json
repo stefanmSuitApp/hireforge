@@ -1045,6 +1045,8 @@
     "APPLICATION_REAPPLY_COOLDOWN": "Nedavno ste povukli prijavu. Sačekajte 24 sata pre ponovne prijave na ovaj posao.",
     "APPLICATION_RESUME_REQUIRED": "Otpremite CV na profilu (ili ga ovde izaberite) pre prijave.",
     "APPLICATION_SUBMIT_RATE_LIMITED": "Previše prijava u jednom danu. Probajte sutra.",
+    "CV_GENERATE_RATE_LIMITED": "Previše generisanih CV-jeva u poslednjih sat vremena. Pokušajte kasnije.",
+    "SAVED_SEARCH_LIMIT_REACHED": "Možete sačuvati najviše 50 pretraga.",
     "AUTH_RATE_LIMITED": "Previše pokušaja. Sačekajte nekoliko minuta i pokušajte ponovo.",
     "AUTH_TOKEN_INVALID": "Link je neispravan ili je istekao. Zatražite novi.",
     "AUTH_EMAIL_SEND_FAILED": "Slanje e-pošte trenutno nije uspelo. Pokušajte ponovo za nekoliko minuta.",

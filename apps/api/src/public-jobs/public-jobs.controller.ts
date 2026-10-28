@@ -21,6 +21,7 @@ import type { Request } from 'express';
 import { z } from 'zod';
 
 import { PublicJobsService } from './public-jobs.service';
+import { forwardedClientIp } from '../auth/auth-rate-limit';
 
 @Controller('public/jobs')
 export class PublicJobsController {
@@ -98,11 +99,9 @@ export class PublicJobsController {
     if (!parsed.success) {
       throw new BadRequestException(z.flattenError(parsed.error));
     }
-    const xf = req.headers['x-forwarded-for'];
+    // The BFF forwards exactly one address (the hop Caddy saw).
     const ip =
-      typeof xf === 'string'
-        ? xf.split(',')[0].trim()
-        : (req.ip ?? req.socket.remoteAddress ?? '');
+      forwardedClientIp(req) ?? req.ip ?? req.socket.remoteAddress ?? '';
     return this.publicJobs.recordExternalApplyClick(
       jobId,
       parsed.data.sessionKey,

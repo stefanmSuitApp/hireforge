@@ -11,6 +11,15 @@ export function nestApiUrl(
     return null;
   }
   const path = apiPath.replace(/^\//, '');
+  // BFF routes interpolate URL-decoded params: `..%2F` would otherwise let a
+  // caller reach any Nest route via `fetch` path normalisation.
+  const pathPart = path.split('?')[0] ?? '';
+  if (
+    pathPart.includes('\\') ||
+    pathPart.split('/').some((seg) => seg === '..' || seg === '.')
+  ) {
+    return null;
+  }
   const b = baseUrl.trim().replace(/\/$/, '');
   if (b.endsWith('/api')) {
     return `${b}/${path}`;
