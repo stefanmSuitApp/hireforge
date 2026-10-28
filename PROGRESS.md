@@ -198,6 +198,12 @@ backup first, migration `0032` applied, `PUBLIC_JOBS` at its default):
 
 ## Known issues not yet scheduled
 
+- SEO: while the API is down or restarting, job and company pages render an
+  error screen with **200** and `noindex` metadata (no canonical). A crawl in
+  that window may drop the page. Fix: answer 503 (throw) when the API fails
+  with anything but 404, in the route and in `generateMetadata`. Seen right
+  after the Phase D restart (2026-10-28), gone on the next fetch.
+
 - `drizzle/meta` only has the `0000` snapshot → `pnpm db:generate` would
   emit a bogus full-schema migration; keep hand-writing migrations.
 - Bank details for invoices are editable in Sanity (payment redirection risk).
