@@ -19,7 +19,7 @@
     "types": ["vitest/globals"],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
+      "@/*": ["./src/*"],
       "contracts": ["../../libs/contracts/src/index.ts"],
       "shared": ["../../libs/shared/src/index.ts"],
       "ui": ["../../libs/ui/src/index.ts"],
