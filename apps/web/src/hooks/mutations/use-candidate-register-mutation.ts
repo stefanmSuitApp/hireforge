@@ -4,7 +4,7 @@ import { useMutation } from '@tanstack/react-query';
 
 import { useLocale } from 'next-intl';
 
-import type { AppLocale } from '@/i18n/localized-path';
+import { stripLocalePrefix, type AppLocale } from '@/i18n/localized-path';
 import { navigateWithFreshSession } from '@/lib/session-navigation';
 
 import {
@@ -12,11 +12,19 @@ import {
   type CandidateRegisterBody,
 } from '@/api/candidate-auth';
 
+type Vars = { body: CandidateRegisterBody; returnTo?: string | null };
+
 export function useCandidateRegisterMutation() {
   const locale = useLocale() as AppLocale;
   return useMutation({
-    mutationFn: (body: CandidateRegisterBody) => postCandidateRegister(body),
-    onSuccess: () => {
+    mutationFn: (vars: Vars) => postCandidateRegister(vars.body),
+    onSuccess: (_data, variables) => {
+      // Back to the job (or list) that sent the visitor here, like login.
+      const ret = variables.returnTo;
+      if (ret?.startsWith('/') && !ret.startsWith('//')) {
+        navigateWithFreshSession(locale, stripLocalePrefix(ret));
+        return;
+      }
       navigateWithFreshSession(locale, '/candidate');
     },
   });

@@ -26,6 +26,7 @@ export function HomeFeaturedJobsStrip({
 }: Props) {
   if (items.length === 0) return null;
 
+  // The list itself is open to guests (featured in full, the rest as teasers).
   const viewAllHref = isAuthenticated
     ? '/jobs'
     : `/sign-in?returnTo=${encodeURIComponent(`/${locale}/jobs`)}`;

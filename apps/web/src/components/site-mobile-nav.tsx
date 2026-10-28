@@ -1,7 +1,8 @@
 'use client';
 
+import { Menu } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 
 import {
   ADMIN_WORKSPACE_LINKS,
@@ -20,6 +21,12 @@ import {
   getModeratorWorkspaceNavKey,
   MODERATOR_WORKSPACE_LINKS,
 } from '@/features/moderator/moderator-workspace-links';
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 import { Link, usePathname } from '@/i18n/navigation';
 import { cn } from '@/lib/cn';
 import { signOut } from '@/lib/sign-out';
@@ -52,6 +59,12 @@ function isCandidateWorkspaceRoute(pathname: string): boolean {
   }
   return /^\/jobs\/[^/]+\/apply$/.test(pathname);
 }
+
+const rowClass = (active: boolean) =>
+  cn(
+    'flex min-h-11 items-center rounded-xl px-3 text-base font-medium transition-colors',
+    active ? 'bg-foreground text-background' : 'text-foreground hover:bg-muted',
+  );
 
 export function SiteMobileNav({
   locale,
@@ -90,225 +103,133 @@ export function SiteMobileNav({
   const adminNavCurrent =
     authRole === 'admin' ? getAdminWorkspaceNavKey(pathname) : null;
 
+  const close = () => setOpen(false);
+  const row = (href: string, label: ReactNode, active: boolean) => (
+    <Link
+      key={href}
+      href={href}
+      locale={locale}
+      className={rowClass(active)}
+      aria-current={active ? 'page' : undefined}
+      onClick={close}
+    >
+      {label}
+    </Link>
+  );
+
+  let workspaceLinks: ReactNode = null;
+  if (isAuthenticated && authRole === 'candidate' && inCandidateContext) {
+    workspaceLinks = CANDIDATE_WORKSPACE_LINKS.map(
+      ({ href, navKey, messageKey }) =>
+        row(href, tCandidate(messageKey), candidateNavCurrent === navKey),
+    );
+  } else if (
+    isAuthenticated &&
+    authRole === 'employer' &&
+    !awaitingApproval &&
+    inEmployerContext
+  ) {
+    workspaceLinks = EMPLOYER_WORKSPACE_LINKS.map(
+      ({ href, navKey, messageKey }) =>
+        row(href, tEmployer(messageKey), employerNavCurrent === navKey),
+    );
+  } else if (
+    isAuthenticated &&
+    (authRole === 'moderator' || authRole === 'admin')
+  ) {
+    workspaceLinks = (
+      <>
+        {MODERATOR_WORKSPACE_LINKS.map(({ href, navKey, messageKey }) =>
+          row(href, tModerator(messageKey), moderatorNavCurrent === navKey),
+        )}
+        {authRole === 'admin' ? (
+          <>
+            <div className="my-2 border-t border-border/60" />
+            {ADMIN_WORKSPACE_LINKS.map(({ href, navKey, messageKey }) =>
+              row(href, tAdmin(messageKey), adminNavCurrent === navKey),
+            )}
+          </>
+        ) : null}
+      </>
+    );
+  }
+
+  const primaryClass =
+    'flex min-h-11 items-center justify-center rounded-xl bg-primary px-3 text-base font-semibold text-primary-foreground hover:bg-primary/90';
+
   return (
-    <div className="relative md:hidden">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        aria-label={ariaLabel}
-        className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border/60 bg-card/70 text-foreground transition-colors hover:bg-muted/70"
-      >
-        <span className="sr-only">{ariaLabel}</span>
-        <span className="text-lg leading-none">☰</span>
-      </button>
-
-      {open ? (
-        <>
-          <button
-            type="button"
-            className="fixed inset-0 z-40 bg-black/30"
-            onClick={() => setOpen(false)}
-            aria-label={ariaLabel}
-          />
-          <div className="absolute right-0 top-12 z-50 w-72 rounded-2xl border border-border/60 bg-background p-3 shadow-xl">
-            <nav aria-label={ariaLabel} className="flex flex-col gap-1">
-              {items.map((item) => {
-                const active = isNavActive(pathname, item.href);
-                return item.external ? (
-                  <a
-                    key={`${item.label}-${item.href}`}
-                    href={item.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className={cn(
-                      'rounded-xl px-3 py-2 text-sm font-medium transition-colors',
-                      active
-                        ? 'bg-foreground text-background'
-                        : 'text-foreground hover:bg-muted',
-                    )}
-                    onClick={() => setOpen(false)}
-                  >
-                    {item.label}
-                  </a>
-                ) : (
-                  <Link
-                    key={`${item.label}-${item.href}`}
-                    href={item.href}
-                    locale={locale}
-                    className={cn(
-                      'rounded-xl px-3 py-2 text-sm font-medium transition-colors',
-                      active
-                        ? 'bg-foreground text-background'
-                        : 'text-foreground hover:bg-muted',
-                    )}
-                    onClick={() => setOpen(false)}
-                  >
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </nav>
-
-            <div className="mt-3 border-t border-border/60 pt-3">
-              {isAuthenticated &&
-              authRole === 'candidate' &&
-              inCandidateContext ? (
-                <div className="flex flex-col gap-1">
-                  {CANDIDATE_WORKSPACE_LINKS.map(
-                    ({ href, navKey, messageKey }) => {
-                      const active = candidateNavCurrent === navKey;
-                      return (
-                        <Link
-                          key={href}
-                          href={href}
-                          locale={locale}
-                          className={cn(
-                            'rounded-xl px-3 py-2 text-sm font-medium transition-colors',
-                            active
-                              ? 'bg-foreground text-background'
-                              : 'text-foreground hover:bg-muted',
-                          )}
-                          onClick={() => setOpen(false)}
-                        >
-                          {tCandidate(messageKey)}
-                        </Link>
-                      );
-                    },
-                  )}
-                </div>
-              ) : isAuthenticated &&
-                authRole === 'employer' &&
-                !awaitingApproval &&
-                inEmployerContext ? (
-                <div className="flex flex-col gap-1">
-                  {EMPLOYER_WORKSPACE_LINKS.map(
-                    ({ href, navKey, messageKey }) => {
-                      const active = employerNavCurrent === navKey;
-                      return (
-                        <Link
-                          key={href}
-                          href={href}
-                          locale={locale}
-                          className={cn(
-                            'rounded-xl px-3 py-2 text-sm font-medium transition-colors',
-                            active
-                              ? 'bg-foreground text-background'
-                              : 'text-foreground hover:bg-muted',
-                          )}
-                          onClick={() => setOpen(false)}
-                        >
-                          {tEmployer(messageKey)}
-                        </Link>
-                      );
-                    },
-                  )}
-                </div>
-              ) : isAuthenticated && authRole === 'moderator' ? (
-                <div className="flex flex-col gap-1">
-                  {MODERATOR_WORKSPACE_LINKS.map(
-                    ({ href, navKey, messageKey }) => {
-                      const active = moderatorNavCurrent === navKey;
-                      return (
-                        <Link
-                          key={href}
-                          href={href}
-                          locale={locale}
-                          className={cn(
-                            'rounded-xl px-3 py-2 text-sm font-medium transition-colors',
-                            active
-                              ? 'bg-foreground text-background'
-                              : 'text-foreground hover:bg-muted',
-                          )}
-                          onClick={() => setOpen(false)}
-                        >
-                          {tModerator(messageKey)}
-                        </Link>
-                      );
-                    },
-                  )}
-                </div>
-              ) : isAuthenticated && authRole === 'admin' ? (
-                <div className="flex flex-col gap-1">
-                  {MODERATOR_WORKSPACE_LINKS.map(
-                    ({ href, navKey, messageKey }) => {
-                      const active = moderatorNavCurrent === navKey;
-                      return (
-                        <Link
-                          key={href}
-                          href={href}
-                          locale={locale}
-                          className={cn(
-                            'rounded-xl px-3 py-2 text-sm font-medium transition-colors',
-                            active
-                              ? 'bg-foreground text-background'
-                              : 'text-foreground hover:bg-muted',
-                          )}
-                          onClick={() => setOpen(false)}
-                        >
-                          {tModerator(messageKey)}
-                        </Link>
-                      );
-                    },
-                  )}
-                  <div className="my-2 border-t border-border/60" />
-                  {ADMIN_WORKSPACE_LINKS.map(({ href, navKey, messageKey }) => {
-                    const active = adminNavCurrent === navKey;
-                    return (
-                      <Link
-                        key={href}
-                        href={href}
-                        locale={locale}
-                        className={cn(
-                          'rounded-xl px-3 py-2 text-sm font-medium transition-colors',
-                          active
-                            ? 'bg-foreground text-background'
-                            : 'text-foreground hover:bg-muted',
-                        )}
-                        onClick={() => setOpen(false)}
-                      >
-                        {tAdmin(messageKey)}
-                      </Link>
-                    );
-                  })}
-                </div>
-              ) : isAuthenticated && dashboardPath ? (
-                <Link
-                  href={dashboardPath}
-                  locale={locale}
-                  className="block rounded-xl bg-primary px-3 py-2 text-center text-sm font-semibold text-primary-foreground hover:bg-primary/90"
-                  onClick={() => setOpen(false)}
+    <div className="md:hidden">
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetTrigger
+          aria-label={ariaLabel}
+          className="inline-flex size-11 items-center justify-center rounded-full border border-border bg-card text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <Menu className="size-5" aria-hidden />
+        </SheetTrigger>
+        <SheetContent side="right" closeLabel={tNav('closeMenu')}>
+          <SheetTitle className="pr-12 leading-[2.75rem]">
+            {ariaLabel}
+          </SheetTitle>
+          <nav aria-label={ariaLabel} className="flex flex-col gap-1">
+            {items.map((item) =>
+              item.external ? (
+                <a
+                  key={`${item.label}-${item.href}`}
+                  href={item.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={rowClass(false)}
+                  onClick={close}
                 >
-                  {dashboardLabel}
-                </Link>
+                  {item.label}
+                </a>
               ) : (
-                <Link
-                  href="/sign-in"
-                  locale={locale}
-                  className="block rounded-xl bg-primary px-3 py-2 text-center text-sm font-semibold text-primary-foreground hover:bg-primary/90"
-                  onClick={() => setOpen(false)}
-                >
-                  {signInLabel}
-                </Link>
-              )}
-              {isAuthenticated && logoutEndpoint ? (
-                <button
-                  type="button"
-                  disabled={signingOut}
-                  onClick={async () => {
-                    setSigningOut(true);
-                    if (await signOut(logoutEndpoint, locale)) return;
-                    setSigningOut(false);
-                  }}
-                  className="mt-2 w-full rounded-xl px-3 py-2 text-left text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-60"
-                >
-                  {signingOut ? tNav('signingOut') : tNav('signOut')}
-                </button>
-              ) : null}
-            </div>
+                row(item.href, item.label, isNavActive(pathname, item.href))
+              ),
+            )}
+          </nav>
+
+          <div className="flex flex-col gap-1 border-t border-border/60 pt-3">
+            {workspaceLinks}
+            {workspaceLinks == null && isAuthenticated && dashboardPath ? (
+              <Link
+                href={dashboardPath}
+                locale={locale}
+                className={primaryClass}
+                onClick={close}
+              >
+                {dashboardLabel}
+              </Link>
+            ) : null}
+            {!isAuthenticated ? (
+              <Link
+                href="/sign-in"
+                locale={locale}
+                className={primaryClass}
+                onClick={close}
+              >
+                {signInLabel}
+              </Link>
+            ) : null}
           </div>
-        </>
-      ) : null}
+
+          {isAuthenticated && logoutEndpoint ? (
+            // Account actions sit apart from navigation, at the bottom.
+            <button
+              type="button"
+              disabled={signingOut}
+              onClick={async () => {
+                setSigningOut(true);
+                if (await signOut(logoutEndpoint, locale)) return;
+                setSigningOut(false);
+              }}
+              className="mt-auto flex min-h-11 w-full items-center rounded-xl px-3 text-left text-base font-medium text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-60"
+            >
+              {signingOut ? tNav('signingOut') : tNav('signOut')}
+            </button>
+          ) : null}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

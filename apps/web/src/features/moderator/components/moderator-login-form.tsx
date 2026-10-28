@@ -51,7 +51,7 @@ export function ModeratorLoginForm() {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="h-11 rounded-xl border-border/70 bg-background/90"
+          className="h-11 rounded-xl"
         />
       </div>
       <div className="space-y-2">
@@ -70,7 +70,7 @@ export function ModeratorLoginForm() {
           onChange={(e) => setPassword(e.target.value)}
           showLabel={t('passwordShow')}
           hideLabel={t('passwordHide')}
-          className="h-11 rounded-xl border-border/70 bg-background/90"
+          className="h-11 rounded-xl"
         />
       </div>
       {error ? (

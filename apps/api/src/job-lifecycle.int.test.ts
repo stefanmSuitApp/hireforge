@@ -189,7 +189,11 @@ describe('a moderator reviews the job', () => {
     expect(row.expires_at.getTime()).toBeGreaterThan(
       row.published_at.getTime(),
     );
-    const pub = await http(app).get(`/api/public/jobs/${id}`).expect(200);
+    // Signed in: a job without the featured perk is a teaser for guests.
+    const pub = await http(app)
+      .get(`/api/public/jobs/${id}`)
+      .set(moderator.headers)
+      .expect(200);
     expect(JSON.stringify(pub.body)).toContain('Električar');
     expect(await outbox('job_published', id)).toHaveLength(1);
   });
@@ -335,7 +339,10 @@ describe('published jobs expire', () => {
     expect(await expirePublishedJobsPastExpiresAt(db, { now: later })).toBe(0);
     expect((await job(id)).status).toBe('expired');
     // The page stays (noindex, no apply) but the job is no longer live or listed.
-    const detail = await http(app).get(`/api/public/jobs/${id}`).expect(200);
+    const detail = await http(app)
+      .get(`/api/public/jobs/${id}`)
+      .set(moderator.headers)
+      .expect(200);
     expect(detail.body.live).toBe(false);
     const list = await http(app)
       .get('/api/public/jobs?pageSize=50')

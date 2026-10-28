@@ -1,5 +1,6 @@
 'use client';
 
+import { Lock } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import type { MouseEvent } from 'react';
 
@@ -7,13 +8,16 @@ import type { PublicJobListItem } from 'contracts';
 
 import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/cn';
-import { publicJobUrlSegment } from '@/lib/job-public-segment';
+import {
+  publicJobCardHref,
+  publicJobUrlSegment,
+} from '@/lib/job-public-segment';
 
 import {
   localizedCategoryLine,
   localizedCityLine,
 } from '../lib/bilingual-label';
-import { humanizeEnum } from '../lib/humanize-enum';
+import { jobEnumLabel } from '../lib/job-enum-label';
 
 import { SaveJobButton } from './save-job-button';
 
@@ -38,16 +42,18 @@ export function PublicJobCard({
 }: Props) {
   const t = useTranslations('Jobs');
   const tDetail = useTranslations('JobDetail');
+  const tEnum = useTranslations('Enums');
   const hookLocale = useLocale();
   const locale = listLocale || hookLocale;
   const seg = publicJobUrlSegment(job);
   const city = localizedCityLine(locale, job.city);
   const cat = localizedCategoryLine(locale, job.category);
-  const jobHref = `/jobs/${seg}`;
+  const jobHref = publicJobCardHref(job, locale);
 
   function onCardLinkClick(e: MouseEvent<HTMLAnchorElement>) {
     if (
       !onSelectDesktop ||
+      job.locked ||
       typeof window === 'undefined' ||
       !window.matchMedia('(min-width: 768px)').matches
     ) {
@@ -76,7 +82,7 @@ export function PublicJobCard({
       />
       <div className="relative z-10 pointer-events-none">
         {job.featured ? (
-          <span className="mb-3 inline-block rounded-full bg-primary/10 px-2.5 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-primary">
+          <span className="mb-3 inline-block rounded-full bg-primary px-2.5 py-0.5 text-xs font-semibold text-primary-foreground">
             {tDetail('featuredBadge')}
           </span>
         ) : null}
@@ -86,13 +92,20 @@ export function PublicJobCard({
               {job.title}
             </h2>
             <p className="m-0 text-sm leading-snug text-muted-foreground">
-              <Link
-                href={`/companies/${job.company.slug}`}
-                className="pointer-events-auto font-medium text-primary underline-offset-2 hover:underline"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {job.company.name}
-              </Link>
+              {job.company ? (
+                <Link
+                  href={`/companies/${job.company.slug}`}
+                  className="pointer-events-auto font-medium text-primary underline-offset-2 hover:underline"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {job.company.name}
+                </Link>
+              ) : (
+                <span className="inline-flex items-center gap-1 font-medium text-foreground">
+                  <Lock className="size-3.5" aria-hidden />
+                  {t('lockedCompany')}
+                </span>
+              )}
               {city ? ` · ${city}` : ''}
               {cat ? ` · ${cat}` : ''}
             </p>
@@ -101,15 +114,15 @@ export function PublicJobCard({
             </p>
             <div className="mt-3 flex flex-wrap gap-1.5">
               {job.applyMode === 'internal' ? (
-                <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+                <span className="rounded-full border border-primary/30 bg-card px-2.5 py-0.5 text-xs font-semibold text-primary">
                   {t('chipEasyApply')}
                 </span>
               ) : null}
               <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-                {humanizeEnum(job.workModel)}
+                {jobEnumLabel(tEnum, 'workModel', job.workModel)}
               </span>
               <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-                {humanizeEnum(job.employmentType)}
+                {jobEnumLabel(tEnum, 'employmentType', job.employmentType)}
               </span>
             </div>
           </div>

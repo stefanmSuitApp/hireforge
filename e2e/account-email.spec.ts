@@ -31,7 +31,7 @@ test('candidate verifies email from the emailed link and can then apply', async 
   // Apply is gated, with a way to get a new email.
   await gotoHydrated(page, `/sr/jobs/${SEED_JOB_ID}/apply`, 'form');
   await expect(
-    page.getByText('Potvrdite e-poštu da biste se prijavili'),
+    page.getByText('Potvrdi e-poštu pre konkurisanja'),
   ).toBeVisible();
   await page
     .getByRole('button', { name: 'Pošalji ponovo e-poruku za potvrdu' })
@@ -61,9 +61,9 @@ test('candidate verifies email from the emailed link and can then apply', async 
 
   // Gate is gone on the apply page.
   await page.goto(`/sr/jobs/${SEED_JOB_ID}/apply`);
-  await expect(
-    page.getByText('Potvrdite e-poštu da biste se prijavili'),
-  ).toHaveCount(0);
+  await expect(page.getByText('Potvrdi e-poštu pre konkurisanja')).toHaveCount(
+    0,
+  );
 });
 
 test('forgotten password can be reset from the login page', async ({
@@ -77,7 +77,7 @@ test('forgotten password can be reset from the login page', async ({
   const ctx = await browser.newContext();
   const page = await ctx.newPage();
   await page.goto('/sr/candidate/login');
-  await page.getByRole('link', { name: 'Zaboravili ste lozinku?' }).click();
+  await page.getByRole('link', { name: 'Zaboravljena lozinka?' }).click();
   await expect(page).toHaveURL(/\/sr\/forgot-password$/);
   await waitHydrated(page, '#forgot-email');
   await page.getByLabel('E-pošta').fill(email);
@@ -93,7 +93,7 @@ test('forgotten password can be reset from the login page', async ({
     '#reset-password',
   );
   await page.getByLabel('Nova lozinka').fill('NovaLozinka9!');
-  await page.getByLabel('Ponovite lozinku').fill('NovaLozinka9!');
+  await page.getByLabel('Ponovi lozinku').fill('NovaLozinka9!');
   await page.getByRole('button', { name: 'Sačuvaj lozinku' }).click();
   await expect(
     page.getByText('Lozinka je promenjena', { exact: false }),

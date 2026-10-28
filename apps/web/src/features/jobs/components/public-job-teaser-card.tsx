@@ -2,17 +2,18 @@
 
 import type { PublicJobListItem } from 'contracts';
 
-import { ArrowUpRight, MapPin, Tag } from 'lucide-react';
+import { ArrowUpRight, Lock, MapPin, Tag } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/cn';
-import { publicJobUrlSegment } from '@/lib/job-public-segment';
+import { publicJobCardHref } from '@/lib/job-public-segment';
 
 import {
   localizedCategoryLine,
   localizedCityLine,
 } from '../lib/bilingual-label';
-import { humanizeEnum } from '../lib/humanize-enum';
+import { jobEnumLabel } from '../lib/job-enum-label';
 
 type Props = {
   job: PublicJobListItem;
@@ -29,7 +30,8 @@ export function PublicJobTeaserCard({
   featuredRibbonLabel,
   isAuthenticated = true,
 }: Props) {
-  const seg = publicJobUrlSegment(job);
+  const t = useTranslations('Jobs');
+  const tEnum = useTranslations('Enums');
   const city = localizedCityLine(locale, job.city);
   const cat = localizedCategoryLine(locale, job.category);
 
@@ -37,10 +39,10 @@ export function PublicJobTeaserCard({
     featuredRibbonLabel?.trim() && (spotlight || job.featured),
   );
 
-  const jobDetailPath = `/jobs/${seg}`;
-  const href = isAuthenticated
-    ? jobDetailPath
-    : `/sign-in?returnTo=${encodeURIComponent(`/${locale}${jobDetailPath}`)}`;
+  const href = publicJobCardHref(
+    { ...job, locked: job.locked || !isAuthenticated },
+    locale,
+  );
 
   return (
     <Link
@@ -65,19 +67,18 @@ export function PublicJobTeaserCard({
 
       <div className="flex flex-1 flex-col p-5">
         <div className="mb-2 flex items-center justify-between gap-2">
-          <span
-            role="link"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              window.location.href = `/${locale}/companies/${job.company.slug}`;
-            }}
-            className="text-xs font-semibold uppercase tracking-wide text-muted-foreground hover:text-primary"
-          >
-            {job.company.name}
-          </span>
+          {job.company ? (
+            <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              {job.company.name}
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground">
+              <Lock className="size-3" aria-hidden />
+              {t('lockedCompany')}
+            </span>
+          )}
           {isFeatured && featuredRibbonLabel && (
-            <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wider text-primary">
+            <span className="shrink-0 rounded-full bg-primary px-2.5 py-0.5 text-xs font-semibold text-primary-foreground">
               {featuredRibbonLabel}
             </span>
           )}
@@ -88,7 +89,8 @@ export function PublicJobTeaserCard({
         </h3>
 
         <p className="m-0 mb-3 text-xs text-muted-foreground">
-          {humanizeEnum(job.workModel)} · {humanizeEnum(job.employmentType)}
+          {jobEnumLabel(tEnum, 'workModel', job.workModel)} ·{' '}
+          {jobEnumLabel(tEnum, 'employmentType', job.employmentType)}
         </p>
 
         <div className="mt-auto flex items-end justify-between gap-3">

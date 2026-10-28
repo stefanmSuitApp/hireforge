@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { isUuidString } from '@/lib/job-public-segment';
 import { nestApiUrl, resolveNestServerOrigin } from '@/lib/nest-api-url';
+import { viewerAuthHeaders } from '@/lib/viewer-access-token';
 
 /**
  * Browser-safe proxy for public job detail (avoids CORS on direct Nest calls).
@@ -35,7 +36,7 @@ export async function GET(
   }
 
   const upstream = await fetch(url, {
-    headers: { Accept: 'application/json' },
+    headers: { Accept: 'application/json', ...(await viewerAuthHeaders()) },
     cache: 'no-store',
   });
   const text = await upstream.text();

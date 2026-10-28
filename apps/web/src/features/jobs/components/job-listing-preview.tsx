@@ -19,7 +19,7 @@ import {
   localizedCategoryLine,
   localizedCityLine,
 } from '../lib/bilingual-label';
-import { humanizeEnum } from '../lib/humanize-enum';
+import { jobEnumLabel } from '../lib/job-enum-label';
 
 import { SimilarJobsSection } from './similar-jobs-section';
 
@@ -144,6 +144,7 @@ export function JobListingPreview({
   className,
 }: JobListingPreviewProps) {
   const t = useTranslations('JobDetail');
+  const tEnum = useTranslations('Enums');
   const locale = useLocale();
   const format = useFormatter();
 
@@ -181,10 +182,10 @@ export function JobListingPreview({
         </p>
       ) : null}
       {listingState === 'live' && job.featured ? (
-        <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 px-3 py-2 text-sm font-semibold text-white shadow-sm">
-          <Sparkles className="h-4 w-4 shrink-0 opacity-95" aria-hidden />
+        <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-950">
+          <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
           <span>{t('featuredBadge')}</span>
-          <span className="hidden text-xs font-normal text-amber-50 sm:inline">
+          <span className="hidden text-xs font-normal text-amber-900 sm:inline">
             {t('featuredSpotlightHint')}
           </span>
         </div>
@@ -225,9 +226,15 @@ export function JobListingPreview({
             {t('crossborderBadge')}
           </span>
         ) : null}
-        <span className={chipClass}>{humanizeEnum(job.workModel)}</span>
-        <span className={chipClass}>{humanizeEnum(job.employmentType)}</span>
-        <span className={chipClass}>{humanizeEnum(job.seniority)}</span>
+        <span className={chipClass}>
+          {jobEnumLabel(tEnum, 'workModel', job.workModel)}
+        </span>
+        <span className={chipClass}>
+          {jobEnumLabel(tEnum, 'employmentType', job.employmentType)}
+        </span>
+        <span className={chipClass}>
+          {jobEnumLabel(tEnum, 'seniority', job.seniority)}
+        </span>
       </div>
 
       {job.pngCreativeUrl ? (
@@ -320,7 +327,7 @@ export function JobListingPreview({
               </Link>
               <span className="text-gray-400"> · </span>
               <Link
-                href="/candidate/register"
+                href={`/candidate/register?returnTo=${encodeURIComponent(`/jobs/${jobPath}/apply`)}`}
                 className="font-medium text-teal-700 underline-offset-2 hover:underline"
               >
                 {t('applyCreateAccount')}

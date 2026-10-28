@@ -50,10 +50,15 @@ pnpm build` (+ `pnpm check:i18n`); CI runs it on PRs. Husky: pre-commit
 
 ## Decisions (2026-10-27/28, Stefan)
 
-- ~~Jobs list/detail stay behind login~~ → **public since the SEO branch**
-  (2026-10-28, "max out SEO"): list, detail, employers and landing pages are
-  public behind `PUBLIC_JOBS` (default on); apply and save need login.
-  Reversible without a rebuild; confirm or flip in NEEDS_STEFAN.md.
+- ~~Jobs list/detail stay behind login~~ → ~~public since the SEO branch~~ →
+  **featured public, the rest teased** (2026-10-28 evening): guests see
+  featured jobs (Šef/Gazda, `jobs.featured`) in full, public and indexed;
+  every other job is a teaser (title, city, date) whose page needs sign-in.
+  The API decides (any valid access token unlocks); `PUBLIC_JOBS=false` still
+  walls everything.
+- Copy voice: **ti everywhere**; apply = "Konkuriši", "Prijava/Prijavi se"
+  only means sign-in; enum labels in Serbian unless Serbians use the English
+  word (Junior/Medior/Senior).
 - Employer signup matching an existing company (PIB/MB/VAT/name) →
   **pending join request, moderator/admin approves**.
 - Auth emails are sent directly by the API (raw tokens never stored);
@@ -253,7 +258,33 @@ first CMS fetch is slow); crawlers get them in `<head>`.
 
 `design/review-01.md` (2026-10-28): design system, UI/UX and accessibility
 review with a Now / Next / Later roadmap and open questions for Stefan.
-Not started yet.
+Stefan approved Now, Next and Later (2026-10-28); shipped in three phases.
+
+### Design phase 1 — guest visibility + "Now" (branch `feat/design-now`)
+
+- **Guest job visibility.** `PublicJobListItem.locked` (no company or
+  excerpt), `lockedTotal` on the list, `lockedJobCount` on company pages,
+  401 `JOB_SIGN_IN_REQUIRED` on a non-featured detail for guests (web 307s
+  to sign-in with `returnTo`). Web forwards the viewer's access token from
+  server fetches and the BFF (`lib/viewer-access-token.ts`); signed-in reads
+  skip the fetch cache. Sitemap, landing/company indexing, JSON-LD, llms.txt
+  and the indexing worker (non-featured → URL_DELETED) count featured jobs
+  only. "Još N oglasa te čeka" prompt (`LockedJobsCta`).
+- **Nav:** Poslovi/Poslodavci shown to guests; "Početna" dropped (logo).
+  Home always links to the full list; "Najnoviji oglasi" when nothing is
+  featured.
+- **Copy:** developer text removed from user copy; empty vs filtered-empty
+  states; ti voice, Konkuriši, Serbian style pass (sentence case,
+  diacritics, plurals, no "portal", no unbacked claims); `Enums` namespace
+  replaces `humanizeEnum`.
+- **Accessibility:** Sheet primitive (`@radix-ui/react-dialog`, already in
+  the lockfile via cmdk) for the phone menu (Escape, focus trap/return,
+  Menu/X icons, 44px rows, sign-out at the bottom); skip link; hero search
+  label + focus ring; link focus ring; `prefers-reduced-motion`; 44px touch
+  targets on phones (chips, locale switch, footer links); chips
+  `aria-pressed`; `--input` at 3:1.
+- **returnTo** survives candidate sign-up (register page, login ↔ register
+  links, job page "Napravi nalog").
 
 ## Known issues not yet scheduled
 

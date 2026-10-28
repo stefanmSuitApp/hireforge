@@ -104,9 +104,10 @@ test.describe('on a phone', () => {
     const names = (await context.cookies()).map((c) => c.name);
     expect(names).not.toContain('hf_candidate_refresh');
     await page.getByRole('button', { name: 'Glavna navigacija' }).click();
+    // The menu is a dialog (rendered outside the header).
     await expect(
       page
-        .locator('header')
+        .getByRole('dialog', { name: 'Glavna navigacija' })
         .getByRole('link', { name: 'Prijava', exact: true }),
     ).toBeVisible();
   });

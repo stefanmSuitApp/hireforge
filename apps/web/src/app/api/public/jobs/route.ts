@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { nestApiUrl, resolveNestServerOrigin } from '@/lib/nest-api-url';
+import { viewerAuthHeaders } from '@/lib/viewer-access-token';
 
 /**
  * Proxies `GET /api/public/jobs?...` to Nest (same-origin for the browser).
@@ -20,7 +21,7 @@ export async function GET(req: Request) {
   const upstream = `${upstreamBase}${qs ? `?${qs}` : ''}`;
 
   const res = await fetch(upstream, {
-    headers: { Accept: 'application/json' },
+    headers: { Accept: 'application/json', ...(await viewerAuthHeaders()) },
     cache: 'no-store',
   });
   const text = await res.text();

@@ -149,11 +149,10 @@ test('publishing needs an active package and sets expiry from its duration', asy
   const secondSlug = (await jobSlug(job)) ?? '';
   expect(secondSlug).not.toBe(firstSlug);
   expect(secondSlug.slice(-5)).toBe(firstSlug.slice(-5));
-  const anon = await request.newContext({ baseURL: API });
-  const oldLink = await anon.get(`public/jobs/by-slug/${firstSlug}`);
+  // Signed in: this package has no featured perk, so guests get a teaser.
+  const oldLink = await moderator.get(`public/jobs/by-slug/${firstSlug}`);
   expect(oldLink.ok(), await oldLink.text()).toBeTruthy();
   expect(((await oldLink.json()) as { slug: string }).slug).toBe(secondSlug);
-  await anon.dispose();
 
   // 4) Search finds the live job the way people type Serbian: without
   //    diacritics and in Cyrillic (title is "Programer B senior inženjer").

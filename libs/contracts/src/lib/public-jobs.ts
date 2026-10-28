@@ -99,6 +99,11 @@ export type PublicJobListItem = {
   /** Whether this row should be pinned in search (ŠEF/GAZDA perk). */
   featured: boolean;
   /**
+   * Shown to a guest as a teaser only: featured jobs are public, the rest
+   * need sign-in. A locked row has no excerpt and no company.
+   */
+  locked: boolean;
+  /**
    * Plain-text excerpt (≤ 200 chars) used for Glassdoor-style cards. The full
    * description doc is NOT shipped with list responses (perf budget per SSOT
    * §11.1).
@@ -109,7 +114,8 @@ export type PublicJobListItem = {
   workModel: string;
   employmentType: string;
   seniority: string;
-  company: { slug: string; name: string };
+  /** Null when `locked`. */
+  company: { slug: string; name: string } | null;
   city: {
     slug: string;
     nameSr: string;
@@ -128,6 +134,8 @@ export type PublicJobListResponse = {
   page: number;
   pageSize: number;
   total: number;
+  /** Matching jobs a guest sees only as teasers (0 when signed in). */
+  lockedTotal: number;
 };
 
 export type PublicJobDetailResponse = {
@@ -203,7 +211,10 @@ export type PublicCompanyDetailResponse = {
     slug: string;
     name: string;
   };
+  /** For a guest: only the featured jobs (the rest need sign-in). */
   jobs: PublicCompanyJobItem[];
+  /** Live jobs a guest can't see here (0 when signed in). */
+  lockedJobCount: number;
 };
 
 /** Companies with at least one published job (public directory). */
@@ -238,14 +249,21 @@ export type PublicJobPreviewsResponse = {
 
 /** `GET /api/public/jobs/sitemap` — what is live, for sitemaps and landing pages. */
 export type PublicSitemapResponse = {
+  /** Live featured jobs: the only job pages guests (and crawlers) can open. */
   jobs: Array<{ id: string; slug: string | null; lastmod: string }>;
   /** Companies with at least one live job. */
-  companies: Array<{ slug: string; liveJobs: number; lastmod: string | null }>;
+  companies: Array<{
+    slug: string;
+    liveJobs: number;
+    featuredJobs: number;
+    lastmod: string | null;
+  }>;
   /** Live job counts per (city, category) pair; null = job has none. */
   facets: Array<{
     city: string | null;
     category: string | null;
     liveJobs: number;
+    featuredJobs: number;
     lastmod: string | null;
   }>;
 };

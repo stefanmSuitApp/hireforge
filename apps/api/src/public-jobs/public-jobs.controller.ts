@@ -20,8 +20,13 @@ import {
 import type { Request } from 'express';
 import { z } from 'zod';
 
-import { PublicJobsService } from './public-jobs.service';
+import { PublicJobsService, type PublicViewer } from './public-jobs.service';
 import { forwardedClientIp } from '../auth/auth-rate-limit';
+
+/** Any valid access token (candidate, employer or staff) unlocks every job. */
+function viewerOf(req: Request): PublicViewer {
+  return { signedIn: req.hireforgeUser != null };
+}
 
 @Controller('public/jobs')
 export class PublicJobsController {
@@ -41,18 +46,18 @@ export class PublicJobsController {
 
   /** Compact list rows for home strips (`refs` = comma-separated UUID or slug segments, max 8). */
   @Get('previews')
-  previews(@Query('refs') refs: string | undefined) {
+  previews(@Query('refs') refs: string | undefined, @Req() req: Request) {
     const parts =
       refs
         ?.split(',')
         .map((s) => s.trim())
         .filter(Boolean)
         .slice(0, 8) ?? [];
-    return this.publicJobs.batchPreviews(parts);
+    return this.publicJobs.batchPreviews(parts, viewerOf(req));
   }
 
   @Get()
-  list(@Query() raw: Record<string, string | undefined>) {
+  list(@Query() raw: Record<string, string | undefined>, @Req() req: Request) {
     const parsed = publicJobListQuerySchema.safeParse({
       page: raw.page ?? '1',
       pageSize: raw.pageSize ?? '20',
@@ -68,29 +73,35 @@ export class PublicJobsController {
     if (!parsed.success) {
       throw new BadRequestException(z.flattenError(parsed.error));
     }
-    return this.publicJobs.list(parsed.data);
+    return this.publicJobs.list(parsed.data, viewerOf(req));
   }
 
   @Get('company/:slug')
-  company(@Param() raw: Record<string, string | undefined>) {
+  company(
+    @Param() raw: Record<string, string | undefined>,
+    @Req() req: Request,
+  ) {
     const parsed = publicCompanyParamSchema.safeParse({
       slug: raw.slug,
     });
     if (!parsed.success) {
       throw new BadRequestException(z.flattenError(parsed.error));
     }
-    return this.publicJobs.getCompanyBySlug(parsed.data.slug);
+    return this.publicJobs.getCompanyBySlug(parsed.data.slug, viewerOf(req));
   }
 
   @Get('by-slug/:slug')
-  detailBySlug(@Param() raw: Record<string, string | undefined>) {
+  detailBySlug(
+    @Param() raw: Record<string, string | undefined>,
+    @Req() req: Request,
+  ) {
     const parsed = publicJobBySlugParamSchema.safeParse({
       slug: raw.slug,
     });
     if (!parsed.success) {
       throw new BadRequestException(z.flattenError(parsed.error));
     }
-    return this.publicJobs.getBySlug(parsed.data.slug);
+    return this.publicJobs.getBySlug(parsed.data.slug, viewerOf(req));
   }
 
   /** External apply click telemetry (rate-limited + idempotent per session key when Redis is configured). */
@@ -116,18 +127,21 @@ export class PublicJobsController {
   }
 
   @Get(':id/similar')
-  similar(@Param('id', new ParseUUIDPipe()) id: string) {
-    return this.publicJobs.listSimilar(id, 6);
+  similar(@Param('id', new ParseUUIDPipe()) id: string, @Req() req: Request) {
+    return this.publicJobs.listSimilar(id, viewerOf(req), 6);
   }
 
   @Get(':id')
-  detail(@Param() raw: Record<string, string | undefined>) {
+  detail(
+    @Param() raw: Record<string, string | undefined>,
+    @Req() req: Request,
+  ) {
     const parsed = publicJobDetailParamSchema.safeParse({
       id: raw.id,
     });
     if (!parsed.success) {
       throw new BadRequestException(z.flattenError(parsed.error));
     }
-    return this.publicJobs.getById(parsed.data.id);
+    return this.publicJobs.getById(parsed.data.id, viewerOf(req));
   }
 }

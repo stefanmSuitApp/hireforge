@@ -25,7 +25,7 @@ test('a logged-out visitor browses jobs, opens one and signs in to apply', async
   await expectNoA11yViolations(page);
 
   await waitHydrated(page, 'main a[href$="/apply"]');
-  await page.getByRole('link', { name: 'Prijavi se na ovaj posao' }).click();
+  await page.getByRole('link', { name: 'Konkuriši za ovaj posao' }).click();
   await page.waitForURL(
     (url) =>
       url.pathname === '/sr/candidate/login' &&
@@ -88,7 +88,7 @@ test('an expired ad stays reachable but is noindex, closed and out of lists', as
     /noindex/,
   );
   await expect(
-    page.getByRole('link', { name: 'Prijavi se na ovaj posao' }),
+    page.getByRole('link', { name: 'Konkuriši za ovaj posao' }),
   ).toHaveCount(0);
 
   await page.goto('/sr/jobs');

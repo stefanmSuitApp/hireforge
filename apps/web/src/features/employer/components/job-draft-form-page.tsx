@@ -141,9 +141,9 @@ export function JobDraftFormPage({
 }: Props) {
   const t = useTranslations('Employer.jobForm');
   const tErrors = useTranslations('Errors');
-  const tWm = useTranslations('Employer.jobForm.wm');
-  const tEt = useTranslations('Employer.jobForm.et');
-  const tSen = useTranslations('Employer.jobForm.sen');
+  const tWm = useTranslations('Enums.workModel');
+  const tEt = useTranslations('Enums.employmentType');
+  const tSen = useTranslations('Enums.seniority');
   const tJobs = useTranslations('Jobs');
   const tModReview = useTranslations('Moderator.review');
   const locale = useLocale();

@@ -88,16 +88,15 @@ export function HomeHeroSearch({ action, taxonomy, isAuthenticated }: Props) {
       )}
 
       {/* Tabs */}
-      <div className="mb-4 flex gap-1" role="tablist">
+      <div className="mb-4 flex gap-1">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             type="button"
-            role="tab"
-            aria-selected={activeTab === tab.id}
+            aria-pressed={activeTab === tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={cn(
-              'rounded-full px-5 py-2 text-sm font-medium transition-colors',
+              'min-h-11 rounded-full px-5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
               activeTab === tab.id
                 ? 'bg-primary text-primary-foreground'
                 : 'bg-muted/60 text-muted-foreground hover:bg-muted',
@@ -109,7 +108,7 @@ export function HomeHeroSearch({ action, taxonomy, isAuthenticated }: Props) {
       </div>
 
       {/* Search pill */}
-      <div className="flex items-center gap-2 rounded-full border border-border/60 bg-background p-2 pl-5 shadow-sm">
+      <div className="flex items-center gap-2 rounded-full border border-input bg-background p-2 pl-5 shadow-sm focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/40">
         {activeTab === 'keyword' && (
           <input
             type="search"
@@ -117,6 +116,7 @@ export function HomeHeroSearch({ action, taxonomy, isAuthenticated }: Props) {
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             placeholder={t('heroSearchKeywordPlaceholder')}
+            aria-label={t('heroSearchKeywordPlaceholder')}
             maxLength={200}
             autoComplete="off"
             className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground/70"

@@ -25,7 +25,11 @@ export async function CandidateLoginScreen({ returnTo }: Props) {
           <p className="mt-6 text-center text-sm text-muted-foreground">
             {t('noAccount')}{' '}
             <Link
-              href="/candidate/register"
+              href={
+                returnTo
+                  ? `/candidate/register?returnTo=${encodeURIComponent(returnTo)}`
+                  : '/candidate/register'
+              }
               className="font-medium text-primary underline-offset-4 hover:underline"
             >
               {t('registerLink')}

@@ -210,13 +210,15 @@ export type SeededJob = {
 /**
  * A published job of the seed DEVLEGION company in Beograd / IT, with a slug
  * like the publish flow builds (`<stem>-<shortId>`). `expiresAt` in the past
- * makes it an ended ad.
+ * makes it an ended ad. Featured (public to guests) unless `featured: false`,
+ * which makes it a teaser that needs sign-in.
  */
 export async function createPublishedJob(
   opts: {
     title?: string;
     expiresAt?: Date | null;
     applyMode?: 'internal' | 'external';
+    featured?: boolean;
   } = {},
 ): Promise<SeededJob> {
   const shortId = randomBytes(3).toString('hex').slice(0, 4);
@@ -227,11 +229,11 @@ export async function createPublishedJob(
       `INSERT INTO jobs (company_id, created_by_user_id, title, description,
          description_plain, status, slug, short_id, city_id, category_id,
          published_at, expires_at, apply_mode, external_apply_url,
-         employment_type, work_model)
+         employment_type, work_model, featured)
        SELECT c.id, u.id, $1, $2, $2, 'published', $3, $4, ci.id, jc.id,
          now() - interval '1 day', $5, $6,
          CASE WHEN $6 = 'external' THEN 'https://example.com/apply' END,
-         'full_time', 'hybrid'
+         'full_time', 'hybrid', $7
        FROM companies c
        JOIN users u ON u.email = 'employer@hireforge.local'
        JOIN cities ci ON ci.slug = 'beograd' AND ci.country_code = 'RS'
@@ -245,6 +247,7 @@ export async function createPublishedJob(
         shortId,
         opts.expiresAt ?? null,
         opts.applyMode ?? 'internal',
+        opts.featured ?? true,
       ],
     ),
   );

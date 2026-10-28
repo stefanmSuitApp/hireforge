@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { useSearchParams } from 'next/navigation';
 
-import { humanizeEnum } from '../lib/humanize-enum';
+import { jobEnumLabel } from '../lib/job-enum-label';
 import {
   JOBS_LIST_PAGE_SIZE,
   mergeJobsSearchParams,
@@ -26,6 +26,7 @@ const POSTED = ['1d', '7d', '30d'] as const;
 
 export function JobsFilterChipsBar() {
   const t = useTranslations('Jobs');
+  const tEnum = useTranslations('Enums');
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -120,10 +121,11 @@ export function JobsFilterChipsBar() {
               type="button"
               size="sm"
               variant={wm === v ? 'default' : 'outline'}
-              className="h-8 rounded-full px-2.5 text-xs"
+              aria-pressed={wm === v}
+              className="min-h-11 rounded-full px-3 text-sm md:h-8 md:min-h-0 md:px-2.5 md:text-xs"
               onClick={() => push({ workModel: wm === v ? undefined : v })}
             >
-              {humanizeEnum(v)}
+              {jobEnumLabel(tEnum, 'workModel', v)}
             </Button>
           ))}
         </div>
@@ -138,10 +140,11 @@ export function JobsFilterChipsBar() {
               type="button"
               size="sm"
               variant={et === v ? 'default' : 'outline'}
-              className="h-8 rounded-full px-2.5 text-xs"
+              aria-pressed={et === v}
+              className="min-h-11 rounded-full px-3 text-sm md:h-8 md:min-h-0 md:px-2.5 md:text-xs"
               onClick={() => push({ employmentType: et === v ? undefined : v })}
             >
-              {humanizeEnum(v)}
+              {jobEnumLabel(tEnum, 'employmentType', v)}
             </Button>
           ))}
         </div>
@@ -156,7 +159,8 @@ export function JobsFilterChipsBar() {
               type="button"
               size="sm"
               variant={pw === v ? 'default' : 'outline'}
-              className="h-8 rounded-full px-2.5 text-xs"
+              aria-pressed={pw === v}
+              className="min-h-11 rounded-full px-3 text-sm md:h-8 md:min-h-0 md:px-2.5 md:text-xs"
               onClick={() => push({ postedWithin: pw === v ? undefined : v })}
             >
               {v === '1d'
@@ -172,7 +176,8 @@ export function JobsFilterChipsBar() {
           type="button"
           size="sm"
           variant={ez ? 'default' : 'outline'}
-          className="h-8 rounded-full px-2.5 text-xs"
+          aria-pressed={ez}
+          className="min-h-11 rounded-full px-3 text-sm md:h-8 md:min-h-0 md:px-2.5 md:text-xs"
           onClick={() => push({ easyApply: ez ? undefined : '1' })}
         >
           {t('chipEasyApply')}

@@ -346,7 +346,7 @@ export function EmployerRegisterForm() {
     <form
       method="post"
       onSubmit={onSubmit}
-      className="flex flex-col gap-5 [&_input]:h-11 [&_input]:rounded-xl [&_input]:border-border/70 [&_input]:bg-background/90"
+      className="flex flex-col gap-5 [&_input]:h-11 [&_input]:rounded-xl"
     >
       <div className="flex flex-wrap gap-1 text-xs text-muted-foreground">
         {steps.map((label, i) => (
@@ -401,7 +401,7 @@ export function EmployerRegisterForm() {
               onChange={(e) => setPassword(e.target.value)}
               showLabel={t('passwordShow')}
               hideLabel={t('passwordHide')}
-              className="h-11 rounded-xl border-border/70 bg-background/90"
+              className="h-11 rounded-xl"
             />
             <p className="text-xs text-muted-foreground">{t('passwordHint')}</p>
           </div>
@@ -426,8 +426,7 @@ export function EmployerRegisterForm() {
               value={draft.countryCode}
               onValueChange={(v) => applyCountryDefaults(v)}
               classNames={{
-                trigger:
-                  'h-11 w-full rounded-xl border-border/70 bg-background/90 font-normal',
+                trigger: 'h-11 w-full rounded-xl font-normal',
               }}
             />
           </div>
@@ -773,8 +772,7 @@ export function EmployerRegisterForm() {
                     }))
                   }
                   classNames={{
-                    trigger:
-                      'h-11 w-full rounded-xl border-border/70 bg-background/90 font-normal',
+                    trigger: 'h-11 w-full rounded-xl font-normal',
                   }}
                 />
               </div>

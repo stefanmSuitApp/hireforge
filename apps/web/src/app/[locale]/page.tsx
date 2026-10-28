@@ -203,7 +203,13 @@ export default async function HomePage({
           <HomePopularJobsStrip
             locale={locale}
             items={moreOpeningJobs}
-            title={t('moreListingsTitle')}
+            // "More positions" only reads right below the featured strip.
+            title={
+              featuredJobs.length > 0
+                ? t('moreListingsTitle')
+                : t('latestListingsTitle')
+            }
+            viewAllLabel={t('viewAllJobs')}
             featuredRibbonLabel={featuredRibbonLabel}
             isAuthenticated={jobsOpen}
           />

@@ -85,7 +85,8 @@ const newest = (a: string | null, b: string | null) =>
 
 /**
  * City, category and city × category landing pages with at least one live
- * job (others are noindex and stay out of the sitemap).
+ * featured job. Guests see only teasers of the other jobs, so a page without
+ * a featured one is thin: noindex and out of the sitemap.
  */
 export function landingEntries(
   facets: PublicSitemapResponse['facets'],
@@ -95,7 +96,7 @@ export function landingEntries(
     if (path) byPath.set(path, newest(byPath.get(path) ?? null, lastmod));
   };
   for (const f of facets) {
-    if (f.liveJobs < 1) continue;
+    if (f.featuredJobs < 1) continue;
     add(landingPath(f.city, null), f.lastmod);
     add(landingPath(null, f.category), f.lastmod);
     add(landingPath(f.city, f.category), f.lastmod);
@@ -118,6 +119,6 @@ export function companyEntries(
   companies: PublicSitemapResponse['companies'],
 ): SitemapEntry[] {
   return companies
-    .filter((c) => c.liveJobs > 0)
+    .filter((c) => c.featuredJobs > 0)
     .map((c) => ({ path: `/companies/${c.slug}`, lastmod: c.lastmod }));
 }
