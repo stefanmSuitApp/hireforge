@@ -15,9 +15,10 @@ import {
   SEED_PASSWORD,
   subscriptionState,
 } from './support/db';
+import { API_ORIGIN } from './support/ports';
 import { resetRateLimits } from './support/redis';
 
-const API = 'http://127.0.0.1:4100/api/';
+const API = `${API_ORIGIN}/api/`;
 
 test.beforeEach(async () => {
   await resetRateLimits();

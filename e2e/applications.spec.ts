@@ -9,9 +9,10 @@ import {
 
 import { SEED_JOB_ID, SEED_PASSWORD } from './support/db';
 import { expectEmails, linkFrom } from './support/mail';
+import { API_ORIGIN } from './support/ports';
 import { resetRateLimits } from './support/redis';
 
-const API = 'http://127.0.0.1:4100/api/';
+const API = `${API_ORIGIN}/api/`;
 const SEED_JOB_EMPLOYER = 'employer@hireforge.local';
 
 test.beforeEach(async () => {
