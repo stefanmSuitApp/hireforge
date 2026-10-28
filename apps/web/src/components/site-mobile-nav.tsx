@@ -22,6 +22,7 @@ import {
 } from '@/features/moderator/moderator-workspace-links';
 import { Link, usePathname } from '@/i18n/navigation';
 import { cn } from '@/lib/cn';
+import { signOut } from '@/lib/sign-out';
 import type { AuthRole } from '@/lib/unified-auth';
 
 import type { SiteNavItem } from './site-main-nav';
@@ -35,6 +36,9 @@ type Props = {
   dashboardPath: string | null;
   dashboardLabel: string;
   authRole: AuthRole | null;
+  /** Employer awaiting company approval: no workspace links yet. */
+  awaitingApproval: boolean;
+  logoutEndpoint: string | null;
 };
 
 function isNavActive(pathname: string, href: string): boolean {
@@ -58,9 +62,13 @@ export function SiteMobileNav({
   dashboardPath,
   dashboardLabel,
   authRole,
+  awaitingApproval,
+  logoutEndpoint,
 }: Props) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
+  const tNav = useTranslations('Nav');
   const tCandidate = useTranslations('Candidate');
   const tEmployer = useTranslations('Employer');
   const tModerator = useTranslations('Moderator');
@@ -171,6 +179,7 @@ export function SiteMobileNav({
                 </div>
               ) : isAuthenticated &&
                 authRole === 'employer' &&
+                !awaitingApproval &&
                 inEmployerContext ? (
                 <div className="flex flex-col gap-1">
                   {EMPLOYER_WORKSPACE_LINKS.map(
@@ -282,6 +291,20 @@ export function SiteMobileNav({
                   {signInLabel}
                 </Link>
               )}
+              {isAuthenticated && logoutEndpoint ? (
+                <button
+                  type="button"
+                  disabled={signingOut}
+                  onClick={async () => {
+                    setSigningOut(true);
+                    if (await signOut(logoutEndpoint, locale)) return;
+                    setSigningOut(false);
+                  }}
+                  className="mt-2 w-full rounded-xl px-3 py-2 text-left text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-60"
+                >
+                  {signingOut ? tNav('signingOut') : tNav('signOut')}
+                </button>
+              ) : null}
             </div>
           </div>
         </>

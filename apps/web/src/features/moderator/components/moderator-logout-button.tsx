@@ -1,20 +1,21 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { useRouter } from '@/i18n/navigation';
+import type { AppLocale } from '@/i18n/localized-path';
 import { postModeratorLogout } from '@/api/moderator-client';
 import {
   getTranslatedApiErrorMessage,
   type ErrorsTranslator,
 } from '@/lib/http/api-error-message';
+import { navigateWithFreshSession } from '@/lib/session-navigation';
 
 export function ModeratorLogoutButton() {
   const t = useTranslations('Moderator');
   const tErrors = useTranslations('Errors');
-  const router = useRouter();
+  const locale = useLocale() as AppLocale;
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,7 +24,7 @@ export function ModeratorLogoutButton() {
     setPending(true);
     try {
       await postModeratorLogout();
-      router.replace('/moderator/login');
+      navigateWithFreshSession(locale, '/moderator/login');
     } catch (err) {
       setError(getTranslatedApiErrorMessage(err, tErrors as ErrorsTranslator));
     } finally {

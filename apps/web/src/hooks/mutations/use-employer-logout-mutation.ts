@@ -1,16 +1,19 @@
 'use client';
 
 import { useMutation } from '@tanstack/react-query';
-import { useRouter } from '@/i18n/navigation';
+import { useLocale } from 'next-intl';
+
+import type { AppLocale } from '@/i18n/localized-path';
+import { navigateWithFreshSession } from '@/lib/session-navigation';
 
 import { postEmployerLogout } from '@/api/employer-auth';
 
 export function useEmployerLogoutMutation() {
-  const router = useRouter();
+  const locale = useLocale() as AppLocale;
   return useMutation({
     mutationFn: () => postEmployerLogout(),
     onSuccess: () => {
-      router.replace('/employer/login');
+      navigateWithFreshSession(locale, '/employer/login');
     },
   });
 }

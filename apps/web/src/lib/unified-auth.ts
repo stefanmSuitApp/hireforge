@@ -11,6 +11,7 @@ import {
   EMPLOYER_REFRESH_COOKIE,
 } from '@/lib/employer-session';
 import { fetchCandidateMe } from '@/lib/fetch-candidate-me';
+import { fetchEmployerJoinRequest } from '@/lib/fetch-employer-join-request';
 import { fetchEmployerWorkspace } from '@/lib/fetch-employer-workspace';
 import { fetchModeratorMe } from '@/lib/fetch-moderator';
 import { getStaffAccessToken } from '@/lib/moderator-access-cookie';
@@ -28,6 +29,8 @@ export type UnifiedAuthSession = {
   email: string | null;
   dashboardPath: string | null;
   logoutEndpoint: string | null;
+  /** Employer whose company join request staff have not approved (or declined). */
+  awaitingApproval: boolean;
 };
 
 const UNAUTHENTICATED: UnifiedAuthSession = {
@@ -37,6 +40,7 @@ const UNAUTHENTICATED: UnifiedAuthSession = {
   email: null,
   dashboardPath: null,
   logoutEndpoint: null,
+  awaitingApproval: false,
 };
 
 /**
@@ -91,6 +95,7 @@ export async function getUnifiedAuthSession(): Promise<UnifiedAuthSession> {
         email: user.email,
         dashboardPath: user.role === 'admin' ? '/admin' : '/moderator',
         logoutEndpoint: '/api/moderator/auth/logout',
+        awaitingApproval: false,
       };
     }
   }
@@ -108,7 +113,24 @@ export async function getUnifiedAuthSession(): Promise<UnifiedAuthSession> {
         email: user.email,
         dashboardPath: '/employer',
         logoutEndpoint: '/api/employer/auth/logout',
+        awaitingApproval: false,
       };
+    }
+    // Signed in, but the workspace is closed until staff decide on the
+    // company join request (403 EMPLOYER_PENDING_APPROVAL / _JOIN_REJECTED).
+    if (result.status === 403) {
+      const joinRequest = await fetchEmployerJoinRequest(employerToken);
+      if (joinRequest && joinRequest.status !== 'approved') {
+        return {
+          isAuthenticated: true,
+          role: 'employer',
+          displayName: joinRequest.companyLegalName,
+          email: null,
+          dashboardPath: '/employer/pending',
+          logoutEndpoint: '/api/employer/auth/logout',
+          awaitingApproval: true,
+        };
+      }
     }
   }
 
@@ -125,6 +147,7 @@ export async function getUnifiedAuthSession(): Promise<UnifiedAuthSession> {
         email: user.email,
         dashboardPath: '/candidate',
         logoutEndpoint: '/api/candidate/auth/logout',
+        awaitingApproval: false,
       };
     }
   }

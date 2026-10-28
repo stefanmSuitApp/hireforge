@@ -2,7 +2,10 @@
 
 import { useMutation } from '@tanstack/react-query';
 
-import { useRouter } from '@/i18n/navigation';
+import { useLocale } from 'next-intl';
+
+import type { AppLocale } from '@/i18n/localized-path';
+import { navigateWithFreshSession } from '@/lib/session-navigation';
 
 import {
   postCandidateRegister,
@@ -10,11 +13,11 @@ import {
 } from '@/api/candidate-auth';
 
 export function useCandidateRegisterMutation() {
-  const router = useRouter();
+  const locale = useLocale() as AppLocale;
   return useMutation({
     mutationFn: (body: CandidateRegisterBody) => postCandidateRegister(body),
     onSuccess: () => {
-      router.replace('/candidate');
+      navigateWithFreshSession(locale, '/candidate');
     },
   });
 }

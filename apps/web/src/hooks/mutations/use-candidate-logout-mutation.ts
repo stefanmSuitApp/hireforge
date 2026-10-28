@@ -2,16 +2,19 @@
 
 import { useMutation } from '@tanstack/react-query';
 
-import { useRouter } from '@/i18n/navigation';
+import { useLocale } from 'next-intl';
+
+import type { AppLocale } from '@/i18n/localized-path';
+import { navigateWithFreshSession } from '@/lib/session-navigation';
 
 import { postCandidateLogout } from '@/api/candidate-auth';
 
 export function useCandidateLogoutMutation() {
-  const router = useRouter();
+  const locale = useLocale() as AppLocale;
   return useMutation({
     mutationFn: () => postCandidateLogout(),
     onSuccess: () => {
-      router.replace('/candidate/login');
+      navigateWithFreshSession(locale, '/candidate/login');
     },
   });
 }

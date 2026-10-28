@@ -3,10 +3,9 @@ import { describe, expect, it } from 'vitest';
 import {
   getAuthRedirectPathname,
   isPublicAuthPath,
+  isSessionRefreshPath,
 } from '@/middleware/auth-gate';
-import { isEmployerSessionPath } from '@/middleware/employer-refresh';
 import { getLocaleFromPathname } from '@/middleware/locale-path';
-import { isModeratorSessionPath } from '@/middleware/staff-refresh';
 
 describe('locale-aware session path helpers', () => {
   it('extracts supported locales from localized paths', () => {
@@ -15,23 +14,18 @@ describe('locale-aware session path helpers', () => {
     expect(getLocaleFromPathname('/de/employer')).toBeNull();
   });
 
-  it('matches employer session paths but excludes public auth pages', () => {
-    expect(isEmployerSessionPath('/sr/employer')).toBe(true);
-    expect(isEmployerSessionPath('/en/employer/jobs/123/edit')).toBe(true);
-    expect(isEmployerSessionPath('/sr/employer/login')).toBe(false);
-    expect(isEmployerSessionPath('/en/employer/register')).toBe(false);
-  });
-
-  it('matches moderator session paths but excludes login', () => {
-    expect(isModeratorSessionPath('/sr/moderator')).toBe(true);
-    expect(isModeratorSessionPath('/en/moderator/jobs/123')).toBe(true);
-    expect(isModeratorSessionPath('/sr/moderator/login')).toBe(false);
-    expect(isModeratorSessionPath('/foo/moderator')).toBe(false);
-  });
-
-  it('matches admin dashboard paths for staff cookie refresh', () => {
-    expect(isModeratorSessionPath('/sr/admin')).toBe(true);
-    expect(isModeratorSessionPath('/en/admin/users')).toBe(true);
+  it('renews sessions on every localized page except the auth pages', () => {
+    // Public pages show the session in the header too.
+    expect(isSessionRefreshPath('/sr')).toBe(true);
+    expect(isSessionRefreshPath('/sr/jobs')).toBe(true);
+    expect(isSessionRefreshPath('/en/companies/devlegion')).toBe(true);
+    expect(isSessionRefreshPath('/sr/employer/jobs/123/edit')).toBe(true);
+    expect(isSessionRefreshPath('/en/moderator/jobs/123')).toBe(true);
+    expect(isSessionRefreshPath('/sr/admin/users')).toBe(true);
+    expect(isSessionRefreshPath('/sr/employer/login')).toBe(false);
+    expect(isSessionRefreshPath('/en/candidate/register')).toBe(false);
+    expect(isSessionRefreshPath('/sr/moderator/login')).toBe(false);
+    expect(isSessionRefreshPath('/foo/moderator')).toBe(false);
   });
 
   it('identifies localized public auth pages', () => {

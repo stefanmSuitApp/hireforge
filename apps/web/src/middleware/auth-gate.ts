@@ -48,6 +48,16 @@ export function isPublicAuthPath(pathname: string): boolean {
 }
 
 /**
+ * Pages where the middleware renews an expiring access cookie: every
+ * localized page except the auth pages. The site header reads the access
+ * cookie on public pages too, so renewing only inside the dashboards showed
+ * signed-in users as guests once it expired.
+ */
+export function isSessionRefreshPath(pathname: string): boolean {
+  return getLocaleFromPathname(pathname) != null && !isPublicAuthPath(pathname);
+}
+
+/**
  * Returns destination when a logged-in user opens public auth pages.
  * Priority favors staff > employer > candidate when stale mixed cookies exist.
  */

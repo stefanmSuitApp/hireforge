@@ -7,26 +7,8 @@ import {
   STAFF_REFRESH_COOKIE_MAX_AGE,
 } from '@/lib/moderator-session';
 import { nestApiUrl, resolveNestServerOrigin } from '@/lib/nest-api-url';
-import { getLocaleFromPathname } from '@/middleware/locale-path';
+import { isSessionRefreshPath } from '@/middleware/auth-gate';
 import { forwardClientIpHeaders } from '@/lib/client-ip';
-
-/** Refreshes staff JWT for moderator routes and for the admin dashboard (same login, `/moderator/login`). */
-export function isModeratorSessionPath(pathname: string): boolean {
-  const locale = getLocaleFromPathname(pathname);
-  if (!locale) {
-    return false;
-  }
-  if (pathname.startsWith(`/${locale}/moderator`)) {
-    if (pathname.includes('/moderator/login')) {
-      return false;
-    }
-    return true;
-  }
-  if (pathname.startsWith(`/${locale}/admin`)) {
-    return true;
-  }
-  return false;
-}
 
 function decodeJwtExpSeconds(token: string): number | null {
   try {
@@ -50,7 +32,7 @@ export async function mergeStaffRefreshIntoResponse(
   request: NextRequest,
   response: NextResponse,
 ): Promise<void> {
-  if (!isModeratorSessionPath(request.nextUrl.pathname)) {
+  if (!isSessionRefreshPath(request.nextUrl.pathname)) {
     return;
   }
 
@@ -92,6 +74,12 @@ export async function mergeStaffRefreshIntoResponse(
   }
 
   const text = await upstream.text();
+  if (upstream.status === 401) {
+    // Revoked or expired: drop the cookies so pages stop retrying the refresh.
+    response.cookies.delete(STAFF_ACCESS_COOKIE);
+    response.cookies.delete(STAFF_REFRESH_COOKIE);
+    return;
+  }
   if (!upstream.ok) {
     return;
   }
