@@ -144,7 +144,8 @@ export function UserProfileDropdown({
       ? getModeratorWorkspaceNavKey(pathname)
       : null;
 
-  const adminNavCurrent = role === 'admin' ? getAdminWorkspaceNavKey(pathname) : null;
+  const adminNavCurrent =
+    role === 'admin' ? getAdminWorkspaceNavKey(pathname) : null;
 
   return (
     <DropdownMenu>
@@ -161,11 +162,18 @@ export function UserProfileDropdown({
           </span>
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 rounded-xl border-border/60 p-2">
+      <DropdownMenuContent
+        align="end"
+        className="w-56 rounded-xl border-border/60 p-2"
+      >
         <DropdownMenuLabel className="px-2 py-2 font-normal">
           <div className="flex flex-col gap-1">
-            <p className="text-sm font-semibold leading-none text-foreground">{displayName}</p>
-            <p className="text-xs leading-none text-muted-foreground">{email}</p>
+            <p className="text-sm font-semibold leading-none text-foreground">
+              {displayName}
+            </p>
+            <p className="text-xs leading-none text-muted-foreground">
+              {email}
+            </p>
             <span className="mt-1 inline-flex w-fit rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
               {roleLabel}
             </span>
@@ -265,7 +273,10 @@ export function UserProfileDropdown({
                 <DropdownMenuItem
                   key={href}
                   asChild
-                  className={cn('rounded-lg px-2 py-2', active && 'bg-muted/80')}
+                  className={cn(
+                    'rounded-lg px-2 py-2',
+                    active && 'bg-muted/80',
+                  )}
                 >
                   <Link
                     href={href}
@@ -293,7 +304,10 @@ export function UserProfileDropdown({
                 <DropdownMenuItem
                   key={href}
                   asChild
-                  className={cn('rounded-lg px-2 py-2', active && 'bg-muted/80')}
+                  className={cn(
+                    'rounded-lg px-2 py-2',
+                    active && 'bg-muted/80',
+                  )}
                 >
                   <Link
                     href={href}

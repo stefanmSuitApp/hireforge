@@ -9,13 +9,17 @@ import { getDb } from '../database';
  * Loads `request.hireforgeUser` from DB when enabled.
  * Set `AUTH_DEV_HEADERS=1` and send header `X-Hireforge-Dev-User-Id: <uuid>` (see seed SQL).
  * Role is always taken from Postgres, not the header (spoof-proof).
+ * Never active in production, even if the flag is set (boot also refuses it).
  */
 export async function devUserMiddleware(
   req: Request,
   _res: Response,
   next: NextFunction,
 ): Promise<void> {
-  if (process.env.AUTH_DEV_HEADERS !== '1') {
+  if (
+    process.env.AUTH_DEV_HEADERS !== '1' ||
+    process.env.NODE_ENV === 'production'
+  ) {
     next();
     return;
   }

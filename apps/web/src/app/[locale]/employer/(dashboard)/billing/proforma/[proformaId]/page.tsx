@@ -145,7 +145,9 @@ export default async function EmployerProformaPage({
               {t('downloadPdf')}
             </a>
           ) : (
-            <span className="text-xs text-muted-foreground">{t('pdfSoon')}</span>
+            <span className="text-xs text-muted-foreground">
+              {t('pdfSoon')}
+            </span>
           )}
         </p>
       </section>

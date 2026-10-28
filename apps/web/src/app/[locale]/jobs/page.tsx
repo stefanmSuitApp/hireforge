@@ -29,7 +29,9 @@ export default async function JobsPage({
   const isAuthenticated = await hasAnyAuthSession();
 
   if (!isAuthenticated) {
-    redirect(`/${locale}/sign-in?returnTo=${encodeURIComponent(`/${locale}/jobs`)}`);
+    redirect(
+      `/${locale}/sign-in?returnTo=${encodeURIComponent(`/${locale}/jobs`)}`,
+    );
   }
 
   return <JobsListRoute params={params} searchParams={searchParams} />;

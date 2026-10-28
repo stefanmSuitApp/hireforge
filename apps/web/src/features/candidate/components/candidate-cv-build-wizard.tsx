@@ -100,7 +100,9 @@ function normalizeProfileForParse(profile: CvProfile): CvProfile {
     experiences: profile.experiences.map((e) => ({
       ...e,
       endDate:
-        e.endDate === '' || e.endDate === undefined ? null : e.endDate ?? null,
+        e.endDate === '' || e.endDate === undefined
+          ? null
+          : (e.endDate ?? null),
       summary: e.summary?.trim() || undefined,
     })),
     education: profile.education.map((ed) => ({
@@ -110,7 +112,7 @@ function normalizeProfileForParse(profile: CvProfile): CvProfile {
       endDate:
         ed.endDate === '' || ed.endDate === undefined
           ? null
-          : ed.endDate ?? null,
+          : (ed.endDate ?? null),
     })),
     skills: profile.skills.map((s) => ({ name: s.name.trim() })),
   };
@@ -154,9 +156,7 @@ export function CandidateCvBuildWizard({
         ? [...initial.cvProfile.education]
         : [],
     skills:
-      initial.cvProfile.skills.length > 0
-        ? [...initial.cvProfile.skills]
-        : [],
+      initial.cvProfile.skills.length > 0 ? [...initial.cvProfile.skills] : [],
   }));
   const [templateCode, setTemplateCode] = React.useState<CvTemplateCode | null>(
     null,
@@ -170,10 +170,11 @@ export function CandidateCvBuildWizard({
     }
   }, [step, templateCode]);
 
-  const effectiveCityGroups = React.useMemo((): PublicJobTaxonomyDistrictGroup[] => {
-    if (cityGroups.length > 0) return cityGroups;
-    return [{ district: null, cities: flatCities }];
-  }, [cityGroups, flatCities]);
+  const effectiveCityGroups =
+    React.useMemo((): PublicJobTaxonomyDistrictGroup[] => {
+      if (cityGroups.length > 0) return cityGroups;
+      return [{ district: null, cities: flatCities }];
+    }, [cityGroups, flatCities]);
 
   const cityLine = React.useMemo(() => {
     if (!cityId) return null;
@@ -200,11 +201,7 @@ export function CandidateCvBuildWizard({
           : [t('cityGroupOther')]
       ).filter(Boolean);
       const heading = g.district
-        ? pickLocalizedBilingual(
-            locale,
-            g.district.nameSr,
-            g.district.nameEn,
-          )
+        ? pickLocalizedBilingual(locale, g.district.nameSr, g.district.nameEn)
         : t('cityGroupOther');
       const options: ComboboxOption[] = g.cities
         .filter((c) => c.id)
@@ -224,8 +221,7 @@ export function CandidateCvBuildWizard({
   }, [effectiveCityGroups, locale, t]);
 
   const sanitizedCvProfile = React.useMemo(
-    () =>
-      sanitizeCvProfileForPersist(normalizeProfileForParse(cvProfile)),
+    () => sanitizeCvProfileForPersist(normalizeProfileForParse(cvProfile)),
     [cvProfile],
   );
 
@@ -259,10 +255,7 @@ export function CandidateCvBuildWizard({
     return cmsTemplates.find((r) => r.code === code);
   }
 
-  function setExperience(
-    index: number,
-    patch: Partial<CvExperienceEntry>,
-  ) {
+  function setExperience(index: number, patch: Partial<CvExperienceEntry>) {
     setCvProfile((p) => {
       const next = [...p.experiences];
       next[index] = { ...next[index], ...patch };
@@ -319,7 +312,9 @@ export function CandidateCvBuildWizard({
       <div className="space-y-6 rounded-xl border border-border/70 bg-background p-5">
         <div className="rounded-lg border border-border/70 bg-card px-3 py-2 text-xs text-muted-foreground">
           {t('stepIndicator', { current: step + 1, total: STEPS })}{' '}
-          <span className="font-medium text-foreground">({step + 1}/{STEPS})</span>
+          <span className="font-medium text-foreground">
+            ({step + 1}/{STEPS})
+          </span>
         </div>
 
         {step === 0 ? (
@@ -359,9 +354,7 @@ export function CandidateCvBuildWizard({
                 leadingOptions={cityComboboxSections.leadingOptions}
                 groups={cityComboboxSections.groups}
                 value={cityId ?? CITY_NONE}
-                onValueChange={(v) =>
-                  setCityId(v === CITY_NONE ? null : v)
-                }
+                onValueChange={(v) => setCityId(v === CITY_NONE ? null : v)}
                 placeholder={t('cityNone')}
                 searchPlaceholder={t('citySearchPlaceholder')}
                 emptyText={t('cityEmpty')}
@@ -374,7 +367,9 @@ export function CandidateCvBuildWizard({
         {step === 1 ? (
           <section className="space-y-4">
             <h3 className="text-base font-medium">{t('stepExperience')}</h3>
-            <p className="text-sm text-muted-foreground">{t('experienceHint')}</p>
+            <p className="text-sm text-muted-foreground">
+              {t('experienceHint')}
+            </p>
             {cvProfile.experiences.map((ex, i) => (
               <Card key={i} className="space-y-3 border-border/70 p-4">
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -401,9 +396,7 @@ export function CandidateCvBuildWizard({
                     <IsoDatePicker
                       id={`cv-ex-start-${i}`}
                       value={ex.startDate}
-                      onChange={(v) =>
-                        setExperience(i, { startDate: v })
-                      }
+                      onChange={(v) => setExperience(i, { startDate: v })}
                       placeholder={t('datePickPlaceholder')}
                       clearLabel={t('dateClear')}
                     />
@@ -503,9 +496,7 @@ export function CandidateCvBuildWizard({
                     <IsoDatePicker
                       id={`cv-ed-start-${i}`}
                       value={ed.startDate}
-                      onChange={(v) =>
-                        setEducation(i, { startDate: v })
-                      }
+                      onChange={(v) => setEducation(i, { startDate: v })}
                       placeholder={t('datePickPlaceholder')}
                       clearLabel={t('dateClear')}
                     />
@@ -613,10 +604,11 @@ export function CandidateCvBuildWizard({
                     key={code}
                     type="button"
                     onClick={() => setTemplateCode(code)}
-                    className={`rounded-lg border p-3 text-left transition-colors ${active
+                    className={`rounded-lg border p-3 text-left transition-colors ${
+                      active
                         ? 'border-primary ring-2 ring-ring'
                         : 'border-border hover:bg-muted/40'
-                      }`}
+                    }`}
                   >
                     {cms?.previewUrl ? (
                       <img
@@ -671,9 +663,7 @@ export function CandidateCvBuildWizard({
           <Button
             type="button"
             size="sm"
-            disabled={
-              step >= STEPS - 1 || (step === 4 && templateCode == null)
-            }
+            disabled={step >= STEPS - 1 || (step === 4 && templateCode == null)}
             onClick={() => setStep((s) => Math.min(STEPS - 1, s + 1))}
           >
             {t('next')}
@@ -701,7 +691,9 @@ export function CandidateCvBuildWizard({
           {canPreview && templateCode ? (
             <PdfPreview layout={layoutPreview} code={templateCode} />
           ) : (
-            <p className="text-sm text-muted-foreground">{t('previewPlaceholder')}</p>
+            <p className="text-sm text-muted-foreground">
+              {t('previewPlaceholder')}
+            </p>
           )}
         </div>
       </aside>

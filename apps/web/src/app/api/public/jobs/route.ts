@@ -27,8 +27,7 @@ export async function GET(req: Request) {
   return new NextResponse(text, {
     status: res.status,
     headers: {
-      'Content-Type':
-        res.headers.get('Content-Type') ?? 'application/json',
+      'Content-Type': res.headers.get('Content-Type') ?? 'application/json',
     },
   });
 }

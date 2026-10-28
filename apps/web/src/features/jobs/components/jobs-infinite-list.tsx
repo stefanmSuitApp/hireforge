@@ -155,7 +155,9 @@ export function JobsInfiniteList({
   });
 
   const showListSkeleton =
-    !seedFromInitialPage && (query.isPending || query.isFetching) && !items.length;
+    !seedFromInitialPage &&
+    (query.isPending || query.isFetching) &&
+    !items.length;
 
   const skeletonCount = pageSize;
 
@@ -273,7 +275,9 @@ export function JobsInfiniteList({
             : t('listStatusComplete', { total })}
         </p>
         {hasNextPage ? (
-          <p className="m-0 text-xs text-muted-foreground">{t('scrollForMore')}</p>
+          <p className="m-0 text-xs text-muted-foreground">
+            {t('scrollForMore')}
+          </p>
         ) : loaded > 0 ? (
           <p className="m-0 text-xs text-muted-foreground">{t('endOfList')}</p>
         ) : null}

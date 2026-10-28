@@ -145,11 +145,12 @@ function safeGeneratedCvFilename(
   templateCode: string,
   fullName: string | null,
 ): string {
-  const slug = (fullName ?? 'CV')
-    .trim()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .slice(0, 40) || 'CV';
+  const slug =
+    (fullName ?? 'CV')
+      .trim()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .slice(0, 40) || 'CV';
   return `CV-${templateCode}-${slug}.pdf`;
 }
 
@@ -313,8 +314,7 @@ export class CandidateService {
         patch.fullName === null ? null : patch.fullName.trim() || null;
     }
     if (patch.phone !== undefined) {
-      updates.phone =
-        patch.phone === null ? null : patch.phone.trim() || null;
+      updates.phone = patch.phone === null ? null : patch.phone.trim() || null;
     }
     if (patch.headline !== undefined) {
       updates.headline =
@@ -954,7 +954,10 @@ export class CandidateService {
       .leftJoin(cities, eq(jobs.cityId, cities.id))
       .leftJoin(jobCategories, eq(jobs.categoryId, jobCategories.id))
       .where(
-        and(eq(savedJobs.candidateId, candidateId), eq(jobs.status, 'published')),
+        and(
+          eq(savedJobs.candidateId, candidateId),
+          eq(jobs.status, 'published'),
+        ),
       )
       .orderBy(desc(savedJobs.createdAt));
 

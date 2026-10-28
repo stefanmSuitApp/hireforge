@@ -28,7 +28,11 @@ export default async function AdminHomePage({
               {t('linkUsers')}
             </Link>
           </Button>
-          <Button variant="outline" asChild className="h-auto justify-center py-3">
+          <Button
+            variant="outline"
+            asChild
+            className="h-auto justify-center py-3"
+          >
             <Link href="/admin/audit" locale={locale}>
               {t('linkAudit')}
             </Link>
@@ -38,8 +42,16 @@ export default async function AdminHomePage({
 
       <section className="grid gap-4 md:grid-cols-3">
         {[
-          { href: '/admin/taxonomy', label: t('linkTaxonomy'), body: t('cardTaxonomyBody') },
-          { href: '/admin/companies', label: t('linkCompanies'), body: t('cardCompaniesBody') },
+          {
+            href: '/admin/taxonomy',
+            label: t('linkTaxonomy'),
+            body: t('cardTaxonomyBody'),
+          },
+          {
+            href: '/admin/companies',
+            label: t('linkCompanies'),
+            body: t('cardCompaniesBody'),
+          },
           {
             href: '/admin/billing/enterprise-pending',
             label: t('linkBillingEnterprise'),

@@ -34,8 +34,14 @@ export default async function EditorialCmsPage({
   return (
     <PublicSurfaceMain className="pb-20 pt-10 md:pt-14">
       <section className="relative overflow-hidden rounded-3xl border border-border/40 bg-card/70 px-6 py-10 backdrop-blur-sm md:px-12 md:py-14">
-        <div className="hf-hero-orb -left-24 -top-24 size-96 bg-primary/20" aria-hidden />
-        <div className="hf-hero-orb -bottom-28 right-2 size-80 bg-cyan-400/20" aria-hidden />
+        <div
+          className="hf-hero-orb -left-24 -top-24 size-96 bg-primary/20"
+          aria-hidden
+        />
+        <div
+          className="hf-hero-orb -bottom-28 right-2 size-80 bg-cyan-400/20"
+          aria-hidden
+        />
         <header className="relative mx-auto max-w-3xl">
           <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
             {t('headerEyebrow')}
@@ -44,7 +50,9 @@ export default async function EditorialCmsPage({
             {doc.title}
           </h1>
           {doc.excerpt?.trim() ? (
-            <p className="mt-4 text-lg leading-relaxed text-muted-foreground">{doc.excerpt}</p>
+            <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
+              {doc.excerpt}
+            </p>
           ) : null}
           <div className="mt-5 flex flex-wrap gap-2">
             <span className="inline-flex rounded-full border border-border/70 bg-background/70 px-3 py-1 text-xs font-medium text-foreground">
@@ -69,7 +77,9 @@ export default async function EditorialCmsPage({
                 <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-primary">
                   {t('aboutPillar1Eyebrow')}
                 </p>
-                <h2 className="text-lg font-semibold text-foreground">{t('aboutPillar1Title')}</h2>
+                <h2 className="text-lg font-semibold text-foreground">
+                  {t('aboutPillar1Title')}
+                </h2>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                   {t('aboutPillar1Body')}
                 </p>
@@ -78,7 +88,9 @@ export default async function EditorialCmsPage({
                 <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-primary">
                   {t('aboutPillar2Eyebrow')}
                 </p>
-                <h2 className="text-lg font-semibold text-foreground">{t('aboutPillar2Title')}</h2>
+                <h2 className="text-lg font-semibold text-foreground">
+                  {t('aboutPillar2Title')}
+                </h2>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                   {t('aboutPillar2Body')}
                 </p>
@@ -87,7 +99,9 @@ export default async function EditorialCmsPage({
                 <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-primary">
                   {t('aboutPillar3Eyebrow')}
                 </p>
-                <h2 className="text-lg font-semibold text-foreground">{t('aboutPillar3Title')}</h2>
+                <h2 className="text-lg font-semibold text-foreground">
+                  {t('aboutPillar3Title')}
+                </h2>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                   {t('aboutPillar3Body')}
                 </p>
@@ -96,33 +110,45 @@ export default async function EditorialCmsPage({
           </section>
 
           <section className="mx-auto mt-8 max-w-5xl rounded-3xl border border-border/60 bg-gradient-to-br from-card to-muted/40 p-6 md:p-8">
-            <h2 className="text-2xl font-bold tracking-tight text-foreground">{t('aboutJourneyTitle')}</h2>
+            <h2 className="text-2xl font-bold tracking-tight text-foreground">
+              {t('aboutJourneyTitle')}
+            </h2>
             <ul className="mt-5 grid list-none gap-3 p-0 md:grid-cols-3">
               <li className="rounded-xl border border-border/60 bg-background/80 p-4">
                 <p className="text-xs font-semibold uppercase tracking-wide text-primary">
                   {t('aboutJourneyStep1Eyebrow')}
                 </p>
-                <p className="mt-2 text-sm text-muted-foreground">{t('aboutJourneyStep1Body')}</p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {t('aboutJourneyStep1Body')}
+                </p>
               </li>
               <li className="rounded-xl border border-border/60 bg-background/80 p-4">
                 <p className="text-xs font-semibold uppercase tracking-wide text-primary">
                   {t('aboutJourneyStep2Eyebrow')}
                 </p>
-                <p className="mt-2 text-sm text-muted-foreground">{t('aboutJourneyStep2Body')}</p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {t('aboutJourneyStep2Body')}
+                </p>
               </li>
               <li className="rounded-xl border border-border/60 bg-background/80 p-4">
                 <p className="text-xs font-semibold uppercase tracking-wide text-primary">
                   {t('aboutJourneyStep3Eyebrow')}
                 </p>
-                <p className="mt-2 text-sm text-muted-foreground">{t('aboutJourneyStep3Body')}</p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {t('aboutJourneyStep3Body')}
+                </p>
               </li>
             </ul>
           </section>
 
           <section className="mx-auto mt-8 flex max-w-5xl flex-wrap items-center justify-between gap-4 rounded-3xl border border-primary/20 bg-primary/[0.06] p-6 md:p-8">
             <div>
-              <h2 className="text-xl font-semibold text-foreground">{t('aboutCtaTitle')}</h2>
-              <p className="mt-2 text-sm text-muted-foreground">{t('aboutCtaBody')}</p>
+              <h2 className="text-xl font-semibold text-foreground">
+                {t('aboutCtaTitle')}
+              </h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {t('aboutCtaBody')}
+              </p>
             </div>
             <div className="flex flex-wrap gap-2">
               <Link

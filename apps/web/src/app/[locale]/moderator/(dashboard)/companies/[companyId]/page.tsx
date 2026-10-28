@@ -64,9 +64,7 @@ export default async function ModeratorCompanyDetailPage({
           {t('membersHeading')}
         </h3>
         {detail.data.employers.length === 0 ? (
-          <p className="mt-3 text-sm text-muted-foreground">
-            {t('noMembers')}
-          </p>
+          <p className="mt-3 text-sm text-muted-foreground">{t('noMembers')}</p>
         ) : (
           <ul className="mt-4 divide-y divide-border rounded-xl border border-border/70">
             {detail.data.employers.map((m) => (

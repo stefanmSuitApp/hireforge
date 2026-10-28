@@ -1,7 +1,8 @@
 import { defineArrayMember, defineField, defineType } from 'sanity';
 
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const slugMessage = 'Use lowercase latin letters, numbers, and hyphen (e.g. it, novi-sad)';
+const slugMessage =
+  'Use lowercase latin letters, numbers, and hyphen (e.g. it, novi-sad)';
 
 export const homeJobsDiscovery = defineType({
   name: 'homeJobsDiscovery',
@@ -15,7 +16,10 @@ export const homeJobsDiscovery = defineType({
         'Exactly 10 tiles. Slugs must exist in Postgres `job_categories`. Marketing-only — filters still use the database.',
       type: 'array' as const,
       validation: (Rule) =>
-        Rule.required().min(10).max(10).error('Provide exactly 10 category rows'),
+        Rule.required()
+          .min(10)
+          .max(10)
+          .error('Provide exactly 10 category rows'),
       of: [
         defineArrayMember({
           type: 'object',
@@ -97,13 +101,7 @@ export const homeJobsDiscovery = defineType({
           ],
           preview: {
             select: { slug: 'citySlug', media: 'image' },
-            prepare({
-              slug,
-              media,
-            }: {
-              slug?: string;
-              media?: unknown;
-            }) {
+            prepare({ slug, media }: { slug?: string; media?: unknown }) {
               return {
                 title: slug || 'City',
                 subtitle: 'City tile',

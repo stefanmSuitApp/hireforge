@@ -5,11 +5,7 @@ import { describe, expect, it } from 'vitest';
 
 const here = dirname(fileURLToPath(import.meta.url));
 
-function collectPaths(
-  value: unknown,
-  prefix: string,
-  out: Set<string>,
-): void {
+function collectPaths(value: unknown, prefix: string, out: Set<string>): void {
   if (value === null || typeof value !== 'object') {
     out.add(prefix || '(root)');
     return;

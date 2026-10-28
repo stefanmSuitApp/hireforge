@@ -9,6 +9,7 @@ import {
   EMPLOYER_REFRESH_COOKIE,
   EMPLOYER_REFRESH_COOKIE_MAX_AGE,
 } from '@/lib/employer-session';
+import { forwardClientIpHeaders } from '@/lib/client-ip';
 
 export async function POST(req: Request) {
   const origin = resolveNestServerOrigin();
@@ -29,7 +30,10 @@ export async function POST(req: Request) {
 
   const upstream = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...forwardClientIpHeaders(req.headers),
+    },
     body: JSON.stringify(body),
   });
   const text = await upstream.text();

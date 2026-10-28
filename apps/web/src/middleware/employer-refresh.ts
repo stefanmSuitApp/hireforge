@@ -8,6 +8,7 @@ import {
 } from '@/lib/employer-session';
 import { nestApiUrl, resolveNestServerOrigin } from '@/lib/nest-api-url';
 import { getLocaleFromPathname } from '@/middleware/locale-path';
+import { forwardClientIpHeaders } from '@/lib/client-ip';
 
 /** Paths like `/sr/employer` or `/en/employer/foo` but not login/register. */
 export function isEmployerSessionPath(pathname: string): boolean {
@@ -84,6 +85,7 @@ export async function mergeEmployerRefreshIntoResponse(
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
+        ...forwardClientIpHeaders(request.headers),
       },
       body: JSON.stringify({ refreshToken: refresh }),
     });

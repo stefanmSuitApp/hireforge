@@ -45,7 +45,9 @@ export default async function SignInChooserPage({
   const titleParts = title.split(brand);
 
   // Build query string for returnTo passthrough
-  const returnToQuery = returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : '';
+  const returnToQuery = returnTo
+    ? `?returnTo=${encodeURIComponent(returnTo)}`
+    : '';
 
   return (
     <main>
@@ -75,18 +77,35 @@ export default async function SignInChooserPage({
               <div className="mb-4 inline-flex rounded-xl bg-primary/10 p-2 text-primary w-fit">
                 <UserRound className="size-5" />
               </div>
-              <h2 className="text-xl font-bold text-foreground">{t('candidateTitle')}</h2>
+              <h2 className="text-xl font-bold text-foreground">
+                {t('candidateTitle')}
+              </h2>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                 {t('candidateDescription')}
               </p>
               <div className="mt-auto flex flex-col gap-2 pt-6">
-                <Button size="lg" className="w-full rounded-full px-5 text-center" asChild>
-                  <Link href={`/candidate/login${returnToQuery}`} locale={locale}>
+                <Button
+                  size="lg"
+                  className="w-full rounded-full px-5 text-center"
+                  asChild
+                >
+                  <Link
+                    href={`/candidate/login${returnToQuery}`}
+                    locale={locale}
+                  >
                     {t('candidateSignIn')}
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" className="w-full rounded-full" asChild>
-                  <Link href={`/candidate/register${returnToQuery}`} locale={locale}>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full rounded-full"
+                  asChild
+                >
+                  <Link
+                    href={`/candidate/register${returnToQuery}`}
+                    locale={locale}
+                  >
                     {t('candidateCreate')}
                   </Link>
                 </Button>
@@ -97,18 +116,35 @@ export default async function SignInChooserPage({
               <div className="mb-4 inline-flex rounded-xl bg-primary/10 p-2 text-primary w-fit">
                 <BriefcaseBusiness className="size-5" />
               </div>
-              <h2 className="text-xl font-bold text-foreground">{t('employerTitle')}</h2>
+              <h2 className="text-xl font-bold text-foreground">
+                {t('employerTitle')}
+              </h2>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                 {t('employerDescription')}
               </p>
               <div className="mt-auto flex flex-col gap-2 pt-6">
-                <Button size="lg" className="w-full rounded-full px-5 text-center" asChild>
-                  <Link href={`/employer/login${returnToQuery}`} locale={locale}>
+                <Button
+                  size="lg"
+                  className="w-full rounded-full px-5 text-center"
+                  asChild
+                >
+                  <Link
+                    href={`/employer/login${returnToQuery}`}
+                    locale={locale}
+                  >
                     {t('employerSignIn')}
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" className="w-full rounded-full" asChild>
-                  <Link href={`/employer/register${returnToQuery}`} locale={locale}>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full rounded-full"
+                  asChild
+                >
+                  <Link
+                    href={`/employer/register${returnToQuery}`}
+                    locale={locale}
+                  >
                     {t('employerCreate')}
                   </Link>
                 </Button>

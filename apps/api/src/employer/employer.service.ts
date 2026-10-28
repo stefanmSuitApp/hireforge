@@ -4,6 +4,7 @@ import type {
   EmployerJobDetailResponse,
   EmployerJobDraftBody,
   EmployerJobListItem,
+  EmployerJoinRequestResponse,
   EmployerPackageCatalogResponse,
   EmployerProformaDetail,
   EmployerSubscriptionsListResponse,
@@ -14,6 +15,7 @@ import type {
   PackageCode,
 } from 'contracts';
 import {
+  companyJoinRequestStatusSchema,
   DEFAULT_JOB_DESCRIPTION_LINK_MIN_LEAD_CHARS,
   effectiveMaxActiveJobs,
   employerPackageUpgradeMessageSchema,
@@ -27,6 +29,7 @@ import {
   candidates,
   cities,
   companies,
+  companyJoinRequests,
   employers,
   jobCategories,
   jobs,
@@ -546,6 +549,19 @@ export class EmployerService {
       .limit(1);
     const row = rows[0];
     if (!row || row.role !== 'employer') {
+      const joinRequest = await this.latestJoinRequest(userId);
+      if (joinRequest?.status === 'pending') {
+        throw codedForbidden(
+          'EMPLOYER_PENDING_APPROVAL',
+          'Your request to join this company is awaiting staff approval',
+        );
+      }
+      if (joinRequest?.status === 'rejected') {
+        throw codedForbidden(
+          'EMPLOYER_JOIN_REJECTED',
+          'Your request to join this company was declined',
+        );
+      }
       throw codedForbidden(
         'EMPLOYER_NOT_SETUP',
         'Employer profile is not set up for this user',
@@ -574,6 +590,43 @@ export class EmployerService {
           : null,
       jobPosting: await this.resolveJobPostingEligibility(row.companyId),
       jobPostingSlots: await this.listActiveJobPostingSlots(row.companyId),
+    };
+  }
+
+  private async latestJoinRequest(userId: string) {
+    const database = getDb();
+    if (!database) {
+      return null;
+    }
+    const [row] = await database.db
+      .select({
+        status: companyJoinRequests.status,
+        createdAt: companyJoinRequests.createdAt,
+        decidedAt: companyJoinRequests.decidedAt,
+        companyLegalName: companies.legalName,
+      })
+      .from(companyJoinRequests)
+      .innerJoin(companies, eq(companyJoinRequests.companyId, companies.id))
+      .where(eq(companyJoinRequests.userId, userId))
+      .orderBy(desc(companyJoinRequests.createdAt))
+      .limit(1);
+    return row ?? null;
+  }
+
+  /** Pending-screen data for a signup that matched an existing company. */
+  async getJoinRequest(userId: string): Promise<EmployerJoinRequestResponse> {
+    const row = await this.latestJoinRequest(userId);
+    if (!row) {
+      throw codedNotFound(
+        'COMPANY_JOIN_REQUEST_NOT_FOUND',
+        'No company join request for this user',
+      );
+    }
+    return {
+      status: companyJoinRequestStatusSchema.parse(row.status),
+      companyLegalName: row.companyLegalName,
+      createdAt: row.createdAt.toISOString(),
+      decidedAt: row.decidedAt ? row.decidedAt.toISOString() : null,
     };
   }
 

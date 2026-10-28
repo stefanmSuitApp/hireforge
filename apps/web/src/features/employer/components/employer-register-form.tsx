@@ -361,7 +361,12 @@ export function EmployerRegisterForm() {
       {draft.step === 0 ? (
         <>
           <div className="space-y-2">
-            <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground" htmlFor="reg-email">{t('email')}</Label>
+            <Label
+              className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+              htmlFor="reg-email"
+            >
+              {t('email')}
+            </Label>
             <Input
               id="reg-email"
               name="email"
@@ -375,7 +380,12 @@ export function EmployerRegisterForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground" htmlFor="reg-password">{t('password')}</Label>
+            <Label
+              className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+              htmlFor="reg-password"
+            >
+              {t('password')}
+            </Label>
             <PasswordInput
               id="reg-password"
               name="password"
@@ -396,7 +406,12 @@ export function EmployerRegisterForm() {
       {draft.step === 1 ? (
         <>
           <div className="space-y-2">
-            <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground" htmlFor="reg-country">{tReg('country')}</Label>
+            <Label
+              className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+              htmlFor="reg-country"
+            >
+              {tReg('country')}
+            </Label>
             <SelectField
               id="reg-country"
               options={COUNTRY_CODES.map((code) => ({
@@ -412,7 +427,12 @@ export function EmployerRegisterForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground" htmlFor="reg-legal">{t('legalName')}</Label>
+            <Label
+              className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+              htmlFor="reg-legal"
+            >
+              {t('legalName')}
+            </Label>
             <Input
               id="reg-legal"
               value={draft.legalName}
@@ -423,7 +443,12 @@ export function EmployerRegisterForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground" htmlFor="reg-slug">{t('companySlug')}</Label>
+            <Label
+              className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+              htmlFor="reg-slug"
+            >
+              {t('companySlug')}
+            </Label>
             <Input
               id="reg-slug"
               value={draft.companySlug}
@@ -439,7 +464,12 @@ export function EmployerRegisterForm() {
           {isDomestic ? (
             <>
               <div className="space-y-2">
-                <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground" htmlFor="reg-pib">{tReg('pib')}</Label>
+                <Label
+                  className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                  htmlFor="reg-pib"
+                >
+                  {tReg('pib')}
+                </Label>
                 <Input
                   id="reg-pib"
                   inputMode="numeric"
@@ -451,7 +481,12 @@ export function EmployerRegisterForm() {
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground" htmlFor="reg-mb">{tReg('mb')}</Label>
+                <Label
+                  className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                  htmlFor="reg-mb"
+                >
+                  {tReg('mb')}
+                </Label>
                 <Input
                   id="reg-mb"
                   inputMode="numeric"
@@ -465,7 +500,12 @@ export function EmployerRegisterForm() {
             </>
           ) : isEUCountry(draft.countryCode) ? (
             <div className="space-y-2">
-              <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground" htmlFor="reg-vat">{tReg('vatId')}</Label>
+              <Label
+                className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                htmlFor="reg-vat"
+              >
+                {tReg('vatId')}
+              </Label>
               <Input
                 id="reg-vat"
                 value={draft.vatId}
@@ -480,7 +520,12 @@ export function EmployerRegisterForm() {
             </div>
           ) : (
             <div className="space-y-2">
-              <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground" htmlFor="reg-tax">{tReg('taxId')}</Label>
+              <Label
+                className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                htmlFor="reg-tax"
+              >
+                {tReg('taxId')}
+              </Label>
               <Input
                 id="reg-tax"
                 value={draft.taxId}
@@ -492,7 +537,12 @@ export function EmployerRegisterForm() {
             </div>
           )}
           <div className="space-y-2">
-            <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground" htmlFor="reg-regno">{tReg('registrationNumber')}</Label>
+            <Label
+              className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+              htmlFor="reg-regno"
+            >
+              {tReg('registrationNumber')}
+            </Label>
             <Input
               id="reg-regno"
               value={draft.registrationNumber}
@@ -510,7 +560,12 @@ export function EmployerRegisterForm() {
       {draft.step === 2 ? (
         <>
           <div className="space-y-2">
-            <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground" htmlFor="reg-a1">{tReg('addressLine1')}</Label>
+            <Label
+              className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+              htmlFor="reg-a1"
+            >
+              {tReg('addressLine1')}
+            </Label>
             <Input
               id="reg-a1"
               value={draft.addressLine1}
@@ -521,7 +576,12 @@ export function EmployerRegisterForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground" htmlFor="reg-a2">{tReg('addressLine2')}</Label>
+            <Label
+              className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+              htmlFor="reg-a2"
+            >
+              {tReg('addressLine2')}
+            </Label>
             <Input
               id="reg-a2"
               value={draft.addressLine2}
@@ -532,7 +592,12 @@ export function EmployerRegisterForm() {
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground" htmlFor="reg-zip">{tReg('postalCode')}</Label>
+              <Label
+                className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                htmlFor="reg-zip"
+              >
+                {tReg('postalCode')}
+              </Label>
               <Input
                 id="reg-zip"
                 value={draft.addressPostalCode}
@@ -546,7 +611,12 @@ export function EmployerRegisterForm() {
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground" htmlFor="reg-city">{tReg('city')}</Label>
+              <Label
+                className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                htmlFor="reg-city"
+              >
+                {tReg('city')}
+              </Label>
               <Input
                 id="reg-city"
                 value={draft.addressCity}
@@ -558,7 +628,12 @@ export function EmployerRegisterForm() {
             </div>
           </div>
           <div className="space-y-2">
-            <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground" htmlFor="reg-region">{tReg('stateRegion')}</Label>
+            <Label
+              className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+              htmlFor="reg-region"
+            >
+              {tReg('stateRegion')}
+            </Label>
             <Input
               id="reg-region"
               value={draft.addressStateRegion}
@@ -583,7 +658,12 @@ export function EmployerRegisterForm() {
           {!isDomestic ? (
             <>
               <div className="space-y-2">
-                <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground" htmlFor="reg-bank">{tReg('bankName')}</Label>
+                <Label
+                  className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                  htmlFor="reg-bank"
+                >
+                  {tReg('bankName')}
+                </Label>
                 <Input
                   id="reg-bank"
                   value={draft.bankName}
@@ -594,7 +674,12 @@ export function EmployerRegisterForm() {
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground" htmlFor="reg-iban">{tReg('iban')}</Label>
+                <Label
+                  className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                  htmlFor="reg-iban"
+                >
+                  {tReg('iban')}
+                </Label>
                 <Input
                   id="reg-iban"
                   value={draft.iban}
@@ -605,7 +690,12 @@ export function EmployerRegisterForm() {
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground" htmlFor="reg-swift">{tReg('swift')}</Label>
+                <Label
+                  className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                  htmlFor="reg-swift"
+                >
+                  {tReg('swift')}
+                </Label>
                 <Input
                   id="reg-swift"
                   value={draft.swiftBic}
@@ -617,7 +707,12 @@ export function EmployerRegisterForm() {
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground" htmlFor="reg-bcc">{tReg('bankCountry')}</Label>
+                  <Label
+                    className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                    htmlFor="reg-bcc"
+                  >
+                    {tReg('bankCountry')}
+                  </Label>
                   <Input
                     id="reg-bcc"
                     value={draft.bankCountryCode}
@@ -632,7 +727,12 @@ export function EmployerRegisterForm() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground" htmlFor="reg-ccy">{tReg('accountCurrency')}</Label>
+                  <Label
+                    className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                    htmlFor="reg-ccy"
+                  >
+                    {tReg('accountCurrency')}
+                  </Label>
                   <Input
                     id="reg-ccy"
                     value={draft.accountCurrency}
@@ -648,7 +748,12 @@ export function EmployerRegisterForm() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground" htmlFor="reg-invlang">{tReg('invoiceLanguage')}</Label>
+                <Label
+                  className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                  htmlFor="reg-invlang"
+                >
+                  {tReg('invoiceLanguage')}
+                </Label>
                 <SelectField
                   id="reg-invlang"
                   options={[
@@ -672,7 +777,12 @@ export function EmployerRegisterForm() {
           ) : (
             <>
               <div className="space-y-2">
-                <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground" htmlFor="reg-bank-o">{tReg('bankName')}</Label>
+                <Label
+                  className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                  htmlFor="reg-bank-o"
+                >
+                  {tReg('bankName')}
+                </Label>
                 <Input
                   id="reg-bank-o"
                   value={draft.bankName}
@@ -683,7 +793,12 @@ export function EmployerRegisterForm() {
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground" htmlFor="reg-iban-o">{tReg('iban')}</Label>
+                  <Label
+                    className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                    htmlFor="reg-iban-o"
+                  >
+                    {tReg('iban')}
+                  </Label>
                   <Input
                     id="reg-iban-o"
                     value={draft.iban}
@@ -693,7 +808,12 @@ export function EmployerRegisterForm() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground" htmlFor="reg-swift-o">{tReg('swift')}</Label>
+                  <Label
+                    className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                    htmlFor="reg-swift-o"
+                  >
+                    {tReg('swift')}
+                  </Label>
                   <Input
                     id="reg-swift-o"
                     value={draft.swiftBic}
@@ -706,7 +826,12 @@ export function EmployerRegisterForm() {
             </>
           )}
           <div className="space-y-2">
-            <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground" htmlFor="reg-bille">{tReg('billingEmail')}</Label>
+            <Label
+              className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+              htmlFor="reg-bille"
+            >
+              {tReg('billingEmail')}
+            </Label>
             <Input
               id="reg-bille"
               type="email"
@@ -718,7 +843,12 @@ export function EmployerRegisterForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground" htmlFor="reg-billp">{tReg('billingPhone')}</Label>
+            <Label
+              className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+              htmlFor="reg-billp"
+            >
+              {tReg('billingPhone')}
+            </Label>
             <Input
               id="reg-billp"
               value={draft.billingPhone}
@@ -728,7 +858,12 @@ export function EmployerRegisterForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground" htmlFor="reg-billn">{tReg('billingContactName')}</Label>
+            <Label
+              className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+              htmlFor="reg-billn"
+            >
+              {tReg('billingContactName')}
+            </Label>
             <Input
               id="reg-billn"
               value={draft.billingContactName}
@@ -742,7 +877,12 @@ export function EmployerRegisterForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground" htmlFor="reg-rp">{tReg('responsiblePerson')}</Label>
+            <Label
+              className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+              htmlFor="reg-rp"
+            >
+              {tReg('responsiblePerson')}
+            </Label>
             <Input
               id="reg-rp"
               value={draft.responsiblePerson}
@@ -752,7 +892,12 @@ export function EmployerRegisterForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground" htmlFor="reg-rpos">{tReg('responsiblePosition')}</Label>
+            <Label
+              className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+              htmlFor="reg-rpos"
+            >
+              {tReg('responsiblePosition')}
+            </Label>
             <Input
               id="reg-rpos"
               value={draft.responsiblePosition}

@@ -7,6 +7,7 @@ import './load-root-env';
 
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { assertProductionEnv } from 'server-auth';
 import { AppModule } from './app/app.module';
 import { getDb, pingDb } from './database';
 import { AllExceptionsFilter } from './observability/http-exception.filter';
@@ -14,6 +15,8 @@ import { LoggingInterceptor } from './observability/logging.interceptor';
 import { getRedis, pingRedis } from './redis';
 
 async function bootstrap() {
+  assertProductionEnv();
+
   const db = getDb();
   if (!db) {
     Logger.warn('DATABASE_URL not set — database connection disabled');

@@ -4,6 +4,7 @@ export * from './lib/billing';
 export * from './lib/candidate';
 export * from './lib/cms-sync';
 export * from './lib/companies';
+export * from './lib/company-join-requests';
 export * from './lib/contracts';
 export * from './lib/domain';
 export * from './lib/editor';

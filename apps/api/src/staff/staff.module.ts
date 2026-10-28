@@ -9,6 +9,8 @@ import { StaffCompaniesController } from './staff-companies.controller';
 import { StaffCompaniesService } from './staff-companies.service';
 import { StaffEmployersController } from './staff-employers.controller';
 import { StaffEmployersService } from './staff-employers.service';
+import { StaffJoinRequestsController } from './staff-join-requests.controller';
+import { StaffJoinRequestsService } from './staff-join-requests.service';
 
 @Module({
   imports: [SubscriptionsModule],
@@ -16,12 +18,14 @@ import { StaffEmployersService } from './staff-employers.service';
     StaffAuditService,
     StaffCompaniesService,
     StaffEmployersService,
+    StaffJoinRequestsService,
     AdminService,
     AdminPromoCodesService,
   ],
   controllers: [
     StaffCompaniesController,
     StaffEmployersController,
+    StaffJoinRequestsController,
     AdminController,
   ],
   exports: [StaffAuditService],

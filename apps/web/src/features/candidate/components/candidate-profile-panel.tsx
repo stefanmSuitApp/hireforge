@@ -117,7 +117,9 @@ export function CandidateProfilePanel({
             </Button>
           </div>
           {resumesError ? (
-            <p className="mt-2 text-sm text-destructive">{t('resumesLoadError')}</p>
+            <p className="mt-2 text-sm text-destructive">
+              {t('resumesLoadError')}
+            </p>
           ) : (
             <>
               <div className="rounded-lg border border-dashed border-border bg-muted/30 p-3">

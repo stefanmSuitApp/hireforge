@@ -95,28 +95,31 @@ export function IsoDatePicker({
             <span className="truncate">{label}</span>
           </Button>
         </PopoverTrigger>
-      <PopoverContent className="w-auto border-border p-0 shadow-md" align="start">
-        <Calendar
-          className="border-0 shadow-none"
-          mode="single"
-          selected={selected}
-          defaultMonth={selected}
-          startMonth={startMonth}
-          endMonth={endMonth}
-          onSelect={(d) => {
-            onChange(d ? format(d, ISO) : '');
-            setOpen(false);
-          }}
-          disabled={
-            fromDate && toDate
-              ? [{ before: fromDate }, { after: toDate }]
-              : fromDate
-                ? { before: fromDate }
-                : toDate
-                  ? { after: toDate }
-                  : undefined
-          }
-        />
+        <PopoverContent
+          className="w-auto border-border p-0 shadow-md"
+          align="start"
+        >
+          <Calendar
+            className="border-0 shadow-none"
+            mode="single"
+            selected={selected}
+            defaultMonth={selected}
+            startMonth={startMonth}
+            endMonth={endMonth}
+            onSelect={(d) => {
+              onChange(d ? format(d, ISO) : '');
+              setOpen(false);
+            }}
+            disabled={
+              fromDate && toDate
+                ? [{ before: fromDate }, { after: toDate }]
+                : fromDate
+                  ? { before: fromDate }
+                  : toDate
+                    ? { after: toDate }
+                    : undefined
+            }
+          />
         </PopoverContent>
       </Popover>
       {allowClear && selected ? (

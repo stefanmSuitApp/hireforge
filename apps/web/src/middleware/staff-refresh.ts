@@ -8,6 +8,7 @@ import {
 } from '@/lib/moderator-session';
 import { nestApiUrl, resolveNestServerOrigin } from '@/lib/nest-api-url';
 import { getLocaleFromPathname } from '@/middleware/locale-path';
+import { forwardClientIpHeaders } from '@/lib/client-ip';
 
 /** Refreshes staff JWT for moderator routes and for the admin dashboard (same login, `/moderator/login`). */
 export function isModeratorSessionPath(pathname: string): boolean {
@@ -82,6 +83,7 @@ export async function mergeStaffRefreshIntoResponse(
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
+        ...forwardClientIpHeaders(request.headers),
       },
       body: JSON.stringify({ refreshToken: refresh }),
     });

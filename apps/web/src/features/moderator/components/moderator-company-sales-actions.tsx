@@ -102,9 +102,7 @@ export function ModeratorCompanySalesActions({
           <h3 className="text-base font-semibold text-foreground">
             {t('salesHeading')}
           </h3>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {t('salesLead')}
-          </p>
+          <p className="mt-1 text-sm text-muted-foreground">{t('salesLead')}</p>
         </div>
         <TableStatusBadge
           label={t(`salesStatus.${company.salesStatus ?? 'unassigned'}`)}

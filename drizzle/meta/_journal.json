@@ -176,6 +176,13 @@
       "when": 1777300000000,
       "tag": "0024_saved_jobs_step15",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1777400000000,
+      "tag": "0025_company_join_requests",
+      "breakpoints": true
     }
   ]
 }

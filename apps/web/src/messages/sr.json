@@ -644,7 +644,15 @@
     "registerLink": "Registruj se",
     "haveAccount": "Već imate nalog?",
     "loginLink": "Prijavi se",
-    "errorGeneric": "Nešto nije u redu. Pokušajte ponovo."
+    "errorGeneric": "Nešto nije u redu. Pokušajte ponovo.",
+    "joinRequest": {
+      "eyebrow": "Pristup kompaniji",
+      "pendingTitle": "Zahtev čeka odobrenje",
+      "rejectedTitle": "Zahtev je odbijen",
+      "companyLabel": "Kompanija:",
+      "pendingBody": "Ova kompanija već postoji na Šljakam. Da bismo zaštitili njene podatke, naš tim mora da potvrdi da pripadate kompaniji. Prijavite se ponovo kasnije da proverite status zahteva.",
+      "rejectedBody": "Nismo mogli da potvrdimo da pripadate ovoj kompaniji. Ako mislite da je ovo greška, javite se našoj podršci."
+    }
   },
   "Moderator": {
     "loginTitle": "Prijava osoblja",
@@ -802,6 +810,13 @@
       "adminOverrideHint": "Odmah arhivira posao bez obzira na status. Koristiti retko.",
       "forceArchive": "Prisilno arhiviraj",
       "forceArchiving": "Arhiviranje…"
+    },
+    "joinRequests": {
+      "heading": "Zahtevi za pristup kompaniji",
+      "lead": "Ovi korisnici su se registrovali sa PIB-om ili matičnim brojem kompanije koja već postoji. Odobrite samo ako ste potvrdili da rade u toj kompaniji.",
+      "wantsToJoin": "želi pristup kompaniji {company}",
+      "approve": "Odobri",
+      "reject": "Odbij"
     }
   },
   "Admin": {
@@ -961,6 +976,11 @@
     "CITY_SLUG_UNKNOWN": "Taj grad nije pronađen.",
     "CATEGORY_SLUG_UNKNOWN": "Ta kategorija nije pronađena.",
     "EMPLOYER_NOT_SETUP": "Profil poslodavca još nije podešen.",
+    "EMPLOYER_PENDING_APPROVAL": "Vaš zahtev za pristup kompaniji čeka odobrenje.",
+    "EMPLOYER_JOIN_REJECTED": "Zahtev za pristup kompaniji je odbijen.",
+    "COMPANY_JOIN_REQUEST_NOT_FOUND": "Zahtev nije pronađen.",
+    "COMPANY_JOIN_REQUEST_FORBIDDEN": "Ova kompanija nije dodeljena vama niti je u bazi slobodnih kontakata.",
+    "COMPANY_JOIN_REQUEST_NOT_PENDING": "O ovom zahtevu je već odlučeno.",
     "JOB_NOT_FOUND": "Taj posao nije pronađen.",
     "JOB_FORBIDDEN_COMPANY": "Taj posao pripada drugoj kompaniji.",
     "JOB_NOT_DRAFT": "Ta radnja važi samo za nacrte poslova.",
@@ -1023,6 +1043,7 @@
     "APPLICATION_REAPPLY_COOLDOWN": "Nedavno ste povukli prijavu. Sačekajte 24 sata pre ponovne prijave na ovaj posao.",
     "APPLICATION_RESUME_REQUIRED": "Otpremite CV na profilu (ili ga ovde izaberite) pre prijave.",
     "APPLICATION_SUBMIT_RATE_LIMITED": "Previše prijava u jednom danu. Probajte sutra.",
+    "AUTH_RATE_LIMITED": "Previše pokušaja. Sačekajte nekoliko minuta i pokušajte ponovo.",
     "APPLICATION_WITHDRAW_FORBIDDEN": "Ovu prijavu više ne možete povući.",
     "CANDIDATE_EMAIL_NOT_VERIFIED": "Potvrdite e-poštu pre slanja prijave.",
     "RESUME_NOT_FOUND": "Taj CV nije pronađen.",
@@ -1030,6 +1051,7 @@
     "RESUME_IN_USE": "Ovaj CV je vezan za prijavu i ne može se obrisati.",
     "STAFF_COMPANY_LIST_VIEW_FORBIDDEN": "Ne možete otvoriti taj prikaz liste kompanija.",
     "STAFF_COMPANY_PATCH_FORBIDDEN": "Ne možete menjati ovu kompaniju u ovom stanju.",
+    "STAFF_COMPANY_VIEW_FORBIDDEN": "Ova kompanija nije dodeljena vama niti je u bazi slobodnih kontakata.",
     "STAFF_COMPANY_PICKUP_FORBIDDEN": "Ova kompanija se trenutno ne može preuzeti.",
     "STAFF_COMPANY_CLOSE_FORBIDDEN": "Ne možete menjati prodajni status ove kompanije.",
     "COMPANY_IDENTIFIER_TAKEN": "Druga kompanija već koristi ovaj PIB, MB, PDV ili identifikator.",

@@ -24,15 +24,15 @@ Examples:
 
 All filters live in the query string (aligned with §15.3):
 
-| Param | Meaning |
-|-------|---------|
-| `page`, `pageSize` | Pagination |
-| `q` | Full-text search |
-| `city`, `category` | Slug filters |
-| `workModel` | `onsite` \| `remote` \| `hybrid` |
-| `employmentType` | `full_time` \| `part_time` \| `contract` \| `internship` \| `temporary` |
-| `postedWithin` | `1d` \| `7d` \| `30d` — `published_at` lower bound |
-| `easyApply` | `1` when set — only `apply_mode = internal` |
+| Param              | Meaning                                                                 |
+| ------------------ | ----------------------------------------------------------------------- |
+| `page`, `pageSize` | Pagination                                                              |
+| `q`                | Full-text search                                                        |
+| `city`, `category` | Slug filters                                                            |
+| `workModel`        | `onsite` \| `remote` \| `hybrid`                                        |
+| `employmentType`   | `full_time` \| `part_time` \| `contract` \| `internship` \| `temporary` |
+| `postedWithin`     | `1d` \| `7d` \| `30d` — `published_at` lower bound                      |
+| `easyApply`        | `1` when set — only `apply_mode = internal`                             |
 
 Empty / omitted params mean “no constraint” for that dimension.
 

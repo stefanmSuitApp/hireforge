@@ -6,6 +6,10 @@ export const dynamic = 'force-dynamic';
  * BFF sample: calls Nest root with `X-Request-Id` so API access logs correlate with this hop.
  */
 export async function GET() {
+  // Dev-only diagnostics (reports Postgres/Redis status).
+  if (process.env.NODE_ENV !== 'development') {
+    return new Response(null, { status: 404 });
+  }
   const base = process.env.NEXT_PUBLIC_API_URL;
   if (!base) {
     return Response.json(

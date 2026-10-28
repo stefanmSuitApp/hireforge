@@ -17,7 +17,9 @@ export async function EmployerJobApplications({ jobId }: Props) {
     <div className="space-y-6">
       <section className="rounded-2xl border border-border/70 bg-card p-6 shadow-sm">
         <div className="flex flex-row flex-wrap items-center justify-between gap-4">
-          <h2 className="text-xl font-semibold text-foreground">{t('title')}</h2>
+          <h2 className="text-xl font-semibold text-foreground">
+            {t('title')}
+          </h2>
           <Button variant="outline" size="sm" asChild>
             <Link href="/employer/jobs" locale={locale}>
               {t('backToList')}

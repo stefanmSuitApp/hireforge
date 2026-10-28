@@ -140,7 +140,9 @@ export function ModeratorPendingPaymentsPanel({ initialItems }: Props) {
             <DropdownMenuContent align="end">
               <DropdownMenuItem onSelect={() => void markPaid(row)}>
                 <Check className="size-3.5 text-muted-foreground" />
-                {busyId === row.subscriptionId ? t('markingPaid') : t('markPaid')}
+                {busyId === row.subscriptionId
+                  ? t('markingPaid')
+                  : t('markPaid')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

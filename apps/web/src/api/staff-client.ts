@@ -12,6 +12,7 @@ import type {
   PromoCodePatchBody,
   PromoCodeResponse,
   StaffCompanyCreateBody,
+  StaffCompanyJoinRequestListResponse,
   StaffCompanyListResponse,
   StaffCompanyPatchBody,
   StaffEmployerListResponse,
@@ -234,5 +235,23 @@ export async function postAdminCompanyReassign(
     `/api/admin/companies/${companyId}/reassign`,
     body,
   );
+  return data;
+}
+
+export async function getStaffJoinRequests(): Promise<StaffCompanyJoinRequestListResponse> {
+  const { data } = await webHttp.get<StaffCompanyJoinRequestListResponse>(
+    '/api/moderator/company-join-requests',
+  );
+  return data;
+}
+
+export async function postStaffJoinRequestDecision(
+  requestId: string,
+  decision: 'approve' | 'reject',
+): Promise<{ id: string; status: 'approved' | 'rejected' }> {
+  const { data } = await webHttp.post<{
+    id: string;
+    status: 'approved' | 'rejected';
+  }>(`/api/moderator/company-join-requests/${requestId}/${decision}`);
   return data;
 }

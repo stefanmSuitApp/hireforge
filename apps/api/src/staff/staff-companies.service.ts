@@ -21,6 +21,7 @@ import {
 } from '../http/coded-http';
 import { getDb } from '../database';
 import { StaffAuditService } from './staff-audit.service';
+import { staffCanAccessCompany } from './staff-company-access';
 
 function trimOrNull(s: string | null | undefined, max?: number): string | null {
   if (s === undefined || s === null) {
@@ -74,13 +75,17 @@ export class StaffCompaniesService {
         )
       : undefined;
 
+    // Moderators never get the unfiltered list (admin-only `view=all`); an
+    // omitted view falls back to their own companies.
+    const view = input.view ?? (ctx.actorRole === 'admin' ? undefined : 'my');
+
     let viewExpr:
       | ReturnType<typeof eq>
       | ReturnType<typeof inArray>
       | undefined;
-    if (input.view === 'my') {
+    if (view === 'my') {
       viewExpr = eq(companies.assignedModeratorId, ctx.actorUserId);
-    } else if (input.view === 'pool') {
+    } else if (view === 'pool') {
       viewExpr = inArray(companies.salesStatus, ['unassigned', 'closed_lost']);
     }
 
@@ -131,7 +136,10 @@ export class StaffCompaniesService {
     return { items, total: Number(totalRow?.n ?? 0) };
   }
 
-  async getById(companyId: string): Promise<StaffCompanyDetailResponse> {
+  async getById(
+    companyId: string,
+    ctx: { actorUserId: string; actorRole: UserRole },
+  ): Promise<StaffCompanyDetailResponse> {
     const database = getDb();
     if (!database) {
       throw codedServiceUnavailable(
@@ -190,6 +198,15 @@ export class StaffCompaniesService {
 
     if (!row) {
       throw codedNotFound('COMPANY_NOT_FOUND', 'Company not found');
+    }
+
+    // Detail includes bank + billing contacts: moderators only see their own
+    // companies and the lead pool (same rule as patch).
+    if (!staffCanAccessCompany(row, ctx)) {
+      throw codedForbidden(
+        'STAFF_COMPANY_VIEW_FORBIDDEN',
+        'You can only view your companies or unassigned / closed-lost leads',
+      );
     }
 
     const members = await database.db

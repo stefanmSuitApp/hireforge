@@ -83,23 +83,31 @@ export function JobsFilterForm({
   }, [locale, t, taxonomy.categories]);
 
   return (
-    <form
-      className="flex flex-col gap-4"
-      method="get"
-      action={action}
-    >
+    <form className="flex flex-col gap-4" method="get" action={action}>
       <input type="hidden" name="page" value="1" />
       {preserve.job.trim() ? (
         <input type="hidden" name="job" value={preserve.job.trim()} />
       ) : null}
       {preserve.workModel.trim() ? (
-        <input type="hidden" name="workModel" value={preserve.workModel.trim()} />
+        <input
+          type="hidden"
+          name="workModel"
+          value={preserve.workModel.trim()}
+        />
       ) : null}
       {preserve.employmentType.trim() ? (
-        <input type="hidden" name="employmentType" value={preserve.employmentType.trim()} />
+        <input
+          type="hidden"
+          name="employmentType"
+          value={preserve.employmentType.trim()}
+        />
       ) : null}
       {preserve.postedWithin.trim() ? (
-        <input type="hidden" name="postedWithin" value={preserve.postedWithin.trim()} />
+        <input
+          type="hidden"
+          name="postedWithin"
+          value={preserve.postedWithin.trim()}
+        />
       ) : null}
       {preserve.easyApply ? (
         <input type="hidden" name="easyApply" value="1" />
@@ -108,7 +116,10 @@ export function JobsFilterForm({
       {/* Inline pill filter bar */}
       <div className="flex flex-col gap-3 rounded-2xl border border-border/50 bg-card/80 p-4 backdrop-blur-sm sm:flex-row sm:items-end sm:gap-3">
         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-          <Label htmlFor="jobs-filter-q" className="text-xs font-semibold text-muted-foreground">
+          <Label
+            htmlFor="jobs-filter-q"
+            className="text-xs font-semibold text-muted-foreground"
+          >
             {t('searchLabel')}
           </Label>
           <Input
@@ -124,7 +135,10 @@ export function JobsFilterForm({
         </div>
 
         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-          <Label htmlFor="jobs-filter-city" className="text-xs font-semibold text-muted-foreground">
+          <Label
+            htmlFor="jobs-filter-city"
+            className="text-xs font-semibold text-muted-foreground"
+          >
             {t('cityLabel')}
           </Label>
           <input type="hidden" name="city" value={city} aria-hidden />
@@ -142,7 +156,10 @@ export function JobsFilterForm({
         </div>
 
         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-          <Label htmlFor="jobs-filter-category" className="text-xs font-semibold text-muted-foreground">
+          <Label
+            htmlFor="jobs-filter-category"
+            className="text-xs font-semibold text-muted-foreground"
+          >
             {t('categoryLabel')}
           </Label>
           <input type="hidden" name="category" value={category} aria-hidden />
@@ -150,10 +167,14 @@ export function JobsFilterForm({
             id="jobs-filter-category"
             options={categoryOptions}
             value={category === '' ? JOBS_FILTER_ANY_VALUE : category}
-            onValueChange={(v) => setCategory(v === JOBS_FILTER_ANY_VALUE ? '' : v)}
+            onValueChange={(v) =>
+              setCategory(v === JOBS_FILTER_ANY_VALUE ? '' : v)
+            }
             placeholder={t('categoryAny')}
             classNames={{
-              trigger: cn('w-full h-10 rounded-full border-input bg-background px-4 font-normal'),
+              trigger: cn(
+                'w-full h-10 rounded-full border-input bg-background px-4 font-normal',
+              ),
             }}
           />
         </div>
@@ -163,7 +184,11 @@ export function JobsFilterForm({
             {t('applySearch')}
           </Button>
           {hasFilters ? (
-            <Button variant="ghost" className="h-10 rounded-full px-4 text-muted-foreground" asChild>
+            <Button
+              variant="ghost"
+              className="h-10 rounded-full px-4 text-muted-foreground"
+              asChild
+            >
               <Link href="/jobs">{t('clearFilters')}</Link>
             </Button>
           ) : null}

@@ -46,7 +46,9 @@ export const ADMIN_WORKSPACE_LINKS: ReadonlyArray<{
   { href: '/admin/audit', navKey: 'audit', messageKey: 'navAudit' },
 ];
 
-export function getAdminWorkspaceNavKey(pathname: string): AdminWorkspaceNavKey {
+export function getAdminWorkspaceNavKey(
+  pathname: string,
+): AdminWorkspaceNavKey {
   if (pathname.startsWith('/admin/users')) {
     return 'users';
   }

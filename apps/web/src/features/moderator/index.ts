@@ -1,6 +1,7 @@
 export { ModeratorPendingPaymentsPanel } from './components/moderator-pending-payments-panel';
 export { ModeratorCompanyCreateForm } from './components/moderator-company-create-form';
 export { ModeratorCompaniesSection } from './components/moderator-companies-section';
+export { ModeratorJoinRequestsPanel } from './components/moderator-join-requests-panel';
 export { ModeratorCompanyDetailForm } from './components/moderator-company-detail-form';
 export { ModeratorCompanySalesActions } from './components/moderator-company-sales-actions';
 export { ModeratorEmployersSection } from './components/moderator-employers-section';

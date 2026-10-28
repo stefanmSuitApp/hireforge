@@ -129,9 +129,13 @@ export function CandidateApplicationsTable({ items }: Props) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onSelect={() => withdrawMutation.mutate(row.id)}>
+                <DropdownMenuItem
+                  onSelect={() => withdrawMutation.mutate(row.id)}
+                >
                   <X className="size-3.5 text-muted-foreground" />
-                  {withdrawMutation.isPending ? t('withdrawing') : t('withdraw')}
+                  {withdrawMutation.isPending
+                    ? t('withdrawing')
+                    : t('withdraw')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

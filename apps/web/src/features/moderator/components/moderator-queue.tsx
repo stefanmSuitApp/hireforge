@@ -187,32 +187,32 @@ export function ModeratorQueue({ queue, initialStatus }: Props) {
       </section>
 
       <section className="rounded-2xl border border-border/70 bg-card p-5 shadow-sm">
-      <div className="mb-4 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-sm text-muted-foreground">
-            {t('total', { count: data.total })}
-          </p>
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-sm text-muted-foreground">
+              {t('total', { count: data.total })}
+            </p>
+          </div>
+          <div className="flex min-w-0 flex-col gap-1.5 sm:max-w-xs">
+            <Label htmlFor="mod-status" className="text-muted-foreground">
+              {t('filterStatus')}
+            </Label>
+            <SelectField
+              id="mod-status"
+              value={initialStatus}
+              onValueChange={navigateToStatus}
+              options={statusOptions}
+              classNames={{ trigger: 'h-9 w-full min-w-[12rem]' }}
+            />
+          </div>
         </div>
-        <div className="flex min-w-0 flex-col gap-1.5 sm:max-w-xs">
-          <Label htmlFor="mod-status" className="text-muted-foreground">
-            {t('filterStatus')}
-          </Label>
-          <SelectField
-            id="mod-status"
-            value={initialStatus}
-            onValueChange={navigateToStatus}
-            options={statusOptions}
-            classNames={{ trigger: 'h-9 w-full min-w-[12rem]' }}
-          />
-        </div>
-      </div>
 
-      <DataTable
-        data={data.items}
-        columns={columns}
-        emptyContent={t('empty')}
-        getRowId={(row) => row.id}
-      />
+        <DataTable
+          data={data.items}
+          columns={columns}
+          emptyContent={t('empty')}
+          getRowId={(row) => row.id}
+        />
       </section>
     </div>
   );

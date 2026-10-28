@@ -2,10 +2,15 @@ import { Injectable, Logger } from '@nestjs/common';
 import { randomBytes } from 'crypto';
 import { and, eq, inArray } from 'drizzle-orm';
 import type { EmployerSelfSignupBody } from 'contracts';
-import { candidates, companies, employers, users } from 'database';
+import {
+  candidates,
+  companies,
+  companyJoinRequests,
+  employers,
+  users,
+} from 'database';
 import {
   findExistingCompanyIdForSelfSignup,
-  mergeCompanyRowFromSelfSignup,
   newCompanyValuesFromSelfSignup,
 } from 'server-employers';
 
@@ -77,24 +82,9 @@ export class AuthService {
       let companyId: string;
 
       if (existingCompanyId) {
-        const [row] = await tx
-          .select()
-          .from(companies)
-          .where(eq(companies.id, existingCompanyId))
-          .limit(1);
-        if (!row) {
-          throw codedInternalError(
-            'INTERNAL_ERROR',
-            'Matched company row is missing',
-          );
-        }
-        const patch = mergeCompanyRowFromSelfSignup(row, companyPayload);
-        if (Object.keys(patch).length > 0) {
-          await tx
-            .update(companies)
-            .set({ ...patch, updatedAt: new Date() })
-            .where(eq(companies.id, existingCompanyId));
-        }
+        // PIB / MB / VAT IDs are public, so a match proves nothing about the
+        // signer: never link or merge into the existing company here. A
+        // pending join request is created below for staff to approve.
         companyId = existingCompanyId;
       } else {
         const baseSlug = input.companySlug?.trim()
@@ -171,10 +161,17 @@ export class AuthService {
         );
       }
 
-      await tx.insert(employers).values({
-        userId: user.id,
-        companyId,
-      });
+      if (existingCompanyId) {
+        await tx.insert(companyJoinRequests).values({
+          userId: user.id,
+          companyId,
+        });
+      } else {
+        await tx.insert(employers).values({
+          userId: user.id,
+          companyId,
+        });
+      }
 
       const accessToken = await signAccessToken(user.id, user.role);
       const refreshToken = await signRefreshToken(user.id);

@@ -43,7 +43,9 @@ function HeaderBlock({
   return (
     <View style={{ marginBottom: 14 }}>
       {layout.fullName ? (
-        <Text style={localePdfBoldStyle({ fontSize: nameSize })}>{layout.fullName}</Text>
+        <Text style={localePdfBoldStyle({ fontSize: nameSize })}>
+          {layout.fullName}
+        </Text>
       ) : (
         <Text style={localePdfBoldStyle({ fontSize: nameSize })}>CV</Text>
       )}
@@ -86,11 +88,15 @@ function BodySections({ layout }: { layout: CvPdfLayoutInput }): ReactElement {
               <Text style={localePdfBoldStyle({ fontSize: 10 })}>
                 {ex.title} · {ex.company}
               </Text>
-              <Text style={{ fontFamily: pdfBody, fontSize: 8, color: '#4a5568' }}>
+              <Text
+                style={{ fontFamily: pdfBody, fontSize: 8, color: '#4a5568' }}
+              >
                 {formatRange(ex.startDate, ex.endDate ?? null)}
               </Text>
               {ex.summary ? (
-                <Text style={{ fontFamily: pdfBody, fontSize: 9, marginTop: 2 }}>
+                <Text
+                  style={{ fontFamily: pdfBody, fontSize: 9, marginTop: 2 }}
+                >
                   {ex.summary}
                 </Text>
               ) : null}
@@ -103,11 +109,15 @@ function BodySections({ layout }: { layout: CvPdfLayoutInput }): ReactElement {
           <SectionTitle>Education</SectionTitle>
           {layout.profile.education.map((ed, i) => (
             <View key={i} style={{ marginBottom: 6 }} wrap={false}>
-              <Text style={localePdfBoldStyle({ fontSize: 10 })}>{ed.institution}</Text>
+              <Text style={localePdfBoldStyle({ fontSize: 10 })}>
+                {ed.institution}
+              </Text>
               <Text style={{ fontFamily: pdfBody, fontSize: 9 }}>
                 {[ed.degree, ed.field].filter(Boolean).join(' · ')}
               </Text>
-              <Text style={{ fontFamily: pdfBody, fontSize: 8, color: '#4a5568' }}>
+              <Text
+                style={{ fontFamily: pdfBody, fontSize: 8, color: '#4a5568' }}
+              >
                 {formatRange(ed.startDate, ed.endDate ?? null)}
               </Text>
             </View>
@@ -145,7 +155,9 @@ function KlasicanDoc({ layout }: { layout: CvPdfLayoutInput }): ReactElement {
             {layout.profile.skills.length ? (
               <View>
                 <Text style={localePdfBoldStyle({ fontSize: 10 })}>Skills</Text>
-                <Text style={{ fontFamily: pdfBody, fontSize: 9, marginTop: 4 }}>
+                <Text
+                  style={{ fontFamily: pdfBody, fontSize: 9, marginTop: 4 }}
+                >
                   {layout.profile.skills.map((s) => `• ${s.name}`).join('\n')}
                 </Text>
               </View>
@@ -154,18 +166,40 @@ function KlasicanDoc({ layout }: { layout: CvPdfLayoutInput }): ReactElement {
           <View style={stylesClassic.right}>
             {layout.profile.experiences.length ? (
               <View>
-                <Text style={localePdfBoldStyle({ fontSize: 11 })}>Experience</Text>
+                <Text style={localePdfBoldStyle({ fontSize: 11 })}>
+                  Experience
+                </Text>
                 {layout.profile.experiences.map((ex, i) => (
                   <View key={i} style={{ marginTop: 8 }} wrap={false}>
-                    <Text style={localePdfBoldStyle({ fontSize: 10 })}>{ex.title}</Text>
-                    <Text style={{ fontFamily: pdfBody, fontSize: 9, color: '#2d3748' }}>
+                    <Text style={localePdfBoldStyle({ fontSize: 10 })}>
+                      {ex.title}
+                    </Text>
+                    <Text
+                      style={{
+                        fontFamily: pdfBody,
+                        fontSize: 9,
+                        color: '#2d3748',
+                      }}
+                    >
                       {ex.company}
                     </Text>
-                    <Text style={{ fontFamily: pdfBody, fontSize: 8, color: '#718096' }}>
+                    <Text
+                      style={{
+                        fontFamily: pdfBody,
+                        fontSize: 8,
+                        color: '#718096',
+                      }}
+                    >
                       {formatRange(ex.startDate, ex.endDate ?? null)}
                     </Text>
                     {ex.summary ? (
-                      <Text style={{ fontFamily: pdfBody, fontSize: 9, marginTop: 2 }}>
+                      <Text
+                        style={{
+                          fontFamily: pdfBody,
+                          fontSize: 9,
+                          marginTop: 2,
+                        }}
+                      >
                         {ex.summary}
                       </Text>
                     ) : null}
@@ -175,14 +209,24 @@ function KlasicanDoc({ layout }: { layout: CvPdfLayoutInput }): ReactElement {
             ) : null}
             {layout.profile.education.length ? (
               <View style={{ marginTop: 12 }}>
-                <Text style={localePdfBoldStyle({ fontSize: 11 })}>Education</Text>
+                <Text style={localePdfBoldStyle({ fontSize: 11 })}>
+                  Education
+                </Text>
                 {layout.profile.education.map((ed, i) => (
                   <View key={i} style={{ marginTop: 6 }} wrap={false}>
-                    <Text style={localePdfBoldStyle({ fontSize: 10 })}>{ed.institution}</Text>
+                    <Text style={localePdfBoldStyle({ fontSize: 10 })}>
+                      {ed.institution}
+                    </Text>
                     <Text style={{ fontFamily: pdfBody, fontSize: 9 }}>
                       {[ed.degree, ed.field].filter(Boolean).join(' · ')}
                     </Text>
-                    <Text style={{ fontFamily: pdfBody, fontSize: 8, color: '#718096' }}>
+                    <Text
+                      style={{
+                        fontFamily: pdfBody,
+                        fontSize: 8,
+                        color: '#718096',
+                      }}
+                    >
                       {formatRange(ed.startDate, ed.endDate ?? null)}
                     </Text>
                   </View>
@@ -207,7 +251,11 @@ const stylesModeran = StyleSheet.create({
   main: { width: '72%', padding: 28 },
 });
 
-function ModeranSidebarHeader({ layout }: { layout: CvPdfLayoutInput }): ReactElement {
+function ModeranSidebarHeader({
+  layout,
+}: {
+  layout: CvPdfLayoutInput;
+}): ReactElement {
   return (
     <View>
       {layout.fullName ? (
@@ -215,7 +263,9 @@ function ModeranSidebarHeader({ layout }: { layout: CvPdfLayoutInput }): ReactEl
           {layout.fullName}
         </Text>
       ) : (
-        <Text style={localePdfBoldStyle({ fontSize: 14, color: '#ffffff' })}>CV</Text>
+        <Text style={localePdfBoldStyle({ fontSize: 14, color: '#ffffff' })}>
+          CV
+        </Text>
       )}
       {layout.headline ? (
         <Text
@@ -253,7 +303,9 @@ function ModeranDoc({ layout }: { layout: CvPdfLayoutInput }): ReactElement {
           <ModeranSidebarHeader layout={layout} />
           {layout.profile.skills.length ? (
             <View style={{ marginTop: 16 }}>
-              <Text style={localePdfBoldStyle({ fontSize: 10, color: '#ffffff' })}>
+              <Text
+                style={localePdfBoldStyle({ fontSize: 10, color: '#ffffff' })}
+              >
                 Skills
               </Text>
               <Text
@@ -312,7 +364,14 @@ function MinimalanDoc({ layout }: { layout: CvPdfLayoutInput }): ReactElement {
             {[layout.phone, layout.cityLine].filter(Boolean).join(' · ')}
           </Text>
         ) : null}
-        <View style={{ height: 1, backgroundColor: '#000', marginVertical: 16, width: 48 }} />
+        <View
+          style={{
+            height: 1,
+            backgroundColor: '#000',
+            marginVertical: 16,
+            width: 48,
+          }}
+        />
         <BodySections layout={layout} />
       </Page>
     </Document>

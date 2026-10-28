@@ -1,10 +1,7 @@
 import { z } from 'zod';
 
 import { currencyCodeSchema } from './companies';
-import {
-  entitlementsBlobSchema,
-  packageCodeSchema,
-} from './packages';
+import { entitlementsBlobSchema, packageCodeSchema } from './packages';
 import { promoCodeStringSchema } from './promo-codes';
 
 // --- Lifecycle -------------------------------------------------------------

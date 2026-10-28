@@ -134,7 +134,9 @@ export function CandidateJobApplyForm({ job, emailVerified = true }: Props) {
           <div className="space-y-2">
             <Label>{t('resumeLabel')}</Label>
             {loading ? (
-              <p className="text-sm text-muted-foreground">{t('resumeLoading')}</p>
+              <p className="text-sm text-muted-foreground">
+                {t('resumeLoading')}
+              </p>
             ) : (
               <SelectField
                 value={resumeId}

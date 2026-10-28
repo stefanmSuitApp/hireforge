@@ -48,8 +48,14 @@ export default async function AboutPage({
   return (
     <PublicSurfaceMain className="pb-16 pt-8 md:pb-20 md:pt-14">
       <section className="relative overflow-hidden rounded-3xl border border-border/40 bg-card/70 px-6 py-10 backdrop-blur-sm md:px-10 md:py-12">
-        <div className="hf-hero-orb -left-24 -top-24 size-80 bg-primary/25" aria-hidden />
-        <div className="hf-hero-orb -bottom-24 right-8 size-72 bg-cyan-400/20" aria-hidden />
+        <div
+          className="hf-hero-orb -left-24 -top-24 size-80 bg-primary/25"
+          aria-hidden
+        />
+        <div
+          className="hf-hero-orb -bottom-24 right-8 size-72 bg-cyan-400/20"
+          aria-hidden
+        />
         <header className="relative">
           <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
             {t('aboutHeroEyebrow')}
@@ -81,7 +87,9 @@ export default async function AboutPage({
             <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-primary">
               {t('aboutPillar1Eyebrow')}
             </p>
-            <h2 className="text-lg font-semibold text-foreground">{t('aboutPillar1Title')}</h2>
+            <h2 className="text-lg font-semibold text-foreground">
+              {t('aboutPillar1Title')}
+            </h2>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
               {t('aboutPillar1Body')}
             </p>
@@ -90,7 +98,9 @@ export default async function AboutPage({
             <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-primary">
               {t('aboutPillar2Eyebrow')}
             </p>
-            <h2 className="text-lg font-semibold text-foreground">{t('aboutPillar2Title')}</h2>
+            <h2 className="text-lg font-semibold text-foreground">
+              {t('aboutPillar2Title')}
+            </h2>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
               {t('aboutPillar2Body')}
             </p>
@@ -99,7 +109,9 @@ export default async function AboutPage({
             <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-primary">
               {t('aboutPillar3Eyebrow')}
             </p>
-            <h2 className="text-lg font-semibold text-foreground">{t('aboutPillar3Title')}</h2>
+            <h2 className="text-lg font-semibold text-foreground">
+              {t('aboutPillar3Title')}
+            </h2>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
               {t('aboutPillar3Body')}
             </p>
@@ -108,49 +120,64 @@ export default async function AboutPage({
       </section>
 
       <section className="mx-auto mt-8 max-w-5xl rounded-3xl border border-border/60 bg-gradient-to-br from-card to-muted/40 p-6 md:p-8">
-        <h2 className="text-2xl font-bold tracking-tight text-foreground">{t('aboutJourneyTitle')}</h2>
+        <h2 className="text-2xl font-bold tracking-tight text-foreground">
+          {t('aboutJourneyTitle')}
+        </h2>
         <ul className="mt-5 grid list-none gap-3 p-0 md:grid-cols-3">
           <li className="rounded-xl border border-border/60 bg-background/80 p-4">
             <p className="text-xs font-semibold uppercase tracking-wide text-primary">
               {t('aboutJourneyStep1Eyebrow')}
             </p>
-            <p className="mt-2 text-sm text-muted-foreground">{t('aboutJourneyStep1Body')}</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {t('aboutJourneyStep1Body')}
+            </p>
           </li>
           <li className="rounded-xl border border-border/60 bg-background/80 p-4">
             <p className="text-xs font-semibold uppercase tracking-wide text-primary">
               {t('aboutJourneyStep2Eyebrow')}
             </p>
-            <p className="mt-2 text-sm text-muted-foreground">{t('aboutJourneyStep2Body')}</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {t('aboutJourneyStep2Body')}
+            </p>
           </li>
           <li className="rounded-xl border border-border/60 bg-background/80 p-4">
             <p className="text-xs font-semibold uppercase tracking-wide text-primary">
               {t('aboutJourneyStep3Eyebrow')}
             </p>
-            <p className="mt-2 text-sm text-muted-foreground">{t('aboutJourneyStep3Body')}</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {t('aboutJourneyStep3Body')}
+            </p>
           </li>
         </ul>
       </section>
 
       <section className="mx-auto mt-8 flex max-w-5xl flex-wrap items-center justify-between gap-4 rounded-3xl border border-primary/20 bg-primary/[0.06] p-5 md:p-8">
         <div>
-          <h2 className="text-xl font-semibold text-foreground">{t('aboutCtaTitle')}</h2>
-          <p className="mt-2 text-sm text-muted-foreground">{t('aboutCtaBody')}</p>
+          <h2 className="text-xl font-semibold text-foreground">
+            {t('aboutCtaTitle')}
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {t('aboutCtaBody')}
+          </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          {isAuthenticated ? <Link
-            href="/jobs"
-            locale={locale}
-            className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
-          >
-            {t('aboutCtaJobs')}
-          </Link> :
+          {isAuthenticated ? (
+            <Link
+              href="/jobs"
+              locale={locale}
+              className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
+            >
+              {t('aboutCtaJobs')}
+            </Link>
+          ) : (
             <Link
               href="/sign-in"
               locale={locale}
               className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
             >
               {t('aboutCtaSignIn')}
-            </Link>}
+            </Link>
+          )}
         </div>
       </section>
     </PublicSurfaceMain>

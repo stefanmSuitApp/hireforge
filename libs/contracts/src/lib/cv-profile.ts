@@ -26,9 +26,7 @@ export function sanitizeCvProfileForPersist(profile: CvProfile): CvProfile {
       title: e.title.trim(),
       startDate: e.startDate.trim(),
       endDate: cleanOptionalIso(e.endDate ?? undefined),
-      summary: e.summary?.trim()
-        ? e.summary.trim().slice(0, 500)
-        : undefined,
+      summary: e.summary?.trim() ? e.summary.trim().slice(0, 500) : undefined,
     }));
 
   const education = profile.education
@@ -38,9 +36,7 @@ export function sanitizeCvProfileForPersist(profile: CvProfile): CvProfile {
     )
     .map((ed) => ({
       institution: ed.institution.trim(),
-      degree: ed.degree?.trim()
-        ? ed.degree.trim().slice(0, 120)
-        : undefined,
+      degree: ed.degree?.trim() ? ed.degree.trim().slice(0, 120) : undefined,
       field: ed.field?.trim() ? ed.field.trim().slice(0, 120) : undefined,
       startDate: ed.startDate.trim(),
       endDate: cleanOptionalIso(ed.endDate ?? undefined),
@@ -58,9 +54,7 @@ export type CvTemplateCode = (typeof cvTemplateCodes)[number];
 export const cvTemplateCodeSchema = z.enum(cvTemplateCodes);
 
 /** ISO date string YYYY-MM-DD */
-const isoDate = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, 'Expected YYYY-MM-DD');
+const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Expected YYYY-MM-DD');
 
 export const cvExperienceEntrySchema = z.object({
   company: z.string().trim().min(1).max(120),

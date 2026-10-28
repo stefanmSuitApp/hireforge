@@ -74,8 +74,11 @@ export class StaffCompaniesController {
   }
 
   @Get(':id')
-  getOne(@Param('id', new ParseUUIDPipe()) id: string) {
-    return this.companies.getById(id);
+  getOne(@Param('id', new ParseUUIDPipe()) id: string, @Req() req: Request) {
+    return this.companies.getById(id, {
+      actorUserId: this.userId(req),
+      actorRole: this.role(req),
+    });
   }
 
   @Post()

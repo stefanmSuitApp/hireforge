@@ -60,7 +60,7 @@ export function HomeHeroSearch({ action, taxonomy, isAuthenticated }: Props) {
     { id: 'category', label: t('heroTabCategory') },
   ];
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     if (!isAuthenticated) {
       e.preventDefault();
       const returnTo = encodeURIComponent(`/${locale}/jobs`);
@@ -69,7 +69,12 @@ export function HomeHeroSearch({ action, taxonomy, isAuthenticated }: Props) {
   }
 
   return (
-    <form method="get" action={action} onSubmit={handleSubmit} className="mt-10 w-full max-w-2xl">
+    <form
+      method="get"
+      action={action}
+      onSubmit={handleSubmit}
+      className="mt-10 w-full max-w-2xl"
+    >
       <input type="hidden" name="page" value="1" />
       <input type="hidden" name="pageSize" value="12" />
       {activeTab !== 'city' && city && (

@@ -51,7 +51,10 @@ export function HomeSpotlightRail({
       setActiveIdx(0);
       return;
     }
-    const clampedIdx = Math.max(0, Math.min(initialOpenIndex, tiles.length - 1));
+    const clampedIdx = Math.max(
+      0,
+      Math.min(initialOpenIndex, tiles.length - 1),
+    );
     setActiveIdx(clampedIdx);
   }, [initialOpenIndex, tiles.length]);
 
@@ -103,14 +106,19 @@ export function HomeSpotlightRail({
                 aria-expanded={isOpen}
                 aria-controls={`${headingId}-mobile-panel-${idx}`}
               >
-                <span className="text-base font-semibold text-foreground">{tile.label}</span>
+                <span className="text-base font-semibold text-foreground">
+                  {tile.label}
+                </span>
                 <span className="text-sm font-semibold text-primary">
                   {isOpen ? '−' : '+'}
                 </span>
               </button>
 
               {isOpen ? (
-                <div id={`${headingId}-mobile-panel-${idx}`} className="px-4 pb-4">
+                <div
+                  id={`${headingId}-mobile-panel-${idx}`}
+                  className="px-4 pb-4"
+                >
                   <div className="relative mb-3 h-40 overflow-hidden rounded-xl">
                     {tile.imageUrl ? (
                       <img

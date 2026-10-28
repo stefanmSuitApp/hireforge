@@ -4,7 +4,10 @@ import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 import * as React from 'react';
 
-import type { PublicJobListResponse, PublicJobTaxonomyResponse } from 'contracts';
+import type {
+  PublicJobListResponse,
+  PublicJobTaxonomyResponse,
+} from 'contracts';
 
 import { Button } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
@@ -42,7 +45,10 @@ export type JobsListScreenProps = {
 
 function JobsFilterChipsFallback() {
   return (
-    <div className="mb-4 h-16 animate-pulse rounded-lg bg-muted/40" aria-hidden />
+    <div
+      className="mb-4 h-16 animate-pulse rounded-lg bg-muted/40"
+      aria-hidden
+    />
   );
 }
 

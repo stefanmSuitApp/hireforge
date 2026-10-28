@@ -27,12 +27,17 @@ export async function EmployersDirectoryView(props: Props) {
     return (
       <PublicSurfaceMain className="pb-16 pt-8 md:pb-20 md:pt-12">
         <section className="relative overflow-hidden rounded-3xl border border-border/40 bg-card/70 px-6 py-10 backdrop-blur-sm md:px-10 md:py-12">
-          <div className="hf-hero-orb -right-16 -top-20 size-72 bg-primary/20" aria-hidden />
+          <div
+            className="hf-hero-orb -right-16 -top-20 size-72 bg-primary/20"
+            aria-hidden
+          />
           <header className="relative">
             <h1 className="m-0 text-[clamp(1.85rem,3.8vw,2.6rem)] font-bold tracking-tight text-foreground">
               {t('title')}
             </h1>
-            <p className="mt-3 max-w-2xl text-base text-muted-foreground">{t('description')}</p>
+            <p className="mt-3 max-w-2xl text-base text-muted-foreground">
+              {t('description')}
+            </p>
           </header>
         </section>
         <div className="mt-8 rounded-2xl border border-dashed border-destructive/35 bg-destructive/5 px-6 py-10 text-center">
@@ -46,12 +51,17 @@ export async function EmployersDirectoryView(props: Props) {
     return (
       <PublicSurfaceMain className="pb-16 pt-8 md:pb-20 md:pt-12">
         <section className="relative overflow-hidden rounded-3xl border border-border/40 bg-card/70 px-6 py-10 backdrop-blur-sm md:px-10 md:py-12">
-          <div className="hf-hero-orb -left-20 -top-14 size-72 bg-cyan-400/20" aria-hidden />
+          <div
+            className="hf-hero-orb -left-20 -top-14 size-72 bg-cyan-400/20"
+            aria-hidden
+          />
           <header className="relative">
             <h1 className="m-0 text-[clamp(1.85rem,3.8vw,2.6rem)] font-bold tracking-tight text-foreground">
               {t('title')}
             </h1>
-            <p className="mt-3 max-w-2xl text-base text-muted-foreground">{t('description')}</p>
+            <p className="mt-3 max-w-2xl text-base text-muted-foreground">
+              {t('description')}
+            </p>
           </header>
         </section>
         <div className="mt-8 rounded-2xl border border-dashed border-destructive/35 bg-destructive/5 px-6 py-10 text-center">
@@ -70,8 +80,14 @@ export async function EmployersDirectoryView(props: Props) {
   return (
     <PublicSurfaceMain className="pb-16 pt-8 md:pb-20 md:pt-12">
       <section className="relative overflow-hidden rounded-3xl border border-border/40 bg-card/70 px-6 py-10 backdrop-blur-sm md:px-10 md:py-12">
-        <div className="hf-hero-orb -left-24 -top-24 size-80 bg-primary/25" aria-hidden />
-        <div className="hf-hero-orb -bottom-24 right-8 size-72 bg-emerald-400/20" aria-hidden />
+        <div
+          className="hf-hero-orb -left-24 -top-24 size-80 bg-primary/25"
+          aria-hidden
+        />
+        <div
+          className="hf-hero-orb -bottom-24 right-8 size-72 bg-emerald-400/20"
+          aria-hidden
+        />
         <header className="relative">
           <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
             {t('headerEyebrow')}
@@ -115,7 +131,9 @@ export async function EmployersDirectoryView(props: Props) {
                       {initialsFromName(row.name)}
                     </span>
                     <div>
-                      <p className="m-0 text-base font-semibold text-foreground">{row.name}</p>
+                      <p className="m-0 text-base font-semibold text-foreground">
+                        {row.name}
+                      </p>
                       <p className="mt-0.5 text-xs text-muted-foreground">
                         {t('cardSlugLabel')}: {row.slug}
                       </p>
@@ -137,7 +155,10 @@ export async function EmployersDirectoryView(props: Props) {
                   <span className="inline-flex rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
                     {t('cardOpenProfile')}
                   </span>
-                  <span className="text-sm font-medium text-primary" aria-hidden>
+                  <span
+                    className="text-sm font-medium text-primary"
+                    aria-hidden
+                  >
                     &rarr;
                   </span>
                 </div>

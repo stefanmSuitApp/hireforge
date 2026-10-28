@@ -346,6 +346,45 @@ export const employers = pgTable(
   ],
 );
 
+/**
+ * Employer self-signup that matched an existing company (PIB / MB / VAT / name).
+ * No `employers` row exists until staff approve, so every employer route stays
+ * closed while `pending` or after `rejected`.
+ */
+export const companyJoinRequests = pgTable(
+  'company_join_requests',
+  {
+    id: uuid('id')
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    companyId: uuid('company_id')
+      .notNull()
+      .references(() => companies.id, { onDelete: 'cascade' }),
+    /** `pending | approved | rejected` (`text + CHECK`, like `vat_treatment`). */
+    status: text('status').notNull().default('pending'),
+    decidedByUserId: uuid('decided_by_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    decidedAt: timestamp('decided_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    check(
+      'company_join_requests_status_check',
+      sql`${t.status} IN ('pending', 'approved', 'rejected')`,
+    ),
+    uniqueIndex('company_join_requests_user_pending_unique')
+      .on(t.userId)
+      .where(sql`${t.status} = 'pending'`),
+    index('company_join_requests_company_status_idx').on(t.companyId, t.status),
+  ],
+);
+
 export const candidates = pgTable(
   'candidates',
   {
@@ -697,16 +736,12 @@ export const savedJobSearches = pgTable(
     candidateId: uuid('candidate_id')
       .notNull()
       .references(() => candidates.id, { onDelete: 'cascade' }),
-    queryJson: jsonb('query_json')
-      .notNull()
-      .$type<Record<string, string>>(),
+    queryJson: jsonb('query_json').notNull().$type<Record<string, string>>(),
     createdAt: timestamp('created_at', { withTimezone: true })
       .notNull()
       .defaultNow(),
   },
-  (t) => [
-    index('saved_job_searches_candidate_id_idx').on(t.candidateId),
-  ],
+  (t) => [index('saved_job_searches_candidate_id_idx').on(t.candidateId)],
 );
 
 // --- Packages, subscriptions, billing (Step 4) ---

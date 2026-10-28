@@ -8,8 +8,9 @@ import {
   STAFF_REFRESH_COOKIE,
   STAFF_REFRESH_COOKIE_MAX_AGE,
 } from '@/lib/moderator-session';
+import { forwardClientIpHeaders } from '@/lib/client-ip';
 
-export async function POST() {
+export async function POST(req: Request) {
   const cookieStore = await cookies();
   const refresh = cookieStore.get(STAFF_REFRESH_COOKIE)?.value;
   if (!refresh) {
@@ -27,7 +28,11 @@ export async function POST() {
 
   const upstream = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      ...forwardClientIpHeaders(req.headers),
+    },
     body: JSON.stringify({ refreshToken: refresh }),
   });
   const text = await upstream.text();

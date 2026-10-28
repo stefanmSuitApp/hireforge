@@ -98,8 +98,8 @@ export async function PublicCompanyPage({
       </header>
 
       {branding &&
-        ((branding.benefits && branding.benefits.length > 0) ||
-          (branding.testimonials && branding.testimonials.length > 0)) ? (
+      ((branding.benefits && branding.benefits.length > 0) ||
+        (branding.testimonials && branding.testimonials.length > 0)) ? (
         <section className="mb-8 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
           {branding.benefits && branding.benefits.length > 0 ? (
             <>
@@ -153,7 +153,10 @@ export async function PublicCompanyPage({
           </p>
         </div>
       ) : (
-        <section id="company-open-jobs" aria-labelledby="company-open-jobs-heading">
+        <section
+          id="company-open-jobs"
+          aria-labelledby="company-open-jobs-heading"
+        >
           <h2
             id="company-open-jobs-heading"
             className="m-0 mb-3 text-lg font-semibold text-gray-900"

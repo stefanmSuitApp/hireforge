@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NX_DAEMON: 'false'
+      NX_NO_CLOUD: 'true'
+      NEXT_TELEMETRY_DISABLED: '1'
+      # Public, non-secret build-time values (same as compose.prod.yml defaults).
+      NEXT_PUBLIC_APP_URL: https://sljakam.com
+      NEXT_PUBLIC_API_URL: http://api:4000
+      NEXT_PUBLIC_DEFAULT_LOCALE: sr
+      NEXT_PUBLIC_SUPPORTED_LOCALES: sr,en
+      NEXT_PUBLIC_SANITY_PROJECT_ID: 845zdl9k
+      NEXT_PUBLIC_SANITY_DATASET: production
+      SANITY_STUDIO_PROJECT_ID: 845zdl9k
+      SANITY_STUDIO_DATASET: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # cms targets declare `envFile: .env`; values come from `env:` above.
+      - run: touch .env
+
+      - run: pnpm lint
+      - run: pnpm format
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: hireforge
+          POSTGRES_PASSWORD: hireforge
+          POSTGRES_DB: hireforge
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U hireforge" --health-interval 5s
+          --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s
+          --health-timeout 5s --health-retries 10
+    env:
+      NX_DAEMON: 'false'
+      NX_NO_CLOUD: 'true'
+      NEXT_TELEMETRY_DISABLED: '1'
+      # scripts/e2e/run.mjs derives an isolated hireforge_e2e DB and Redis DB 15.
+      DATABASE_URL: postgresql://hireforge:hireforge@localhost:5432/hireforge
+      REDIS_URL: redis://localhost:6379
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: touch .env
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm e2e
+
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results
+          path: e2e/test-results
+          retention-days: 7

@@ -94,9 +94,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
       } else {
         code = 'HTTP_EXCEPTION';
       }
-    } else if (exception instanceof Error) {
-      message = exception.message;
     }
+    // Non-HttpException messages (e.g. Drizzle "Failed query: <sql> params: ...")
+    // can leak schema and user data, so clients only get the generic message;
+    // the full chain is logged below under the request id.
 
     // Only true crashes (non-HttpException) are "unhandled". HttpException is an
     // intentional response — avoid error-level noise for 503 migration hints, etc.

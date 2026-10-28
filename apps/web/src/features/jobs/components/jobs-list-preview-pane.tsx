@@ -46,9 +46,7 @@ export function JobsListPreviewPane({ jobSegment, apiBasePresent }: Props) {
   });
 
   const showLoader =
-    shouldFetch &&
-    !query.data &&
-    (query.isPending || query.isFetching);
+    shouldFetch && !query.data && (query.isPending || query.isFetching);
 
   let body: ReactNode;
   if (!trimmed) {
@@ -56,13 +54,13 @@ export function JobsListPreviewPane({ jobSegment, apiBasePresent }: Props) {
       <p className="text-sm text-muted-foreground">{t('previewPlaceholder')}</p>
     );
   } else if (!apiBasePresent) {
-    body = (
-      <p className="text-sm text-muted-foreground">{t('errorNoApi')}</p>
-    );
+    body = <p className="text-sm text-muted-foreground">{t('errorNoApi')}</p>;
   } else if (showLoader) {
     body = (
       <>
-        <p className="mb-4 text-xs text-muted-foreground">{t('previewLoading')}</p>
+        <p className="mb-4 text-xs text-muted-foreground">
+          {t('previewLoading')}
+        </p>
         <JobListingPreviewSkeleton />
       </>
     );

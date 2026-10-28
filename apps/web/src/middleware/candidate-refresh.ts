@@ -8,6 +8,7 @@ import {
 } from '@/lib/candidate-session';
 import { nestApiUrl, resolveNestServerOrigin } from '@/lib/nest-api-url';
 import { getLocaleFromPathname } from '@/middleware/locale-path';
+import { forwardClientIpHeaders } from '@/lib/client-ip';
 
 export function isCandidateSessionPath(pathname: string): boolean {
   const locale = getLocaleFromPathname(pathname);
@@ -76,6 +77,7 @@ export async function mergeCandidateRefreshIntoResponse(
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
+        ...forwardClientIpHeaders(request.headers),
       },
       body: JSON.stringify({ refreshToken: refresh }),
     });

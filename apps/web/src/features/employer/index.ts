@@ -7,3 +7,4 @@ export { EmployerJobsListSection } from './components/employer-jobs-list-section
 export { EmployerLoginScreen } from './components/employer-login-screen';
 export { EmployerRegisterScreen } from './components/employer-register-screen';
 export { EmployerWorkspaceShell } from './components/employer-workspace-shell';
+export { EmployerLogoutButton } from './components/employer-logout-button';

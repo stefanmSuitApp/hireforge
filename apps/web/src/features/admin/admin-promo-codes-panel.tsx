@@ -81,10 +81,7 @@ function buildCategoryComboboxOptions(
 ): ComboboxOption[] {
   const opts: ComboboxOption[] = categories.map((c) => ({
     value: c.slug,
-    label:
-      locale === 'en'
-        ? (c.nameEn?.trim() || c.nameSr)
-        : c.nameSr,
+    label: locale === 'en' ? c.nameEn?.trim() || c.nameSr : c.nameSr,
     keywords: [c.slug, c.nameSr, c.nameEn ?? ''].filter(Boolean),
   }));
   const known = new Set(opts.map((o) => o.value));
@@ -246,12 +243,8 @@ export function AdminPromoCodesPanel({
         validTo: utcBoundaryIso(createValidTo, true) ?? undefined,
         applicablePackages,
         applicableCategories,
-        maxRedemptions: createMaxR.trim()
-          ? Number(createMaxR)
-          : undefined,
-        maxPerCompany: createMaxC.trim()
-          ? Number(createMaxC)
-          : undefined,
+        maxRedemptions: createMaxR.trim() ? Number(createMaxR) : undefined,
+        maxPerCompany: createMaxC.trim() ? Number(createMaxC) : undefined,
       });
       setCreateCode('');
       setCreateDiscountType('percent');
@@ -457,7 +450,10 @@ export function AdminPromoCodesPanel({
             </thead>
             <tbody>
               {items.map((row) => (
-                <tr key={row.id} className="border-b border-border last:border-0">
+                <tr
+                  key={row.id}
+                  className="border-b border-border last:border-0"
+                >
                   <td className="px-3 py-2 font-mono text-xs">{row.code}</td>
                   <td className="px-3 py-2">{row.discountType}</td>
                   <td className="px-3 py-2 tabular-nums">{row.value}</td>

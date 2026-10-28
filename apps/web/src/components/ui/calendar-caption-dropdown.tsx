@@ -7,7 +7,9 @@ import { Dropdown as RDPDropdown, UI, useDayPicker } from 'react-day-picker';
 
 import { cn } from '@/lib/utils';
 
-export type CalendarCaptionDropdownProps = React.ComponentProps<typeof RDPDropdown>;
+export type CalendarCaptionDropdownProps = React.ComponentProps<
+  typeof RDPDropdown
+>;
 
 function emitNativeSelectChange(
   handler: React.ChangeEventHandler<HTMLSelectElement> | undefined,
@@ -62,7 +64,8 @@ export function CalendarCaptionDropdown(props: CalendarCaptionDropdownProps) {
   } = props;
 
   const opts = options ?? [];
-  const stringValue = value !== undefined && value !== null ? String(value) : '';
+  const stringValue =
+    value !== undefined && value !== null ? String(value) : '';
 
   const triggerPassthrough = selectTriggerPassthrough(props);
 
@@ -88,7 +91,9 @@ export function CalendarCaptionDropdown(props: CalendarCaptionDropdownProps) {
             className,
           )}
         >
-          <SelectPrimitive.Value placeholder={opts.find((o) => o.value === value)?.label} />
+          <SelectPrimitive.Value
+            placeholder={opts.find((o) => o.value === value)?.label}
+          />
           <SelectPrimitive.Icon asChild>
             <ChevronDown className="size-4 shrink-0 opacity-50" aria-hidden />
           </SelectPrimitive.Icon>
@@ -120,7 +125,9 @@ export function CalendarCaptionDropdown(props: CalendarCaptionDropdownProps) {
                       <Check className="size-4 text-primary" aria-hidden />
                     </SelectPrimitive.ItemIndicator>
                   </span>
-                  <SelectPrimitive.ItemText>{opt.label}</SelectPrimitive.ItemText>
+                  <SelectPrimitive.ItemText>
+                    {opt.label}
+                  </SelectPrimitive.ItemText>
                 </SelectPrimitive.Item>
               ))}
             </SelectPrimitive.Viewport>
