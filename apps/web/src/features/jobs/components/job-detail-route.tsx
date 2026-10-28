@@ -7,6 +7,8 @@ import { publicJobUrlSegment } from '@/lib/job-public-segment';
 import {
   fetchPublicCompanyDetail,
   fetchPublicJobDetail,
+  isPublicApiOutage,
+  PublicApiUnavailableError,
 } from '@/lib/public-jobs';
 import { breadcrumbJsonLd, jobPostingJsonLd } from '@/lib/seo/json-ld';
 import { absoluteSiteOrigin } from '@/lib/site-origin';
@@ -37,6 +39,9 @@ export async function JobDetailRoute({ params, structuredData }: Props) {
   if (!result.ok) {
     if (result.status === 404 || result.status === 400) {
       notFound();
+    }
+    if (isPublicApiOutage(result)) {
+      throw new PublicApiUnavailableError('job', result);
     }
     return <JobDetailScreen kind="error" />;
   }

@@ -4,7 +4,12 @@ import type { ReactNode } from 'react';
 import type { PublicJobTaxonomyResponse } from 'contracts';
 
 import { resolveNestPublicOrigin } from '@/lib/nest-api-url';
-import { fetchPublicJobTaxonomy, fetchPublicJobsList } from '@/lib/public-jobs';
+import {
+  fetchPublicJobTaxonomy,
+  fetchPublicJobsList,
+  isPublicApiOutage,
+  PublicApiUnavailableError,
+} from '@/lib/public-jobs';
 
 import {
   buildListQuery,
@@ -75,6 +80,9 @@ export async function JobsListRoute({
 
     taxonomy = taxonomyResult.ok ? taxonomyResult.data : emptyTaxonomy;
 
+    if (!result.ok && isPublicApiOutage(result)) {
+      throw new PublicApiUnavailableError('jobs list', result);
+    }
     if (!result.ok) {
       body = {
         kind: 'error',

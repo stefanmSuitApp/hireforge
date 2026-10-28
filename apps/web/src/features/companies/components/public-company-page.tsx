@@ -8,7 +8,11 @@ import { absoluteSiteOrigin } from '@/lib/site-origin';
 import { fetchCmsEmployerBranding } from '@/lib/cms-content';
 import { publicJobUrlSegment } from '@/lib/job-public-segment';
 import { resolveNestPublicOrigin } from '@/lib/nest-api-url';
-import { fetchPublicCompanyDetail } from '@/lib/public-jobs';
+import {
+  fetchPublicCompanyDetail,
+  isPublicApiOutage,
+  PublicApiUnavailableError,
+} from '@/lib/public-jobs';
 
 type Props = {
   locale: string;
@@ -60,6 +64,9 @@ export async function PublicCompanyPage({
   if (!result.ok) {
     if (result.status === 404 || result.status === 400) {
       notFound();
+    }
+    if (isPublicApiOutage(result)) {
+      throw new PublicApiUnavailableError('company', result);
     }
     const msg = t('errorGeneric');
     return (

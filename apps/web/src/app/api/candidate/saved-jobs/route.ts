@@ -6,7 +6,9 @@ import { nestApiUrl, resolveNestServerOrigin } from '@/lib/nest-api-url';
 export async function GET() {
   const access = await getCandidateAccessToken();
   if (!access) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Every job card asks; a guest simply has none saved (a 401 per card
+    // filled the console on public pages). Saving still answers 401.
+    return NextResponse.json({ items: [] });
   }
   const origin = resolveNestServerOrigin();
   const url = nestApiUrl(origin ?? '', 'candidate/saved-jobs');

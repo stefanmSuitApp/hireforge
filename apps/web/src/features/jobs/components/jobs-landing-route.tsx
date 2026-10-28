@@ -6,7 +6,12 @@ import { JsonLd } from '@/components/json-ld';
 import { buildPublicPageMetadata } from '@/i18n/metadata';
 import { Link } from '@/i18n/navigation';
 import { resolveNestPublicOrigin } from '@/lib/nest-api-url';
-import { fetchPublicJobTaxonomy, fetchPublicSitemap } from '@/lib/public-jobs';
+import {
+  fetchPublicJobTaxonomy,
+  fetchPublicSitemap,
+  isPublicApiOutage,
+  PublicApiUnavailableError,
+} from '@/lib/public-jobs';
 import { breadcrumbJsonLd } from '@/lib/seo/json-ld';
 import { absoluteSiteOrigin } from '@/lib/site-origin';
 
@@ -35,6 +40,12 @@ async function loadLanding(
     fetchPublicJobTaxonomy(base),
     fetchPublicSitemap(base),
   ]);
+  // Only an unknown city/category is a 404; an outage must not be one.
+  for (const r of [taxonomy, live]) {
+    if (!r.ok && isPublicApiOutage(r)) {
+      throw new PublicApiUnavailableError('landing', r);
+    }
+  }
   if (!taxonomy.ok || !live.ok) return null;
   return resolveLanding(key, locale, taxonomy.data, live.data.facets);
 }

@@ -2,7 +2,6 @@
 
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
-import * as React from 'react';
 
 import type {
   PublicJobListResponse,
@@ -46,15 +45,6 @@ export type JobsListScreenProps = {
   before?: ReactNode;
   after?: ReactNode;
 };
-
-function JobsFilterChipsFallback() {
-  return (
-    <div
-      className="mb-4 h-16 animate-pulse rounded-lg bg-muted/40"
-      aria-hidden
-    />
-  );
-}
 
 export function JobsListScreen({
   formAction,
@@ -157,9 +147,9 @@ export function JobsListScreen({
 
       {apiBasePresent ? (
         <>
-          <React.Suspense fallback={<JobsFilterChipsFallback />}>
-            <JobsFilterChipsBar />
-          </React.Suspense>
+          {/* No Suspense: these pages render per request, so the bar is in
+              the first HTML; a streamed swap pushed the form down (CLS). */}
+          <JobsFilterChipsBar />
           <div className="mb-8">
             <JobsFilterForm
               action={formAction}

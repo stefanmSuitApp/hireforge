@@ -4,7 +4,11 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { buildPublicPageMetadata, NOINDEX } from '@/i18n/metadata';
 import { publicJobUrlSegment } from '@/lib/job-public-segment';
 import { resolveNestPublicOrigin } from '@/lib/nest-api-url';
-import { fetchPublicJobDetail } from '@/lib/public-jobs';
+import {
+  fetchPublicJobDetail,
+  isPublicApiOutage,
+  PublicApiUnavailableError,
+} from '@/lib/public-jobs';
 
 function cleanMetaDescription(value: string): string {
   return value.replace(/\s+/g, ' ').trim().slice(0, 160);
@@ -22,6 +26,9 @@ export async function buildJobDetailMetadata(
   }
   const result = await fetchPublicJobDetail(base, jobRef);
   if (!result.ok) {
+    if (isPublicApiOutage(result)) {
+      throw new PublicApiUnavailableError('job metadata', result);
+    }
     return { title: t('fallbackTitle'), robots: NOINDEX };
   }
   const job = result.data;

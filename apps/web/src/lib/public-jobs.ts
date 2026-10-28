@@ -30,6 +30,29 @@ export type PublicEmployersDirectoryResult =
   | { ok: true; data: PublicEmployerDirectoryResponse }
   | { ok: false; error: string; status?: number };
 
+/**
+ * The API is down or overloaded (unreachable, 5xx, 429), as opposed to "no
+ * such job" (404/400) or a bad request. Public pages throw on it so Next
+ * answers 500: crawlers retry a 5xx later, while a 200 error screen or a
+ * noindex fallback (what a restart used to serve) drops the page from the
+ * index.
+ */
+export function isPublicApiOutage(result: {
+  error: string;
+  status?: number;
+}): boolean {
+  if (result.error === 'missing_api_url') return false;
+  const { status } = result;
+  return status === undefined || status >= 500 || status === 429;
+}
+
+export class PublicApiUnavailableError extends Error {
+  constructor(what: string, result: { error: string }) {
+    super(`public API unavailable (${what}): ${result.error}`);
+    this.name = 'PublicApiUnavailableError';
+  }
+}
+
 export async function fetchPublicJobTaxonomy(
   apiBaseUrl: string,
 ): Promise<PublicJobTaxonomyResult> {

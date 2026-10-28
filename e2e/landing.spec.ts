@@ -64,3 +64,22 @@ test('a filtered list URL canonicalizes to its landing page', async ({
     /\/sr\/jobs\/city\/beograd$/,
   );
 });
+
+test('the filter bar is in the first HTML, not swapped in later (no layout shift)', async ({
+  browser,
+}) => {
+  await createPublishedJob();
+  // Without JavaScript a streamed-in block never replaces its placeholder, so
+  // this sees exactly what the first paint shows (and what no-JS crawlers see).
+  const context = await browser.newContext({
+    javaScriptEnabled: false,
+    viewport: { width: 375, height: 812 },
+  });
+  const page = await context.newPage();
+  await page.goto('/sr/jobs/city/beograd');
+  await expect(
+    page.getByRole('button', { name: 'Brza prijava' }),
+  ).toBeVisible();
+  await expect(page.getByRole('searchbox', { name: 'Reči' })).toBeVisible();
+  await context.close();
+});

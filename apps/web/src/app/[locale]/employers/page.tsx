@@ -23,7 +23,8 @@ export async function generateMetadata({
     locale,
     path: '/employers',
     title: t('metaTitle'),
-    description: t('metaDescription'),
+    // The visible intro: long enough for a search snippet (50–160 chars).
+    description: t('description'),
   });
 }
 
