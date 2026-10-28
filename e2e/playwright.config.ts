@@ -71,7 +71,7 @@ export default defineConfig({
       },
     },
     {
-      // Outbox → notification emails. Schedulers that call Sanity / NBS are off.
+      // Outbox → notification emails + scheduled sweeps. Sanity / NBS schedulers off.
       command: 'node dist/apps/worker/main.js',
       cwd: '..',
       wait: { stdout: /worker_started/ },
@@ -81,7 +81,8 @@ export default defineConfig({
         DATABASE_URL: databaseUrl,
         REDIS_URL: redisUrl,
         OUTBOX_POLL_INTERVAL_MS: '500',
-        WORKER_SCHEDULE_TICK_MS: '0',
+        // Fast tick: billing/job expiry sweeps run while tests wait for them.
+        WORKER_SCHEDULE_TICK_MS: '1000',
         WORKER_CMS_PACKAGES_RECONCILE_MS: '0',
         WORKER_NBS_MIDDLE_RATE_MS: '0',
         ...emailEnv,
