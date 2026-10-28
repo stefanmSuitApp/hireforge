@@ -6,7 +6,9 @@ import { Link } from '@/i18n/navigation';
 
 import { CandidateRegisterForm } from './candidate-register-form';
 
-export async function CandidateRegisterScreen() {
+type Props = { returnTo?: string | null };
+
+export async function CandidateRegisterScreen({ returnTo }: Props) {
   const t = await getTranslations('Candidate');
 
   return (
@@ -23,7 +25,11 @@ export async function CandidateRegisterScreen() {
           <p className="mt-6 text-center text-sm text-muted-foreground">
             {t('hasAccount')}{' '}
             <Link
-              href="/candidate/login"
+              href={
+                returnTo
+                  ? `/candidate/login?returnTo=${encodeURIComponent(returnTo)}`
+                  : '/candidate/login'
+              }
               className="font-medium text-primary underline-offset-4 hover:underline"
             >
               {t('signInLink')}
@@ -31,7 +37,7 @@ export async function CandidateRegisterScreen() {
           </p>
         }
       >
-        <CandidateRegisterForm />
+        <CandidateRegisterForm returnTo={returnTo} />
       </AuthFormGateway>
     </AuthPublicGradientShell>
   );

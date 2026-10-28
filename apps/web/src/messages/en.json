@@ -1,7 +1,7 @@
 {
   "Metadata": {
     "title": "Šljakam — jobs with clarity and trust",
-    "description": "Modern hiring for Serbia: fast search, transparent listings, and verified employers."
+    "description": "Modern hiring for Serbia: fast search and clear listings."
   },
   "Nav": {
     "brand": "Šljakam",
@@ -23,7 +23,9 @@
     "roleCandidate": "Candidate",
     "roleEmployer": "Employer",
     "roleModerator": "Moderator",
-    "roleAdmin": "Admin"
+    "roleAdmin": "Admin",
+    "skipToContent": "Skip to content",
+    "closeMenu": "Close menu"
   },
   "Footer": {
     "copyright": "© Šljakam. All rights reserved.",
@@ -56,7 +58,7 @@
     "aboutHeroTitle": "Building trusted hiring in Serbia",
     "aboutHeroSubtitle": "Šljakam helps candidates and employers connect through clear listings, practical workflows, and better quality signals.",
     "headerEyebrow": "About Šljakam",
-    "headerChipTrust": "Verified employer marketplace",
+    "headerChipTrust": "Jobs from employers across Serbia",
     "headerChipClarity": "Clear and structured job content",
     "aboutPillar1Eyebrow": "Clarity first",
     "aboutPillar1Title": "Listings people can trust",
@@ -96,11 +98,11 @@
     "backHome": "Back to home"
   },
   "Home": {
-    "headline": "Find Your Next Career Move",
-    "headlineAccent": "Career Move",
-    "subhead": "Discover top opportunities from verified employers across Serbia — fast, transparent, and built for you.",
+    "headline": "Looking for a job? Find it now.",
+    "headlineAccent": "Find it now.",
+    "subhead": "Search jobs from employers across Serbia — fast and simple.",
     "ctaJobs": "Browse jobs",
-    "trustStrip": "Trusted by 500+ employers across Serbia",
+    "trustStrip": "Jobs from all over Serbia, in one place.",
     "heroTabKeyword": "By Keyword",
     "heroTabCity": "By City",
     "heroTabCategory": "By Category",
@@ -125,17 +127,18 @@
     "popularJobsTitle": "Popular listings this week",
     "recentJobsTitle": "Recently viewed",
     "featuredSpotlightTitle": "Featured Roles",
-    "featuredSpotlightSubtitle": "Highlighted positions from top employers on Šljakam.",
+    "featuredSpotlightSubtitle": "Highlighted positions from employers on Šljakam.",
     "viewAllJobs": "View all jobs",
+    "latestListingsTitle": "Latest jobs",
     "moreListingsTitle": "More Openings",
-    "audiencePathsTitlePrefix": "One Platform, ",
-    "audiencePathsTitleAccent": "Two Paths",
+    "audiencePathsTitlePrefix": "One platform, ",
+    "audiencePathsTitleAccent": "for job seekers and employers",
     "audiencePathsSubtitle": "Whether you're hiring or looking — Šljakam has the tools you need.",
     "howItWorksTitle": "How It Works",
     "howStep1Title": "Search & Discover",
     "howStep1Body": "Filter jobs by keyword, city, or category. New listings appear as soon as they go live.",
     "howStep2Title": "Explore & Compare",
-    "howStep2Body": "View company profiles, job details, and Easy Apply options — all in one view.",
+    "howStep2Body": "View company profiles, job details, and Quick apply options — all in one view.",
     "howStep3Title": "Apply & Track",
     "howStep3Body": "Submit applications, build your CV, and track progress from your personal dashboard.",
     "spotlightCategoriesTitle": "Find Top Jobs by Category",
@@ -162,12 +165,13 @@
     "categoryAny": "Any category",
     "applySearch": "Apply",
     "clearFilters": "Clear filters",
-    "emptyTitle": "No open roles yet",
-    "emptyBody": "When employers publish jobs, they will show up here. If you are developing locally, run the seed SQL to insert a sample listing.",
+    "emptyTitle": "No jobs yet",
+    "emptyBody": "When employers publish jobs, they will show up here. Check back soon.",
+    "emptyFilteredTitle": "No jobs match these filters",
+    "emptyFilteredBody": "Try fewer filters or a different word.",
     "errorTitle": "Could not load jobs",
-    "errorBody": "{message}",
-    "error404Hint": "404 usually means the browser asked the wrong server. NEXT_PUBLIC_API_URL must be the Nest API (default http://localhost:4000), not the Next.js app (port 3000). Restart the dev server after changing .env.",
-    "errorNoApi": "Set NEXT_PUBLIC_API_URL in .env so the site can reach the API (e.g. http://localhost:4000).",
+    "errorBody": "Please try again in a few minutes.",
+    "errorNoApi": "Jobs are not available right now. Please try again in a few minutes.",
     "publishedLabel": "Published",
     "paginationNav": "Pagination",
     "pageRange": "{from}–{to} of {total}",
@@ -183,7 +187,7 @@
     "chipWorkModel": "Work model",
     "chipEmploymentType": "Employment type",
     "chipPostedWithin": "Posted",
-    "chipEasyApply": "Easy Apply",
+    "chipEasyApply": "Quick apply",
     "posted1d": "Last 24 hours",
     "posted7d": "Last 7 days",
     "posted30d": "Last 30 days",
@@ -198,10 +202,15 @@
     "emptyClearFilters": "Clear filters",
     "twoColumnNavHint": "Tip: on desktop, pick a job to preview it beside the list.",
     "cardOpenJobAria": "Open job: {title}",
+    "lockedCompany": "Sign in to see the employer",
+    "lockedMoreTitle": "{count, plural, one {# more job is waiting} other {# more jobs are waiting}}",
+    "lockedMoreBody": "Featured jobs are open to everyone. Sign in to open the rest; an account is free.",
+    "lockedSignIn": "Sign in",
+    "lockedRegister": "Create account",
     "infiniteListError": "Could not load more jobs. Scroll up and try again.",
     "listStatusNav": "Job list status",
-    "listStatusPartial": "Showing {loaded} of {total} jobs",
-    "listStatusComplete": "{total} matching jobs loaded",
+    "listStatusPartial": "{total, plural, one {Showing {loaded} of {total} job} other {Showing {loaded} of {total} jobs}}",
+    "listStatusComplete": "{total, plural, one {# matching job loaded} other {# matching jobs loaded}}",
     "scrollForMore": "Scroll down to load more",
     "endOfList": "All matching jobs are loaded",
     "pagerPrevious": "Previous page",
@@ -219,13 +228,13 @@
     "applyPreviewNote": "Apply options appear here once the listing is published.",
     "descriptionTitle": "Role description",
     "applyTitle": "Apply",
-    "applyHint": "Sign in as a candidate to submit your application and optional CV.",
+    "applyHint": "Apply with your candidate account; a CV is optional.",
     "applyHintExternal": "Applications for this role are handled on the employer’s website. Opens in a new tab.",
     "applyButton": "Apply for this job",
-    "applyButtonExternal": "Apply on employer site",
+    "applyButtonExternal": "Apply on the employer's site",
     "applySignIn": "Sign in to apply",
     "applyCreateAccount": "Create a candidate account",
-    "errorNoApi": "Set NEXT_PUBLIC_API_URL in .env so the site can reach the API.",
+    "errorNoApi": "This job is not available right now. Please try again in a few minutes.",
     "errorNotFound": "This job is missing, unpublished, or no longer available.",
     "errorGeneric": "Could not load this job right now.",
     "similarJobsTitle": "Similar jobs",
@@ -248,7 +257,7 @@
     "locationUnknown": "Location not set",
     "emptyTitle": "No open roles for this company",
     "emptyBody": "When this employer publishes jobs, they will appear here.",
-    "errorNoApi": "Set NEXT_PUBLIC_API_URL in .env so the site can reach the API.",
+    "errorNoApi": "This company is not available right now. Please try again in a few minutes.",
     "errorNotFound": "This company does not exist or is not available.",
     "errorGeneric": "Could not load this company right now.",
     "snapshotOpenJobs": "All open jobs",
@@ -272,7 +281,7 @@
     "cardInsightMid": "Active hiring is underway with several open opportunities.",
     "cardInsightLow": "A focused hiring cycle with selected open opportunities.",
     "empty": "No employers with published listings yet.",
-    "errorNoApi": "Set NEXT_PUBLIC_API_URL in .env so the site can reach the API.",
+    "errorNoApi": "The employer list is not available right now. Please try again in a few minutes.",
     "errorGeneric": "Could not load the employer directory right now."
   },
   "Employer": {
@@ -320,7 +329,7 @@
       "manageListings": "My job listings",
       "pickSubscriptionTitle": "Which package is this listing for?",
       "pickSubscriptionBody": "You have more than one active subscription. Choose one to open the listing form with the right limits and editor options.",
-      "slotMeterShort": "{used} / {max} listings in review or live",
+      "slotMeterShort": "{used} / {max, plural, one {{max} listing} other {{max} listings}} in review or live",
       "backToPackages": "Back to packages",
       "invalidSubscriptionTitle": "That package isn’t available",
       "invalidSubscriptionBody": "This link doesn’t match an active subscription. Open packages and use “Add listing” on one of your active purchases."
@@ -337,9 +346,7 @@
       "heading": "Choose a package",
       "lead": "Pick a billing period and subscribe. You will receive a proforma invoice to complete payment. Enterprise (Gazda) is arranged with Šljakam staff.",
       "loadError": "Packages could not be loaded. Try again later.",
-      "loadErrorStaleApi": "If you just pulled new code, restart the API (`pnpm dev:api` or your process manager) so `GET /api/employer/packages` is running, then refresh.",
       "catalogEmpty": "No billable packages are available yet for checkout.",
-      "catalogEmptyHint": "Ensure database migrations are applied and package seed data exists (see `drizzle/0012_*` and `scripts/db/seed-domain-baseline.sql`).",
       "subscriptionsLoadError": "Your subscriptions could not be loaded. Refresh the page or try again later.",
       "mySubscriptions": {
         "title": "Your subscriptions",
@@ -348,8 +355,8 @@
         "addListing": "Add listing",
         "openProforma": "Open proforma",
         "periodLabel": "Period: {start} – {end}",
-        "slotMeter": "{used} of {max} listings in review or live",
-        "slotMeterA11y": "{used} of {max} listings in review or live",
+        "slotMeter": "{used} of {max, plural, one {{max} listing} other {{max} listings}} in review or live",
+        "slotMeterA11y": "{used} of {max, plural, one {{max} listing} other {{max} listings}} in review or live",
         "slotsRemaining": "{count, plural, one {# slot left} other {# slots left}}",
         "slotsFullHint": "All slots in use — you can still draft; submit unlocks when a slot frees up.",
         "slotsFullBanner": "Every active package is at capacity for listings in review or live. You can still save drafts; “Submit for review” unlocks when a slot frees up on that package."
@@ -504,7 +511,7 @@
       "titleLabel": "Job title",
       "descriptionLabel": "Description",
       "descriptionHint": "Describe the role, responsibilities, and requirements.",
-      "descriptionCharBudget": "{used} / {max} characters",
+      "descriptionCharBudget": "{used} / {max, plural, one {{max} character} other {{max} characters}}",
       "cityLabel": "City",
       "categoryLabel": "Category",
       "categoryNone": "Not set",
@@ -515,7 +522,7 @@
       "saving": "Saving…",
       "submitForReview": "Submit for review",
       "submitting": "Submitting…",
-      "taxonomyMissing": "Could not load cities and categories. Check NEXT_PUBLIC_API_URL and try again.",
+      "taxonomyMissing": "We could not load cities and categories. Refresh the page.",
       "publishSlotsFullBanner": "Your package’s slots are full: you already have the maximum number of listings in review or live. You can still use this form to prepare a draft, but “Submit for review” stays blocked until you free a slot (for example by archiving a listing) or upgrade your package.",
       "submitDisabledSlotsFullHint": "No free listing slots — archive or replace a live listing, or upgrade your package, before submitting another job.",
       "errorGeneric": "Could not save. Try again.",
@@ -523,27 +530,7 @@
       "applyModeInternal": "On Šljakam (sign in and upload a CV)",
       "applyModeExternal": "On your website (external link)",
       "externalUrlLabel": "External apply URL",
-      "externalUrlHint": "Must start with https://. In production you can restrict hosts with EXTERNAL_APPLY_HOST_ALLOWLIST on the API.",
-      "wm": {
-        "onsite": "On-site",
-        "remote": "Remote",
-        "hybrid": "Hybrid"
-      },
-      "et": {
-        "full_time": "Full-time",
-        "part_time": "Part-time",
-        "contract": "Contract",
-        "internship": "Internship",
-        "temporary": "Temporary"
-      },
-      "sen": {
-        "intern": "Intern",
-        "junior": "Junior",
-        "mid": "Mid-level",
-        "senior": "Senior",
-        "lead": "Lead",
-        "executive": "Executive"
-      },
+      "externalUrlHint": "The address must start with https://.",
       "packagingSectionTitle": "Listing options",
       "packagingSectionHint": "These fields depend on your package. Locked items require an upgrade.",
       "featuredLabel": "Featured listing",
@@ -748,7 +735,7 @@
       "pickAgain": "Choose again"
     },
     "staffApi": {
-      "unconfigured": "The app server could not reach the Nest API (missing URL or network). Set NEXT_PUBLIC_API_URL to your API origin. If Next runs in Docker, also set NEST_API_URL (or INTERNAL_API_URL) to a host the server can reach (e.g. http://host.docker.internal:4000).",
+      "unconfigured": "The server cannot reach the API right now. Try again in a minute; if it keeps happening, tell tech support.",
       "generic": "Could not load this data (HTTP {status})."
     },
     "employers": {
@@ -998,6 +985,7 @@
     "COMPANY_JOIN_REQUEST_FORBIDDEN": "This company is not assigned to you and is not in the lead pool.",
     "COMPANY_JOIN_REQUEST_NOT_PENDING": "This request has already been decided.",
     "JOB_NOT_FOUND": "That job could not be found.",
+    "JOB_SIGN_IN_REQUIRED": "Sign in to see this job.",
     "JOB_FORBIDDEN_COMPANY": "That job belongs to another company.",
     "JOB_NOT_DRAFT": "That action only applies to job drafts.",
     "JOB_CREATE_FAILED": "The job could not be created. Try again.",
@@ -1098,7 +1086,7 @@
     "SUBSCRIPTION_FORBIDDEN": "You are not allowed to manage this subscription.",
     "PROMO_CURRENCY_MISMATCH": "This promo code does not apply to purchases in this currency.",
     "tableRenderFailed": "Could not render this table right now.",
-    "apiNotConfigured": "The API address is not configured (NEXT_PUBLIC_API_URL)."
+    "apiNotConfigured": "The service is not available right now. Please try again in a few minutes."
   },
   "Candidate": {
     "workspaceLabel": "Candidate account",
@@ -1289,5 +1277,27 @@
     "otherCities": "Other cities",
     "otherCategories": "Other categories",
     "breadcrumb": "Breadcrumb"
+  },
+  "Enums": {
+    "workModel": {
+      "onsite": "On-site",
+      "remote": "Remote",
+      "hybrid": "Hybrid"
+    },
+    "employmentType": {
+      "full_time": "Full-time",
+      "part_time": "Part-time",
+      "contract": "Contract",
+      "internship": "Internship",
+      "temporary": "Temporary"
+    },
+    "seniority": {
+      "intern": "Intern",
+      "junior": "Junior",
+      "mid": "Mid-level",
+      "senior": "Senior",
+      "lead": "Lead",
+      "executive": "Executive"
+    }
   }
 }

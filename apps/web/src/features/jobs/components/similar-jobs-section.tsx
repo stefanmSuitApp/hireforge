@@ -6,7 +6,7 @@ import * as React from 'react';
 import type { PublicJobListItem } from 'contracts';
 
 import { Link } from '@/i18n/navigation';
-import { publicJobUrlSegment } from '@/lib/job-public-segment';
+import { publicJobCardHref } from '@/lib/job-public-segment';
 
 import {
   localizedCategoryLine,
@@ -22,6 +22,7 @@ export function SimilarJobsSection({
   listLocale: string;
 }) {
   const t = useTranslations('JobDetail');
+  const tJobs = useTranslations('Jobs');
   const hookLocale = useLocale();
   const locale = listLocale || hookLocale;
   const [items, setItems] = React.useState<PublicJobListItem[] | null>(null);
@@ -58,18 +59,17 @@ export function SimilarJobsSection({
       </h2>
       <ul className="m-0 flex list-none flex-col gap-2 p-0">
         {items.map((job) => {
-          const seg = publicJobUrlSegment(job);
           const city = localizedCityLine(locale, job.city);
           const cat = localizedCategoryLine(locale, job.category);
           return (
             <li key={job.id}>
               <Link
-                href={`/jobs/${seg}`}
+                href={publicJobCardHref(job, locale)}
                 className="block rounded-lg border border-gray-100 bg-gray-50/80 px-3 py-2 text-sm font-medium text-teal-800 hover:bg-gray-100"
               >
                 <span className="block text-gray-900">{job.title}</span>
                 <span className="mt-0.5 block text-xs font-normal text-gray-600">
-                  {job.company.name}
+                  {job.company?.name ?? tJobs('lockedCompany')}
                   {city ? ` · ${city}` : ''}
                   {cat ? ` · ${cat}` : ''}
                 </span>

@@ -100,7 +100,8 @@ INSERT INTO job_categories (slug, name_sr, name_en) VALUES
   ('marketing', 'Marketing', 'Marketing')
 ON CONFLICT (slug) DO NOTHING;
 
--- Sample published job (list/browse UI); idempotent on primary key
+-- Sample published job (list/browse UI); idempotent on primary key.
+-- Featured, so guests see one full public ad in dev and e2e.
 INSERT INTO jobs (
   id,
   company_id,
@@ -110,7 +111,8 @@ INSERT INTO jobs (
   status,
   city_id,
   category_id,
-  published_at
+  published_at,
+  featured
 )
 SELECT
   '20000000-0000-4000-8000-000000000001'::uuid,
@@ -121,7 +123,8 @@ SELECT
   'published'::job_status,
   ci.id,
   jc.id,
-  now()
+  now(),
+  true
 FROM companies c
 JOIN users u ON u.email = 'employer@hireforge.local'
 JOIN cities ci ON ci.slug = 'beograd' AND ci.country_code = 'RS'

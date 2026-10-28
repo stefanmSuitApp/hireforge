@@ -9,6 +9,7 @@ import type {
 
 import { isUuidString } from './job-public-segment';
 import { nestApiUrl } from './nest-api-url';
+import { viewerAuthHeaders } from './viewer-access-token';
 
 export type PublicJobsResult =
   | { ok: true; data: PublicJobListResponse }
@@ -95,7 +96,7 @@ export async function fetchPublicJobsList(
     const res = await fetch(full, {
       /** Avoid stale job boards after publish; BFF/public API is the source of truth. */
       cache: 'no-store',
-      headers: { accept: 'application/json' },
+      headers: { accept: 'application/json', ...(await viewerAuthHeaders()) },
     });
     if (!res.ok) {
       return {
@@ -126,9 +127,13 @@ export async function fetchPublicJobDetail(
     return { ok: false, error: 'missing_api_url' };
   }
   try {
+    const auth = await viewerAuthHeaders();
     const res = await fetch(url, {
-      next: { revalidate: 15 },
-      headers: { accept: 'application/json' },
+      // Only the anonymous view is shared; a signed-in one is per user.
+      ...(auth.authorization
+        ? { cache: 'no-store' as const }
+        : { next: { revalidate: 15 } }),
+      headers: { accept: 'application/json', ...auth },
     });
     if (!res.ok) {
       return {
@@ -189,9 +194,12 @@ export async function fetchPublicCompanyDetail(
     return { ok: false, error: 'missing_api_url' };
   }
   try {
+    const auth = await viewerAuthHeaders();
     const res = await fetch(url, {
-      next: { revalidate: 30 },
-      headers: { accept: 'application/json' },
+      ...(auth.authorization
+        ? { cache: 'no-store' as const }
+        : { next: { revalidate: 30 } }),
+      headers: { accept: 'application/json', ...auth },
     });
     if (!res.ok) {
       return {

@@ -14,10 +14,28 @@ const taxonomy = {
   ],
 };
 const facets = [
-  { city: 'beograd', category: 'it', liveJobs: 3, lastmod: null },
-  { city: 'beograd', category: 'prodaja', liveJobs: 1, lastmod: null },
-  { city: 'nis', category: 'it', liveJobs: 2, lastmod: null },
-  { city: 'novi-sad', category: 'prodaja', liveJobs: 0, lastmod: null },
+  {
+    city: 'beograd',
+    category: 'it',
+    liveJobs: 3,
+    featuredJobs: 1,
+    lastmod: null,
+  },
+  {
+    city: 'beograd',
+    category: 'prodaja',
+    liveJobs: 1,
+    featuredJobs: 0,
+    lastmod: null,
+  },
+  { city: 'nis', category: 'it', liveJobs: 2, featuredJobs: 0, lastmod: null },
+  {
+    city: 'novi-sad',
+    category: 'prodaja',
+    liveJobs: 0,
+    featuredJobs: 0,
+    lastmod: null,
+  },
 ];
 
 describe('resolveLanding', () => {
@@ -27,6 +45,7 @@ describe('resolveLanding', () => {
       path: '/jobs/city/beograd',
       cityName: 'Beograd',
       liveJobs: 4,
+      featuredJobs: 1,
     });
     expect(city?.otherCities.map((l) => l.href)).toEqual(['/jobs/city/nis']);
     expect(city?.otherCategories).toEqual([

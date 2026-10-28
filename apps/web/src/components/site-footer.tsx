@@ -83,12 +83,12 @@ export async function SiteFooter() {
             <h2 className="m-0 mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               {t('columnDiscover')}
             </h2>
-            <ul className="m-0 flex list-none flex-col gap-2 p-0">
+            <ul className="m-0 flex list-none flex-col gap-0 p-0 md:gap-2">
               <li>
                 <Link
                   href="/jobs"
                   locale={locale}
-                  className="text-sm font-medium text-foreground underline-offset-4 hover:underline"
+                  className="inline-flex min-h-11 items-center text-sm md:min-h-0 font-medium text-foreground underline-offset-4 hover:underline"
                 >
                   {t('linkJobs')}
                 </Link>
@@ -97,7 +97,7 @@ export async function SiteFooter() {
                 <Link
                   href="/employers"
                   locale={locale}
-                  className="text-sm font-medium text-foreground underline-offset-4 hover:underline"
+                  className="inline-flex min-h-11 items-center text-sm md:min-h-0 font-medium text-foreground underline-offset-4 hover:underline"
                 >
                   {t('linkEmployers')}
                 </Link>
@@ -109,12 +109,12 @@ export async function SiteFooter() {
             <h2 className="m-0 mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               {t('columnJobSeekers')}
             </h2>
-            <ul className="m-0 flex list-none flex-col gap-2 p-0">
+            <ul className="m-0 flex list-none flex-col gap-0 p-0 md:gap-2">
               <li>
                 <Link
                   href="/sign-in"
                   locale={locale}
-                  className="text-sm font-medium text-foreground underline-offset-4 hover:underline"
+                  className="inline-flex min-h-11 items-center text-sm md:min-h-0 font-medium text-foreground underline-offset-4 hover:underline"
                 >
                   {t('candidateSignIn')}
                 </Link>
@@ -123,7 +123,7 @@ export async function SiteFooter() {
                 <Link
                   href="/candidate/register"
                   locale={locale}
-                  className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+                  className="inline-flex min-h-11 items-center text-sm md:min-h-0 text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
                 >
                   {t('candidateRegister')}
                 </Link>
@@ -135,12 +135,12 @@ export async function SiteFooter() {
             <h2 className="m-0 mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               {t('columnEmployers')}
             </h2>
-            <ul className="m-0 flex list-none flex-col gap-2 p-0">
+            <ul className="m-0 flex list-none flex-col gap-0 p-0 md:gap-2">
               <li>
                 <Link
                   href="/sign-in"
                   locale={locale}
-                  className="text-sm font-medium text-foreground underline-offset-4 hover:underline"
+                  className="inline-flex min-h-11 items-center text-sm md:min-h-0 font-medium text-foreground underline-offset-4 hover:underline"
                 >
                   {t('employerSignIn')}
                 </Link>
@@ -149,7 +149,7 @@ export async function SiteFooter() {
                 <Link
                   href="/employer/register"
                   locale={locale}
-                  className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+                  className="inline-flex min-h-11 items-center text-sm md:min-h-0 text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
                 >
                   {t('employerRegister')}
                 </Link>
@@ -162,13 +162,13 @@ export async function SiteFooter() {
               {t('columnCities')}
             </h2>
             {cityTiles.length ? (
-              <ul className="m-0 flex list-none flex-col gap-2 p-0">
+              <ul className="m-0 flex list-none flex-col gap-0 p-0 md:gap-2">
                 {cityTiles.map((tile) => (
                   <li key={tile.slug}>
                     <Link
                       href={tile.jobsHref}
                       locale={locale}
-                      className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+                      className="inline-flex min-h-11 items-center text-sm md:min-h-0 text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
                     >
                       {tile.label}
                     </Link>
@@ -187,13 +187,13 @@ export async function SiteFooter() {
               {t('columnCategories')}
             </h2>
             {categoryTiles.length ? (
-              <ul className="m-0 flex list-none flex-col gap-2 p-0">
+              <ul className="m-0 flex list-none flex-col gap-0 p-0 md:gap-2">
                 {categoryTiles.map((tile) => (
                   <li key={tile.slug}>
                     <Link
                       href={tile.jobsHref}
                       locale={locale}
-                      className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+                      className="inline-flex min-h-11 items-center text-sm md:min-h-0 text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
                     >
                       {tile.label}
                     </Link>

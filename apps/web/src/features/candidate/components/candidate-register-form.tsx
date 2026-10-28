@@ -10,7 +10,9 @@ import {
   type ErrorsTranslator,
 } from '@/lib/http/api-error-message';
 
-export function CandidateRegisterForm() {
+type Props = { returnTo?: string | null };
+
+export function CandidateRegisterForm({ returnTo }: Props) {
   const t = useTranslations('Candidate');
   const locale = useLocale();
   const tErrors = useTranslations('Errors');
@@ -25,10 +27,13 @@ export function CandidateRegisterForm() {
     setError(null);
     register.mutate(
       {
-        email,
-        password,
-        fullName: fullName.trim() || undefined,
-        locale: locale === 'en' ? 'en' : 'sr',
+        body: {
+          email,
+          password,
+          fullName: fullName.trim() || undefined,
+          locale: locale === 'en' ? 'en' : 'sr',
+        },
+        returnTo,
       },
       {
         onError: (err) => {
@@ -56,7 +61,7 @@ export function CandidateRegisterForm() {
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
           placeholder={t('fullNameOptional')}
-          className="h-11 rounded-xl border-border/70 bg-background/90"
+          className="h-11 rounded-xl"
         />
       </div>
       <div className="space-y-2">
@@ -74,7 +79,7 @@ export function CandidateRegisterForm() {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="h-11 rounded-xl border-border/70 bg-background/90"
+          className="h-11 rounded-xl"
         />
       </div>
       <div className="space-y-2">
@@ -93,7 +98,7 @@ export function CandidateRegisterForm() {
           onChange={(e) => setPassword(e.target.value)}
           showLabel={t('passwordShow')}
           hideLabel={t('passwordHide')}
-          className="h-11 rounded-xl border-border/70 bg-background/90"
+          className="h-11 rounded-xl"
         />
       </div>
       {error ? (

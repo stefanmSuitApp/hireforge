@@ -1,5 +1,6 @@
 import { unstable_noStore as noStore } from 'next/cache';
 import { getLocale, getTranslations } from 'next-intl/server';
+import { publicJobsEnabled } from 'shared';
 
 import { fetchCmsNavigation } from '@/lib/cms-content';
 import { getUnifiedAuthSession } from '@/lib/unified-auth';
@@ -23,17 +24,22 @@ export async function SiteHeader() {
   const brandText = t('brand');
 
   const fallbackNav: SiteNavItem[] = [
-    { href: '/', label: t('home') },
     { href: '/jobs', label: t('jobs') },
     { href: '/employers', label: t('employer') },
   ];
-  const shouldHideForGuests = (href: string) =>
-    href === '/jobs' ||
-    href.startsWith('/jobs/') ||
-    href === '/employers' ||
-    href.startsWith('/employers/');
+  // Guests see featured jobs and teasers of the rest, so the job pages stay
+  // in the nav; only the old full wall (`PUBLIC_JOBS=false`) hides them.
+  const isWalled = (href: string) =>
+    !publicJobsEnabled() &&
+    (href === '/jobs' ||
+      href.startsWith('/jobs/') ||
+      href === '/employers' ||
+      href.startsWith('/employers/'));
   const visibleNavItems = (navItems ?? fallbackNav).filter(
-    (item) => authSession.isAuthenticated || !shouldHideForGuests(item.href),
+    (item) =>
+      // The logo already links home.
+      item.href !== '/' &&
+      (authSession.isAuthenticated || !isWalled(item.href)),
   );
 
   return (

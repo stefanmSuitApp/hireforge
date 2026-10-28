@@ -14,6 +14,10 @@ import { workerLog } from './worker-log';
  *   job goes live or expires (the page stays, noindex, no JobPosting),
  *   URL_DELETED when it is unpublished or archived (the page 404s).
  *
+ * Only featured jobs are public pages; any other job page sends guests (and
+ * crawlers) to sign-in, so its changes go out as deletions. That also covers
+ * a job republished without the featured perk.
+ *
  * Off unless configured (`INDEXNOW_KEY`, `GOOGLE_INDEXING_SA_JSON`) and while
  * `PUBLIC_JOBS` is on. Events are queued in memory and flushed in batches on
  * a timer, outside the outbox transaction: a slow or failing engine never
@@ -82,16 +86,23 @@ function parseGoogleServiceAccount(
 }
 
 type Fetch = typeof fetch;
-/** Job id → path segment (slug, else id), for the jobs that still exist. */
-type LookupSegments = (jobIds: string[]) => Promise<Map<string, string>>;
+/** Job id → path segment (slug, else id) and featured, for the jobs that still exist. */
+type LookupSegments = (
+  jobIds: string[],
+) => Promise<Map<string, { segment: string; featured: boolean }>>;
 
 export function dbJobSegments(db: DrizzleDb): LookupSegments {
   return async (jobIds) => {
     const rows = await db
-      .select({ id: jobs.id, slug: jobs.slug })
+      .select({ id: jobs.id, slug: jobs.slug, featured: jobs.featured })
       .from(jobs)
       .where(inArray(jobs.id, jobIds));
-    return new Map(rows.map((r) => [r.id, r.slug ?? r.id]));
+    return new Map(
+      rows.map((r) => [
+        r.id,
+        { segment: r.slug ?? r.id, featured: r.featured },
+      ]),
+    );
   };
 }
 
@@ -187,7 +198,7 @@ export function createSearchIndexingNotifier(
     const batch = new Map(pending);
     pending.clear();
 
-    let segments: Map<string, string>;
+    let segments: Awaited<ReturnType<LookupSegments>>;
     try {
       segments = await deps.lookupSegments([...batch.keys()]);
     } catch (e) {
@@ -199,12 +210,12 @@ export function createSearchIndexingNotifier(
     }
     const changes: Array<{ url: string; change: Change }> = [];
     for (const [jobId, change] of batch) {
-      const segment = segments.get(jobId);
-      if (!segment) continue; // deleted row: nothing left to point at
+      const job = segments.get(jobId);
+      if (!job) continue; // deleted row: nothing left to point at
       for (const locale of config.locales) {
         changes.push({
-          url: `${config.origin}/${locale}/jobs/${segment}`,
-          change,
+          url: `${config.origin}/${locale}/jobs/${job.segment}`,
+          change: job.featured ? change : 'deleted',
         });
       }
     }

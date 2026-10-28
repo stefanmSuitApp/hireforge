@@ -63,7 +63,11 @@ describe('only published jobs are public', () => {
   });
 
   it('detail by id and by slug answers for a published job and 404 for a draft', async () => {
-    const pub = await jobOf({ status: 'published', title: 'Magacioner' });
+    const pub = await jobOf({
+      status: 'published',
+      title: 'Magacioner',
+      featured: true,
+    });
     await http(app).get(`/api/public/jobs/${pub.id}`).expect(200);
     const bySlug = await http(app).get(`/api/public/jobs/by-slug/${pub.slug}`);
     expect(bySlug.status).toBe(200);
@@ -90,6 +94,7 @@ describe('only published jobs are public', () => {
     const pub = await jobOf({
       status: 'published',
       title: 'Na stranici firme',
+      featured: true,
     });
     const res = await http(app)
       .get(`/api/public/jobs/company/${owner.slug}`)
@@ -106,6 +111,119 @@ describe('only published jobs are public', () => {
       .expect(200);
     expect(JSON.stringify(res.body)).not.toContain(a.id);
     expect(JSON.stringify(res.body)).not.toContain(draft.id);
+  });
+});
+
+describe('guests see featured jobs in full and the rest as teasers', () => {
+  it('the list locks a non-featured job for a guest: title and city, no company or excerpt', async () => {
+    const plain = await jobOf({ status: 'published', title: 'Pekar' });
+    const paid = await jobOf({
+      status: 'published',
+      title: 'Poslastičar',
+      featured: true,
+    });
+    const res = await http(app).get('/api/public/jobs?pageSize=50').expect(200);
+    const items = res.body.items as Array<{
+      id: string;
+      title: string;
+      locked: boolean;
+      company: unknown;
+      excerpt: unknown;
+      city: { slug: string } | null;
+    }>;
+    const lockedRow = items.find((i) => i.id === plain.id);
+    expect(lockedRow).toMatchObject({
+      title: 'Pekar',
+      locked: true,
+      company: null,
+      excerpt: null,
+      city: { slug: 'beograd' },
+    });
+    expect(items.find((i) => i.id === paid.id)).toMatchObject({
+      locked: false,
+      company: { slug: owner.slug },
+    });
+    expect(res.body.lockedTotal).toBeGreaterThanOrEqual(1);
+  });
+
+  it('signed in, nothing is locked', async () => {
+    const plain = await jobOf({ status: 'published', title: 'Mesar' });
+    const res = await http(app)
+      .get('/api/public/jobs?pageSize=50')
+      .set(owner.headers)
+      .expect(200);
+    expect(res.body.lockedTotal).toBe(0);
+    expect(
+      (res.body.items as Array<{ id: string; locked: boolean }>).find(
+        (i) => i.id === plain.id,
+      ),
+    ).toMatchObject({ locked: false });
+  });
+
+  it('a non-featured job page needs sign-in (401 JOB_SIGN_IN_REQUIRED), by id and by slug', async () => {
+    const plain = await jobOf({ status: 'published', title: 'Konobar' });
+    const byId = await http(app).get(`/api/public/jobs/${plain.id}`);
+    expect(byId.status).toBe(401);
+    expect(byId.body.error.code).toBe('JOB_SIGN_IN_REQUIRED');
+    const bySlug = await http(app).get(
+      `/api/public/jobs/by-slug/${plain.slug}`,
+    );
+    expect(bySlug.status).toBe(401);
+    await http(app)
+      .get(`/api/public/jobs/${plain.id}`)
+      .set(owner.headers)
+      .expect(200);
+  });
+
+  it("a guest's company page lists only featured jobs and counts the rest", async () => {
+    const company = await insertCompany({
+      company: { slug: 'mesovita-firma', legalName: 'Mešovita Firma d.o.o.' },
+    });
+    const user = await insertEmployer(company.id);
+    const plain = await insertJob(company.id, user.id, {
+      status: 'published',
+      title: 'Vozač',
+    });
+    const paid = await insertJob(company.id, user.id, {
+      status: 'published',
+      title: 'Viljuškarista',
+      featured: true,
+    });
+    const guest = await http(app)
+      .get('/api/public/jobs/company/mesovita-firma')
+      .expect(200);
+    expect(JSON.stringify(guest.body.jobs)).toContain(paid.id);
+    expect(JSON.stringify(guest.body.jobs)).not.toContain(plain.id);
+    expect(guest.body.lockedJobCount).toBe(1);
+    const member = await http(app)
+      .get('/api/public/jobs/company/mesovita-firma')
+      .set(owner.headers)
+      .expect(200);
+    expect(member.body.lockedJobCount).toBe(0);
+    expect(JSON.stringify(member.body.jobs)).toContain(plain.id);
+  });
+
+  it('the sitemap feed lists only featured jobs and counts featured per facet', async () => {
+    const plain = await jobOf({ status: 'published', title: 'Pomoćni radnik' });
+    const paid = await jobOf({
+      status: 'published',
+      title: 'Električar',
+      featured: true,
+    });
+    const res = await http(app).get('/api/public/jobs/sitemap').expect(200);
+    const ids = (res.body.jobs as Array<{ id: string }>).map((j) => j.id);
+    expect(ids).toContain(paid.id);
+    expect(ids).not.toContain(plain.id);
+    const facet = (
+      res.body.facets as Array<{
+        city: string | null;
+        category: string | null;
+        liveJobs: number;
+        featuredJobs: number;
+      }>
+    ).find((f) => f.city === 'beograd' && f.category === 'it');
+    expect(facet?.featuredJobs).toBeGreaterThanOrEqual(1);
+    expect(facet?.liveJobs).toBeGreaterThan(facet?.featuredJobs ?? 0);
   });
 });
 

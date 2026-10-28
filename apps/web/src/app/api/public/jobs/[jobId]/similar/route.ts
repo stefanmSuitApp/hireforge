@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { nestApiUrl, resolveNestServerOrigin } from '@/lib/nest-api-url';
+import { viewerAuthHeaders } from '@/lib/viewer-access-token';
 
 export async function GET(
   _req: Request,
@@ -15,9 +16,13 @@ export async function GET(
       { status: 503 },
     );
   }
+  const auth = await viewerAuthHeaders();
+  // Guests share a cached teaser view; signed-in reads are per user.
   const upstream = await fetch(url, {
-    headers: { Accept: 'application/json' },
-    next: { revalidate: 60 },
+    headers: { Accept: 'application/json', ...auth },
+    ...(auth.authorization
+      ? { cache: 'no-store' as const }
+      : { next: { revalidate: 60 } }),
   });
   const text = await upstream.text();
   return new NextResponse(text, {

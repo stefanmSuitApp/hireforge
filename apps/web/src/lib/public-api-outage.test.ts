@@ -16,6 +16,10 @@ vi.mock('@/lib/nest-api-url', async (importOriginal) => ({
 vi.mock('@/lib/cms-content', () => ({
   fetchCmsEmployerBranding: async () => null,
 }));
+// A guest: no session cookie to forward.
+vi.mock('@/lib/viewer-access-token', () => ({
+  viewerAuthHeaders: async () => ({}),
+}));
 
 const jobParams = Promise.resolve({ locale: 'sr', jobRef: 'kuvar-ab12' });
 const companyParams = Promise.resolve({ locale: 'sr', slug: 'devlegion' });

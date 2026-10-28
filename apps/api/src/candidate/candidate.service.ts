@@ -88,6 +88,7 @@ function mapPublishedJoinRowToPublicListItem(r: {
     slug: r.slug ?? null,
     shortId: r.shortId ?? null,
     featured: r.featured,
+    locked: false,
     excerpt: jobListExcerpt(r.descriptionPlain),
     applyMode: r.applyMode === 'external' ? 'external' : 'internal',
     publishedAt: r.publishedAt?.toISOString() ?? null,

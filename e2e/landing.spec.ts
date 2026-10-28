@@ -78,7 +78,7 @@ test('the filter bar is in the first HTML, not swapped in later (no layout shift
   const page = await context.newPage();
   await page.goto('/sr/jobs/city/beograd');
   await expect(
-    page.getByRole('button', { name: 'Brza prijava' }),
+    page.getByRole('button', { name: 'Brzo konkurisanje' }),
   ).toBeVisible();
   await expect(page.getByRole('searchbox', { name: 'Reči' })).toBeVisible();
   await context.close();

@@ -307,6 +307,7 @@ export async function insertJob(
     expiresInDays = 30,
     applyMode = 'internal',
     externalApplyUrl = null,
+    featured = false,
   }: {
     status?: JobStatus;
     title?: string;
@@ -317,6 +318,8 @@ export async function insertJob(
     expiresInDays?: number;
     applyMode?: 'internal' | 'external';
     externalApplyUrl?: string | null;
+    /** Paid placement: public to guests (others are teasers for them). */
+    featured?: boolean;
   } = {},
   given?: Db,
 ): Promise<SeededJob> {
@@ -329,14 +332,14 @@ export async function insertJob(
     `insert into jobs (company_id, created_by_user_id, subscription_id, title,
        description, description_plain, description_html, status, slug, short_id,
        category_id, city_id, submitted_at, published_at, expires_at, apply_mode,
-       external_apply_url)
+       external_apply_url, featured)
      values ($1, $2, $3, $4, $5, $5, '<p>' || $5 || '</p>', $6::job_status, $7, $8,
        (select id from job_categories where slug = $9),
        (select id from cities where slug = $10 and country_code = 'RS' limit 1),
        case when $6 <> 'draft' then now() end,
        case when $11 then now() - interval '1 day' end,
        case when $11 then now() + make_interval(days => $12) end,
-       $13, $14)
+       $13, $14, $15)
      returning id`,
     [
       companyId,
@@ -353,6 +356,7 @@ export async function insertJob(
       status === 'expired' ? -1 : expiresInDays,
       applyMode,
       externalApplyUrl,
+      featured,
     ],
   );
   return { id: one(rows).id, slug, shortId };

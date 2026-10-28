@@ -11,8 +11,8 @@ export async function GET() {
   const t = await getTranslations({ locale: 'en', namespace: 'Metadata' });
   const jobs = publicJobsEnabled()
     ? [
-        `- [Jobs](${origin}/en/jobs): every open job ad (Serbian: ${origin}/sr/jobs)`,
-        `- Job ads: ${origin}/{sr|en}/jobs/{slug}`,
+        `- [Jobs](${origin}/en/jobs): open job ads (Serbian: ${origin}/sr/jobs); featured ads are public, others need sign-in`,
+        `- Featured job ads: ${origin}/{sr|en}/jobs/{slug} (listed in the sitemap)`,
         `- By city or category: ${origin}/{sr|en}/jobs/city/{city}, ${origin}/{sr|en}/jobs/category/{category}`,
         `- [Employers](${origin}/en/employers): companies with open jobs, each at ${origin}/{sr|en}/companies/{slug}`,
       ]

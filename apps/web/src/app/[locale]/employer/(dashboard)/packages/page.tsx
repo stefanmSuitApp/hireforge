@@ -48,7 +48,6 @@ export default async function EmployerPackagesPage({
   );
 
   if (!catalog.ok) {
-    const staleApiHint = catalog.status === 404 ? t('loadErrorStaleApi') : null;
     return (
       <div className="space-y-6">
         <EmployerPackagesHashScroll />
@@ -57,9 +56,6 @@ export default async function EmployerPackagesPage({
         <p className="text-sm text-destructive" role="alert">
           {t('loadError')}
         </p>
-        {staleApiHint ? (
-          <p className="mt-2 text-sm text-muted-foreground">{staleApiHint}</p>
-        ) : null}
       </div>
     );
   }
@@ -72,9 +68,6 @@ export default async function EmployerPackagesPage({
         {subscriptionsBlock}
         <section className="rounded-2xl border border-border/70 bg-card p-5 shadow-sm">
           <p className="text-sm text-muted-foreground">{t('catalogEmpty')}</p>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {t('catalogEmptyHint')}
-          </p>
         </section>
       </div>
     );

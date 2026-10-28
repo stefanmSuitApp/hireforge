@@ -39,7 +39,11 @@ import { cities, companies, districts, jobCategories, jobs } from 'database';
 import { effectiveJobDescriptionHtml, shortIdFromJobSlug } from 'server-jobs';
 
 import { getDb } from '../database';
-import { codedBadRequest, codedTooManyRequests } from '../http/coded-http';
+import {
+  codedBadRequest,
+  codedTooManyRequests,
+  codedUnauthorized,
+} from '../http/coded-http';
 import { getRedis } from '../redis';
 
 const EXCERPT_MAX_CHARS = 200;
@@ -54,6 +58,11 @@ function liveJob(): SQL {
     eq(jobs.status, 'published'),
     or(isNull(jobs.expiresAt), gt(jobs.expiresAt, sql`now()`)),
   ) as SQL;
+}
+
+/** How many of the grouped rows are featured. */
+function featuredCount(): SQL<number> {
+  return sql<number>`count(*) filter (where ${jobs.featured})`;
 }
 
 /** Live, or ended by expiry: the detail page still shows it (noindex, no apply). */
@@ -97,22 +106,35 @@ type PublicJobListJoinRow = {
   catNameEn: string | null;
 };
 
+/**
+ * Who is asking. Guests see featured (paid) jobs in full and every other job
+ * as a teaser (title, city, date); signing in unlocks the rest.
+ */
+export type PublicViewer = { signedIn: boolean };
+
+function isLockedFor(viewer: PublicViewer, featured: boolean): boolean {
+  return !viewer.signedIn && !featured;
+}
+
 function mapJoinRowToPublicListItem(
   r: PublicJobListJoinRow,
+  viewer: PublicViewer,
 ): PublicJobListItem {
+  const locked = isLockedFor(viewer, r.featured);
   return {
     id: r.id,
     title: r.title,
     slug: r.slug ?? null,
     shortId: r.shortId ?? null,
     featured: r.featured,
-    excerpt: excerptOf(r.descriptionPlain),
+    locked,
+    excerpt: locked ? null : excerptOf(r.descriptionPlain),
     applyMode: r.applyMode === 'external' ? 'external' : 'internal',
     publishedAt: r.publishedAt?.toISOString() ?? null,
     workModel: r.workModel,
     employmentType: r.employmentType,
     seniority: r.seniority,
-    company: { slug: r.companySlug, name: r.companyName },
+    company: locked ? null : { slug: r.companySlug, name: r.companyName },
     city:
       r.citySlug != null
         ? {
@@ -176,7 +198,10 @@ export class PublicJobsService {
     }
   }
 
-  async getCompanyBySlug(slug: string): Promise<PublicCompanyDetailResponse> {
+  async getCompanyBySlug(
+    slug: string,
+    viewer: PublicViewer,
+  ): Promise<PublicCompanyDetailResponse> {
     const database = getDb();
     if (!database) {
       throw new ServiceUnavailableException(
@@ -202,6 +227,7 @@ export class PublicJobsService {
         .select({
           id: jobs.id,
           title: jobs.title,
+          featured: jobs.featured,
           jobSlug: jobs.slug,
           jobShortId: jobs.shortId,
           publishedAt: jobs.publishedAt,
@@ -223,9 +249,13 @@ export class PublicJobsService {
         .where(and(eq(companies.slug, slug), liveJob()))
         .orderBy(desc(jobs.publishedAt), desc(jobs.createdAt));
 
+      // The company's own page names it, so a guest gets only its featured
+      // jobs here plus a count of the rest.
+      const visible = rows.filter((r) => !isLockedFor(viewer, r.featured));
       return {
         company,
-        jobs: rows.map((r) => ({
+        lockedJobCount: rows.length - visible.length,
+        jobs: visible.map((r) => ({
           id: r.id,
           title: r.title,
           slug: r.jobSlug ?? null,
@@ -275,7 +305,7 @@ export class PublicJobsService {
       const jobRows = await db
         .select({ id: jobs.id, slug: jobs.slug, updatedAt: jobs.updatedAt })
         .from(jobs)
-        .where(liveJob())
+        .where(and(liveJob(), eq(jobs.featured, true)))
         .orderBy(desc(jobs.publishedAt), asc(jobs.id));
 
       const companyRows = await db
@@ -283,6 +313,7 @@ export class PublicJobsService {
           slug: companies.slug,
           lastmod: max(jobs.updatedAt),
           liveJobs: count(jobs.id),
+          featuredJobs: featuredCount(),
         })
         .from(companies)
         .innerJoin(jobs, and(eq(jobs.companyId, companies.id), liveJob()))
@@ -294,6 +325,7 @@ export class PublicJobsService {
           city: cities.slug,
           category: jobCategories.slug,
           liveJobs: count(jobs.id),
+          featuredJobs: featuredCount(),
           lastmod: max(jobs.updatedAt),
         })
         .from(jobs)
@@ -311,12 +343,14 @@ export class PublicJobsService {
         companies: companyRows.map((r) => ({
           slug: r.slug,
           liveJobs: Number(r.liveJobs),
+          featuredJobs: Number(r.featuredJobs),
           lastmod: r.lastmod?.toISOString() ?? null,
         })),
         facets: facetRows.map((r) => ({
           city: r.city ?? null,
           category: r.category ?? null,
           liveJobs: Number(r.liveJobs),
+          featuredJobs: Number(r.featuredJobs),
           lastmod: r.lastmod?.toISOString() ?? null,
         })),
       };
@@ -325,13 +359,19 @@ export class PublicJobsService {
     }
   }
 
-  async getById(id: string): Promise<PublicJobDetailResponse> {
-    return this.loadPublishedJobDetail(eq(jobs.id, id));
+  async getById(
+    id: string,
+    viewer: PublicViewer,
+  ): Promise<PublicJobDetailResponse> {
+    return this.loadPublishedJobDetail(eq(jobs.id, id), viewer);
   }
 
-  async getBySlug(slug: string): Promise<PublicJobDetailResponse> {
+  async getBySlug(
+    slug: string,
+    viewer: PublicViewer,
+  ): Promise<PublicJobDetailResponse> {
     try {
-      return await this.loadPublishedJobDetail(eq(jobs.slug, slug));
+      return await this.loadPublishedJobDetail(eq(jobs.slug, slug), viewer);
     } catch (error) {
       if (!(error instanceof NotFoundException)) {
         throw error;
@@ -351,12 +391,13 @@ export class PublicJobsService {
       if (matches.length !== 1 || !matches[0]) {
         throw error;
       }
-      return this.loadPublishedJobDetail(eq(jobs.id, matches[0].id));
+      return this.loadPublishedJobDetail(eq(jobs.id, matches[0].id), viewer);
     }
   }
 
   private async loadPublishedJobDetail(
     jobKey: SQL,
+    viewer: PublicViewer,
   ): Promise<PublicJobDetailResponse> {
     const database = getDb();
     if (!database) {
@@ -408,6 +449,12 @@ export class PublicJobsService {
 
       if (!row) {
         throw new NotFoundException('Job not found');
+      }
+      if (isLockedFor(viewer, row.featured)) {
+        throw codedUnauthorized(
+          'JOB_SIGN_IN_REQUIRED',
+          'Sign in to see this job',
+        );
       }
 
       return {
@@ -550,7 +597,10 @@ export class PublicJobsService {
     }
   }
 
-  async list(params: PublicJobListQuery): Promise<PublicJobListResponse> {
+  async list(
+    params: PublicJobListQuery,
+    viewer: PublicViewer,
+  ): Promise<PublicJobListResponse> {
     const database = getDb();
     if (!database) {
       throw new ServiceUnavailableException(
@@ -595,13 +645,19 @@ export class PublicJobsService {
 
     try {
       const [countRow] = await db
-        .select({ total: count(jobs.id) })
+        .select({
+          total: count(jobs.id),
+          notFeatured: sql<number>`count(*) filter (where not ${jobs.featured})`,
+        })
         .from(jobs)
         .innerJoin(companies, eq(jobs.companyId, companies.id))
         .leftJoin(cities, eq(jobs.cityId, cities.id))
         .leftJoin(jobCategories, eq(jobs.categoryId, jobCategories.id))
         .where(wherePublished);
       const total = Number(countRow?.total ?? 0);
+      const lockedTotal = viewer.signedIn
+        ? 0
+        : Number(countRow?.notFeatured ?? 0);
 
       const rows = await db
         .select({
@@ -639,20 +695,26 @@ export class PublicJobsService {
         .limit(params.pageSize)
         .offset(offset);
 
-      const items: PublicJobListItem[] = rows.map(mapJoinRowToPublicListItem);
+      const items: PublicJobListItem[] = rows.map((r) =>
+        mapJoinRowToPublicListItem(r, viewer),
+      );
 
       return {
         items,
         page: params.page,
         pageSize: params.pageSize,
         total,
+        lockedTotal,
       };
     } catch (e) {
       mapPublicJobsDbError(e);
     }
   }
 
-  async batchPreviews(refs: string[]): Promise<PublicJobPreviewsResponse> {
+  async batchPreviews(
+    refs: string[],
+    viewer: PublicViewer,
+  ): Promise<PublicJobPreviewsResponse> {
     const database = getDb();
     if (!database) {
       throw new ServiceUnavailableException(
@@ -700,7 +762,7 @@ export class PublicJobsService {
           .where(and(liveJob(), jobKey))
           .limit(1);
         if (row) {
-          items.push(mapJoinRowToPublicListItem(row));
+          items.push(mapJoinRowToPublicListItem(row, viewer));
         }
       }
       return { items };
@@ -711,6 +773,7 @@ export class PublicJobsService {
 
   async listSimilar(
     jobId: string,
+    viewer: PublicViewer,
     limit = 6,
   ): Promise<PublicSimilarJobsResponse> {
     const database = getDb();
@@ -781,7 +844,9 @@ export class PublicJobsService {
         )
         .limit(limit);
 
-      return { items: rows.map(mapJoinRowToPublicListItem) };
+      return {
+        items: rows.map((r) => mapJoinRowToPublicListItem(r, viewer)),
+      };
     } catch (e) {
       mapPublicJobsDbError(e);
     }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 
 import type {
@@ -9,7 +9,7 @@ import type {
 } from 'contracts';
 
 import { Button } from '@/components/ui/button';
-import { Link } from '@/i18n/navigation';
+import { Link, usePathname } from '@/i18n/navigation';
 
 import { type JobsFilterDefaults } from '../lib/jobs-list-query';
 
@@ -17,6 +17,7 @@ import { JobsFilterChipsBar } from './jobs-filter-chips-bar';
 import { JobsFilterForm } from './jobs-filter-form';
 import { JobsInfiniteList } from './jobs-infinite-list';
 import { JobsListPreviewPane } from './jobs-list-preview-pane';
+import { LockedJobsCta } from './locked-jobs-cta';
 
 export type JobsListBody =
   | { kind: 'no-api' }
@@ -58,6 +59,8 @@ export function JobsListScreen({
   after,
 }: JobsListScreenProps) {
   const t = useTranslations('Jobs');
+  const locale = useLocale();
+  const pathname = usePathname();
 
   const selectedSegment = defaults.job.trim();
 
@@ -74,32 +77,33 @@ export function JobsListScreen({
       </div>
     );
   } else if (body.kind === 'error') {
-    const message = body.missingApiUrl
-      ? t('errorNoApi')
-      : t('errorBody', { message: body.message });
     main = (
       <div className="rounded-xl border border-dashed border-red-200 bg-red-50 px-6 py-10 text-center">
         <h2 className="m-0 mb-2 text-lg font-semibold text-red-900">
           {t('errorTitle')}
         </h2>
         <p className="m-0 mx-auto max-w-md text-[0.9375rem] text-gray-700">
-          {message}
+          {t('errorBody')}
         </p>
-        {body.httpStatus === 404 ? (
-          <p className="mx-auto mt-3 max-w-lg text-sm leading-snug text-red-900">
-            {t('error404Hint')}
-          </p>
-        ) : null}
       </div>
     );
   } else if (body.kind === 'empty') {
+    const filtered = Boolean(
+      defaults.q ||
+        defaults.city ||
+        defaults.category ||
+        defaults.workModel ||
+        defaults.employmentType ||
+        defaults.postedWithin ||
+        defaults.easyApply,
+    );
     main = (
       <div className="rounded-xl border border-dashed border-gray-300 bg-neutral-50 px-6 py-10 text-center">
         <h2 className="m-0 mb-2 text-lg font-semibold text-gray-700">
-          {t('emptyTitle')}
+          {filtered ? t('emptyFilteredTitle') : t('emptyTitle')}
         </h2>
         <p className="m-0 mx-auto max-w-md text-[0.9375rem] text-gray-500">
-          {t('emptyBody')}
+          {filtered ? t('emptyFilteredBody') : t('emptyBody')}
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Button variant="outline" size="sm" asChild>
@@ -168,6 +172,15 @@ export function JobsListScreen({
             />
           </div>
         </>
+      ) : null}
+
+      {body.kind === 'list' ? (
+        <LockedJobsCta
+          count={body.initialPage.lockedTotal}
+          locale={locale}
+          returnToPath={pathname}
+          className="mb-6"
+        />
       ) : null}
 
       <div className="md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] md:items-start md:gap-6">

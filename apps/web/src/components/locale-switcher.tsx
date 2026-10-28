@@ -25,7 +25,7 @@ export function LocaleSwitcher() {
       href={{ pathname, query }}
       locale={otherLocale}
       hrefLang={otherLocale}
-      className="flex items-center gap-1.5 rounded-full border border-border/60 bg-card/50 px-3 py-1.5 text-xs font-medium text-muted-foreground transition-all hover:border-primary/40 hover:bg-primary/5 hover:text-foreground"
+      className="flex min-h-11 items-center gap-1.5 rounded-full border border-border/60 bg-card/50 px-3 py-1.5 text-xs md:min-h-0 font-medium text-muted-foreground transition-all hover:border-primary/40 hover:bg-primary/5 hover:text-foreground"
     >
       <Globe className="size-3.5" aria-hidden />
       {/* Accessible name keeps the visible "EN"/"SR" (WCAG 2.5.3). */}

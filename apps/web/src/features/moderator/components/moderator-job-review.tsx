@@ -10,10 +10,11 @@ import {
 } from '@/components/table-status-badge';
 import { Button } from '@/components/ui/button';
 import { Input, Label } from '@/components/ui';
+// Not the `@/features/jobs` barrel: it re-exports server-only loaders.
 import {
   JobListingPreview,
   moderatorJobToPublicPreviewShape,
-} from '@/features/jobs';
+} from '@/features/jobs/components/job-listing-preview';
 import {
   useAdminForceArchiveMutation,
   useModeratorPublishDirectMutation,

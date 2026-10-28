@@ -68,7 +68,8 @@
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
+  /* Control outlines (inputs, selects): 3:1 against background and card (WCAG 1.4.11); `--border` stays light for dividers. */
+  --input: oklch(0.64 0.012 200);
   --ring: oklch(0.55 0.09 181);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
@@ -157,6 +158,24 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  /* Links and custom controls get the same visible ring as Button/Input. */
+  a:focus-visible,
+  [role='button']:focus-visible,
+  summary:focus-visible {
+    @apply rounded-sm outline-2 outline-offset-2 outline-ring;
+  }
+}
+
+/* Respect the OS "reduce motion" setting: no animations, instant transitions. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
