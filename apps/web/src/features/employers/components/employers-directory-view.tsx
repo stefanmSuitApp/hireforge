@@ -32,9 +32,7 @@ export async function EmployersDirectoryView(props: Props) {
             aria-hidden
           />
           <header className="relative">
-            <h1 className="m-0 text-[clamp(1.85rem,3.8vw,2.6rem)] font-bold tracking-tight text-foreground">
-              {t('title')}
-            </h1>
+            <h1 className="m-0 text-h1 text-foreground">{t('title')}</h1>
             <p className="mt-3 max-w-2xl text-base text-muted-foreground">
               {t('description')}
             </p>
@@ -56,9 +54,7 @@ export async function EmployersDirectoryView(props: Props) {
             aria-hidden
           />
           <header className="relative">
-            <h1 className="m-0 text-[clamp(1.85rem,3.8vw,2.6rem)] font-bold tracking-tight text-foreground">
-              {t('title')}
-            </h1>
+            <h1 className="m-0 text-h1 text-foreground">{t('title')}</h1>
             <p className="mt-3 max-w-2xl text-base text-muted-foreground">
               {t('description')}
             </p>
@@ -92,9 +88,7 @@ export async function EmployersDirectoryView(props: Props) {
           <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
             {t('headerEyebrow')}
           </span>
-          <h1 className="m-0 text-[clamp(1.55rem,6vw,2.6rem)] font-bold tracking-tight text-foreground">
-            {t('title')}
-          </h1>
+          <h1 className="m-0 text-h1 text-foreground">{t('title')}</h1>
           <p className="mt-3 max-w-2xl text-base leading-relaxed text-muted-foreground">
             {t('description')}
           </p>

@@ -82,7 +82,7 @@ export function PublicJobCard({
       />
       <div className="relative z-10 pointer-events-none">
         {job.featured ? (
-          <span className="mb-3 inline-block rounded-full bg-primary px-2.5 py-0.5 text-xs font-semibold text-primary-foreground">
+          <span className="mb-3 inline-block rounded-full bg-featured px-2.5 py-0.5 text-xs font-semibold text-featured-foreground">
             {tDetail('featuredBadge')}
           </span>
         ) : null}

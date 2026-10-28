@@ -61,9 +61,7 @@ export default async function AboutPage({
           <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
             {t('aboutHeroEyebrow')}
           </span>
-          <h1 className="m-0 text-[clamp(1.55rem,6vw,2.6rem)] font-bold tracking-tight text-foreground">
-            {t('aboutHeroTitle')}
-          </h1>
+          <h1 className="m-0 text-h1 text-foreground">{t('aboutHeroTitle')}</h1>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base">
             {t('aboutHeroSubtitle')}
           </p>

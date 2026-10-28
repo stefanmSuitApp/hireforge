@@ -58,6 +58,17 @@ const pairs = [
   ['ring', 'card', UI, 'focus ring on cards'],
   ['input', 'background', UI, 'input outlines'],
   ['input', 'card', UI, 'input outlines on cards'],
+  ['success', 'card', TEXT, 'success text'],
+  ['success', 'success-soft', TEXT, 'success badges and notices'],
+  ['success-foreground', 'success', TEXT, 'solid success label'],
+  ['warning', 'card', TEXT, 'warning text'],
+  ['warning', 'warning-soft', TEXT, 'warning badges and notices'],
+  ['warning-foreground', 'warning', TEXT, 'solid warning label'],
+  ['info', 'card', TEXT, 'info text'],
+  ['info', 'info-soft', TEXT, 'info badges and notices'],
+  ['info-foreground', 'info', TEXT, 'solid info label'],
+  ['destructive', 'destructive-soft', TEXT, 'error notices'],
+  ['featured-foreground', 'featured', TEXT, 'featured (paid) badge'],
 ];
 
 const rows = [];

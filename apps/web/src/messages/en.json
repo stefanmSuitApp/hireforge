@@ -103,15 +103,10 @@
     "subhead": "Search jobs from employers across Serbia — fast and simple.",
     "ctaJobs": "Browse jobs",
     "trustStrip": "Jobs from all over Serbia, in one place.",
-    "heroTabKeyword": "By Keyword",
-    "heroTabCity": "By City",
-    "heroTabCategory": "By Category",
     "heroSearchKeywords": "Keywords",
     "heroSearchKeywordPlaceholder": "Job title, skill, or company…",
     "heroSearchCity": "City",
     "heroSearchCityAny": "Any city",
-    "heroSearchCategory": "Category",
-    "heroSearchCategoryAny": "Any category",
     "heroSearchSubmit": "Search",
     "candidatePortalTitle": "For Job Seekers",
     "candidatePortalBody": "Build your profile, upload a CV, save jobs, and apply — all in one place.",
@@ -200,7 +195,6 @@
     "browseEmployers": "Browse employers",
     "popularCategories": "Popular categories",
     "emptyClearFilters": "Clear filters",
-    "twoColumnNavHint": "Tip: on desktop, pick a job to preview it beside the list.",
     "cardOpenJobAria": "Open job: {title}",
     "lockedCompany": "Sign in to see the employer",
     "lockedMoreTitle": "{count, plural, one {# more job is waiting} other {# more jobs are waiting}}",
@@ -214,7 +208,8 @@
     "scrollForMore": "Scroll down to load more",
     "endOfList": "All matching jobs are loaded",
     "pagerPrevious": "Previous page",
-    "pagerNext": "Next page ({page})"
+    "pagerNext": "Next page ({page})",
+    "filtersToggle": "{count, plural, =0 {Filters} other {Filters (#)}}"
   },
   "JobDetail": {
     "fallbackTitle": "Job details",
@@ -628,7 +623,10 @@
       "responsiblePerson": "Legal representative (optional)",
       "responsiblePosition": "Representative role (optional)",
       "foreignBankHint": "Required for companies outside Serbia.",
-      "validationFailed": "Please fix the highlighted fields."
+      "validationFailed": "Please fix the highlighted fields.",
+      "fieldRequired": "This field is required.",
+      "fieldEmail": "Enter a valid email address.",
+      "fieldPassword": "The password needs at least 8 characters."
     },
     "emailVerificationBanner": "Confirm your email to unlock package purchases. We sent a confirmation link to your address.",
     "signIn": "Sign in",
@@ -1141,7 +1139,10 @@
       "colApplied": "Applied",
       "colActions": "Actions",
       "withdraw": "Withdraw",
-      "withdrawing": "Withdrawing…"
+      "withdrawing": "Withdrawing…",
+      "withdrawConfirmTitle": "Withdraw this application?",
+      "withdrawConfirmBody": "Your application for “{title}” will be withdrawn. You can apply to the same job again after 24 hours.",
+      "withdrawConfirmAction": "Withdraw application"
     },
     "profile": {
       "heading": "Profile & CV",
@@ -1299,5 +1300,20 @@
       "lead": "Lead",
       "executive": "Executive"
     }
+  },
+  "NotFound": {
+    "title": "This page does not exist",
+    "body": "The job may have ended or the address has a typo. Browse current jobs or go back home.",
+    "browseJobs": "Browse jobs",
+    "goHome": "Home"
+  },
+  "ErrorPage": {
+    "title": "Something went wrong",
+    "body": "This page cannot be loaded right now. Please try again in a moment.",
+    "retry": "Try again",
+    "goHome": "Home"
+  },
+  "Common": {
+    "cancel": "Cancel"
   }
 }

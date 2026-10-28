@@ -47,9 +47,7 @@ export function AuthFormGateway({
     <div className="relative mx-auto max-w-3xl">
       <header className="mx-auto max-w-xl text-center">
         <AuthGatewayEyebrow>{eyebrowText}</AuthGatewayEyebrow>
-        <h1 className="mt-3 text-[clamp(1.7rem,4.8vw,2.6rem)] font-extrabold tracking-tight text-foreground">
-          {title}
-        </h1>
+        <h1 className="mt-3 text-h1 text-foreground">{title}</h1>
         {subtitle ? (
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground md:text-base">
             {subtitle}

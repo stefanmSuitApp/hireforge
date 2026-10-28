@@ -286,6 +286,39 @@ Stefan approved Now, Next and Later (2026-10-28); shipped in three phases.
 - **returnTo** survives candidate sign-up (register page, login ↔ register
   links, job page "Napravi nalog").
 
+Deployed 2026-10-29 (main@b71a292, PR #20), verified on sljakam.com.
+
+### Design phase 2 — "Next" (branch `feat/design-next`)
+
+- **Status tokens** `success`/`warning`/`info` (+ `-foreground`, `-soft`),
+  `destructive-soft`, `featured` (logo gold) in both themes; all 56 contrast
+  pairs pass (dark `--input` and destructive label fixed too). Hard-coded
+  amber/emerald/red/sky/gray/teal moved to tokens (check:design 243 → 82;
+  allowlist for dev page, global-error, manifest, skeletons). Left: home tile
+  gradients and hero orbs (Later: flatten visuals) and arbitrary sizes.
+- **Inter** via `next/font` (latin + latin-ext, self-hosted) and a type scale
+  (`text-display`, `text-h1`–`h3`); every page title uses it.
+- **Job page:** "Konkuriši" right under the title, apply section before the
+  company block, and a sticky apply bar on phones (full page only).
+- **Phones, jobs list:** results first; filters fold behind "Filteri (N)".
+  Not a sheet: a portal would duplicate the form, a JS media query would
+  shift layout. Without JS the folded filters can't open (crawlers don't
+  need them). Desktop-only "Savet" tip removed.
+- **Hero search:** what + where side by side (stacked on phones); fake tabs
+  and the category select removed (categories are the tiles below).
+- **Forms:** employer sign-up marks each invalid field (`aria-invalid`,
+  message under it, focus moves there); `FieldError` + `fieldErrorProps`
+  and `aria-invalid` styling in Input/Select/Textarea. The job form keeps
+  native `required` + its inline image-URL error.
+- **Confirmations:** `useConfirm` (Radix Dialog, alertdialog) replaces
+  `window.confirm` (taxonomy delete, close won/lost) and now guards
+  withdrawing an application.
+- **Branded 404** (`[locale]/not-found.tsx`, catch-all `[...rest]`) and
+  **error page** (`[locale]/error.tsx`, retry). No `loading.tsx`: streaming
+  starts before a page picks its status, so missing jobs would stop being
+  real 404s and locked jobs real 307s.
+- Visual baselines re-rendered (font).
+
 ## Known issues not yet scheduled
 
 Phase T pinned these with an `it.fails` test named after the fix; fixing the

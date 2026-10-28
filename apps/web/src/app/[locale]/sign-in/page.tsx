@@ -58,7 +58,7 @@ export default async function SignInChooserPage({
         <section className="relative rounded-3xl border border-border/40 bg-card/70 p-6 backdrop-blur-sm md:p-10">
           <header className="max-w-2xl">
             <AuthGatewayEyebrow>{t('eyebrow')}</AuthGatewayEyebrow>
-            <h1 className="mt-3 mb-3 text-[clamp(1.8rem,5.3vw,3rem)] font-extrabold leading-tight tracking-tight text-foreground">
+            <h1 className="mt-3 mb-3 text-h1 text-foreground">
               {titleParts.length > 1 ? (
                 <>
                   {titleParts[0]}

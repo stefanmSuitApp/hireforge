@@ -686,7 +686,7 @@ export function CandidateCvBuildWizard({
         <div className="rounded-xl border border-border/70 bg-background p-4">
           <h3 className="mb-2 text-sm font-medium">{t('previewTitle')}</h3>
           {previewIssuesText ? (
-            <p className="mb-2 text-xs text-amber-700 dark:text-amber-400">
+            <p className="mb-2 text-xs text-warning">
               {t('previewValidationHint')}
               <span className="mt-1 block font-mono text-[11px] text-muted-foreground">
                 {previewIssuesText}

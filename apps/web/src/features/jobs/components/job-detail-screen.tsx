@@ -30,7 +30,7 @@ export function JobDetailScreen(props: JobDetailScreenProps) {
   if (props.kind === 'no-api') {
     return (
       <PublicSurfaceMain narrow>
-        <div className="rounded-xl border border-dashed border-red-200 bg-red-50 px-5 py-9 text-center">
+        <div className="rounded-xl border border-dashed border-destructive/30 bg-destructive-soft px-5 py-9 text-center">
           {t('errorNoApi')}
         </div>
       </PublicSurfaceMain>
@@ -40,7 +40,7 @@ export function JobDetailScreen(props: JobDetailScreenProps) {
   if (props.kind === 'error') {
     return (
       <PublicSurfaceMain narrow>
-        <div className="rounded-xl border border-dashed border-red-200 bg-red-50 px-5 py-9 text-center">
+        <div className="rounded-xl border border-dashed border-destructive/30 bg-destructive-soft px-5 py-9 text-center">
           {t('errorGeneric')}
         </div>
       </PublicSurfaceMain>
@@ -63,6 +63,9 @@ export function JobDetailScreen(props: JobDetailScreenProps) {
       <JobListingPreview
         job={job}
         listingState={job.live ? 'live' : 'expired'}
+        stickyApply
+        // Room for the sticky apply bar on phones.
+        className={job.live ? 'mb-20 md:mb-0' : undefined}
       />
 
       {moreFromCompany.length > 0 ? (

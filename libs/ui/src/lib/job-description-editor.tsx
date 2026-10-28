@@ -717,7 +717,7 @@ export function JobDescriptionEditor({
                   overBudget
                     ? 'font-semibold text-destructive'
                     : budgetRatio >= 0.9
-                      ? 'font-medium text-amber-600 dark:text-amber-400'
+                      ? 'font-medium text-warning'
                       : 'text-foreground',
                 )}
               >
@@ -741,7 +741,7 @@ export function JobDescriptionEditor({
                   overBudget
                     ? 'bg-destructive'
                     : budgetRatio >= 0.9
-                      ? 'bg-amber-500'
+                      ? 'bg-warning'
                       : 'bg-primary',
                 )}
                 style={{

@@ -77,9 +77,17 @@ test('the filter bar is in the first HTML, not swapped in later (no layout shift
   });
   const page = await context.newPage();
   await page.goto('/sr/jobs/city/beograd');
+  // Phones show results first: the filters are in the HTML, folded behind
+  // one button (so opening them shifts nothing that was already painted).
+  await expect(page.getByRole('button', { name: /^Filteri/ })).toBeVisible();
   await expect(
-    page.getByRole('button', { name: 'Brzo konkurisanje' }),
-  ).toBeVisible();
-  await expect(page.getByRole('searchbox', { name: 'Reči' })).toBeVisible();
+    page.getByRole('button', {
+      name: 'Brzo konkurisanje',
+      includeHidden: true,
+    }),
+  ).toBeAttached();
+  await expect(
+    page.getByRole('searchbox', { name: 'Reči', includeHidden: true }),
+  ).toBeAttached();
   await context.close();
 });

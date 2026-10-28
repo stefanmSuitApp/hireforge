@@ -5,6 +5,26 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* Inter (next/font, latin + latin-ext), set on <html> as --font-inter. */
+  --font-sans:
+    var(--font-inter), ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+    sans-serif;
+  /* Type scale: page roles, not one-off sizes. Headings 600–700. */
+  --text-display: clamp(2rem, 6vw, 3.5rem);
+  --text-display--line-height: 1.08;
+  --text-display--letter-spacing: -0.025em;
+  --text-display--font-weight: 800;
+  --text-h1: clamp(1.625rem, 4vw, 2.375rem);
+  --text-h1--line-height: 1.15;
+  --text-h1--letter-spacing: -0.02em;
+  --text-h1--font-weight: 700;
+  --text-h2: clamp(1.25rem, 2.6vw, 1.625rem);
+  --text-h2--line-height: 1.25;
+  --text-h2--letter-spacing: -0.01em;
+  --text-h2--font-weight: 700;
+  --text-h3: 1.125rem;
+  --text-h3--line-height: 1.35;
+  --text-h3--font-weight: 600;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -45,6 +65,21 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-brand-accent: var(--brand-accent);
+  /* Status colours: `X` for text/icons/borders, `X-foreground` on a solid
+     `bg-X`, `X-soft` for tinted panels and badges (text on it: `text-X`). */
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-soft: var(--warning-soft);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-info-soft: var(--info-soft);
+  --color-destructive-soft: var(--destructive-soft);
+  /* Paid placement (Šef/Gazda): the gold of the logo mark. */
+  --color-featured: var(--featured);
+  --color-featured-foreground: var(--featured-foreground);
 }
 
 :root {
@@ -86,6 +121,18 @@
   --sidebar-ring: oklch(0.55 0.09 181);
   /* Logo check mark (BrandMark, app icons): gold on the teal. */
   --brand-accent: oklch(0.83 0.15 80);
+  --success: oklch(0.5 0.12 155);
+  --success-foreground: oklch(0.99 0.01 155);
+  --success-soft: oklch(0.96 0.04 155);
+  --warning: oklch(0.5 0.11 60);
+  --warning-foreground: oklch(0.99 0.01 80);
+  --warning-soft: oklch(0.97 0.05 85);
+  --info: oklch(0.5 0.13 250);
+  --info-foreground: oklch(0.99 0.01 250);
+  --info-soft: oklch(0.96 0.03 250);
+  --destructive-soft: oklch(0.985 0.01 27);
+  --featured: oklch(0.83 0.15 80);
+  --featured-foreground: oklch(0.3 0.07 60);
   /* Button gradients (hue aligned with `--primary` / neutrals) */
   --gradient-primary-from: oklch(0.43 0.125 178);
   --gradient-primary-via: oklch(0.52 0.115 181);
@@ -119,9 +166,9 @@
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.985 0 0);
+  --destructive-foreground: oklch(0.2 0.05 25);
   --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
+  --input: oklch(0.56 0.01 200);
   --ring: oklch(0.65 0.08 181);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
@@ -150,6 +197,18 @@
   --gradient-destructive-hover-to: oklch(0.58 0.2 23);
   --gradient-link-from: oklch(0.45 0.06 181 / 45%);
   --gradient-link-to: oklch(0.62 0.08 181 / 62%);
+  --success: oklch(0.78 0.14 155);
+  --success-foreground: oklch(0.2 0.04 155);
+  --success-soft: oklch(0.3 0.06 155);
+  --warning: oklch(0.82 0.13 80);
+  --warning-foreground: oklch(0.22 0.05 70);
+  --warning-soft: oklch(0.32 0.06 70);
+  --info: oklch(0.78 0.11 250);
+  --info-foreground: oklch(0.2 0.04 250);
+  --info-soft: oklch(0.3 0.06 250);
+  --destructive-soft: oklch(0.3 0.08 25);
+  --featured: oklch(0.8 0.14 80);
+  --featured-foreground: oklch(0.25 0.06 60);
 }
 
 @layer base {

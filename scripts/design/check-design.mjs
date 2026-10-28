@@ -19,6 +19,19 @@ const root = resolve(fileURLToPath(import.meta.url), '../../..');
 const DIRS = ['apps/web/src', 'libs/ui/src'];
 const TOKEN_FILE = 'apps/web/src/app/global.css';
 const onCi = Boolean(process.env.CI);
+/**
+ * Legitimate exceptions, so the count is real debt only:
+ * - the dev-only integration page;
+ * - global-error renders outside the layout (no token stylesheet);
+ * - manifest / viewport `themeColor` must be hex;
+ * - skeleton placeholders use arbitrary widths on purpose.
+ */
+const ALLOW = [
+  'apps/web/src/app/[locale]/integration/page.tsx',
+  'apps/web/src/app/global-error.tsx',
+  'apps/web/src/app/manifest.ts',
+  'apps/web/src/features/jobs/components/public-job-card-skeleton.tsx',
+];
 
 const PALETTE =
   'slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose';
@@ -55,7 +68,7 @@ const findings = [];
 for (const dir of DIRS) {
   for (const file of walk(join(root, dir))) {
     const rel = relative(root, file);
-    if (rel === TOKEN_FILE) continue;
+    if (rel === TOKEN_FILE || ALLOW.includes(rel)) continue;
     readFileSync(file, 'utf8')
       .split('\n')
       .forEach((text, i) => {

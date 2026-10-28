@@ -287,7 +287,7 @@ export function EmployerPackagesPanel({
                         : t('subscribe')}
                   </Button>
                   {!emailVerified && !isEnterprise ? (
-                    <p className="text-xs text-amber-700 dark:text-amber-400">
+                    <p className="text-xs text-warning">
                       {t('verifyToPurchase')}
                     </p>
                   ) : null}
