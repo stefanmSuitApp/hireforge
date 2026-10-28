@@ -3,6 +3,19 @@
 Things Claude could not (or must not) do alone. Newest first within each
 priority. Remove an item when it is done. **No secrets in this file.**
 
+## ▶ Next, in order (updated 2026-10-29)
+
+1. Server (~10 min): set `INDEXNOW_KEY` and, if `sudo` works, add swap —
+   commands under "Values" and item 2.
+2. Admin UI: archive the seed sample job (see "Values").
+3. Google Search Console + Bing Webmaster Tools, submit the sitemap
+   (see "Values"). Worth doing now: verification takes days to settle.
+4. Off-VM backup storage (item 1).
+5. Get the first **featured** job live: with the featured-only rule nothing
+   job-related is indexed until one exists.
+6. When convenient: Sentry (3), accountant (4), legal texts (5), Phase T
+   decisions, social profiles, analytics.
+
 ## ✅ Done
 
 - **Seed passwords rotated** on production (2026-10-28) and the five
@@ -11,23 +24,21 @@ priority. Remove an item when it is done. **No secrets in this file.**
   `~/hireforge-prod-credentials-2026-10-28.txt` on Stefan's Mac (kept on
   purpose, outside the repo — never commit it).
 - **Resend domain** `sljakam.com` confirmed verified.
+- **Nightly Postgres backup** installed on the VM (cron 02:17 server time,
+  keeps 14 days; `backups/backup-cron.log`). Checked 2026-10-28.
+- **SEO and featured-only visibility** live: public pages, sitemap, JobPosting
+  markup (#7, #13), guests see featured jobs in full and others as teasers
+  (#20, deployed 2026-10-28).
 
 ## 🟠 Soon
 
-### 1. Turn on nightly backups, then copy them off the VM
+### 1. Copy backups off the VM
 
-The only Postgres dumps on the server are the ones taken by hand during
-deploys. Installing the nightly job was blocked by the permission check
-(adds a cron entry). It needs no sudo — run once:
-
-```bash
-ssh -i ~/.ssh/hetzner_hireforge deploy@178.105.128.190 'cd /opt/hireforge && ./scripts/deploy/install-backup-cron.sh'
-```
-
-It runs `backup-postgres.sh` at 02:17 server time and keeps 14 days. The
-dumps sit on the same disk as the database: create a Hetzner Storage Box or
-Object Storage bucket and put its credentials in `deploy/.env.production`
-(not chat) so dumps can be copied off the machine.
+The nightly dump runs (see Done), but it sits on the same disk as the
+database: losing the VM loses both. Create a Hetzner Storage Box or Object
+Storage bucket, put its credentials in `deploy/.env.production` yourself (not
+in chat), and say so; the copy step then gets wired into
+`backup-postgres.sh`.
 
 ### 2. The production VM is too small to build on (optional now)
 
@@ -79,13 +90,6 @@ Privacy policy, terms of use and refund policy pages need real legal copy
 
 ## 🟡 Decide when convenient
 
-### 6. SEO branch
-
-A separate session is preparing `feat/seo-quality-gates` (clone at
-`~/Dev/DEVLEGION/hireforge-seo`) that makes job list/detail public behind
-`PUBLIC_JOBS`. Claude's phases do not touch SEO to avoid conflicts; merge
-it when you are ready.
-
 ## Phase T: decisions (found by the new tests)
 
 - [ ] **Moderator scope for employer accounts:** may a moderator move an
@@ -106,18 +110,19 @@ it when you are ready.
 - [ ] **External images in job descriptions** (any https host) allow
       tracking pixels. Restrict to uploaded media?
 
-## SEO branch: decisions
+## SEO and reach: decisions
 
 The full to-do list for search and reach, ordered by impact:
 `docs/plans/SEO_REACH_CHECKLIST.md`.
 
-- [ ] **Confirm or flip `PUBLIC_JOBS`** (SEO branch, 2026-10-28). Job list,
-      job detail and the employers pages are now public so search engines can
-      index them; apply and save still need login. This reverses the
-      2026-10-27 "jobs behind login" decision, as discussed at handoff.
-      To go back: `PUBLIC_JOBS=false` in `deploy/.env.production` and restart
-      `web` and `api` (no rebuild). That also turns off job sitemaps,
-      JobPosting JSON-LD and indexing pings.
+- [ ] **Featured-only visibility: revisit after the first month** (decided
+      2026-10-28, live with #20). Only featured jobs are indexed, in the
+      sitemap and announced to search engines; the rest are locked teasers.
+      Today prod has no featured job, so the sitemap lists static pages only.
+      If search traffic stays near zero, the alternative is: every job page
+      public and indexed, apply and contact details behind sign-in, featured
+      jobs get placement, a badge and the faster indexing pings.
+      `PUBLIC_JOBS=false` still walls everything.
 
 - [ ] **Logo** (you asked for a designed mark on 2026-10-28). Picked concept A:
       an "S" whose caron is a gold check mark ("the job is yours"), on the
@@ -131,29 +136,40 @@ The full to-do list for search and reach, ordered by impact:
 - [ ] **Social profiles** for Organization `sameAs` (JSON-LD): official
       Instagram / LinkedIn / Facebook URLs, if any. Code:
       `SOCIAL_PROFILES` in `apps/web/src/lib/seo/json-ld.ts`.
-- [ ] **Search engine verification codes** (Search Console, Bing Webmaster
-      Tools, Yandex Webmaster): add the site, choose the HTML meta tag method,
-      and put each code in `deploy/.env.production` as
-      `GOOGLE_SITE_VERIFICATION`, `BING_SITE_VERIFICATION`,
-      `YANDEX_SITE_VERIFICATION`; restart `web`. Then submit
-      `https://sljakam.com/sitemap.xml` in each.
+- [ ] **Search Console and Bing Webmaster Tools.** Easiest: in Search
+      Console add a **Domain** property `sljakam.com` and verify with the DNS
+      TXT record at the domain registrar (no server change; covers `www`).
+      Then Bing Webmaster Tools → "Import from Google Search Console". Submit
+      `https://sljakam.com/sitemap.xml` in both. Meta tag method instead:
+      put the codes in `deploy/.env.production` as
+      `GOOGLE_SITE_VERIFICATION` / `BING_SITE_VERIFICATION` /
+      `YANDEX_SITE_VERIFICATION` and recreate `web`.
 - [ ] **Google Indexing API**: in Google Cloud create a service account,
       enable the "Web Search Indexing API", download its JSON key, add the
       account's email as an **Owner** of sljakam.com in Search Console, and
       put the key base64-encoded (`base64 -i key.json`) in
       `deploy/.env.production` as `GOOGLE_INDEXING_SA_JSON`; restart
       `worker`. Not in chat.
-- [ ] **`INDEXNOW_KEY`**: any 32 hex chars work (e.g. `openssl rand -hex 16`);
-      set it in `deploy/.env.production` and restart `web` and `worker`.
-      Not secret (it is served publicly at `/<key>.txt`).
+- [ ] **`INDEXNOW_KEY`** (not secret; served at `/<key>.txt`). On the VM:
+
+  ```bash
+  cd /opt/hireforge
+  grep -q '^INDEXNOW_KEY=' deploy/.env.production || echo "INDEXNOW_KEY=$(openssl rand -hex 16)" >> deploy/.env.production
+  docker compose -f compose.prod.yml up -d --no-build --force-recreate web worker
+  curl -s https://sljakam.com/$(grep '^INDEXNOW_KEY=' deploy/.env.production | cut -d= -f2).txt; echo
+  ```
+
+  The last line prints the key back when it works. Only featured jobs are
+  announced.
+
 - [ ] **Analytics**: none is installed (by design in this branch). Choose GA4
       (needs the cookie consent banner) or a cookieless tool (Plausible,
       Umami, Cloudflare Web Analytics: no banner needed).
 
-- [ ] **Unpublish the seed sample job on prod** before submitting the
-      sitemap: "Senior TypeScript developer" (DEVLEGION,
-      `20000000-0000-4000-8000-000000000001`, from
-      `scripts/db/seed-domain-baseline.sql`) is the only live job, and since
-      the SEO deploy it is public, in `jobs-0.xml` and carries JobPosting
-      markup. Archive it from the moderator/admin UI (or say so and it gets
-      archived).
+- [ ] **Archive the seed sample job on prod**: "Senior TypeScript developer"
+      (DEVLEGION, `20000000-0000-4000-8000-000000000001`, from
+      `scripts/db/seed-domain-baseline.sql`). Since #20 it is non-featured:
+      a locked teaser, out of the sitemap, no JobPosting markup, so it no
+      longer risks Google's job-posting rules, but guests still see a fake
+      ad in the list. Archive it from the moderator/admin UI (or say so and
+      it gets archived).
