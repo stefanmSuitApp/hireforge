@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import type { PublicJobListItem, PublicJobTaxonomyResponse } from 'contracts';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
@@ -21,12 +22,34 @@ import { resolveNestPublicOrigin } from '@/lib/nest-api-url';
 import { fetchPublicJobsList, fetchPublicJobTaxonomy } from '@/lib/public-jobs';
 import { getUnifiedAuthSession } from '@/lib/unified-auth';
 import { Link } from '@/i18n/navigation';
+import { buildPublicPageMetadata } from '@/i18n/metadata';
 
 const emptyTaxonomy: PublicJobTaxonomyResponse = {
   cities: [],
   cityGroups: [],
   categories: [],
 };
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations('Metadata');
+  const title = t('title');
+  return {
+    ...buildPublicPageMetadata({
+      locale,
+      path: '/',
+      title,
+      description: t('description'),
+    }),
+    // Already carries the brand; skip the layout's "%s · Šljakam" template.
+    title: { absolute: title },
+  };
+}
 
 export default async function HomePage({
   params,

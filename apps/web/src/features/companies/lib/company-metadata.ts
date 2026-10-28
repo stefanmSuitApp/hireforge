@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
-import { buildLocaleAlternates } from '@/i18n/metadata';
+import { buildPublicPageMetadata, NOINDEX } from '@/i18n/metadata';
 import { fetchCmsEmployerBranding } from '@/lib/cms-content';
 import { resolveNestPublicOrigin } from '@/lib/nest-api-url';
 import { fetchPublicCompanyDetail } from '@/lib/public-jobs';
@@ -13,13 +13,13 @@ export async function buildCompanyPublicMetadata(
   setRequestLocale(locale);
   const t = await getTranslations('Company');
   const base = resolveNestPublicOrigin();
-  if (!base) return { title: t('fallbackTitle') };
+  if (!base) return { title: t('fallbackTitle'), robots: NOINDEX };
 
   const [result, branding] = await Promise.all([
     fetchPublicCompanyDetail(base, slug),
     fetchCmsEmployerBranding(slug, locale),
   ]);
-  if (!result.ok) return { title: t('fallbackTitle') };
+  if (!result.ok) return { title: t('fallbackTitle'), robots: NOINDEX };
 
   const companyName = result.data.company.name;
   const cmsLead = branding?.heroSubhead?.trim();
@@ -29,9 +29,12 @@ export async function buildCompanyPublicMetadata(
       : `${cmsLead.slice(0, 317)}…`
     : t('metaDescription', { company: companyName });
 
-  return {
+  return buildPublicPageMetadata({
+    locale,
+    path: `/companies/${slug}`,
     title: `${companyName} · ${t('titleSuffix')}`,
     description,
-    alternates: buildLocaleAlternates(locale, `/companies/${slug}`),
-  };
+    // No live jobs: nothing to find here; keep it out of the index.
+    noindex: result.data.jobs.length === 0,
+  });
 }

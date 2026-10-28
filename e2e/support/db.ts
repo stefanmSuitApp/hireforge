@@ -199,3 +199,71 @@ export async function jobSlug(jobId: string): Promise<string | null> {
     return r.rows[0]?.slug ?? null;
   });
 }
+
+export type SeededJob = {
+  id: string;
+  slug: string;
+  shortId: string;
+  title: string;
+};
+
+/**
+ * A published job of the seed DEVLEGION company in Beograd / IT, with a slug
+ * like the publish flow builds (`<stem>-<shortId>`). `expiresAt` in the past
+ * makes it an ended ad.
+ */
+export async function createPublishedJob(
+  opts: {
+    title?: string;
+    expiresAt?: Date | null;
+    applyMode?: 'internal' | 'external';
+  } = {},
+): Promise<SeededJob> {
+  const shortId = randomBytes(3).toString('hex').slice(0, 4);
+  const title = opts.title ?? `E2E inženjer ${shortId}`;
+  const slug = `e2e-inzenjer-beograd-${shortId}`;
+  const r = await withDb((db) =>
+    db.query<{ id: string }>(
+      `INSERT INTO jobs (company_id, created_by_user_id, title, description,
+         description_plain, status, slug, short_id, city_id, category_id,
+         published_at, expires_at, apply_mode, external_apply_url,
+         employment_type, work_model)
+       SELECT c.id, u.id, $1, $2, $2, 'published', $3, $4, ci.id, jc.id,
+         now() - interval '1 day', $5, $6,
+         CASE WHEN $6 = 'external' THEN 'https://example.com/apply' END,
+         'full_time', 'hybrid'
+       FROM companies c
+       JOIN users u ON u.email = 'employer@hireforge.local'
+       JOIN cities ci ON ci.slug = 'beograd' AND ci.country_code = 'RS'
+       JOIN job_categories jc ON jc.slug = 'it'
+       WHERE c.slug = 'devlegion'
+       RETURNING id`,
+      [
+        title,
+        `Opis posla za ${title}. Rad u Beogradu, hibridno.`,
+        slug,
+        shortId,
+        opts.expiresAt ?? null,
+        opts.applyMode ?? 'internal',
+      ],
+    ),
+  );
+  const id = r.rows[0]?.id;
+  if (!id) throw new Error('seed company/city/category missing');
+  return { id, slug, shortId, title };
+}
+
+/** What an edit + re-publish does to the URL: new stem, same short id. */
+export async function renameJobSlug(
+  job: SeededJob,
+  stem: string,
+): Promise<string> {
+  const slug = `${stem}-${job.shortId}`;
+  await withDb((db) =>
+    db.query('UPDATE jobs SET slug = $2, updated_at = now() WHERE id = $1', [
+      job.id,
+      slug,
+    ]),
+  );
+  return slug;
+}

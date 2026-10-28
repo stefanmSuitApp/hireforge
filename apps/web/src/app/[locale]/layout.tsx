@@ -1,3 +1,5 @@
+import '../global.css';
+
 import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import {
@@ -7,10 +9,11 @@ import {
 } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 
-import { HtmlLang } from '../../components/html-lang';
+import { AppQueryProvider } from '../../components/providers/app-query-provider';
 import { SiteShell } from '../../components/site-shell';
 import { AppToaster } from '../../components/app-toaster';
-import { buildLocaleAlternates } from '../../i18n/metadata';
+import { buildLocaleAlternates, SITE_NAME } from '../../i18n/metadata';
+import { absoluteSiteOrigin } from '../../lib/site-origin';
 import { routing } from '../../i18n/routing';
 
 export function generateStaticParams() {
@@ -28,20 +31,22 @@ export async function generateMetadata({
   }
   setRequestLocale(locale);
   const t = await getTranslations('Metadata');
-  const base = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
 
   return {
-    metadataBase: new URL(base),
+    metadataBase: new URL(absoluteSiteOrigin()),
+    applicationName: SITE_NAME,
     title: {
       default: t('title'),
-      template: '%s · Šljakam',
+      template: `%s · ${SITE_NAME}`,
     },
     description: t('description'),
+    // People type the name without the diacritic; both spellings + domain.
+    keywords: [SITE_NAME, 'Sljakam', 'sljakam.com'],
     alternates: buildLocaleAlternates(locale, '/'),
     openGraph: {
       type: 'website',
       locale: locale === 'sr' ? 'sr_RS' : 'en_US',
-      siteName: 'Šljakam',
+      siteName: SITE_NAME,
     },
     twitter: {
       card: 'summary_large_image',
@@ -70,12 +75,15 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <>
-      <HtmlLang locale={locale} />
-      <NextIntlClientProvider locale={locale} messages={messages}>
-        <AppToaster />
-        <SiteShell>{children}</SiteShell>
-      </NextIntlClientProvider>
-    </>
+    <html lang={locale} suppressHydrationWarning>
+      <body className="min-h-dvh font-sans antialiased">
+        <AppQueryProvider>
+          <NextIntlClientProvider locale={locale} messages={messages}>
+            <AppToaster />
+            <SiteShell>{children}</SiteShell>
+          </NextIntlClientProvider>
+        </AppQueryProvider>
+      </body>
+    </html>
   );
 }

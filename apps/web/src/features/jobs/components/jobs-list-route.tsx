@@ -34,8 +34,12 @@ export async function JobsListRoute({ params, searchParams }: Props) {
     ),
   );
 
-  /** First page only; further pages load via client infinite scroll. */
-  const qp = buildListQuery(sp, 1, pageSize);
+  /**
+   * The requested page (`?page=N`, so crawlers can paginate through real
+   * links); later pages load via client infinite scroll.
+   */
+  const page = Math.max(1, parseInt(sp.page ?? '1', 10) || 1);
+  const qp = buildListQuery(sp, page, pageSize);
   const base = resolveNestPublicOrigin();
 
   const emptyTaxonomy: PublicJobTaxonomyResponse = {

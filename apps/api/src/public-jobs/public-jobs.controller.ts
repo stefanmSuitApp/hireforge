@@ -32,6 +32,12 @@ export class PublicJobsController {
     return this.publicJobs.listJobTaxonomy();
   }
 
+  /** Live job URLs, companies and city/category counts for sitemaps and landing pages. */
+  @Get('sitemap')
+  sitemap() {
+    return this.publicJobs.sitemap();
+  }
+
   /** Compact list rows for home strips (`refs` = comma-separated UUID or slug segments, max 8). */
   @Get('previews')
   previews(@Query('refs') refs: string | undefined) {

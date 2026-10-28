@@ -203,7 +203,9 @@
     "listStatusPartial": "Prikazano {loaded} od {total} oglasa",
     "listStatusComplete": "Učitano {total} odgovarajućih oglasa",
     "scrollForMore": "Skroluj nadole da učitaš još",
-    "endOfList": "Svi odgovarajući oglasi su učitani"
+    "endOfList": "Svi odgovarajući oglasi su učitani",
+    "pagerPrevious": "Prethodna strana",
+    "pagerNext": "Sledeća strana ({page})"
   },
   "JobDetail": {
     "fallbackTitle": "Detalji posla",
@@ -228,7 +230,11 @@
     "errorGeneric": "Trenutno nije moguce ucitati ovaj oglas.",
     "similarJobsTitle": "Slični poslovi",
     "companySnapshotTitle": "O poslodavcu",
-    "companySnapshotCta": "Otvori profil kompanije"
+    "companySnapshotCta": "Otvori profil kompanije",
+    "expiredBanner": "Ovaj oglas je istekao. Poslodavac više ne prima prijave preko njega.",
+    "applyClosed": "Prijave su zatvorene.",
+    "expiredBrowseLive": "Pogledaj aktuelne oglase",
+    "metaDescriptionLead": "{hasCity, select, yes {Posao u kompaniji {company}, {city}.} other {Posao u kompaniji {company}.}}"
   },
   "Company": {
     "fallbackTitle": "Kompanija",

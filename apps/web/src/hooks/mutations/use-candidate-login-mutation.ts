@@ -2,6 +2,7 @@
 
 import { useMutation } from '@tanstack/react-query';
 
+import { stripLocalePrefix } from '@/i18n/localized-path';
 import { useRouter } from '@/i18n/navigation';
 
 import {
@@ -23,8 +24,10 @@ export function useCandidateLoginMutation() {
     mutationFn: (vars: Vars) => postCandidateLogin(vars.body),
     onSuccess: (_data, variables) => {
       const ret = variables.returnTo;
-      if (ret?.startsWith('/')) {
-        navigateWithFreshSession(ret);
+      if (ret?.startsWith('/') && !ret.startsWith('//')) {
+        // `returnTo` may carry the locale (`/sr/jobs/x/apply`, from the apply
+        // page); the locale-aware router adds it again otherwise (`/sr/sr/…`).
+        navigateWithFreshSession(stripLocalePrefix(ret));
         return;
       }
       navigateWithFreshSession('/candidate');

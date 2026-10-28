@@ -1,3 +1,4 @@
+import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 
 import { Link } from '@/i18n/navigation';
@@ -54,7 +55,10 @@ export async function PublicCompanyPage({
 
   const result = await fetchPublicCompanyDetail(base, slug);
   if (!result.ok) {
-    const msg = result.status === 404 ? t('errorNotFound') : t('errorGeneric');
+    if (result.status === 404 || result.status === 400) {
+      notFound();
+    }
+    const msg = t('errorGeneric');
     return (
       <main className="mx-auto max-w-5xl px-4 py-12 pb-16 md:py-14">
         <div className="rounded-xl border border-dashed border-red-200 bg-red-50 px-6 py-10 text-center">

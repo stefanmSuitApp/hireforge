@@ -1,12 +1,11 @@
 import type { Metadata } from 'next';
-import { redirect } from 'next/navigation';
 
 import {
   JobsListRoute,
   buildJobsListMetadata,
   type JobsSearchParams,
 } from '@/features/jobs';
-import { hasAnyAuthSession } from '@/lib/unified-auth';
+import { requireSessionUnlessPublicJobs } from '@/lib/public-jobs-gate';
 
 export async function generateMetadata({
   params,
@@ -26,13 +25,7 @@ export default async function JobsPage({
   searchParams: Promise<JobsSearchParams>;
 }) {
   const { locale } = await params;
-  const isAuthenticated = await hasAnyAuthSession();
-
-  if (!isAuthenticated) {
-    redirect(
-      `/${locale}/sign-in?returnTo=${encodeURIComponent(`/${locale}/jobs`)}`,
-    );
-  }
+  await requireSessionUnlessPublicJobs(locale, '/jobs');
 
   return <JobsListRoute params={params} searchParams={searchParams} />;
 }

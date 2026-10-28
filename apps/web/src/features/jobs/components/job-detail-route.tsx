@@ -1,4 +1,4 @@
-import { permanentRedirect } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
 
 import { resolveNestPublicOrigin } from '@/lib/nest-api-url';
@@ -22,10 +22,13 @@ export async function JobDetailRoute({ params }: Props) {
 
   const result = await fetchPublicJobDetail(base, jobRef);
   if (!result.ok) {
-    return <JobDetailScreen kind="error" notFound={result.status === 404} />;
+    if (result.status === 404 || result.status === 400) {
+      notFound();
+    }
+    return <JobDetailScreen kind="error" />;
   }
 
-  // UUID links and old slugs (title edited, same short id) → canonical slug.
+  // UUID links and slugs from before an edit 301 to the current slug.
   if (result.data.slug && result.data.slug !== jobRef) {
     permanentRedirect(`/${locale}/jobs/${result.data.slug}`);
   }

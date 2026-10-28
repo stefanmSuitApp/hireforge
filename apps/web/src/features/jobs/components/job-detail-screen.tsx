@@ -15,7 +15,7 @@ import { TrackRecentlyViewedJob } from './track-recently-viewed-job';
 
 export type JobDetailScreenProps =
   | { kind: 'no-api' }
-  | { kind: 'error'; notFound: boolean }
+  | { kind: 'error' }
   | { kind: 'ok'; job: PublicJobDetailResponse; viewedSegment: string };
 
 export function JobDetailScreen(props: JobDetailScreenProps) {
@@ -32,11 +32,10 @@ export function JobDetailScreen(props: JobDetailScreenProps) {
   }
 
   if (props.kind === 'error') {
-    const message = props.notFound ? t('errorNotFound') : t('errorGeneric');
     return (
       <PublicSurfaceMain narrow>
         <div className="rounded-xl border border-dashed border-red-200 bg-red-50 px-5 py-9 text-center">
-          {message}
+          {t('errorGeneric')}
         </div>
       </PublicSurfaceMain>
     );
@@ -55,7 +54,10 @@ export function JobDetailScreen(props: JobDetailScreenProps) {
         <Link href="/jobs">{t('backToJobs')}</Link>
       </Button>
 
-      <JobListingPreview job={job} listingState="live" />
+      <JobListingPreview
+        job={job}
+        listingState={job.live ? 'live' : 'expired'}
+      />
     </PublicSurfaceMain>
   );
 }

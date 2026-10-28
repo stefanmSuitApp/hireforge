@@ -11,6 +11,7 @@ import {
 } from '@/lib/home-jobs-discovery';
 
 import { Link } from '@/i18n/navigation';
+import { absoluteSiteOrigin } from '@/lib/site-origin';
 
 import { BrandWordmark } from './brand-wordmark';
 
@@ -38,6 +39,10 @@ export async function SiteFooter() {
             <BrandWordmark text={brandText} size="sm" />
             <p className="m-0 mt-2 text-xs text-muted-foreground">
               {t('copyright')}
+            </p>
+            {/* The domain spells the brand without "Š", as people search it. */}
+            <p className="m-0 mt-1 text-xs text-muted-foreground">
+              {new URL(absoluteSiteOrigin()).host}
             </p>
             {siteSettings?.footerTagline?.trim() ? (
               <p className="m-0 mt-2 max-w-xs text-sm leading-relaxed text-muted-foreground/90">

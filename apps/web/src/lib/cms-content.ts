@@ -196,6 +196,28 @@ export async function fetchCmsEditorialPage(
   return doc;
 }
 
+export type CmsEditorialSlug = { slug: string; updatedAt: string | null };
+
+/** Published editorial pages (for the sitemap). */
+export const fetchCmsEditorialSlugs = unstable_cache(
+  async (): Promise<CmsEditorialSlug[]> => {
+    const client = getCmsClient();
+    if (!client) return [];
+    try {
+      return await client.fetch<CmsEditorialSlug[]>(
+        `*[_type == "editorialPage" && defined(slug.current) && !(_id in path("drafts.**"))]{
+          "slug": slug.current,
+          "updatedAt": _updatedAt
+        }`,
+      );
+    } catch {
+      return [];
+    }
+  },
+  ['cms-editorial-slugs'],
+  { revalidate: 3600 },
+);
+
 export type CmsCvTemplateRow = {
   code: string;
   name: string;

@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation';
 import { CmsPortableText } from '@/components/cms-portable-text';
 import { PublicSurfaceMain } from '@/components/public-surface';
 import { Link } from '@/i18n/navigation';
-import { buildLocaleAlternates } from '@/i18n/metadata';
+import { buildPublicPageMetadata } from '@/i18n/metadata';
 import { fetchCmsEditorialPage } from '@/lib/cms-content';
 import { hasAnyAuthSession } from '@/lib/unified-auth';
 
@@ -26,11 +26,12 @@ export async function generateMetadata({
   const doc = await fetchAboutDoc(locale);
   const rawDesc = doc?.seoDescription?.trim() || doc?.excerpt?.trim() || '';
   const description = rawDesc ? rawDesc.slice(0, 320) : t('defaultDescription');
-  return {
+  return buildPublicPageMetadata({
+    locale,
+    path: '/about',
     title: doc?.seoTitle?.trim() || doc?.title?.trim() || t('fallbackTitle'),
     description,
-    alternates: buildLocaleAlternates(locale, '/about'),
-  };
+  });
 }
 
 export default async function AboutPage({

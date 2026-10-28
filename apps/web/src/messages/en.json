@@ -203,7 +203,9 @@
     "listStatusPartial": "Showing {loaded} of {total} jobs",
     "listStatusComplete": "{total} matching jobs loaded",
     "scrollForMore": "Scroll down to load more",
-    "endOfList": "All matching jobs are loaded"
+    "endOfList": "All matching jobs are loaded",
+    "pagerPrevious": "Previous page",
+    "pagerNext": "Next page ({page})"
   },
   "JobDetail": {
     "fallbackTitle": "Job details",
@@ -228,7 +230,11 @@
     "errorGeneric": "Could not load this job right now.",
     "similarJobsTitle": "Similar jobs",
     "companySnapshotTitle": "About the employer",
-    "companySnapshotCta": "View company profile"
+    "companySnapshotCta": "View company profile",
+    "expiredBanner": "This ad has expired. The employer is no longer accepting applications through it.",
+    "applyClosed": "Applications are closed.",
+    "expiredBrowseLive": "See current jobs",
+    "metaDescriptionLead": "{hasCity, select, yes {Job at {company}, {city}.} other {Job at {company}.}}"
   },
   "Company": {
     "fallbackTitle": "Company",

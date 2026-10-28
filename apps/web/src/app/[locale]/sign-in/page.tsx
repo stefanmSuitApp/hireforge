@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { BriefcaseBusiness, UserRound } from 'lucide-react';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
-import { buildLocaleAlternates } from '@/i18n/metadata';
+import { buildLocaleAlternates, NOINDEX } from '@/i18n/metadata';
 import { routing } from '@/i18n/routing';
 import { AuthGatewayEyebrow } from '@/components/auth-form-gateway';
 import { AuthPublicGradientShell } from '@/components/auth-public-gradient-shell';
@@ -25,6 +25,8 @@ export async function generateMetadata({
     title: t('metaTitle'),
     description: t('metaDescription'),
     alternates: buildLocaleAlternates(locale, '/sign-in'),
+    // A login chooser: nothing to rank, and it was in the sitemap before.
+    robots: NOINDEX,
   };
 }
 

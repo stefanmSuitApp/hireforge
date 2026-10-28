@@ -283,3 +283,39 @@ Ticked as each step lands on the branch. Skipped items say why.
       Fixed: footer link contrast, home promo chip contrast, `--primary`
       L 0.52 → 0.50, locale switcher accessible name, nested buttons in the
       home spotlight rail. No rules skipped.
+- [x] W1.1 · Public jobs behind `PUBLIC_JOBS` (default on; `shared`
+      `publicJobsEnabled()`, read at runtime). The gate moved from the
+      middleware into the pages (`requireSessionUnlessPublicJobs`); the API's
+      employers directory is anonymous while the flag is on. Apply still
+      needs login (`/candidate/login?returnTo=…`). Fixed on the way: login
+      `returnTo` with a locale (`/sr/…`) navigated to `/sr/sr/…` (404).
+- [x] W1.2 · `robots.txt`: disallows `/api/`, the four workspaces (with and
+      without trailing slash), `/*/jobs/*/apply`, `/*/integration`; points at
+      the sitemap index; any host other than `NEXT_PUBLIC_APP_URL`'s gets
+      `Disallow: /`.
+- [x] W1.3 · Sitemap index `/sitemap.xml` → `/sitemaps/{pages,companies-N,
+jobs-N}.xml` with `sr`/`en`/`x-default` alternates, ≤ 5 000 URLs per
+      file, live jobs only (published and not past `expires_at`), companies
+      with a live job, CMS pages. Data from the new
+      `GET /api/public/jobs/sitemap`. `/sign-in` dropped. Landing file added
+      with W3.
+- [x] W1.4 · Metadata on public pages via `buildPublicPageMetadata` (title,
+      description, self canonical, hreflang, OG, Twitter). `noindex,follow`:
+      sign-in, expired jobs, companies without live jobs, filtered list
+      permutations, empty result pages (workspaces were already noindex;
+      admin added). City/category filters canonicalize to their landing page;
+      `?page=N` is self-canonical with real prev/next links.
+- [x] W1.5 · Brand: `keywords` and visible footer domain (`sljakam.com`) carry
+      the spelling without "Š"; Organization `alternateName` comes with W2.
+- [x] W1.6 · Missing job / company → real 404. Old slugs → 308 (permanent) to
+      the current slug: an edit keeps the job's short id and the API falls
+      back from slug to its `-xxxx` short id. UUID URLs → current slug.
+- [x] W1.7 · `www` → apex was already a 301 in `deploy/Caddyfile`. `/`
+      without `Accept-Language` lands on `/sr`; `x-default` points to `sr`.
+- [x] W1.8 · `<html lang>` rendered on the server per locale (`<html>` moved
+      into `[locale]/layout.tsx`). Heading audit: job, company and list pages
+      have one `<h1>`.
+- [~] W1.9 · Job detail, company and list are server-rendered with content in
+  the HTML; job/company fetches revalidate (15–30 s). Not done: full-page
+  ISR (the site header reads auth cookies, so every page is dynamic);
+  revalidate-on-publish. Listed under "Ideas" in PROGRESS.md.

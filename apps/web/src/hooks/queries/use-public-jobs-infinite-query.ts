@@ -51,7 +51,7 @@ export function usePublicJobsInfiniteQuery({
     queryKey: publicJobsInfiniteQueryKey(search, pageSize),
     queryFn: ({ pageParam }) =>
       fetchJobsPage(pageParam as number, search, pageSize),
-    initialPageParam: 1,
+    initialPageParam: seedFromInitialPage ? initialPage.page : 1,
     getNextPageParam: (last) => {
       const loaded = last.page * last.pageSize;
       return loaded < last.total ? last.page + 1 : undefined;
@@ -60,7 +60,7 @@ export function usePublicJobsInfiniteQuery({
       ? {
           initialData: {
             pages: [initialPage],
-            pageParams: [1],
+            pageParams: [initialPage.page],
           },
         }
       : {}),

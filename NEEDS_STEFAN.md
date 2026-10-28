@@ -85,3 +85,13 @@ A separate session is preparing `feat/seo-quality-gates` (clone at
 `~/Dev/DEVLEGION/hireforge-seo`) that makes job list/detail public behind
 `PUBLIC_JOBS`. Claude's phases do not touch SEO to avoid conflicts; merge
 it when you are ready.
+
+## SEO branch: decisions
+
+- [ ] **Confirm or flip `PUBLIC_JOBS`** (SEO branch, 2026-10-28). Job list,
+      job detail and the employers pages are now public so search engines can
+      index them; apply and save still need login. This reverses the
+      2026-10-27 "jobs behind login" decision, as discussed at handoff.
+      To go back: `PUBLIC_JOBS=false` in `deploy/.env.production` and restart
+      `web` and `api` (no rebuild). That also turns off job sitemaps,
+      JobPosting JSON-LD and indexing pings.

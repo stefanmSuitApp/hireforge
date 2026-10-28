@@ -1,17 +1,12 @@
-import './global.css';
-
-import { AppQueryProvider } from '../components/providers/app-query-provider';
-
+/**
+ * `<html lang>` must match the page language in the server HTML (crawlers and
+ * screen readers read it before any JS runs), so `<html>` lives in
+ * `[locale]/layout.tsx`. This root only passes children through.
+ */
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <body className="min-h-dvh font-sans antialiased">
-        <AppQueryProvider>{children}</AppQueryProvider>
-      </body>
-    </html>
-  );
+  return children;
 }

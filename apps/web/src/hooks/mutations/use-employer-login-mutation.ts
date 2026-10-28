@@ -1,6 +1,7 @@
 'use client';
 
 import { useMutation } from '@tanstack/react-query';
+import { stripLocalePrefix } from '@/i18n/localized-path';
 import { useRouter } from '@/i18n/navigation';
 
 import { postEmployerLogin, type EmployerLoginBody } from '@/api/employer-auth';
@@ -19,8 +20,9 @@ export function useEmployerLoginMutation() {
     mutationFn: (vars: Vars) => postEmployerLogin(vars.body),
     onSuccess: (_data, variables) => {
       const ret = variables.returnTo;
-      if (ret?.startsWith('/')) {
-        navigateWithFreshSession(ret);
+      if (ret?.startsWith('/') && !ret.startsWith('//')) {
+        // `returnTo` may carry the locale; the router adds it otherwise.
+        navigateWithFreshSession(stripLocalePrefix(ret));
         return;
       }
       navigateWithFreshSession('/employer');

@@ -7,7 +7,7 @@ import * as React from 'react';
 import type { PublicJobListItem, PublicJobListResponse } from 'contracts';
 
 import { usePublicJobsInfiniteQuery } from '@/hooks/queries/use-public-jobs-infinite-query';
-import { usePathname, useRouter } from '@/i18n/navigation';
+import { Link, usePathname, useRouter } from '@/i18n/navigation';
 import { useSearchParams } from 'next/navigation';
 import { publicJobUrlSegment } from '@/lib/job-public-segment';
 
@@ -233,6 +233,21 @@ export function JobsInfiniteList({
   const total = query.data?.pages?.[0]?.total ?? initialPage.total;
   const loaded = items.length;
 
+  /** Real `?page=N` links: crawlers and no-JS visitors can't infinite-scroll. */
+  function pageHref(page: number): string {
+    const n = new URLSearchParams(searchParams.toString());
+    n.delete('job');
+    if (page > 1) n.set('page', String(page));
+    else n.delete('page');
+    const qs = n.toString();
+    return qs ? `${pathname}?${qs}` : pathname;
+  }
+  const prevPage = initialPage.page > 1 ? initialPage.page - 1 : null;
+  const nextPage =
+    initialPage.page * initialPage.pageSize < initialPage.total
+      ? initialPage.page + 1
+      : null;
+
   return (
     <>
       <p className="mb-3 hidden text-xs text-muted-foreground md:block">
@@ -280,6 +295,28 @@ export function JobsInfiniteList({
           </p>
         ) : loaded > 0 ? (
           <p className="m-0 text-xs text-muted-foreground">{t('endOfList')}</p>
+        ) : null}
+        {prevPage || nextPage ? (
+          <p className="m-0 flex gap-4 text-sm">
+            {prevPage ? (
+              <Link
+                href={pageHref(prevPage)}
+                rel="prev"
+                className="font-medium text-primary underline-offset-4 hover:underline"
+              >
+                {t('pagerPrevious')}
+              </Link>
+            ) : null}
+            {nextPage ? (
+              <Link
+                href={pageHref(nextPage)}
+                rel="next"
+                className="font-medium text-primary underline-offset-4 hover:underline"
+              >
+                {t('pagerNext', { page: nextPage })}
+              </Link>
+            ) : null}
+          </p>
         ) : null}
       </nav>
     </>

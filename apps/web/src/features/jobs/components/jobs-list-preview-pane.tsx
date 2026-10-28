@@ -74,7 +74,9 @@ export function JobsListPreviewPane({ jobSegment, apiBasePresent }: Props) {
       </p>
     );
   } else if (query.data) {
-    body = <JobListingPreview job={query.data} listingState="live" />;
+    body = (
+      <JobListingPreview job={query.data} listingState="live" titleAs="h2" />
+    );
   } else {
     body = (
       <p className="text-sm text-muted-foreground">{t('previewPlaceholder')}</p>
