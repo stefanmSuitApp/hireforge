@@ -1,16 +1,19 @@
 'use client';
 
 import { useMutation } from '@tanstack/react-query';
-import { useRouter } from '@/i18n/navigation';
+import { useLocale } from 'next-intl';
+
+import type { AppLocale } from '@/i18n/localized-path';
+import { navigateWithFreshSession } from '@/lib/session-navigation';
 
 import { postModeratorLogin } from '@/api/moderator-client';
 
 export function useModeratorLoginMutation() {
-  const router = useRouter();
+  const locale = useLocale() as AppLocale;
   return useMutation({
     mutationFn: postModeratorLogin,
     onSuccess: () => {
-      router.replace('/moderator');
+      navigateWithFreshSession(locale, '/moderator');
     },
   });
 }

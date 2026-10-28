@@ -75,6 +75,7 @@ export async function SiteHeader() {
                 role={authSession.role}
                 dashboardPath={authSession.dashboardPath}
                 logoutEndpoint={authSession.logoutEndpoint}
+                awaitingApproval={authSession.awaitingApproval}
               />
             ) : (
               <Link
@@ -96,6 +97,8 @@ export async function SiteHeader() {
             dashboardPath={authSession.dashboardPath}
             dashboardLabel={t('dashboard')}
             authRole={authSession.role}
+            awaitingApproval={authSession.awaitingApproval}
+            logoutEndpoint={authSession.logoutEndpoint}
           />
         </div>
       </div>

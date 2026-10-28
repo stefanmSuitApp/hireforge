@@ -7,23 +7,8 @@ import {
   EMPLOYER_REFRESH_COOKIE_MAX_AGE,
 } from '@/lib/employer-session';
 import { nestApiUrl, resolveNestServerOrigin } from '@/lib/nest-api-url';
-import { getLocaleFromPathname } from '@/middleware/locale-path';
+import { isSessionRefreshPath } from '@/middleware/auth-gate';
 import { forwardClientIpHeaders } from '@/lib/client-ip';
-
-/** Paths like `/sr/employer` or `/en/employer/foo` but not login/register. */
-export function isEmployerSessionPath(pathname: string): boolean {
-  const locale = getLocaleFromPathname(pathname);
-  if (!locale || !pathname.startsWith(`/${locale}/employer`)) {
-    return false;
-  }
-  if (
-    pathname.includes('/employer/login') ||
-    pathname.includes('/employer/register')
-  ) {
-    return false;
-  }
-  return true;
-}
 
 /** Decode JWT `exp` (seconds since epoch) without verifying signature — only for refresh timing. */
 function decodeJwtExpSeconds(token: string): number | null {
@@ -52,7 +37,7 @@ export async function mergeEmployerRefreshIntoResponse(
   request: NextRequest,
   response: NextResponse,
 ): Promise<void> {
-  if (!isEmployerSessionPath(request.nextUrl.pathname)) {
+  if (!isSessionRefreshPath(request.nextUrl.pathname)) {
     return;
   }
 
@@ -94,6 +79,12 @@ export async function mergeEmployerRefreshIntoResponse(
   }
 
   const text = await upstream.text();
+  if (upstream.status === 401) {
+    // Revoked or expired: drop the cookies so pages stop retrying the refresh.
+    response.cookies.delete(EMPLOYER_ACCESS_COOKIE);
+    response.cookies.delete(EMPLOYER_REFRESH_COOKIE);
+    return;
+  }
   if (!upstream.ok) {
     return;
   }

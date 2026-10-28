@@ -40,6 +40,7 @@ import {
 } from '@/features/moderator/moderator-workspace-links';
 import { Link, usePathname } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
+import { signOut } from '@/lib/sign-out';
 import type { AuthRole } from '@/lib/unified-auth';
 
 type Props = {
@@ -48,6 +49,8 @@ type Props = {
   role: AuthRole;
   dashboardPath: string;
   logoutEndpoint: string;
+  /** Employer awaiting company approval: only the pending page is open. */
+  awaitingApproval: boolean;
 };
 
 function getInitials(name: string): string {
@@ -99,6 +102,7 @@ export function UserProfileDropdown({
   role,
   dashboardPath,
   logoutEndpoint,
+  awaitingApproval,
 }: Props) {
   const t = useTranslations('Nav');
   const tCandidate = useTranslations('Candidate');
@@ -111,12 +115,8 @@ export function UserProfileDropdown({
 
   async function handleLogout() {
     setIsLoggingOut(true);
-    try {
-      await fetch(logoutEndpoint, { method: 'POST' });
-      window.location.href = `/${locale}`;
-    } catch {
-      setIsLoggingOut(false);
-    }
+    if (await signOut(logoutEndpoint, locale)) return;
+    setIsLoggingOut(false);
   }
 
   const initials = getInitials(displayName);
@@ -171,9 +171,11 @@ export function UserProfileDropdown({
             <p className="text-sm font-semibold leading-none text-foreground">
               {displayName}
             </p>
-            <p className="text-xs leading-none text-muted-foreground">
-              {email}
-            </p>
+            {email ? (
+              <p className="text-xs leading-none text-muted-foreground">
+                {email}
+              </p>
+            ) : null}
             <span className="mt-1 inline-flex w-fit rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
               {roleLabel}
             </span>
@@ -208,7 +210,7 @@ export function UserProfileDropdown({
               </DropdownMenuItem>
             );
           })
-        ) : role === 'employer' ? (
+        ) : role === 'employer' && !awaitingApproval ? (
           EMPLOYER_WORKSPACE_LINKS.map(({ href, navKey, messageKey }) => {
             const Icon = employerNavIcon[messageKey];
             const active = employerNavCurrent === navKey;

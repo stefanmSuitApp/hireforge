@@ -7,22 +7,8 @@ import {
   CANDIDATE_REFRESH_COOKIE_MAX_AGE,
 } from '@/lib/candidate-session';
 import { nestApiUrl, resolveNestServerOrigin } from '@/lib/nest-api-url';
-import { getLocaleFromPathname } from '@/middleware/locale-path';
+import { isSessionRefreshPath } from '@/middleware/auth-gate';
 import { forwardClientIpHeaders } from '@/lib/client-ip';
-
-export function isCandidateSessionPath(pathname: string): boolean {
-  const locale = getLocaleFromPathname(pathname);
-  if (!locale || !pathname.startsWith(`/${locale}/candidate`)) {
-    return false;
-  }
-  if (
-    pathname.includes('/candidate/login') ||
-    pathname.includes('/candidate/register')
-  ) {
-    return false;
-  }
-  return true;
-}
 
 function decodeJwtExpSeconds(token: string): number | null {
   try {
@@ -46,7 +32,7 @@ export async function mergeCandidateRefreshIntoResponse(
   request: NextRequest,
   response: NextResponse,
 ): Promise<void> {
-  if (!isCandidateSessionPath(request.nextUrl.pathname)) {
+  if (!isSessionRefreshPath(request.nextUrl.pathname)) {
     return;
   }
 
@@ -86,6 +72,12 @@ export async function mergeCandidateRefreshIntoResponse(
   }
 
   const text = await upstream.text();
+  if (upstream.status === 401) {
+    // Revoked or expired: drop the cookies so pages stop retrying the refresh.
+    response.cookies.delete(CANDIDATE_ACCESS_COOKIE);
+    response.cookies.delete(CANDIDATE_REFRESH_COOKIE);
+    return;
+  }
   if (!upstream.ok) {
     return;
   }
