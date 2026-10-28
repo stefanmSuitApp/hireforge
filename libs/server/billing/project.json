@@ -4,6 +4,15 @@
   "sourceRoot": "libs/server/billing/src",
   "projectType": "library",
   "tags": ["scope:api", "type:lib", "layer:server"],
+  "implicitDependencies": ["!testing"],
   "// targets": "to see all targets run: nx show project server-billing --web",
-  "targets": {}
+  "targets": {
+    "test:integration": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --config vitest.integration.config.mts",
+        "cwd": "libs/server/billing"
+      }
+    }
+  }
 }

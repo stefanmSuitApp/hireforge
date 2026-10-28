@@ -4,5 +4,6 @@
   "sourceRoot": "libs/server/cv-templates/src",
   "projectType": "library",
   "tags": ["scope:api", "type:lib", "layer:server"],
+  "implicitDependencies": ["!testing"],
   "targets": {}
 }

@@ -21,6 +21,7 @@ export default [
       '**/.next/**',
       '**/coverage/**',
       '**/vitest.config.mts',
+      '**/vitest.*.config.mts',
     ],
     languageOptions: {
       parserOptions: {

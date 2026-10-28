@@ -5,7 +5,7 @@ Living status file. **Trust this over the `Status:` lines in
 which went stale during the Cursor phase (Steps 4, 5, 14, 15 say "pending"
 but shipped). Update this file in the same PR as the work.
 
-Last updated: 2026-10-28 (SEO & quality gates, Phase D). Open items for
+Last updated: 2026-10-28 (SEO & quality gates, Phase D, Phase T tests). Open items for
 Stefan: [`NEEDS_STEFAN.md`](./NEEDS_STEFAN.md).
 
 ## Current state
@@ -20,7 +20,12 @@ Stefan: [`NEEDS_STEFAN.md`](./NEEDS_STEFAN.md).
 pnpm build` (+ `pnpm check:i18n`); CI runs it on PRs. Husky: pre-commit
   lint-staged, pre-push lint/typecheck/test/i18n (blocking) + design and
   contrast reports (warn-only). `pnpm test` covers api and worker and the
-  merged-migration guard.
+  merged-migration guard, plus a 90 % coverage gate on dense logic.
+- **Integration:** `pnpm test:integration` (Docker; real Postgres + Redis
+  through Testcontainers, ~75 s): route registry + role matrix, company
+  isolation, flows, races, query plans, schema drift, the built worker.
+  CI runs it on push to `main` (`integration.yml`), not on PRs. How to
+  test: [`docs/TESTING.md`](./docs/TESTING.md).
 - **Warn-only reports:** `pnpm check:design`, `pnpm check:contrast`,
   `pnpm e2e:visual`, `pnpm lighthouse <url>`, `pnpm seo:audit <url>`;
   on CI in `quality-report.yml` (push to main / dispatch, never PRs).
@@ -111,6 +116,28 @@ agent was editing the main checkout at the same time.
   Slugs keep `đ` as `dj` and transliterate Cyrillic.
 - Unpaid checkouts are cancelled after 14 days: proforma voided, promo
   redemption released, audited (worker scheduled tick).
+
+## Phase T — test coverage ✅ (plan: `docs/plans/TEST_COVERAGE.md`)
+
+- `libs/testing`: Vitest presets, Testcontainers Postgres 16 + Redis 7 (one
+  pair per run, a migrated template DB, a database per test file), factories
+  for every role and resource, Resend / NBS / Sanity stubs, PDF text, EXPLAIN.
+- API (`apps/api/src/*.int.test.ts`, real `AppModule`): every route is in a
+  registry with its access rule; every route × every role; company
+  isolation for every owned resource; job, billing, application, auth and
+  staff flows; races; query plans; security; search golden list; BFF ↔ Nest
+  parity.
+- Database: migrations from empty, `schema.ts` ↔ migrated DB drift,
+  constraints. Worker: outbox, notifications, schedulers, the built
+  `dist/apps/worker/main.js`, real BullMQ retries and dead letters.
+- Unit: 90 % lines/branches gate on billing numbers, promo maths, slugs,
+  the description sanitizer (XSS), templates, the billing PDF, the Sanity
+  mapper; web component tests (apply form, checkout + promo, CV wizard,
+  sign-in redirect, refresh middleware).
+- Known bugs found are pinned as `it.fails` (below); fixes: Serbian proforma
+  email typo ("izdata").
+- Not yet: e2e for every role, axe/visual on every screen, browser security
+  checks, the gates' own tests (T6–T10 in the plan).
 
 ## Phase E — candidates (mostly needs Stefan)
 
@@ -223,6 +250,32 @@ metadata (tags sent after `<head>` to non-crawler user agents while the
 first CMS fetch is slow); crawlers get them in `<head>`.
 
 ## Known issues not yet scheduled
+
+Phase T pinned these with an `it.fails` test named after the fix; fixing the
+bug turns it red and it is flipped to `it`.
+
+- Moderators can move any employer into any company
+  (`PATCH /api/moderator/employers/:id` has no pipeline check) —
+  `company-isolation.int.test.ts`. Needs a decision (NEEDS_STEFAN.md).
+- Employer job routes answer 403 `JOB_FORBIDDEN_COMPANY` for another
+  company's job (confirms the id exists) instead of 404.
+- Two simultaneous sign-ups of the same new company → 500 for the second
+  (unique PIB) instead of a join request — `races.int.test.ts`.
+- Cover letters are stored but no route shows them to the employer.
+- Job-description images of drafts / rejected / archived jobs are public to
+  anyone with the URL (`getPublicFile` has no status check).
+- Uploaded CV file names lose Serbian letters (`Petrović` → `Petrovi__`:
+  multer reads names as latin1, `safeBasename` keeps ASCII only).
+- A JSON body over the size limit → 500 (and a crash log) instead of 413.
+- `staff_audit_log.actor_user_id` is ON DELETE CASCADE: deleting a staff user
+  erases their audit trail.
+- Search has no word forms (`kuvari` doesn't find `Kuvar`).
+- CV wizard: experience / education / skill row labels aren't tied to their
+  inputs (screen readers).
+- Sign-in `returnTo` refuses `//host` but not `/\host` (safe while
+  `localePrefix: 'always'`).
+- Contracts' `applicationResponseSchema` is unused (`POST
+/candidate/applications` answers `{ id }`).
 
 - `drizzle/meta` only has the `0000` snapshot → `pnpm db:generate` would
   emit a bogus full-schema migration; keep hand-writing migrations.

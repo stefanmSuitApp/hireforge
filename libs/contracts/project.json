@@ -4,6 +4,7 @@
   "sourceRoot": "libs/contracts/src",
   "projectType": "library",
   "tags": ["scope:shared", "type:lib", "layer:contracts"],
+  "implicitDependencies": ["!testing"],
   "// targets": "to see all targets run: nx show project contracts --web",
   "targets": {}
 }

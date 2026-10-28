@@ -86,6 +86,26 @@ A separate session is preparing `feat/seo-quality-gates` (clone at
 `PUBLIC_JOBS`. Claude's phases do not touch SEO to avoid conflicts; merge
 it when you are ready.
 
+## Phase T: decisions (found by the new tests)
+
+- [ ] **Moderator scope for employer accounts:** may a moderator move an
+      employer into a company outside their pipeline (today: any)? Same for
+      `GET /moderator/employers` (lists every employer) and
+      `POST /moderator/jobs` / the job composer bootstrap (any company).
+- [ ] **Cover letters:** should employers see them? Collected and stored,
+      never shown.
+- [ ] **Draft images:** may images of unpublished jobs be fetched by URL? If
+      not, `getPublicFile` needs a status check (and the editor preview must
+      load drafts' images through an authenticated route).
+- [ ] **Billing emails** go to one arbitrary employer of the company, not to
+      the company's `billing_email`, and failures are not retried. Intended?
+- [ ] **Worker without `RESEND_API_KEY` in production:** every notification
+      is silently skipped. Refuse to start, like the API's production guard?
+- [ ] **`GET /api/integration` is public** and enqueues a BullMQ job and pings
+      Sanity on every call. Keep, put behind a token, or remove?
+- [ ] **External images in job descriptions** (any https host) allow
+      tracking pixels. Restrict to uploaded media?
+
 ## SEO branch: decisions
 
 The full to-do list for search and reach, ordered by impact:

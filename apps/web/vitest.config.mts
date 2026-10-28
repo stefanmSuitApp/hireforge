@@ -1,14 +1,7 @@
-/// <reference types="vitest" />
-import { defineConfig } from 'vitest/config';
-import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
+import react from '@vitejs/plugin-react';
+import { unitConfig } from '../../libs/testing/src/vitest/preset';
 
-export default defineConfig({
-  root: import.meta.dirname,
-  plugins: [nxViteTsPaths()],
-  test: {
-    environment: 'node',
-    globals: true,
-    include: ['src/**/*.{test,spec}.{ts,tsx}'],
-    passWithNoTests: false,
-  },
+// Component tests (*.test.tsx) opt into jsdom per file; the rest run in node.
+export default unitConfig(import.meta.url, {
+  extra: { plugins: [react()] },
 });

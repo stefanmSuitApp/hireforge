@@ -34,7 +34,8 @@
       "server-pdf/locale-fonts": [
         "../../libs/server/pdf/src/lib/locale-pdf-fonts.ts"
       ],
-      "database": ["../../libs/database/src/index.ts"]
+      "database": ["../../libs/database/src/index.ts"],
+      "testing": ["../../libs/testing/src/index.ts"]
     },
     "plugins": [{ "name": "next" }]
   },

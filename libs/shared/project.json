@@ -4,6 +4,7 @@
   "sourceRoot": "libs/shared/src",
   "projectType": "library",
   "tags": ["scope:shared", "type:lib", "layer:shared"],
+  "implicitDependencies": ["!testing"],
   "// targets": "to see all targets run: nx show project shared --web",
   "targets": {}
 }

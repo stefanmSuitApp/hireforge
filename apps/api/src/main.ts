@@ -9,9 +9,8 @@ import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { assertProductionEnv } from 'server-auth';
 import { AppModule } from './app/app.module';
+import { configureApp, GLOBAL_PREFIX } from './app/configure-app';
 import { getDb, pingDb } from './database';
-import { AllExceptionsFilter } from './observability/http-exception.filter';
-import { LoggingInterceptor } from './observability/logging.interceptor';
 import { getRedis, pingRedis } from './redis';
 
 async function bootstrap() {
@@ -49,14 +48,11 @@ async function bootstrap() {
     }
   }
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
-  app.useGlobalInterceptors(new LoggingInterceptor());
-  app.useGlobalFilters(new AllExceptionsFilter());
-  const globalPrefix = 'api';
-  app.setGlobalPrefix(globalPrefix);
+  configureApp(app);
   const port = Number(process.env.API_PORT || process.env.PORT || 4000);
   await app.listen(port);
   Logger.log(
-    `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`,
+    `🚀 Application is running on: http://localhost:${port}/${GLOBAL_PREFIX}`,
   );
 }
 
