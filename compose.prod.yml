@@ -1,12 +1,22 @@
 name: hireforge-production
 
+# Bounded container logs (Docker's default json-file grows without limit).
+x-logging: &logging
+  logging:
+    driver: json-file
+    options:
+      max-size: 10m
+      max-file: '5'
+
 x-app-env: &app-env
   env_file:
     - ${HIREFORGE_ENV_FILE:-./deploy/.env.production}
   restart: unless-stopped
+  <<: *logging
 
 services:
   caddy:
+    <<: *logging
     image: caddy:2.8-alpine
     restart: unless-stopped
     env_file:
@@ -93,6 +103,7 @@ services:
         condition: service_healthy
 
   postgres:
+    <<: *logging
     image: postgres:16-alpine
     restart: unless-stopped
     env_file:
@@ -106,6 +117,7 @@ services:
       retries: 10
 
   redis:
+    <<: *logging
     image: redis:7-alpine
     restart: unless-stopped
     env_file:

@@ -183,13 +183,24 @@ Then smoke test:
 
 ## 8. Backups
 
-Create a manual Postgres backup:
+Nightly backups (02:17 server time, keeps 14 days, refuses empty dumps) —
+install once as the `deploy` user, no sudo needed:
 
 ```bash
-./scripts/deploy/backup-postgres.sh
+cd /opt/hireforge && ./scripts/deploy/install-backup-cron.sh
 ```
 
-Backups are written to `./backups/postgres` by default. Copy them off the VM to Hetzner Object Storage or another external backup target.
+Manual backup at any time: `./scripts/deploy/backup-postgres.sh`. Dumps go
+to `./backups/postgres` (override with `HIREFORGE_BACKUP_DIR`, retention with
+`HIREFORGE_BACKUP_KEEP_DAYS`). They live on the same disk as the database:
+**copy them off the VM** (Hetzner Storage Box / Object Storage) — see
+`NEEDS_STEFAN.md`.
+
+Restore (destroys current data; take a fresh dump first):
+
+```bash
+gunzip -c backups/postgres/<file>.sql.gz | docker compose -f compose.prod.yml exec -T postgres sh -c 'psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB"'
+```
 
 Also back up Docker volumes:
 
@@ -200,10 +211,42 @@ Also back up Docker volumes:
 
 ## 9. Updating Production
 
+**Do not build images on the VM.** It has 3.8 GB RAM and no swap; building
+web/api/worker there starved the machine and took sljakam.com offline for
+~18 minutes on 2026-10-28. Build `linux/amd64` images elsewhere (a Mac with
+OrbStack/Docker Desktop or CI) and ship them:
+
 ```bash
-cd /opt/hireforge
-git pull --ff-only
-./scripts/deploy/deploy-hetzner.sh
+# 1. On the build machine, from a clean checkout of main (bash, not zsh):
+for svc in api worker web; do
+  args=()
+  [ "$svc" = web ] && args=(--build-arg NEXT_PUBLIC_APP_URL=https://sljakam.com \
+    --build-arg NEXT_PUBLIC_API_URL=http://api:4000 --build-arg NEXT_PUBLIC_DEFAULT_LOCALE=sr \
+    --build-arg NEXT_PUBLIC_SUPPORTED_LOCALES=sr,en --build-arg NEXT_PUBLIC_SANITY_PROJECT_ID=845zdl9k \
+    --build-arg NEXT_PUBLIC_SANITY_DATASET=production)
+  docker buildx build --platform linux/amd64 --load -f "Dockerfile.${svc}" ${args[@]+"${args[@]}"} \
+    -t "hireforge-production-${svc}:latest" .
+done
+docker tag hireforge-production-api:latest hireforge-production-migrate:latest
+
+# 2. Back up, then ship the images (~2 min):
+ssh deploy@<server> 'cd /opt/hireforge && ./scripts/deploy/backup-postgres.sh'
+docker save hireforge-production-{api,worker,web,migrate}:latest | gzip -1 \
+  | ssh deploy@<server> 'gunzip | docker load'
+
+# 3. On the server: code (compose/Caddyfile/migrations), migrate, restart.
+cd /opt/hireforge && git pull --ff-only
+set -a && . deploy/.env.production && set +a
+docker compose -f compose.prod.yml --profile tools run --rm migrate
+docker compose -f compose.prod.yml up -d --no-build --remove-orphans
+docker compose -f compose.prod.yml exec -T caddy caddy reload --config /etc/caddy/Caddyfile
 ```
 
-For emergency rollback, check out the previous known-good commit and rerun the deploy script. Database migrations may not be reversible, so take a backup before deploying schema changes.
+Rollback: before shipping, record the running image ids
+(`docker inspect --format '{{.Image}}' hireforge-production-api-1`, same for
+`worker` / `web`), then `docker tag <id> hireforge-production-<svc>:latest`
+and `up -d --no-build`. Migrations are forward-only: restore a dump if a
+schema change must be undone.
+
+`./scripts/deploy/deploy-hetzner.sh` still builds on the VM (sequentially);
+use it only after adding swap or resizing the server.
