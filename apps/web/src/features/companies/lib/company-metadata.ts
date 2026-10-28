@@ -4,7 +4,11 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { buildPublicPageMetadata, NOINDEX } from '@/i18n/metadata';
 import { fetchCmsEmployerBranding } from '@/lib/cms-content';
 import { resolveNestPublicOrigin } from '@/lib/nest-api-url';
-import { fetchPublicCompanyDetail } from '@/lib/public-jobs';
+import {
+  fetchPublicCompanyDetail,
+  isPublicApiOutage,
+  PublicApiUnavailableError,
+} from '@/lib/public-jobs';
 
 export async function buildCompanyPublicMetadata(
   params: Promise<{ locale: string; slug: string }>,
@@ -19,7 +23,12 @@ export async function buildCompanyPublicMetadata(
     fetchPublicCompanyDetail(base, slug),
     fetchCmsEmployerBranding(slug, locale),
   ]);
-  if (!result.ok) return { title: t('fallbackTitle'), robots: NOINDEX };
+  if (!result.ok) {
+    if (isPublicApiOutage(result)) {
+      throw new PublicApiUnavailableError('company metadata', result);
+    }
+    return { title: t('fallbackTitle'), robots: NOINDEX };
+  }
 
   const companyName = result.data.company.name;
   const cmsLead = branding?.heroSubhead?.trim();

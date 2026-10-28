@@ -88,6 +88,9 @@ it when you are ready.
 
 ## SEO branch: decisions
 
+The full to-do list for search and reach, ordered by impact:
+`docs/plans/SEO_REACH_CHECKLIST.md`.
+
 - [ ] **Confirm or flip `PUBLIC_JOBS`** (SEO branch, 2026-10-28). Job list,
       job detail and the employers pages are now public so search engines can
       index them; apply and save still need login. This reverses the

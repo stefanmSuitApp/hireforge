@@ -94,3 +94,27 @@ test('an expired ad stays reachable but is noindex, closed and out of lists', as
   await page.goto('/sr/jobs');
   await expect(page.getByText(job.title)).toHaveCount(0);
 });
+
+test('a logged-out visitor on a phone: named logo link, clean console, save asks to sign in', async ({
+  page,
+}) => {
+  await createPublishedJob();
+  await page.setViewportSize({ width: 375, height: 812 });
+  const consoleErrors: string[] = [];
+  page.on('console', (m) => {
+    if (m.type() === 'error') consoleErrors.push(m.text());
+  });
+
+  await page.goto('/sr/jobs');
+  // The wordmark is hidden at this width; the link still needs a name.
+  await expect(
+    page.getByRole('banner').getByRole('link', { name: 'Šljakam' }),
+  ).toBeVisible();
+
+  const save = page.getByRole('button', { name: 'Sačuvaj oglas' }).first();
+  await expect(save).toBeEnabled();
+  expect(consoleErrors).toEqual([]);
+
+  await save.click();
+  await page.waitForURL((url) => url.pathname === '/sr/candidate/login');
+});

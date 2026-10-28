@@ -43,6 +43,8 @@ export async function SiteHeader() {
         <Link
           href="/"
           locale={locale}
+          // The wordmark is hidden on phones; the mark itself is decorative.
+          aria-label={brandText}
           className="flex shrink-0 items-center gap-2 transition-opacity hover:opacity-80"
         >
           <BrandMark />

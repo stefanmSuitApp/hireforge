@@ -70,3 +70,20 @@ test('the sitemap index lists live jobs, companies and landing pages, no sign-in
     expect((await request.get(url[1] ?? '')).status(), url[1]).toBe(200);
   }
 });
+
+test('public pages carry a snippet-length meta description', async ({
+  page,
+}) => {
+  for (const path of ['/sr', '/sr/jobs', '/sr/employers', '/en/employers']) {
+    await page.goto(path);
+    const description =
+      (await page
+        .locator('meta[name="description"]')
+        .getAttribute('content')) ?? '';
+    expect(
+      description.length,
+      `${path}: "${description}"`,
+    ).toBeGreaterThanOrEqual(50);
+    expect(description.length, path).toBeLessThanOrEqual(170);
+  }
+});

@@ -192,17 +192,25 @@ backup first, migration `0032` applied, `PUBLIC_JOBS` at its default):
   | `/sr/jobs/city/beograd` | 1.00 | 0.96 | 0.96     | 0.93 | CLS 0.156     |
   | job page                | 1.00 | 0.96 | 1.00     | 1.00 | —             |
 
-  Performance budget set to 0.90 from this run. To look at: layout shift on
-  the job list (filter chips / list loading in), and the remaining
-  colour-contrast audit item Lighthouse names on every page.
+  Performance budget set to 0.90 from this run.
+
+Follow-up fixes (`fix/seo-leftovers`, 2026-10-28):
+
+- API outage → **500**, not 200 + `noindex`: job, company, landing and list
+  pages throw `PublicApiUnavailableError` when the API is unreachable or
+  answers 5xx/429 (`isPublicApiOutage` in `lib/public-jobs.ts`); 404/400
+  still 404 or noindex. Landing pages no longer 404 during an outage.
+  Checked against a production build with the API down: job, landing and
+  list → 500; company served its cached copy.
+- Layout shift on list/landing pages: the filter chips were streamed in
+  behind a Suspense placeholder (64 px) and pushed the form down; the bar
+  now renders in the first HTML (`e2e/landing.spec.ts`, JS off).
+- `/sr/employers` meta description reuses the page intro (97 chars).
+- Header logo link has an accessible name on phones (wordmark hidden).
+- `GET /api/candidate/saved-jobs` answers `{items: []}` to guests instead of
+  a 401 per job card (console errors on public pages).
 
 ## Known issues not yet scheduled
-
-- SEO: while the API is down or restarting, job and company pages render an
-  error screen with **200** and `noindex` metadata (no canonical). A crawl in
-  that window may drop the page. Fix: answer 503 (throw) when the API fails
-  with anything but 404, in the route and in `generateMetadata`. Seen right
-  after the Phase D restart (2026-10-28), gone on the next fetch.
 
 - `drizzle/meta` only has the `0000` snapshot → `pnpm db:generate` would
   emit a bogus full-schema migration; keep hand-writing migrations.
