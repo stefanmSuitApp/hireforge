@@ -24,7 +24,7 @@ export type DemotePublishedJobDraftEditInput = {
 /**
  * Applies a full draft-style body update to a **published** row and moves it
  * back to **`submitted`** for re-review (SSOT §7.2). Clears public slug
- * fields and `published_at`; keeps `expires_at` untouched.
+ * fields and `published_at`; keeps `expires_at`, `slug` and `short_id`.
  */
 export async function demotePublishedJobAfterDraftBodyEdit(
   db: DrizzleDbOrTx,
@@ -53,8 +53,8 @@ export async function demotePublishedJobAfterDraftBodyEdit(
         status: 'submitted',
         submittedAt: input.now,
         publishedAt: null,
-        slug: null,
-        shortId: null,
+        // Keep slug + short_id: re-approval reuses the short id so shared and
+        // indexed links keep working (old slugs redirect by short id).
         rejectedReason: null,
         updatedAt: input.now,
       })

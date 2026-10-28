@@ -189,3 +189,13 @@ export async function promoRedemptionCount(code: string): Promise<number> {
     return Number(r.rows[0]?.n ?? 0);
   });
 }
+
+export async function jobSlug(jobId: string): Promise<string | null> {
+  return withDb(async (db) => {
+    const r = await db.query<{ slug: string | null }>(
+      'SELECT slug FROM jobs WHERE id = $1',
+      [jobId],
+    );
+    return r.rows[0]?.slug ?? null;
+  });
+}

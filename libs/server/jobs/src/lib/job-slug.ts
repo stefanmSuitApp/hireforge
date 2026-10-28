@@ -63,3 +63,9 @@ export function buildPublishedJobFullSlug(
   const base = jobSlugBaseFromTitleAndCity(title, cityLatin);
   return `${base}-${shortId}`;
 }
+
+/** Trailing `-<shortId>` of a job slug, or null (ids are 4 chars, [a-z0-9]). */
+export function shortIdFromJobSlug(slug: string): string | null {
+  const m = /-([a-z0-9]{4})$/.exec(slug);
+  return m ? (m[1] ?? null) : null;
+}
