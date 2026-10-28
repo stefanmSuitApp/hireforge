@@ -1,0 +1,22 @@
+{
+  "lighthouse": {
+    "categories": {
+      "seo": 1,
+      "accessibility": 0.95,
+      "best-practices": 0.95,
+      "performance": null
+    },
+    "metricsMs": {
+      "largest-contentful-paint": 2500,
+      "total-blocking-time": 200
+    },
+    "metrics": { "cumulative-layout-shift": 0.1 },
+    "ci": {
+      "categories": { "performance": 0.1 },
+      "metricsMs": {
+        "largest-contentful-paint": 300,
+        "total-blocking-time": 300
+      }
+    }
+  }
+}

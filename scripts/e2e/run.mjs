@@ -94,7 +94,11 @@ if (!process.argv.includes('--skip-build')) {
   }
 }
 
-const passThrough = process.argv.slice(2).filter((a) => a !== '--skip-build');
+// `--visual`: the screenshot suite (e2e/playwright.visual.config.ts).
+const visual = process.argv.includes('--visual');
+const passThrough = process.argv
+  .slice(2)
+  .filter((a) => a !== '--skip-build' && a !== '--visual');
 run(
   'pnpm',
   [
@@ -102,7 +106,7 @@ run(
     'playwright',
     'test',
     '--config',
-    'e2e/playwright.config.ts',
+    visual ? 'e2e/playwright.visual.config.ts' : 'e2e/playwright.config.ts',
     ...passThrough,
   ],
   {

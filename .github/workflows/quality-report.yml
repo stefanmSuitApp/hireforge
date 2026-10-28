@@ -1,0 +1,98 @@
+name: quality report
+
+# WARN-ONLY quality gates: design tokens + contrast, visual baselines, and an
+# SEO audit + Lighthouse of the live site. Never on pull requests (Actions
+# minutes cost money); every job is continue-on-error, so nothing here can
+# fail a merge or a deploy. Findings show as ::warning:: annotations.
+# Deploys are manual (docs/deployment/hetzner.md): after one, re-run this
+# workflow by hand so the live audit sees the new version.
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['docs/**', '**/*.md']
+  workflow_dispatch:
+
+concurrency:
+  group: quality-report-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NX_DAEMON: 'false'
+  NX_NO_CLOUD: 'true'
+  NEXT_TELEMETRY_DISABLED: '1'
+
+jobs:
+  design:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node scripts/design/check-design.mjs
+      - run: node scripts/design/check-contrast.mjs
+
+  live-seo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm seo:audit https://sljakam.com
+      - run: pnpm lighthouse https://sljakam.com
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse
+          path: dist/lighthouse
+          retention-days: 14
+
+  visual:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    continue-on-error: true
+    # Same image the baselines were rendered in (scripts/e2e/visual-linux.mjs).
+    container: mcr.microsoft.com/playwright:v1.64.1-noble
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: hireforge
+          POSTGRES_PASSWORD: hireforge
+          POSTGRES_DB: hireforge
+        options: >-
+          --health-cmd "pg_isready -U hireforge" --health-interval 5s
+          --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s
+          --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://hireforge:hireforge@postgres:5432/hireforge
+      REDIS_URL: redis://redis:6379
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: touch .env
+      - run: pnpm e2e:visual
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-diffs
+          path: e2e/test-results
+          retention-days: 7

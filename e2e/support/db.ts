@@ -267,3 +267,16 @@ export async function renameJobSlug(
   );
   return slug;
 }
+
+/** Stable dates for screenshots. */
+export async function setJobPublishedAt(
+  jobId: string,
+  at: Date,
+): Promise<void> {
+  await withDb((db) =>
+    db.query(
+      'UPDATE jobs SET published_at = $2, updated_at = $2 WHERE id = $1',
+      [jobId, at],
+    ),
+  );
+}

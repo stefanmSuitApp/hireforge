@@ -65,7 +65,11 @@ export async function SiteFooter() {
               {t('copyright')}
             </p>
             {/* The domain spells the brand without "Š", as people search it. */}
-            <p className="m-0 mt-1 text-xs text-muted-foreground">
+            {/* Masked in screenshots: the e2e host differs per checkout. */}
+            <p
+              className="m-0 mt-1 text-xs text-muted-foreground"
+              data-visual-mask
+            >
               {new URL(absoluteSiteOrigin()).host}
             </p>
             {siteSettings?.footerTagline?.trim() ? (

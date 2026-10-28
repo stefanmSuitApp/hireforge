@@ -371,3 +371,35 @@ jobs-N}.xml` with `sr`/`en`/`x-default` alternates, ≤ 5 000 URLs per
       public sections; job sections only while `PUBLIC_JOBS` is on.
 - [x] W4.6 · No analytics added; the GA4 vs cookieless choice is in
       NEEDS_STEFAN.md.
+- [x] W5.6 · `pnpm check:design` (raw hex/rgb/oklch, Tailwind palette
+      colours, arbitrary colour/size values outside `global.css`; 240
+      findings in 48 files today) and `pnpm check:contrast` (17 token pairs ×
+      light/dark, oklch → sRGB; 5 low: input borders, dark destructive
+      button). Warn-only: pre-push prints the summary; CI `quality report`.
+      No component refactor.
+- [x] W5.7 · Visual baselines: `e2e/playwright.visual.config.ts`
+      (`*.visual.ts`, 375 + 1440, light — the UI has no dark theme), home,
+      jobs list, job detail, company, a landing page, sign-in. Rendered in
+      the Playwright Linux image (`pnpm e2e:visual[:update]`,
+      `scripts/e2e/visual-linux.mjs`); baselines committed for Linux only.
+      `update screenshots` workflow (dispatch) commits new baselines.
+- [x] W5.8 · `pnpm lighthouse <baseUrl>` (mobile, median of 3, home / jobs /
+      landing / job), budgets in `scripts/perf-budgets.json` (SEO 1,
+      a11y 0.95, best practices 0.95; performance `null` until set from the
+      first live run), CI margins like autofind. Report only.
+- [x] W5.9 · `pnpm seo:audit <baseUrl>`: robots, sitemap index + children,
+      sampled URLs (200, self canonical, hreflang incl. reciprocity, noindex,
+      title/description length, JSON-LD, JobPosting fields), www → apex 301.
+      Report only.
+- [x] Where they run: `.github/workflows/quality-report.yml` on push to
+      `main` (paths-ignore docs) + dispatch, every job
+      `continue-on-error`, never on `pull_request`. Phase C did not add a
+      deploy/image workflow (deploys are manual), so the post-deploy audit is
+      a step in `docs/deployment/hetzner.md` §9.
+- [x] W6 · Shared fixtures (`e2e/support/fixtures.ts`: `fixedClock`
+      option / `E2E_NOW`, theme, axe), width projects for the visual suite,
+      Linux snapshot path, Docker-backed `e2e:visual:update`. New specs:
+      `public-jobs`, `seo`, `structured-data`, `landing`, `discovery`,
+      `a11y`, each shown failing before its fix. www redirect is covered by
+      `seo:audit`. `e2e/support/ports.ts` + `E2E_MAIL_PORT` make every port
+      configurable (Phase B's fake Resend and specs had fixed ones).
