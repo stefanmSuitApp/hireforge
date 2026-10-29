@@ -17,6 +17,7 @@ const SCREENS: Array<[name: string, path: string]> = [
   ['company', '/sr/companies/devlegion'],
   ['landing-city', '/sr/jobs/city/beograd'],
   ['sign-in', '/sr/sign-in'],
+  ['about', '/sr/about'],
 ];
 
 for (const [name, path] of SCREENS) {

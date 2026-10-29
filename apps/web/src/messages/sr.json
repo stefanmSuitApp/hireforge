@@ -61,7 +61,7 @@
     "fallbackTitle": "Stranica",
     "defaultDescription": "Editorijalni sadržaj na Šljakam.",
     "aboutHeroEyebrow": "Naša misija",
-    "aboutHeroTitle": "Gradimo pouzdano zapošljavanje u Srbiji",
+    "aboutHeroTitle": "Gradimo <mark>pouzdano</mark> zapošljavanje u Srbiji",
     "aboutHeroSubtitle": "Šljakam povezuje kandidate i poslodavce kroz jasne oglase, praktične tokove rada i kvalitetnije signale poverenja.",
     "headerEyebrow": "O Šljakam",
     "headerChipTrust": "Oglasi poslodavaca iz cele Srbije",
@@ -85,7 +85,8 @@
     "aboutCtaTitle": "Hoćeš da isprobaš Šljakam?",
     "aboutCtaBody": "Pogledaj aktuelne pozicije ili se prijavi u svoj radni prostor.",
     "aboutCtaJobs": "Pogledaj poslove",
-    "aboutCtaSignIn": "Prijavi se"
+    "aboutCtaSignIn": "Prijavi se",
+    "aboutPillarsTitle": "Tri stvari do kojih nam je stalo"
   },
   "Legal": {
     "lastUpdated": "Poslednja izmena: {date}",
