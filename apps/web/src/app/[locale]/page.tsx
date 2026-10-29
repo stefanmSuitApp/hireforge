@@ -12,19 +12,14 @@ import { HomeRecentJobsStrip } from '@/features/home/home-recent-jobs-strip';
 import { HomeSpotlightRail } from '@/features/home/home-spotlight-rail';
 import { SiteLaunchPanel } from '@/features/jobs/components/site-launch-panel';
 import { buildListQuery } from '@/features/jobs/lib/jobs-list-query';
-import {
-  fetchCmsHomeJobsDiscovery,
-  fetchCmsHomePromoBanner,
-} from '@/lib/cms-content';
+import { fetchCmsHomeJobsDiscovery } from '@/lib/cms-content';
 import {
   buildCmsCategorySpotlightTiles,
   buildCmsCitySpotlightTiles,
 } from '@/lib/home-jobs-discovery';
 import { resolveNestPublicOrigin } from '@/lib/nest-api-url';
-import { campaignEndDate, fetchPublicCampaign } from '@/lib/public-campaign';
 import { fetchPublicJobsList, fetchPublicJobTaxonomy } from '@/lib/public-jobs';
 import { getUnifiedAuthSession } from '@/lib/unified-auth';
-import { Link } from '@/i18n/navigation';
 import { buildPublicPageMetadata } from '@/i18n/metadata';
 import { JsonLd } from '@/components/json-ld';
 import { organizationJsonLd, websiteJsonLd } from '@/lib/seo/json-ld';
@@ -67,32 +62,8 @@ export default async function HomePage({
   const t = await getTranslations('Home');
   const tJBadge = await getTranslations('JobDetail');
   const featuredRibbonLabel = tJBadge('featuredBadge');
-  const [authSession, cmsBanner, campaign, tCampaign] = await Promise.all([
-    getUnifiedAuthSession(),
-    fetchCmsHomePromoBanner(locale),
-    fetchPublicCampaign(),
-    getTranslations('Campaign'),
-  ]);
-  // A running campaign is the banner; the CMS calendar is for announcements.
-  const promoBanner = campaign
-    ? {
-        text:
-          (locale === 'en' ? campaign.bannerEn : campaign.bannerSr) ??
-          tCampaign(
-            campaign.discountType === 'full_free'
-              ? 'bannerFree'
-              : 'bannerPercent',
-            {
-              percent: campaign.value,
-              date: campaignEndDate(campaign, locale),
-            },
-          ),
-        href:
-          authSession.role === 'employer'
-            ? '/employer/packages'
-            : '/employer/register',
-      }
-    : cmsBanner;
+  // The promo bar is site-wide now (SiteShell → PromoBar).
+  const authSession = await getUnifiedAuthSession();
   /** Valid access token (not merely cookie presence), so guest CTAs show when truly signed out. */
   const isAuthenticated = authSession.isAuthenticated;
   /**
@@ -186,18 +157,6 @@ export default async function HomePage({
         />
 
         <div className="relative mx-auto max-w-6xl px-4">
-          {promoBanner ? (
-            <aside className="mb-8 inline-block">
-              <Link
-                href={promoBanner.href}
-                locale={locale}
-                className="inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-medium text-accent-foreground no-underline transition-colors hover:bg-accent/80"
-              >
-                {promoBanner.text}
-              </Link>
-            </aside>
-          ) : null}
-
           {/* Hero card container (JoinBrands-style) */}
           <div className="rounded-3xl border border-border/40 bg-card/70 px-5 py-8 backdrop-blur-sm md:px-14 md:py-16">
             <header className="max-w-3xl">
