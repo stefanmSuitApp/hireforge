@@ -27,6 +27,19 @@ function requiredEnv(name) {
   return value;
 }
 
+/** One Portable Text paragraph (Sanity needs a `_key` on array items). */
+function paragraph(text) {
+  return [
+    {
+      _type: 'block',
+      _key: 'p1',
+      style: 'normal',
+      markDefs: [],
+      children: [{ _type: 'span', _key: 'p1s1', marks: [], text }],
+    },
+  ];
+}
+
 async function main() {
   const projectId =
     process.env.SANITY_PROJECT_ID?.trim() ||
@@ -149,21 +162,15 @@ async function main() {
       sr: 'Kako Šljakam pristupa pouzdanom i transparentnom zapošljavanju.',
       en: 'Learn how Šljakam approaches trustworthy and transparent hiring.',
     },
-    body: [
-      {
-        _type: 'block',
-        style: 'normal',
-        markDefs: [],
-        children: [
-          {
-            _type: 'span',
-            marks: [],
-            // One body for both locales (the schema's body isn't localized).
-            text: 'Šljakam se fokusira na jasne oglase za posao, brže zapošljavanje i proverene profile poslodavaca.',
-          },
-        ],
-      },
-    ],
+    body: {
+      _type: 'localeBlockContent',
+      sr: paragraph(
+        'Šljakam se fokusira na jasne oglase za posao, brže zapošljavanje i proverene profile poslodavaca.',
+      ),
+      en: paragraph(
+        'Šljakam focuses on clear job listings, faster hiring workflows, and trusted employer profiles.',
+      ),
+    },
   });
 
   tx.createOrReplace({

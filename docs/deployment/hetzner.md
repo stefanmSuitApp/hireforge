@@ -132,11 +132,26 @@ Do not run `pnpm db:seed:domain` in production unless you intentionally want the
 
 ## 6. Sanity And Object Storage
 
-Configure the Sanity publish webhook:
+Sanity project `o85214ma` ("sljakam", dataset `production`, public), owned
+by Stefan's account; it replaced `845zdl9k` on 2026-10-29 (owner login
+lost). Content comes from `pnpm cms:seed`. Studio:
+https://sljakam.sanity.studio (`cd apps/cms && SANITY_STUDIO_PROJECT_ID=o85214ma
+SANITY_STUDIO_DATASET=production pnpm exec sanity deploy`); local Studio
+origin `http://localhost:4200` is in the project's CORS list. The site reads
+Sanity only on the server, so sljakam.com needs no CORS entry.
+
+Publish webhook (project → API → Webhooks), so edits show without waiting
+for the 5-minute cache:
 
 ```text
-POST https://sljakam.com/api/revalidate/sanity?secret=<SANITY_WEBHOOK_SECRET>
+POST https://sljakam.com/api/revalidate/sanity
+dataset production · create, update, delete
+projection {_type, slug, companySlug}
+header x-sanity-webhook-secret: <SANITY_WEBHOOK_SECRET>
 ```
+
+Use the header, not Sanity's "Secret" field: that one sends a signature the
+route doesn't check.
 
 For billing PDFs on Hetzner Object Storage, set:
 

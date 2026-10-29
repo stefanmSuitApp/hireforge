@@ -2,6 +2,10 @@ import imageUrlBuilder from '@sanity/image-url';
 import { unstable_cache } from 'next/cache';
 import { createSanityReadClient } from 'shared';
 
+import {
+  type CmsPortableTextBody,
+  pickLocalizedBody,
+} from '@/lib/cms-localized-body';
 import type { CmsDiscoverySpotlightRow } from '@/lib/home-jobs-discovery';
 
 type CmsNavLink = {
@@ -23,8 +27,7 @@ type CmsEmployerBranding = {
   testimonials?: Array<{ quote?: string; attribution?: string; role?: string }>;
 };
 
-/** Portable Text blocks from Sanity `blockContent` (typed loosely for fetch). */
-export type CmsPortableTextBody = Array<Record<string, unknown>>;
+export type { CmsPortableTextBody };
 
 function getSanityImageBuilder() {
   const projectId =
@@ -173,7 +176,12 @@ export async function fetchCmsEditorialPage(
       const client = getCmsClient();
       if (!client) return null;
       try {
-        return await client.fetch<CmsEditorialPage | null>(
+        const doc = await client.fetch<
+          | (Omit<CmsEditorialPage, 'body'> & {
+              body: Parameters<typeof pickLocalizedBody>[0];
+            })
+          | null
+        >(
           `*[_type == "editorialPage" && slug.current == $slug][0]{
             "title": coalesce(title[$locale], title.sr, title.en),
             "excerpt": coalesce(excerpt[$locale], excerpt.sr, excerpt.en),
@@ -183,6 +191,7 @@ export async function fetchCmsEditorialPage(
           }`,
           { slug: trimmed, locale },
         );
+        return doc && { ...doc, body: pickLocalizedBody(doc.body, locale) };
       } catch {
         return null;
       }

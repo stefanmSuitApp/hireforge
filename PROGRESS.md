@@ -381,6 +381,13 @@ Found with a scripted sweep of the live public pages at 375 and 1440 px
   English body on the Serbian page). Seed now says Šljakam with a Serbian
   body; the live CMS document is patched separately. Internal names (repo,
   CMS doc id/slug `about-hireforge`, log prefixes) stay.
+- **New Sanity project `o85214ma`** (branch `feat/cms-sljakam-project`,
+  2026-10-29): nobody could find the login that owns `845zdl9k`, so Stefan
+  made `o85214ma` under his account. Every old document came from one seed
+  run (2026-05-08, no hand edits), so `pnpm cms:seed` recreated it, rebranded.
+  Editorial bodies are now bilingual (`localeBlockContent`); the web still
+  accepts the old single array (rollback, staging on the old env). Studio
+  hosted at https://sljakam.sanity.studio. Setup: `docs/deployment/hetzner.md` §6.
 - Tests: `e2e/header-stability.spec.ts` (runs with real scrollbars),
   `home-jobs-discovery.test.ts`, `employer-job-applications-table.test.tsx`,
   `i18n/request.test.ts`; each shown failing without its fix.
