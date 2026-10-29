@@ -272,23 +272,19 @@ describe('employer company profile and purchases', () => {
 });
 
 describe('employer job ids', () => {
-  // Known issue (PROGRESS.md): 403 JOB_FORBIDDEN_COMPANY tells B that A's job
-  // id exists. Flip to `it` when employer job routes answer 404 for it.
-  it.fails(
-    "another company's job id answers 404, exactly like an unknown id",
-    async () => {
-      const { a, b } = await employerParties();
-      const job = await insertJob(a.companyId ?? '', a.userId);
-      const unknown = await http(app)
-        .get('/api/employer/jobs/00000000-0000-4000-8000-00000000dead')
-        .set(b.headers);
-      const foreign = await http(app)
-        .get(`/api/employer/jobs/${job.id}`)
-        .set(b.headers);
-      expect(foreign.status).toBe(unknown.status);
-      expect(foreign.body.error.code).toBe(unknown.body.error.code);
-    },
-  );
+  // A 403 would tell B that A's job id exists: answer like an unknown id.
+  it("another company's job id answers 404, exactly like an unknown id", async () => {
+    const { a, b } = await employerParties();
+    const job = await insertJob(a.companyId ?? '', a.userId);
+    const unknown = await http(app)
+      .get('/api/employer/jobs/00000000-0000-4000-8000-00000000dead')
+      .set(b.headers);
+    const foreign = await http(app)
+      .get(`/api/employer/jobs/${job.id}`)
+      .set(b.headers);
+    expect(foreign.status).toBe(unknown.status);
+    expect(foreign.body.error.code).toBe(unknown.body.error.code);
+  });
 });
 
 // --- candidate A vs candidate B -------------------------------------------------

@@ -960,10 +960,8 @@ export class EmployerService {
       throw codedNotFound('JOB_NOT_FOUND', 'Job not found');
     }
     if (row.companyId !== ctx.companyId) {
-      throw codedForbidden(
-        'JOB_FORBIDDEN_COMPANY',
-        'Job belongs to another company',
-      );
+      // Same answer as an unknown id: never confirm another company's job exists.
+      throw codedNotFound('JOB_NOT_FOUND', 'Job not found');
     }
 
     let authoringEntitlements: EmployerJobDetailResponse['authoringEntitlements'] =
@@ -1143,10 +1141,8 @@ export class EmployerService {
       throw codedNotFound('JOB_NOT_FOUND', 'Job not found');
     }
     if (existing.companyId !== ctx.companyId) {
-      throw codedForbidden(
-        'JOB_FORBIDDEN_COMPANY',
-        'Job belongs to another company',
-      );
+      // Same answer as an unknown id: never confirm another company's job exists.
+      throw codedNotFound('JOB_NOT_FOUND', 'Job not found');
     }
 
     const resolved: EmployerJobDraftBody = {
@@ -1421,10 +1417,8 @@ export class EmployerService {
       throw codedNotFound('JOB_NOT_FOUND', 'Job not found');
     }
     if (existing.companyId !== ctx.companyId) {
-      throw codedForbidden(
-        'JOB_FORBIDDEN_COMPANY',
-        'Job belongs to another company',
-      );
+      // Same answer as an unknown id: never confirm another company's job exists.
+      throw codedNotFound('JOB_NOT_FOUND', 'Job not found');
     }
     if (existing.status !== 'draft') {
       throw codedBadRequest(
@@ -1581,10 +1575,8 @@ export class EmployerService {
       throw codedNotFound('JOB_NOT_FOUND', 'Job not found');
     }
     if (jobRow.companyId !== ctx.companyId) {
-      throw codedForbidden(
-        'JOB_FORBIDDEN_COMPANY',
-        'Job belongs to another company',
-      );
+      // Same answer as an unknown id: never confirm another company's job exists.
+      throw codedNotFound('JOB_NOT_FOUND', 'Job not found');
     }
 
     const rows = await database.db

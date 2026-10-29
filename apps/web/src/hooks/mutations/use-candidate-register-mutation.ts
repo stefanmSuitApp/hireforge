@@ -11,6 +11,7 @@ import {
   postCandidateRegister,
   type CandidateRegisterBody,
 } from '@/api/candidate-auth';
+import { isSafeReturnPath } from '@/lib/safe-return-path';
 
 type Vars = { body: CandidateRegisterBody; returnTo?: string | null };
 
@@ -21,7 +22,7 @@ export function useCandidateRegisterMutation() {
     onSuccess: (_data, variables) => {
       // Back to the job (or list) that sent the visitor here, like login.
       const ret = variables.returnTo;
-      if (ret?.startsWith('/') && !ret.startsWith('//')) {
+      if (isSafeReturnPath(ret)) {
         navigateWithFreshSession(locale, stripLocalePrefix(ret));
         return;
       }

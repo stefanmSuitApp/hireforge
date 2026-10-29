@@ -8,6 +8,7 @@ import {
   insertCompany,
   insertEmployer,
   insertJob,
+  insertModerator,
   insertSubscription,
   testDb,
 } from 'testing/db';
@@ -384,13 +385,42 @@ describe('job description images', () => {
     expect(res.headers['cache-control']).toContain('immutable');
   });
 
-  // Known issue (PROGRESS.md, NEEDS_STEFAN.md): getPublicFile has no job-status
-  // check, so images of drafts / rejected / archived jobs are public to anyone
-  // with the URL. Flip to `it` once only published jobs' media is served.
-  it.fails('an image of a draft job is not public', async () => {
+  // Only published jobs' images are public; the job's company and staff can
+  // still load unpublished ones (editor preview), others get a 404.
+  it('an image of a draft job is not public', async () => {
     const { mediaId } = await draftWithImage();
     await http(app)
       .get(`/api/public/job-description-media/${mediaId}`)
+      .expect(404);
+  });
+
+  it("the job's company and staff still see it (editor preview), never cached", async () => {
+    const { mediaId } = await draftWithImage();
+    const moderator = await signIn(
+      app.getHttpServer(),
+      await insertModerator(),
+    );
+    for (const headers of [owner.headers, moderator.headers]) {
+      const res = await http(app)
+        .get(`/api/public/job-description-media/${mediaId}`)
+        .set(headers)
+        .expect(200);
+      expect(res.headers['cache-control']).toBe('private, no-store');
+    }
+  });
+
+  it("another company's employer gets the same 404 as a stranger", async () => {
+    const { mediaId } = await draftWithImage();
+    const other = await insertCompany({
+      company: { slug: 'druga-firma-slike', legalName: 'Druga Firma d.o.o.' },
+    });
+    const stranger = await signIn(
+      app.getHttpServer(),
+      await insertEmployer(other.id),
+    );
+    await http(app)
+      .get(`/api/public/job-description-media/${mediaId}`)
+      .set(stranger.headers)
       .expect(404);
   });
 
