@@ -432,6 +432,26 @@ Found with a scripted sweep of the live public pages at 375 and 1440 px
   `EMAIL_REDIRECT_TO` (staging-init `STAGING_EMAIL_TO=…`) once the redirect
   code is live on staging.
 
+### Incident 2026-10-29: sljakam.com served staging (~08:13–08:55 UTC)
+
+- **Cause:** `compose.staging.yml` put staging's web on `hireforge-edge`.
+  Compose also registers every service under its own name, so production's
+  Caddy (`reverse_proxy web:3000`, on the same network) reached staging's
+  web. Visitors saw staging without basic auth; sign-ups and password
+  resets in that window went to the staging database (no email: staging had
+  no Resend key).
+- **Missed by my checks:** they tested staging through Caddy and that
+  sljakam.com answered 200, never which backend answered. Found by the
+  other session (a request logged by staging's api).
+- **Fix** (branch `fix/staging-edge-alias`):
+  - `release.sh` attaches staging's web as `staging-web` only.
+  - New gate in every release: `web` in production's Caddy must be
+    production's web container; otherwise staging is taken off the edge
+    network and the release fails.
+  - Reproduced locally first: the old setup fails the gate, the new one
+    passes. Verified on the server: Caddy reaches staging as `staging-web`,
+    and sljakam.com is production's.
+
 ## Known issues not yet scheduled
 
 Phase T pinned these with an `it.fails` test named after the fix; fixing the

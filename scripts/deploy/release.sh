@@ -137,6 +137,26 @@ if [[ $TARGET == staging ]]; then
   fi
 fi
 
+# Production's Caddy reaches staging as `staging-web` on hireforge-edge. Not
+# through Compose: it would also register the service as `web` there, the
+# name production's Caddy proxies sljakam.com to.
+attach_staging_web() {
+  [[ $TARGET == staging ]] || return 0
+  docker network disconnect hireforge-edge "$PROJECT-web-1" >/dev/null 2>&1 || true
+  docker network connect --alias staging-web hireforge-edge "$PROJECT-web-1"
+}
+
+# `web` inside production's Caddy must be production's web container and
+# nothing else (true when production isn't running).
+prod_caddy_reaches_prod_web() {
+  local want got
+  want=$(docker inspect -f '{{(index .NetworkSettings.Networks "hireforge-production_default").IPAddress}}' \
+    hireforge-production-web-1 2>/dev/null) || return 0
+  docker inspect hireforge-production-caddy-1 >/dev/null 2>&1 || return 0
+  got=$(docker exec hireforge-production-caddy-1 getent ahostsv4 web | awk '{ print $1 }' | sort -u)
+  [[ -n $want && $got == "$want" ]]
+}
+
 rollback() {
   echo "!!! [$TARGET] release $SHA failed: $1; restoring the previous images" >&2
   for s in "${SERVICES[@]}"; do
@@ -145,7 +165,7 @@ rollback() {
   if [[ -z "${PREV[api]}" ]]; then
     echo "nothing ran before; leaving $TARGET stopped" >&2
     compose stop >/dev/null 2>&1 || true
-  elif compose up -d --no-build --pull never --wait --wait-timeout 240; then
+  elif compose up -d --no-build --pull never --wait --wait-timeout 240 && attach_staging_web; then
     echo "rollback ok: the previous images are live again" >&2
   else
     echo "ROLLBACK FAILED: check 'docker compose -f $COMPOSE_FILE ps' now" >&2
@@ -157,6 +177,7 @@ log "start $SHA"
 for s in "${SERVICES[@]}"; do docker tag "$(img "$s" "$SHA")" "$(img "$s" "$LIVE_TAG")"; done
 compose up -d --no-build --pull never --remove-orphans --wait --wait-timeout 240 ||
   rollback "containers not healthy"
+attach_staging_web || rollback "could not attach staging web to hireforge-edge"
 
 # Since the container's own start: compose leaves an unchanged worker image
 # running, and then there is no new line since the deploy began. Read the log
@@ -195,6 +216,17 @@ for _ in $(seq 1 10); do
   sleep 3
 done
 [[ $ok == 1 ]] || rollback "/sr does not answer"
+
+# Not a property of the images, so no rollback: take staging off the edge
+# network (production is safe again) and fail loudly.
+if ! prod_caddy_reaches_prod_web; then
+  echo "!!! production's Caddy does not reach production's web as 'web'" >&2
+  if [[ $TARGET == staging ]]; then
+    docker network disconnect hireforge-edge "$PROJECT-web-1" >/dev/null 2>&1 || true
+    echo "staging web taken off hireforge-edge; staging is not served until this is fixed" >&2
+  fi
+  exit 1
+fi
 
 if [[ $TARGET == production ]]; then
   compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile >/dev/null
