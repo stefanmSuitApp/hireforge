@@ -41,6 +41,56 @@ const portableTextComponents: PortableTextComponents = {
       );
     },
   },
+  // Explicit styles: `prose` needs @tailwindcss/typography, which the app
+  // does not use, so without these every block rendered as one plain run.
+  block: {
+    normal: ({ children }) => <p className="my-4 leading-7">{children}</p>,
+    h2: ({ children }) => (
+      <h2 className="mb-3 mt-10 text-xl font-semibold tracking-tight text-foreground first:mt-0">
+        {children}
+      </h2>
+    ),
+    h3: ({ children }) => (
+      <h3 className="mb-2 mt-8 text-lg font-semibold text-foreground">
+        {children}
+      </h3>
+    ),
+    blockquote: ({ children }) => (
+      <blockquote className="my-6 border-l-2 border-primary/40 pl-4 italic text-muted-foreground">
+        {children}
+      </blockquote>
+    ),
+  },
+  list: {
+    bullet: ({ children }) => (
+      <ul className="my-4 list-disc space-y-2 pl-6 marker:text-muted-foreground">
+        {children}
+      </ul>
+    ),
+    number: ({ children }) => (
+      <ol className="my-4 list-decimal space-y-2 pl-6 marker:text-muted-foreground">
+        {children}
+      </ol>
+    ),
+  },
+  listItem: ({ children }) => <li className="leading-7">{children}</li>,
+  marks: {
+    link: ({ value, children }) => {
+      const href = typeof value?.href === 'string' ? value.href : undefined;
+      const external = href?.startsWith('http');
+      return (
+        <a
+          href={href}
+          className="font-medium text-primary underline underline-offset-2 hover:no-underline"
+          {...(external
+            ? { target: '_blank', rel: 'noopener noreferrer' }
+            : {})}
+        >
+          {children}
+        </a>
+      );
+    },
+  },
 };
 
 export function CmsPortableText({
