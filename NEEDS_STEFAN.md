@@ -5,15 +5,18 @@ priority. Remove an item when it is done. **No secrets in this file.**
 
 ## ▶ Next, in order (updated 2026-10-29)
 
-1. Server (~10 min): set `INDEXNOW_KEY` and, if `sudo` works, add swap —
-   commands under "Values" and item 2.
-2. Admin UI: archive the seed sample job (see "Values").
-3. Google Search Console + Bing Webmaster Tools, submit the sitemap
+1. Server memory (item 2): `sudo systemctl restart docker` (frees ~1.8 GB,
+   ~30 s downtime) and add swap. Staging waits on this.
+2. Backup bucket (item 1): create it, put the keys in `deploy/.env.production`
+   — the upload code is live and switches on by itself.
+3. Staging (item 1b): DNS record, then say "staging go".
+4. Server (~2 min): set `INDEXNOW_KEY` (see "Values").
+5. Admin UI: archive the seed sample job (see "Values").
+6. Google Search Console + Bing Webmaster Tools, submit the sitemap
    (see "Values"). Worth doing now: verification takes days to settle.
-4. Off-VM backup storage (item 1).
-5. Get the first **featured** job live: with the featured-only rule nothing
+7. Get the first **featured** job live: with the featured-only rule nothing
    job-related is indexed until one exists.
-6. When convenient: Sentry (3), accountant (4), legal texts (5), Phase T
+8. When convenient: Sentry (3), accountant (4), legal texts (5), Phase T
    decisions, social profiles, analytics.
 
 ## ✅ Done
@@ -24,6 +27,12 @@ priority. Remove an item when it is done. **No secrets in this file.**
   `~/hireforge-prod-credentials-2026-10-28.txt` on Stefan's Mac (kept on
   purpose, outside the repo — never commit it).
 - **Resend domain** `sljakam.com` confirmed verified.
+- **Slim images + safe deploys** (2026-10-29): images ~0.7–0.9 GB (were
+  ~4.5 GB), disk 90% → 13%; `scripts/deploy/ship.sh` with backup, health
+  gates, automatic rollback (proven on a real deploy) and image pruning.
+- **Restore drill** passed on production (2026-10-29,
+  `scripts/deploy/restore-check.sh`): the dump restores with identical
+  table and row counts.
 - **Nightly Postgres backup** installed on the VM (cron 02:17 server time,
   keeps 14 days; `backups/backup-cron.log`). Checked 2026-10-28.
 - **SEO and featured-only visibility** live: public pages, sitemap, JobPosting
@@ -32,13 +41,46 @@ priority. Remove an item when it is done. **No secrets in this file.**
 
 ## 🟠 Soon
 
-### 1. Copy backups off the VM
+### 1. Copy backups off the VM (code ready, needs the bucket)
 
-The nightly dump runs (see Done), but it sits on the same disk as the
-database: losing the VM loses both. Create a Hetzner Storage Box or Object
-Storage bucket, put its credentials in `deploy/.env.production` yourself (not
-in chat), and say so; the copy step then gets wired into
-`backup-postgres.sh`.
+The nightly dump and every deploy's dump sit on the VM's disk. The upload is
+live and turns on once these are in `deploy/.env.production` (set them
+yourself, never in chat):
+
+1. Hetzner Console → **DEVLEGION** project → Object Storage → Create Bucket:
+   Nuremberg (`nbg1`), name `hireforge`, Private, Object Lock off.
+2. Manage credentials → Generate (`hireforge-prod`) → password manager.
+   Hetzner keys reach every bucket in the project (autofind's too).
+3. On the VM, `nano deploy/.env.production` (the S3 lines exist):
+
+   ```
+   S3_ENDPOINT=https://nbg1.your-objectstorage.com
+   S3_REGION=nbg1
+   AWS_ACCESS_KEY_ID=<from password manager>
+   AWS_SECRET_ACCESS_KEY=<from password manager>
+   S3_BACKUP_BUCKET=hireforge
+   S3_BACKUP_PREFIX=backups/postgres/production/
+   ```
+
+   Leave `S3_JOB_MEDIA_BUCKET` / `S3_BILLING_BUCKET` empty (that would move
+   uploads to the bucket without migrating existing files).
+
+4. Test: `./scripts/deploy/backup-postgres.sh` should print `uploaded
+s3://hireforge/...`; then `./scripts/deploy/restore-check.sh` restores the
+   newest dump **from the bucket**. Or just say "bucket done".
+
+### 1b. Staging (code ready, needs DNS and memory)
+
+`compose.staging.yml`, `deploy/.env.staging` (already generated on the VM)
+and `ship.sh staging` are in place; see `docs/deployment/hetzner.md` §10.
+Not started yet because the VM has ~1 GB free and no swap (item 2):
+staging can use up to ~1.2 GB.
+
+1. DNS at the registrar: `A` record `staging` → `178.105.128.190`.
+2. Item 2 (Docker restart + swap).
+3. Say "staging go": `staging-init.sh` adds the Caddy site, `ship.sh staging`
+   starts it. Login afterwards: `grep STAGING_BASIC_AUTH deploy/.env.staging`
+   on the VM.
 
 ### 2. The production VM is too small to build on (optional now)
 
