@@ -5,6 +5,7 @@ import { cvTemplate } from './documents/cvTemplate';
 import { editorialPage } from './documents/editorialPage';
 import { employerBranding } from './documents/employerBranding';
 import { homeJobsDiscovery } from './documents/homeJobsDiscovery';
+import { legalPage } from './documents/legalPage';
 import {
   packageDefinition,
   packageEditorCapabilities,
@@ -43,6 +44,7 @@ export const schemaTypes: SchemaTypeDefinition[] = [
   navigation,
   homeJobsDiscovery,
   editorialPage,
+  legalPage,
   employerBranding,
   packageDefinition,
   refundPolicy,

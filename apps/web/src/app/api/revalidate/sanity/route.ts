@@ -1,6 +1,8 @@
 import { revalidatePath, revalidateTag } from 'next/cache';
 import type { NextRequest } from 'next/server';
 
+import { LEGAL_PAGE_KINDS } from '@/lib/cms-content';
+
 export const dynamic = 'force-dynamic';
 
 type SanityWebhookPayload = {
@@ -66,6 +68,16 @@ export async function POST(req: NextRequest) {
     revalidateTag(`cms:editorialPage:${changedSlug}`, 'max');
     revalidatePath(`/sr/p/${changedSlug}`);
     revalidatePath(`/en/p/${changedSlug}`);
+  }
+
+  // Few and cheap: refresh every legal page (and the footer / sign-up links).
+  if (changedType === 'legalPage') {
+    revalidateTag('cms:legalPage', 'max');
+    for (const kind of LEGAL_PAGE_KINDS) {
+      revalidateTag(`cms:legalPage:${kind}`, 'max');
+      revalidatePath(`/sr/${kind}`);
+      revalidatePath(`/en/${kind}`);
+    }
   }
 
   // Safety fallback so updates appear even when payload does not include keys we expect.

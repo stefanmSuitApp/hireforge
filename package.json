@@ -48,6 +48,7 @@
     "db:seed:rs": "node scripts/db/seed-rs-locations.mjs",
     "db:seed:domain": "node scripts/db/seed-domain-baseline.mjs",
     "cms:seed": "node scripts/cms/seed-sanity.mjs",
+    "cms:seed:legal": "node scripts/cms/seed-legal.mjs",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
     "docker:logs": "docker compose logs -f",

@@ -173,13 +173,25 @@ agent was editing the main checkout at the same time.
 
 ## Phase E — candidates (mostly needs Stefan)
 
-1. Legal pages (privacy, terms, refund) + footer links + account erasure
-   request — needs legal copy.
-2. Invoices: legal fields, credit notes, invoice PDF download, SEF — needs
-   the accountant's answers. `full_free` promo auto-activation (zero-value
-   invoices) — same question.
-3. Observability: Sentry — needs a DSN; offsite backups — needs storage.
-4. Product: salary fields on jobs; GAZDA (enterprise) creation by admin;
+1. **Legal pages, account deletion, invoices and credit notes:** plan
+   `docs/plans/LEGAL_AND_INVOICES.md` (C1–C5, Stefan's decisions
+   2026-10-29).
+   - **C1 built** (branch `feat/legal-pages`): CMS legal pages
+     `/privacy`, `/terms` and `/refunds`, published-only footer, sign-up
+     and checkout links, and the terms version recorded at sign-up
+     (migration 0035).
+   - Drafts are in `docs/legal/`. They go live after Stefan seeds them
+     (`pnpm cms:seed:legal`, needs a write token for `o85214ma`), reads
+     them in Studio and publishes.
+   - Next: C2 account deletion.
+2. Invoices: SEF is not needed for a paušalac outside VAT (checked, plan
+   §1). Invoice fields and credit notes are plan C3 and C4. `full_free`
+   promo auto-activation (zero-value invoices) still needs the
+   accountant's answer.
+3. **Found 2026-10-29: candidate CV files are not backed up.** The
+   `api_var` volume is in no backup script; only Postgres is dumped.
+4. Observability: Sentry — needs a DSN; offsite backups — needs storage.
+5. Product: salary fields on jobs; GAZDA (enterprise) creation by admin;
    employer application status workflow (viewed / shortlisted / rejected).
 
 ## SEO & quality gates ✅ (branch `feat/seo-quality-gates`)

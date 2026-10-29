@@ -104,6 +104,41 @@ describe('candidate sign-up and sign-in', () => {
     expect(JSON.stringify(stored.rows)).not.toContain(token);
   });
 
+  it('records the accepted terms version, and nothing when none was shown', async () => {
+    const accepted = email('uslovi');
+    const silent = email('bez-uslova');
+    await http(app)
+      .post('/api/auth/candidate/register')
+      .send({
+        email: accepted,
+        password: 'Lozinka-123',
+        acceptedTermsVersion: '2026-11-01',
+      })
+      .expect(201);
+    await http(app)
+      .post('/api/auth/candidate/register')
+      .send({ email: silent, password: 'Lozinka-123' })
+      .expect(201);
+    const rows = await q(
+      `select email, terms_version, terms_accepted_at is not null as accepted
+         from users where email = any($1) order by email desc`,
+      [[accepted, silent]],
+    );
+    expect(rows.rows).toEqual([
+      { email: accepted, terms_version: '2026-11-01', accepted: true },
+      { email: silent, terms_version: null, accepted: false },
+    ]);
+
+    const bad = await http(app)
+      .post('/api/auth/candidate/register')
+      .send({
+        email: email('los-datum'),
+        password: 'Lozinka-123',
+        acceptedTermsVersion: 'latest',
+      });
+    expect(bad.status).toBe(400);
+  });
+
   it('the same email cannot register twice (any role)', async () => {
     const address = email('dupli');
     await http(app)
@@ -340,6 +375,7 @@ describe('company sign-up', () => {
       .send({
         email: address,
         password: 'Lozinka-123',
+        acceptedTermsVersion: '2026-11-01',
         company: COMPANY({
           pib: '107000002',
           mb: '21700002',
@@ -347,6 +383,10 @@ describe('company sign-up', () => {
         }),
       })
       .expect(201);
+    const user = await q('select terms_version from users where email = $1', [
+      address,
+    ]);
+    expect(user.rows).toEqual([{ terms_version: '2026-11-01' }]);
     const ws = await http(app)
       .get('/api/employer/workspace')
       .set('authorization', `Bearer ${res.body.accessToken}`)

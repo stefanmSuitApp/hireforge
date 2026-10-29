@@ -53,15 +53,22 @@ export class BillingContentService {
   }
 
   /**
-   * Plain-text refund excerpt for proforma HTML / PDF footer (CMS `refundPolicy.summary` or env).
+   * Plain-text refund excerpt for proforma HTML / PDF footer: the published
+   * refund policy's summary, else the old `refundPolicy` doc, else env.
    */
   async refundExcerpt(locale: BillingContentLocale): Promise<string | null> {
     const c = this.sanity();
     if (c) {
       try {
+        // `legal-refunds`, never its draft: the token can read drafts.
         const doc = await c.fetch<{
           summary?: { sr?: string; en?: string };
-        }>(`*[_type == "refundPolicy"] | order(_updatedAt desc)[0]{ summary }`);
+        }>(
+          `coalesce(
+            *[_id == "legal-refunds" && defined(summary)][0],
+            *[_type == "refundPolicy" && !(_id in path("drafts.**"))] | order(_updatedAt desc)[0]
+          ){ summary }`,
+        );
         const s = doc?.summary;
         const text = pickLocale(locale, s?.sr, s?.en);
         if (text) {

@@ -11,6 +11,7 @@ import { useEffect, useRef, useState, type SubmitEvent } from 'react';
 import { Button, Input, Label, PasswordInput } from '@/components/ui';
 import { FieldError, fieldErrorProps } from '@/components/ui/field-error';
 import { SelectField } from '@/components/ui/select';
+import { SignUpLegalNotice } from '@/features/legal/legal-links';
 import { useEmployerRegisterMutation } from '@/hooks/mutations';
 import {
   getTranslatedApiErrorMessage,
@@ -1018,6 +1019,7 @@ export function EmployerRegisterForm() {
         </p>
       ) : null}
 
+      {draft.step === lastStep ? <SignUpLegalNotice /> : null}
       <div className="flex flex-wrap gap-2">
         {draft.step > 0 ? (
           <Button
