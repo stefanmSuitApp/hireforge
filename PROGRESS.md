@@ -547,6 +547,31 @@ known bugs. This branch (`feat/dashboards-packages-job-page`) fixes:
     passes. Verified on the server: Caddy reaches staging as `staging-web`,
     and sljakam.com is production's.
 
+## Redesign A (plan: `docs/plans/REDESIGN_A.md`, 2026-10-29)
+
+Stefan picked direction A ("Topao i ljudski") from three homepage concepts;
+every main page, the shared header and footer and a new About page are
+concepts on https://claude.ai/artifact/TwJpGaQHuiJBXbd7H3cRhU. Rules: same
+functionality and order, existing endpoints, one theme of role tokens,
+shared components, CSS-only motion within the Lighthouse budgets.
+
+- **Step 1, foundation** (branch `feat/redesign-foundation`):
+  - Palette A in the existing tokens: warm cream page, warm lines and muted
+    surfaces in light; a teal-tinted dark. New roles: `featured-soft`
+    (+ `-foreground`), `placeholder` (+ `-foreground`), `footer`
+    (+ `-foreground`). All 64 contrast pairs pass (the four new pairs are in
+    `check:contrast`).
+  - Motion: `--ease-bounce` and `--ease-soft`, plus `hf-lift`, `hf-press`,
+    `hf-slide-down` and `hf-reveal` (scroll-driven where supported).
+    Everything stops under reduced motion.
+  - Site-wide promo bar above the header (`PromoBar`, `resolvePromoBanner`).
+    It shows a campaign or the CMS announcement to guests, employers and
+    staff, not to candidates. The homepage's own hero banner is gone.
+  - Compact footer on the teal band with gold headings; same content.
+  - Tests: `campaigns.spec.ts` checks the bar on `/sr/jobs` too (failed
+    before). All 12 visual baselines were re-rendered and reviewed: only
+    the background and the footer changed.
+
 ## Sign-up draft, job search layout, employers pitch (branch `fix/signup-draft-and-job-list`, 2026-10-29)
 
 - **Employer sign-up:** a first visit no longer shows "Vraćen je sačuvan

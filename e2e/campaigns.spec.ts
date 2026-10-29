@@ -33,6 +33,13 @@ test('an admin starts a free week; the home banner shows it; pausing removes it'
     await expect(
       page.getByRole('link', { name: /Besplatno objavljivanje oglasa do/ }),
     ).toBeVisible();
+    // Redesign A (2026-10-29): the promo bar is site-wide, above the header.
+    await page.goto('/sr/jobs');
+    await expect(
+      page
+        .getByRole('region', { name: 'Promocija' })
+        .getByRole('link', { name: /Besplatno objavljivanje oglasa do/ }),
+    ).toBeVisible();
   } finally {
     await page.goto('/sr/admin/campaigns');
     await page

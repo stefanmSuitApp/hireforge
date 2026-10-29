@@ -69,6 +69,21 @@ const pairs = [
   ['info-foreground', 'info', TEXT, 'solid info label'],
   ['destructive', 'destructive-soft', TEXT, 'error notices'],
   ['featured-foreground', 'featured', TEXT, 'featured (paid) badge'],
+  // Redesign A roles (docs/plans/REDESIGN_A.md).
+  [
+    'featured-soft-foreground',
+    'featured-soft',
+    TEXT,
+    'soft gold chips (Istaknuto, promo)',
+  ],
+  [
+    'placeholder-foreground',
+    'placeholder',
+    TEXT,
+    'image placeholders, initials',
+  ],
+  ['footer-foreground', 'footer', TEXT, 'footer text and links'],
+  ['featured', 'footer', TEXT, 'footer column headings (gold)'],
 ];
 
 const rows = [];

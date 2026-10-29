@@ -1,17 +1,28 @@
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 
 import { LegalLinksProvider } from '@/features/legal/legal-links';
 import { fetchCmsPublishedLegalPages } from '@/lib/cms-content';
-import { hasAnyAuthSession } from '@/lib/unified-auth';
+import { resolvePromoBanner } from '@/lib/promo-banner';
+import { getUnifiedAuthSession, hasAnyAuthSession } from '@/lib/unified-auth';
 
 import { GuestSignUpBar } from './guest-sign-up-bar';
+import { PromoBar } from './promo-bar';
 import { SiteFooter } from './site-footer';
 import { SiteHeader } from './site-header';
 
 export async function SiteShell({ children }: { children: React.ReactNode }) {
-  const t = await getTranslations('Nav');
-  const guest = !(await hasAnyAuthSession());
-  const legal = (await fetchCmsPublishedLegalPages()).map((p) => p.kind);
+  const [t, locale, session, anySession] = await Promise.all([
+    getTranslations('Nav'),
+    getLocale(),
+    getUnifiedAuthSession(),
+    hasAnyAuthSession(),
+  ]);
+  const guest = !anySession;
+  const [legalPages, promo] = await Promise.all([
+    fetchCmsPublishedLegalPages(),
+    resolvePromoBanner(locale, session.role),
+  ]);
+  const legal = legalPages.map((p) => p.kind);
   return (
     <LegalLinksProvider published={legal}>
       <div className="flex min-h-screen flex-col bg-background text-foreground">
@@ -22,6 +33,7 @@ export async function SiteShell({ children }: { children: React.ReactNode }) {
         >
           {t('skipToContent')}
         </a>
+        {promo ? <PromoBar banner={promo} locale={locale} /> : null}
         <SiteHeader />
         <div
           id="main-content"

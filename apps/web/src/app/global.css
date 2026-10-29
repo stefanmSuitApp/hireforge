@@ -80,11 +80,20 @@
   /* Paid placement (Šef/Gazda): the gold of the logo mark. */
   --color-featured: var(--featured);
   --color-featured-foreground: var(--featured-foreground);
+  /* Redesign A (docs/plans/REDESIGN_A.md): soft gold chips, image
+     placeholders, the footer band. */
+  --color-featured-soft: var(--featured-soft);
+  --color-featured-soft-foreground: var(--featured-soft-foreground);
+  --color-placeholder: var(--placeholder);
+  --color-placeholder-foreground: var(--placeholder-foreground);
+  --color-footer: var(--footer);
+  --color-footer-foreground: var(--footer-foreground);
 }
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(0.985 0 0);
+  /* Redesign A: warm cream page under white cards. */
+  --background: oklch(0.982 0.008 85);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -96,13 +105,13 @@
   --primary-foreground: oklch(0.99 0.01 181);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.96 0.01 180);
+  --muted: oklch(0.958 0.012 85);
   --muted-foreground: oklch(0.45 0.02 200);
   --accent: oklch(0.96 0.02 181);
   --accent-foreground: oklch(0.25 0.05 181);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.922 0 0);
+  --border: oklch(0.93 0.015 85);
   /* Control outlines (inputs, selects): 3:1 against background and card (WCAG 1.4.11); `--border` stays light for dividers. */
   --input: oklch(0.64 0.012 200);
   --ring: oklch(0.55 0.09 181);
@@ -133,6 +142,15 @@
   --destructive-soft: oklch(0.985 0.01 27);
   --featured: oklch(0.83 0.15 80);
   --featured-foreground: oklch(0.3 0.07 60);
+  --featured-soft: oklch(0.965 0.045 88);
+  --featured-soft-foreground: oklch(0.4 0.08 70);
+  --placeholder: oklch(0.93 0.025 181);
+  --placeholder-foreground: oklch(0.42 0.05 182);
+  --footer: oklch(0.34 0.06 182);
+  --footer-foreground: oklch(0.92 0.022 182);
+  /* Motion: a light overshoot for entrances and presses, a soft settle. */
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-soft: cubic-bezier(0.2, 0.7, 0.2, 1);
   /* Button gradients (hue aligned with `--primary` / neutrals) */
   --gradient-primary-from: oklch(0.43 0.125 178);
   --gradient-primary-via: oklch(0.52 0.115 181);
@@ -151,17 +169,17 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
+  --background: oklch(0.18 0.012 180);
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
+  --card: oklch(0.22 0.014 180);
   --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
+  --popover: oklch(0.22 0.014 180);
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.72 0.09 181);
   --primary-foreground: oklch(0.18 0.04 181);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
+  --muted: oklch(0.26 0.014 180);
   --muted-foreground: oklch(0.708 0 0);
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
@@ -209,6 +227,12 @@
   --destructive-soft: oklch(0.3 0.08 25);
   --featured: oklch(0.8 0.14 80);
   --featured-foreground: oklch(0.25 0.06 60);
+  --featured-soft: oklch(0.3 0.05 80);
+  --featured-soft-foreground: oklch(0.88 0.1 85);
+  --placeholder: oklch(0.27 0.02 180);
+  --placeholder-foreground: oklch(0.78 0.04 182);
+  --footer: oklch(0.13 0.01 180);
+  --footer-foreground: oklch(0.78 0.02 182);
 }
 
 /* Native controls and scrollbars follow the theme. */
@@ -282,6 +306,34 @@ html body[data-scroll-locked] {
 }
 
 @layer utilities {
+  /* Redesign A motion: transform/opacity only, off under reduced motion
+     (the global rule above). Scroll reveals run only where the browser has
+     scroll-driven animations; elsewhere the content is simply shown. */
+  .hf-lift {
+    transition:
+      transform 0.25s var(--ease-soft),
+      box-shadow 0.25s var(--ease-soft);
+  }
+  .hf-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 40px -20px oklch(0.34 0.06 182 / 0.45);
+  }
+  .hf-press {
+    transition: transform 0.2s var(--ease-bounce);
+  }
+  .hf-press:active {
+    transform: scale(0.95);
+  }
+  .hf-slide-down {
+    animation: hf-slide-down 0.5s var(--ease-bounce) both;
+  }
+  @supports (animation-timeline: view()) {
+    .hf-reveal {
+      animation: hf-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 28%;
+    }
+  }
   .hf-gradient-text {
     background: linear-gradient(
       135deg,
@@ -345,5 +397,27 @@ html body[data-scroll-locked] {
       opacity: 1;
       transform: translateY(0);
     }
+  }
+}
+
+@keyframes hf-slide-down {
+  from {
+    transform: translateY(-100%);
+  }
+}
+
+/* Scroll-linked: overshoots a little before it settles (the "bounce"). */
+@keyframes hf-reveal {
+  0% {
+    opacity: 0;
+    transform: translateY(28px) scale(0.98);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(-4px) scale(1.005);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
   }
 }
