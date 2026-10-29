@@ -30,6 +30,7 @@ ARG NEXT_PUBLIC_SANITY_PROJECT_ID
 ARG NEXT_PUBLIC_SANITY_DATASET
 
 ENV NODE_ENV=production
+ENV NEXT_OUTPUT=standalone
 ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_DEFAULT_LOCALE=$NEXT_PUBLIC_DEFAULT_LOCALE
@@ -38,25 +39,23 @@ ENV NEXT_PUBLIC_SANITY_PROJECT_ID=$NEXT_PUBLIC_SANITY_PROJECT_ID
 ENV NEXT_PUBLIC_SANITY_DATASET=$NEXT_PUBLIC_SANITY_DATASET
 
 COPY . .
-RUN pnpm build:web && test -f apps/web/.next/BUILD_ID
+RUN pnpm build:web && test -f apps/web/.next/standalone/apps/web/server.js
 
-FROM base AS runner
+# Runtime: Next's standalone server (only the traced files it needs) plus
+# static assets; no workspace node_modules, no pnpm.
+FROM node:24-bookworm-slim AS runner
 
 ENV NODE_ENV=production
 ENV HOSTNAME=0.0.0.0
 ENV PORT=3000
-
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
-COPY --from=builder /app/nx.json ./nx.json
-COPY --from=builder /app/tsconfig.base.json ./tsconfig.base.json
-COPY --from=builder /app/libs ./libs
-COPY --from=builder /app/apps/web ./apps/web
-COPY --from=builder /app/apps/web/.next ./apps/web/.next
+ENV NEXT_TELEMETRY_DISABLED=1
 
 WORKDIR /app
 
+COPY --from=builder /app/apps/web/.next/standalone ./
+COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
+COPY --from=builder /app/apps/web/public ./apps/web/public
+
 EXPOSE 3000
 
-CMD ["pnpm", "exec", "next", "start", "apps/web", "--hostname", "0.0.0.0", "--port", "3000"]
+CMD ["node", "apps/web/server.js"]

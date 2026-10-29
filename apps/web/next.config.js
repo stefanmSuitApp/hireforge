@@ -35,6 +35,18 @@ const nextConfig = {
   // Use this to set Nx-specific options
   // See: https://nx.dev/recipes/next/next-config-setup
   nx: {},
+  /**
+   * Docker sets `NEXT_OUTPUT=standalone`: the build then copies only the files
+   * the server needs (traced from the monorepo root) into `.next/standalone`,
+   * instead of the image carrying the whole workspace `node_modules`. Local
+   * `next start` (e2e) keeps the default output.
+   */
+  ...(process.env.NEXT_OUTPUT === 'standalone'
+    ? {
+        output: 'standalone',
+        outputFileTracingRoot: path.join(__dirname, '../..'),
+      }
+    : {}),
   turbopack: {
     resolveAlias: {
       'next-intl/config': nextIntlRequestPath,

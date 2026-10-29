@@ -8,7 +8,10 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "target": "es2021",
-    "moduleResolution": "bundler"
+    "moduleResolution": "bundler",
+    // Inline the few helpers: the runtime image installs only the packages the
+    // bundle requires (dist/apps/api/package.json), and tslib isn't among them.
+    "importHelpers": false
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts"]
 }
