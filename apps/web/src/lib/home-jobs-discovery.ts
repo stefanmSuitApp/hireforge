@@ -4,12 +4,16 @@ export type CmsDiscoverySpotlightRow = {
   slug: string;
   imageUrl: string | null;
   labelOverride: string | null;
+  /** Whole button text, already declined ("Istraži Suboticu"). */
+  exploreLabel?: string | null;
 };
 
 export type HomeJobsSpotlightTile = {
   slug: string;
   label: string;
   imageUrl: string | null;
+  /** Whole button text from Sanity, already declined ("Istraži Suboticu"). */
+  exploreLabel?: string | null;
   /** Relative path including query for `next-intl` `Link`. */
   jobsHref: string;
 };
@@ -44,6 +48,7 @@ export function buildCmsCategorySpotlightTiles(
       slug: row.slug,
       label: row.labelOverride?.trim() || slugToLabel(row.slug),
       imageUrl: row.imageUrl,
+      exploreLabel: row.exploreLabel ?? null,
       jobsHref: landingPath(null, row.slug) ?? '/jobs',
     };
   });
@@ -59,6 +64,7 @@ export function buildCmsCitySpotlightTiles(
       slug: row.slug,
       label: row.labelOverride?.trim() || slugToLabel(row.slug),
       imageUrl: row.imageUrl,
+      exploreLabel: row.exploreLabel ?? null,
       jobsHref: landingPath(row.slug, null) ?? '/jobs',
     };
   });

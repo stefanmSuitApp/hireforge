@@ -16,6 +16,8 @@ import { fileURLToPath } from 'node:url';
 import { createClient } from '@sanity/client';
 import { config } from 'dotenv';
 
+import { homeDiscoveryDocument } from './home-discovery.mjs';
+
 const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 config({ path: join(root, '.env') });
 
@@ -27,17 +29,28 @@ function requiredEnv(name) {
   return value;
 }
 
-/** One Portable Text paragraph (Sanity needs a `_key` on array items). */
-function paragraph(text) {
-  return [
-    {
+/**
+ * Portable Text blocks (Sanity needs a `_key` on array items). A `{ quote }`
+ * item is a blockquote: the About page shows the first one as its pull quote.
+ */
+function blocks(...items) {
+  return items.map((item, i) => {
+    const quote = typeof item === 'object';
+    return {
       _type: 'block',
-      _key: 'p1',
-      style: 'normal',
+      _key: `b${i + 1}`,
+      style: quote ? 'blockquote' : 'normal',
       markDefs: [],
-      children: [{ _type: 'span', _key: 'p1s1', marks: [], text }],
-    },
-  ];
+      children: [
+        {
+          _type: 'span',
+          _key: `b${i + 1}s1`,
+          marks: [],
+          text: quote ? item.quote : item,
+        },
+      ],
+    };
+  });
 }
 
 async function main() {
@@ -98,11 +111,6 @@ async function main() {
     items: [
       {
         _type: 'navLink',
-        label: { _type: 'localeString', sr: 'Početna', en: 'Home' },
-        href: '/',
-      },
-      {
-        _type: 'navLink',
         label: { _type: 'localeString', sr: 'Poslovi', en: 'Jobs' },
         href: '/jobs',
       },
@@ -156,11 +164,21 @@ async function main() {
     },
     body: {
       _type: 'localeBlockContent',
-      sr: paragraph(
-        'Šljakam se fokusira na jasne oglase za posao, brže zapošljavanje i proverene profile poslodavaca.',
+      sr: blocks(
+        {
+          quote:
+            'Posao treba da se nađe brzo, bilo da si kuvar, vozač, knjigovođa ili programer.',
+        },
+        'Šljakam je platforma za zapošljavanje u Srbiji koja povezuje poslodavce i ljude koji traže posao: jednostavno, bez prepreka i besplatno za kandidate. Pravljena je za sve vrste poslova, od ugostiteljstva, trgovine i transporta do proizvodnje, zanata i kancelarijskih poslova.',
+        'Kandidati pretražuju oglase, čuvaju one koji im se dopadaju i konkurišu u nekoliko koraka. Poslodavci objavljuju oglase po jasnim i predvidljivim cenama, a svaki oglas pre objave pregleda naš tim, da bi oglasi ostali jasni i pouzdani.',
       ),
-      en: paragraph(
-        'Šljakam focuses on clear job listings, faster hiring workflows, and trusted employer profiles.',
+      en: blocks(
+        {
+          quote:
+            'Finding work should be quick, whether you are a cook, a driver, a bookkeeper or a developer.',
+        },
+        'Šljakam is a hiring platform in Serbia that connects employers with people looking for work: simply, without barriers and free for candidates. It is built for every kind of job, from hospitality, retail and transport to manufacturing, skilled trades and office work.',
+        'Candidates search job ads, save the ones they like and apply in a few steps. Employers post ads at clear, predictable prices, and our team reviews every ad before it goes live, so listings stay clear and trustworthy.',
       ),
     },
   });
@@ -404,98 +422,8 @@ async function main() {
     },
   });
 
-  // Home jobs discovery rails (category + city spotlights)
-  tx.createOrReplace({
-    _id: 'homeJobsDiscovery',
-    _type: 'homeJobsDiscovery',
-    categorySpotlights: [
-      {
-        _key: 'cat-1',
-        categorySlug: 'it',
-        label: { _type: 'localeString', sr: 'IT', en: 'IT' },
-      },
-      {
-        _key: 'cat-2',
-        categorySlug: 'marketing',
-        label: { _type: 'localeString', sr: 'Marketing', en: 'Marketing' },
-      },
-      {
-        _key: 'cat-3',
-        categorySlug: 'finansije',
-        label: { _type: 'localeString', sr: 'Finansije', en: 'Finance' },
-      },
-      {
-        _key: 'cat-4',
-        categorySlug: 'pravo',
-        label: { _type: 'localeString', sr: 'Pravo', en: 'Law' },
-      },
-      {
-        _key: 'cat-5',
-        categorySlug: 'administracija',
-        label: {
-          _type: 'localeString',
-          sr: 'Administracija',
-          en: 'Administration',
-        },
-      },
-      {
-        _key: 'cat-6',
-        categorySlug: 'inzenjerstvo',
-        label: { _type: 'localeString', sr: 'Inženjerstvo', en: 'Engineering' },
-      },
-      {
-        _key: 'cat-7',
-        categorySlug: 'prodaja',
-        label: { _type: 'localeString', sr: 'Prodaja', en: 'Sales' },
-      },
-      {
-        _key: 'cat-8',
-        categorySlug: 'dizajn',
-        label: { _type: 'localeString', sr: 'Dizajn', en: 'Design' },
-      },
-      {
-        _key: 'cat-9',
-        categorySlug: 'zdravstvo',
-        label: { _type: 'localeString', sr: 'Zdravstvo', en: 'Healthcare' },
-      },
-      {
-        _key: 'cat-10',
-        categorySlug: 'ugostiteljstvo',
-        label: {
-          _type: 'localeString',
-          sr: 'Ugostiteljstvo',
-          en: 'Hospitality',
-        },
-      },
-    ],
-    citySpotlights: [
-      {
-        _key: 'city-1',
-        citySlug: 'beograd',
-        label: { _type: 'localeString', sr: 'Beograd', en: 'Belgrade' },
-      },
-      {
-        _key: 'city-2',
-        citySlug: 'novi-sad',
-        label: { _type: 'localeString', sr: 'Novi Sad', en: 'Novi Sad' },
-      },
-      {
-        _key: 'city-3',
-        citySlug: 'nis',
-        label: { _type: 'localeString', sr: 'Niš', en: 'Niš' },
-      },
-      {
-        _key: 'city-4',
-        citySlug: 'kragujevac',
-        label: { _type: 'localeString', sr: 'Kragujevac', en: 'Kragujevac' },
-      },
-      {
-        _key: 'city-5',
-        citySlug: 'subotica',
-        label: { _type: 'localeString', sr: 'Subotica', en: 'Subotica' },
-      },
-    ],
-  });
+  // Home jobs discovery rails (category + city spotlights, with images).
+  tx.createOrReplace(await homeDiscoveryDocument(client));
 
   tx.createOrReplace({
     _id: 'refundPolicy',

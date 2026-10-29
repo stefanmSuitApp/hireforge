@@ -16,9 +16,16 @@ priority. Remove an item when it is done. **No secrets in this file.**
    After it: deploy the Studio so editors see the new **Logo** field on
    Employer branding (`cd apps/cms && SANITY_STUDIO_PROJECT_ID=o85214ma
 SANITY_STUDIO_DATASET=production pnpm exec sanity deploy`), then upload
-   logos; cards show initials until then. Content: the About document still
-   says "Hireforge" and its body is English on `/sr/about`.
-3. When convenient: `sudo systemctl restart docker` (item 2), Sentry (3),
+   logos; cards show initials until then. About text: Šljakam and bilingual
+   since #41; #59's seed adds Design A's pull quote and two paragraphs.
+3. City photos for the home tabs (Beograd, Novi Sad, Niš, Kragujevac,
+   Subotica), no credit required. Wikimedia has no CC0 photos of Niš or
+   Subotica and Claude can't search Unsplash/Pexels without a key. Either
+   download five landscape photos (≥ 2000 px wide) from unsplash.com or
+   pexels.com into `scripts/cms/home-images/cities/<slug>.jpg`
+   (`beograd`, `novi-sad`, `nis`, `kragujevac`, `subotica`), or add a free
+   Pixabay API key to `.env` as `PIXABAY_API_KEY` and Claude picks them.
+4. When convenient: `sudo systemctl restart docker` (item 2), Sentry (3),
    accountant (4), legal texts (5), Phase T decisions, social profiles,
    analytics, Google Indexing API.
 

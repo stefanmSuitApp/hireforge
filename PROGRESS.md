@@ -431,6 +431,30 @@ Found with a scripted sweep of the live public pages at 375 and 1440 px
   `home-jobs-discovery.test.ts`, `employer-job-applications-table.test.tsx`,
   `i18n/request.test.ts`; each shown failing without its fix.
 
+### Launch categories, home tiles and CMS copy (branch `feat/home-taxonomy-and-cms-content`, 2026-10-29)
+
+- **Categories** (`drizzle/0038`): `job_categories.sort_order`; `it` and
+  `marketing` deleted on staging and production, replaced by Stefan's ten in
+  his order (Trgovina i prodaja … Finansije i računovodstvo); search filter,
+  footer and admin list in that order. Dev/test seeds still add `it` /
+  `marketing` as fixtures (sorted after the ten).
+- **Home tiles in Sanity** (`scripts/cms/home-discovery.mjs`, loaded by
+  `pnpm cms:seed`): the ten categories and five cities in order, each with
+  label, the declined button text (`exploreLabel`: "Istraži Suboticu") and a
+  landing intro (`intro`). Category images are generated in the Design A
+  palette (`scripts/cms/home-images/generate-category-images.mjs`, 1200×660);
+  city photos wait for Stefan (credit-free only; NEEDS_STEFAN). Web builds
+  tile images at Design A sizes (categories 436×240, cities 1104×880) and
+  `fetchCmsLandingSpotlight` gives the redesign's landing pages intro + hero.
+  The design session (seo-31) renders them; this branch doesn't touch the rail.
+- **CMS copy from Design A:** About body = pull quote (blockquote) + two
+  paragraphs (sr/en); navigation without "Početna"; no campaign slots.
+- Publishing `homeJobsDiscovery` now refreshes the home tiles at once
+  (webhook route revalidates `cms:homeJobsDiscovery`).
+- Order: deploy the migration to production **before** running the seed
+  (staging and production share the Sanity dataset; the home page hides
+  tiles whose slug the database doesn't have yet).
+
 ### Design review 02 (`design/review-02.md`, 2026-10-29)
 
 Full sweep: 178 page views (every route × role × 375/1440 × light/dark) plus

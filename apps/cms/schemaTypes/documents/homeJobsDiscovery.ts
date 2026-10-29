@@ -48,6 +48,20 @@ export const homeJobsDiscovery = defineType({
                 'If empty, the app uses Serbian/English category names from the API for the current locale.',
               type: 'localeString',
             }),
+            defineField({
+              name: 'exploreLabel',
+              title: 'Button text (optional)',
+              description:
+                'Full button text in the right grammatical case, e.g. "Istraži Suboticu" / "Explore Subotica". Empty: "Istraži" + the label.',
+              type: 'localeString',
+            }),
+            defineField({
+              name: 'intro',
+              title: 'Landing page intro (optional)',
+              description:
+                'One or two sentences under the title of this city / category page.',
+              type: 'localeText',
+            }),
           ],
           preview: {
             select: { slug: 'categorySlug', media: 'image' },
@@ -97,6 +111,20 @@ export const homeJobsDiscovery = defineType({
               description:
                 'If empty, the app uses Serbian/English city names from the API for the current locale.',
               type: 'localeString',
+            }),
+            defineField({
+              name: 'exploreLabel',
+              title: 'Button text (optional)',
+              description:
+                'Full button text in the right grammatical case, e.g. "Istraži Suboticu" / "Explore Subotica". Empty: "Istraži" + the label.',
+              type: 'localeString',
+            }),
+            defineField({
+              name: 'intro',
+              title: 'Landing page intro (optional)',
+              description:
+                'One or two sentences under the title of this city / category page.',
+              type: 'localeText',
             }),
           ],
           preview: {

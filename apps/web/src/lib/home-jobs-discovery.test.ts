@@ -27,6 +27,14 @@ describe('CMS spotlight tiles', () => {
     expect(tiles.map((t) => t.slug)).toEqual(['beograd']);
   });
 
+  it('carry the declined button text from the CMS ("Istraži Suboticu")', () => {
+    const [tile] = buildCmsCitySpotlightTiles(
+      [{ ...row('subotica'), exploreLabel: 'Istraži Suboticu' }],
+      [{ slug: 'subotica' }],
+    );
+    expect(tile?.exploreLabel).toBe('Istraži Suboticu');
+  });
+
   it('keep every tile when the taxonomy could not be loaded', () => {
     const tiles = buildCmsCategorySpotlightTiles([row('it'), row('pravo')], []);
     expect(tiles).toHaveLength(2);
