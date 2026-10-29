@@ -12,17 +12,3 @@ export function publicJobUrlSegment(job: {
 }): string {
   return job.slug ?? job.id;
 }
-
-/**
- * Where a job card leads: the job page, or sign-in (back to the job) for a
- * job a guest only sees as a teaser. Locale-less, for the i18n `Link`.
- */
-export function publicJobCardHref(
-  job: { slug: string | null; id: string; locked: boolean },
-  locale: string,
-): string {
-  const path = `/jobs/${publicJobUrlSegment(job)}`;
-  return job.locked
-    ? `/sign-in?returnTo=${encodeURIComponent(`/${locale}${path}`)}`
-    : path;
-}

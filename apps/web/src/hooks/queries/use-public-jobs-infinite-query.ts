@@ -53,6 +53,8 @@ export function usePublicJobsInfiniteQuery({
       fetchJobsPage(pageParam as number, search, pageSize),
     initialPageParam: seedFromInitialPage ? initialPage.page : 1,
     getNextPageParam: (last) => {
+      // Guests browse page 1 only (option B).
+      if (last.guestLimited) return undefined;
       const loaded = last.page * last.pageSize;
       return loaded < last.total ? last.page + 1 : undefined;
     },

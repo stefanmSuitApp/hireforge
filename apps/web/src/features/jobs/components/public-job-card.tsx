@@ -1,6 +1,5 @@
 'use client';
 
-import { Lock } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import type { MouseEvent } from 'react';
 
@@ -8,10 +7,7 @@ import type { PublicJobListItem } from 'contracts';
 
 import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/cn';
-import {
-  publicJobCardHref,
-  publicJobUrlSegment,
-} from '@/lib/job-public-segment';
+import { publicJobUrlSegment } from '@/lib/job-public-segment';
 
 import {
   localizedCategoryLine,
@@ -48,12 +44,11 @@ export function PublicJobCard({
   const seg = publicJobUrlSegment(job);
   const city = localizedCityLine(locale, job.city);
   const cat = localizedCategoryLine(locale, job.category);
-  const jobHref = publicJobCardHref(job, locale);
+  const jobHref = `/jobs/${seg}`;
 
   function onCardLinkClick(e: MouseEvent<HTMLAnchorElement>) {
     if (
       !onSelectDesktop ||
-      job.locked ||
       typeof window === 'undefined' ||
       !window.matchMedia('(min-width: 768px)').matches
     ) {
@@ -92,20 +87,13 @@ export function PublicJobCard({
               {job.title}
             </h2>
             <p className="m-0 text-sm leading-snug text-muted-foreground">
-              {job.company ? (
-                <Link
-                  href={`/companies/${job.company.slug}`}
-                  className="pointer-events-auto font-medium text-primary underline-offset-2 hover:underline"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {job.company.name}
-                </Link>
-              ) : (
-                <span className="inline-flex items-center gap-1 font-medium text-foreground">
-                  <Lock className="size-3.5" aria-hidden />
-                  {t('lockedCompany')}
-                </span>
-              )}
+              <Link
+                href={`/companies/${job.company.slug}`}
+                className="pointer-events-auto font-medium text-primary underline-offset-2 hover:underline"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {job.company.name}
+              </Link>
               {city ? ` · ${city}` : ''}
               {cat ? ` · ${cat}` : ''}
             </p>

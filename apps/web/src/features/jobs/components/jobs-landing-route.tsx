@@ -80,9 +80,9 @@ export async function buildJobsLandingMetadata(
     canonicalPath: page > 1 ? `${info.path}?page=${page}` : info.path,
     title: page > 1 ? `${title} — ${t('page', { page })}` : title,
     description: t('metaDescription', { title, count: info.liveJobs }),
-    // Without a featured job a guest sees only teasers: a thin page, so keep
-    // it out of the index (and sitemap).
-    noindex: info.featuredJobs < 1,
+    // No live jobs: an empty page; keep it out of the index (and sitemap).
+    // Page 2+ repeats page 1 for guests and crawlers (option B).
+    noindex: info.liveJobs < 1 || page > 1,
   });
 }
 

@@ -60,11 +60,6 @@ function liveJob(): SQL {
   ) as SQL;
 }
 
-/** How many of the grouped rows are featured. */
-function featuredCount(): SQL<number> {
-  return sql<number>`count(*) filter (where ${jobs.featured})`;
-}
-
 /** Live, or ended by expiry: the detail page still shows it (noindex, no apply). */
 function publicJobDetailVisible(): SQL {
   return inArray(jobs.status, ['published', 'expired']);
@@ -107,34 +102,33 @@ type PublicJobListJoinRow = {
 };
 
 /**
- * Who is asking. Guests see featured (paid) jobs in full and every other job
- * as a teaser (title, city, date); signing in unlocks the rest.
+ * Who is asking. Every job ad is public; guests browse only the first page of
+ * any list and can't use the advanced filters (option B,
+ * docs/plans/GUEST_ACCESS_B.md). Signing in unlocks the rest.
  */
 export type PublicViewer = { signedIn: boolean };
 
-function isLockedFor(viewer: PublicViewer, featured: boolean): boolean {
-  return !viewer.signedIn && !featured;
-}
+/** Jobs a guest sees in one list, company page or search. */
+export const GUEST_PAGE_SIZE = 20;
+/** Similar jobs a guest sees under a job ad. */
+const GUEST_SIMILAR = 3;
 
 function mapJoinRowToPublicListItem(
   r: PublicJobListJoinRow,
-  viewer: PublicViewer,
 ): PublicJobListItem {
-  const locked = isLockedFor(viewer, r.featured);
   return {
     id: r.id,
     title: r.title,
     slug: r.slug ?? null,
     shortId: r.shortId ?? null,
     featured: r.featured,
-    locked,
-    excerpt: locked ? null : excerptOf(r.descriptionPlain),
+    excerpt: excerptOf(r.descriptionPlain),
     applyMode: r.applyMode === 'external' ? 'external' : 'internal',
     publishedAt: r.publishedAt?.toISOString() ?? null,
     workModel: r.workModel,
     employmentType: r.employmentType,
     seniority: r.seniority,
-    company: locked ? null : { slug: r.companySlug, name: r.companyName },
+    company: { slug: r.companySlug, name: r.companyName },
     city:
       r.citySlug != null
         ? {
@@ -249,12 +243,10 @@ export class PublicJobsService {
         .where(and(eq(companies.slug, slug), liveJob()))
         .orderBy(desc(jobs.publishedAt), desc(jobs.createdAt));
 
-      // The company's own page names it, so a guest gets only its featured
-      // jobs here plus a count of the rest.
-      const visible = rows.filter((r) => !isLockedFor(viewer, r.featured));
+      const visible = viewer.signedIn ? rows : rows.slice(0, GUEST_PAGE_SIZE);
       return {
         company,
-        lockedJobCount: rows.length - visible.length,
+        totalJobs: rows.length,
         jobs: visible.map((r) => ({
           id: r.id,
           title: r.title,
@@ -305,7 +297,7 @@ export class PublicJobsService {
       const jobRows = await db
         .select({ id: jobs.id, slug: jobs.slug, updatedAt: jobs.updatedAt })
         .from(jobs)
-        .where(and(liveJob(), eq(jobs.featured, true)))
+        .where(liveJob())
         .orderBy(desc(jobs.publishedAt), asc(jobs.id));
 
       const companyRows = await db
@@ -313,7 +305,6 @@ export class PublicJobsService {
           slug: companies.slug,
           lastmod: max(jobs.updatedAt),
           liveJobs: count(jobs.id),
-          featuredJobs: featuredCount(),
         })
         .from(companies)
         .innerJoin(jobs, and(eq(jobs.companyId, companies.id), liveJob()))
@@ -325,7 +316,6 @@ export class PublicJobsService {
           city: cities.slug,
           category: jobCategories.slug,
           liveJobs: count(jobs.id),
-          featuredJobs: featuredCount(),
           lastmod: max(jobs.updatedAt),
         })
         .from(jobs)
@@ -343,14 +333,12 @@ export class PublicJobsService {
         companies: companyRows.map((r) => ({
           slug: r.slug,
           liveJobs: Number(r.liveJobs),
-          featuredJobs: Number(r.featuredJobs),
           lastmod: r.lastmod?.toISOString() ?? null,
         })),
         facets: facetRows.map((r) => ({
           city: r.city ?? null,
           category: r.category ?? null,
           liveJobs: Number(r.liveJobs),
-          featuredJobs: Number(r.featuredJobs),
           lastmod: r.lastmod?.toISOString() ?? null,
         })),
       };
@@ -359,19 +347,13 @@ export class PublicJobsService {
     }
   }
 
-  async getById(
-    id: string,
-    viewer: PublicViewer,
-  ): Promise<PublicJobDetailResponse> {
-    return this.loadPublishedJobDetail(eq(jobs.id, id), viewer);
+  async getById(id: string): Promise<PublicJobDetailResponse> {
+    return this.loadPublishedJobDetail(eq(jobs.id, id));
   }
 
-  async getBySlug(
-    slug: string,
-    viewer: PublicViewer,
-  ): Promise<PublicJobDetailResponse> {
+  async getBySlug(slug: string): Promise<PublicJobDetailResponse> {
     try {
-      return await this.loadPublishedJobDetail(eq(jobs.slug, slug), viewer);
+      return await this.loadPublishedJobDetail(eq(jobs.slug, slug));
     } catch (error) {
       if (!(error instanceof NotFoundException)) {
         throw error;
@@ -391,13 +373,12 @@ export class PublicJobsService {
       if (matches.length !== 1 || !matches[0]) {
         throw error;
       }
-      return this.loadPublishedJobDetail(eq(jobs.id, matches[0].id), viewer);
+      return this.loadPublishedJobDetail(eq(jobs.id, matches[0].id));
     }
   }
 
   private async loadPublishedJobDetail(
     jobKey: SQL,
-    viewer: PublicViewer,
   ): Promise<PublicJobDetailResponse> {
     const database = getDb();
     if (!database) {
@@ -449,12 +430,6 @@ export class PublicJobsService {
 
       if (!row) {
         throw new NotFoundException('Job not found');
-      }
-      if (isLockedFor(viewer, row.featured)) {
-        throw codedUnauthorized(
-          'JOB_SIGN_IN_REQUIRED',
-          'Sign in to see this job',
-        );
       }
 
       return {
@@ -608,7 +583,24 @@ export class PublicJobsService {
       );
     }
     const { db } = database;
-    const offset = (params.page - 1) * params.pageSize;
+    // Guests: advanced filters need an account; any list stops at page 1.
+    if (
+      !viewer.signedIn &&
+      (params.workModel ||
+        params.employmentType ||
+        params.postedWithin ||
+        params.easyApply)
+    ) {
+      throw codedUnauthorized(
+        'JOBS_SIGN_IN_REQUIRED',
+        'Sign in to use these filters',
+      );
+    }
+    const page = viewer.signedIn ? params.page : 1;
+    const pageSize = viewer.signedIn
+      ? params.pageSize
+      : Math.min(params.pageSize, GUEST_PAGE_SIZE);
+    const offset = (page - 1) * pageSize;
 
     const conditions = [liveJob()];
 
@@ -645,19 +637,13 @@ export class PublicJobsService {
 
     try {
       const [countRow] = await db
-        .select({
-          total: count(jobs.id),
-          notFeatured: sql<number>`count(*) filter (where not ${jobs.featured})`,
-        })
+        .select({ total: count(jobs.id) })
         .from(jobs)
         .innerJoin(companies, eq(jobs.companyId, companies.id))
         .leftJoin(cities, eq(jobs.cityId, cities.id))
         .leftJoin(jobCategories, eq(jobs.categoryId, jobCategories.id))
         .where(wherePublished);
       const total = Number(countRow?.total ?? 0);
-      const lockedTotal = viewer.signedIn
-        ? 0
-        : Number(countRow?.notFeatured ?? 0);
 
       const rows = await db
         .select({
@@ -692,29 +678,24 @@ export class PublicJobsService {
           desc(jobs.publishedAt),
           desc(jobs.createdAt),
         )
-        .limit(params.pageSize)
+        .limit(pageSize)
         .offset(offset);
 
-      const items: PublicJobListItem[] = rows.map((r) =>
-        mapJoinRowToPublicListItem(r, viewer),
-      );
+      const items: PublicJobListItem[] = rows.map(mapJoinRowToPublicListItem);
 
       return {
         items,
-        page: params.page,
-        pageSize: params.pageSize,
+        page,
+        pageSize,
         total,
-        lockedTotal,
+        guestLimited: !viewer.signedIn && total > items.length,
       };
     } catch (e) {
       mapPublicJobsDbError(e);
     }
   }
 
-  async batchPreviews(
-    refs: string[],
-    viewer: PublicViewer,
-  ): Promise<PublicJobPreviewsResponse> {
+  async batchPreviews(refs: string[]): Promise<PublicJobPreviewsResponse> {
     const database = getDb();
     if (!database) {
       throw new ServiceUnavailableException(
@@ -762,7 +743,7 @@ export class PublicJobsService {
           .where(and(liveJob(), jobKey))
           .limit(1);
         if (row) {
-          items.push(mapJoinRowToPublicListItem(row, viewer));
+          items.push(mapJoinRowToPublicListItem(row));
         }
       }
       return { items };
@@ -800,8 +781,9 @@ export class PublicJobsService {
 
       const qText = src.title.trim();
       if (!qText) {
-        return { items: [] };
+        return { items: [], moreAvailable: false };
       }
+      const shown = viewer.signedIn ? limit : Math.min(limit, GUEST_SIMILAR);
 
       const similarWhere = and(
         liveJob(),
@@ -842,10 +824,12 @@ export class PublicJobsService {
           desc(jobs.publishedAt),
           desc(jobs.createdAt),
         )
-        .limit(limit);
+        // One more than shown tells a guest whether more exist.
+        .limit(shown + 1);
 
       return {
-        items: rows.map((r) => mapJoinRowToPublicListItem(r, viewer)),
+        items: rows.slice(0, shown).map(mapJoinRowToPublicListItem),
+        moreAvailable: rows.length > shown,
       };
     } catch (e) {
       mapPublicJobsDbError(e);

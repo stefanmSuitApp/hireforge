@@ -5,8 +5,8 @@ import * as React from 'react';
 
 import type { PublicJobListItem } from 'contracts';
 
-import { Link } from '@/i18n/navigation';
-import { publicJobCardHref } from '@/lib/job-public-segment';
+import { Link, usePathname } from '@/i18n/navigation';
+import { publicJobUrlSegment } from '@/lib/job-public-segment';
 
 import {
   localizedCategoryLine,
@@ -25,7 +25,10 @@ export function SimilarJobsSection({
   const tJobs = useTranslations('Jobs');
   const hookLocale = useLocale();
   const locale = listLocale || hookLocale;
+  const pathname = usePathname();
   const [items, setItems] = React.useState<PublicJobListItem[] | null>(null);
+  // Guests see 3; the API says when signing in shows more.
+  const [moreAvailable, setMoreAvailable] = React.useState(false);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -36,8 +39,14 @@ export function SimilarJobsSection({
           if (!cancelled) setItems([]);
           return;
         }
-        const data = (await res.json()) as { items: PublicJobListItem[] };
-        if (!cancelled) setItems(data.items ?? []);
+        const data = (await res.json()) as {
+          items: PublicJobListItem[];
+          moreAvailable?: boolean;
+        };
+        if (!cancelled) {
+          setItems(data.items ?? []);
+          setMoreAvailable(data.moreAvailable === true);
+        }
       } catch {
         if (!cancelled) setItems([]);
       }
@@ -64,12 +73,12 @@ export function SimilarJobsSection({
           return (
             <li key={job.id}>
               <Link
-                href={publicJobCardHref(job, locale)}
+                href={`/jobs/${publicJobUrlSegment(job)}`}
                 className="block rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm font-medium text-primary hover:bg-muted"
               >
                 <span className="block text-foreground">{job.title}</span>
                 <span className="mt-0.5 block text-xs font-normal text-muted-foreground">
-                  {job.company?.name ?? tJobs('lockedCompany')}
+                  {job.company.name}
                   {city ? ` · ${city}` : ''}
                   {cat ? ` · ${cat}` : ''}
                 </span>
@@ -78,6 +87,16 @@ export function SimilarJobsSection({
           );
         })}
       </ul>
+      {moreAvailable ? (
+        <p className="m-0 mt-3 text-sm">
+          <Link
+            href={`/sign-in?returnTo=${encodeURIComponent(`/${locale}${pathname}`)}`}
+            className="font-medium text-primary underline-offset-4 hover:underline"
+          >
+            {tJobs('similarMoreSignIn')}
+          </Link>
+        </p>
+      ) : null}
     </section>
   );
 }

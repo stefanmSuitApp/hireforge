@@ -2,6 +2,7 @@
 
 import { SlidersHorizontal } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
 import { useState, type ReactNode } from 'react';
 
 import type {
@@ -18,7 +19,7 @@ import { JobsFilterChipsBar } from './jobs-filter-chips-bar';
 import { JobsFilterForm } from './jobs-filter-form';
 import { JobsInfiniteList } from './jobs-infinite-list';
 import { JobsListPreviewPane } from './jobs-list-preview-pane';
-import { LockedJobsCta } from './locked-jobs-cta';
+import { GuestBrowseCta } from './guest-browse-cta';
 
 export type JobsListBody =
   | { kind: 'no-api' }
@@ -29,6 +30,8 @@ export type JobsListBody =
       httpStatus?: number;
     }
   | { kind: 'empty' }
+  /** A guest opened a URL with filters that need an account. */
+  | { kind: 'guest-filters' }
   | {
       kind: 'list';
       initialPage: PublicJobListResponse;
@@ -40,6 +43,8 @@ export type JobsListScreenProps = {
   pageSize: number;
   defaults: JobsFilterDefaults;
   apiBasePresent: boolean;
+  /** Guests browse page 1 and can't use the advanced filters. */
+  signedIn: boolean;
   taxonomy: PublicJobTaxonomyResponse;
   body: JobsListBody;
   /** Landing pages replace the generic heading and add breadcrumbs / links. */
@@ -53,6 +58,7 @@ export function JobsListScreen({
   pageSize,
   defaults,
   apiBasePresent,
+  signedIn,
   taxonomy,
   body,
   heading,
@@ -62,6 +68,9 @@ export function JobsListScreen({
   const t = useTranslations('Jobs');
   const locale = useLocale();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const query = searchParams.toString();
+  const returnToPath = query ? `${pathname}?${query}` : pathname;
 
   const selectedSegment = defaults.job.trim();
   const activeFilters = [
@@ -127,6 +136,15 @@ export function JobsListScreen({
         </div>
       </div>
     );
+  } else if (body.kind === 'guest-filters') {
+    main = (
+      <GuestBrowseCta
+        total={0}
+        title={t('guestFiltersTitle')}
+        locale={locale}
+        returnToPath={returnToPath}
+      />
+    );
   } else {
     main = (
       <JobsInfiniteList
@@ -180,7 +198,7 @@ export function JobsListScreen({
             id="jobs-filters"
             className={filtersOpen ? 'block' : 'hidden md:block'}
           >
-            <JobsFilterChipsBar />
+            <JobsFilterChipsBar guest={!signedIn} />
           </div>
           <div className={filtersOpen ? 'mb-8' : 'mb-8 hidden md:block'}>
             <JobsFilterForm
@@ -202,17 +220,18 @@ export function JobsListScreen({
         </>
       ) : null}
 
-      {body.kind === 'list' ? (
-        <LockedJobsCta
-          count={body.initialPage.lockedTotal}
-          locale={locale}
-          returnToPath={pathname}
-          className="mb-6"
-        />
-      ) : null}
-
       <div className="md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] md:items-start md:gap-6">
-        <div>{main}</div>
+        <div>
+          {main}
+          {body.kind === 'list' && body.initialPage.guestLimited ? (
+            <GuestBrowseCta
+              total={body.initialPage.total}
+              locale={locale}
+              returnToPath={returnToPath}
+              className="mt-6"
+            />
+          ) : null}
+        </div>
         {previewPane}
       </div>
       {after}

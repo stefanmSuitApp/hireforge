@@ -29,12 +29,11 @@ tick items off as you go.
 
 ## 2. The biggest lever: real, complete job ads
 
-Every live **featured** job (Šef/Gazda packages) adds a job page plus city and
-category pages to the index. Since 2026-10-28 guests (and crawlers) see only
-featured jobs in full; other jobs are sign-in teasers, stay out of the sitemap
-and are sent to Google/IndexNow as removed. A city or category page is indexed
-only while it has a featured job. With one or zero featured jobs there is
-almost nothing for search engines to show.
+Every live job adds a job page plus city and category pages to the index
+(option B since 2026-10-29, `docs/plans/GUEST_ACCESS_B.md`: every ad is
+public; guests browse only the first 20 results, so page 2+ of lists is
+noindex and jobs are found through the sitemap). With one or zero jobs there
+is almost nothing for search engines to show.
 
 - [ ] Get the first real employers posting (TODO(Stefan): who and how).
 - [ ] Ask employers to fill city, category, employment type and an expiry

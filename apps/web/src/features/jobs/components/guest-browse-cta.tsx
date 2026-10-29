@@ -6,23 +6,25 @@ import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/cn';
 
 type Props = {
-  /** Jobs a guest sees only as teasers (or not at all). */
-  count: number;
+  /** All matching jobs (a guest sees the first 20). */
+  total: number;
   locale: string;
-  /** Locale-less path to come back to after sign-in. */
+  /** Locale-less path (with query) to come back to after sign-in. */
   returnToPath: string;
+  /** Override the default "see all N jobs" heading (e.g. for filters). */
+  title?: string;
   className?: string;
 };
 
-/** Guests: featured jobs are public, the rest open after sign-in. */
-export function LockedJobsCta({
-  count,
+/** Guests browse the first page only; this is the way to the rest. */
+export function GuestBrowseCta({
+  total,
   locale,
   returnToPath,
+  title,
   className,
 }: Props) {
   const t = useTranslations('Jobs');
-  if (count < 1) return null;
   const returnTo = encodeURIComponent(`/${locale}${returnToPath}`);
   return (
     <aside
@@ -37,10 +39,10 @@ export function LockedJobsCta({
         </span>
         <div>
           <p className="m-0 font-semibold text-foreground">
-            {t('lockedMoreTitle', { count })}
+            {title ?? t('guestBrowseTitle', { count: total })}
           </p>
           <p className="m-0 mt-0.5 text-sm text-muted-foreground">
-            {t('lockedMoreBody')}
+            {t('guestBrowseBody')}
           </p>
         </div>
       </div>
@@ -50,14 +52,14 @@ export function LockedJobsCta({
           locale={locale}
           className={buttonVariants({ size: 'sm' })}
         >
-          {t('lockedSignIn')}
+          {t('guestSignIn')}
         </Link>
         <Link
           href={`/candidate/register?returnTo=${returnTo}`}
           locale={locale}
           className={buttonVariants({ size: 'sm', variant: 'outline' })}
         >
-          {t('lockedRegister')}
+          {t('guestRegister')}
         </Link>
       </div>
     </aside>
