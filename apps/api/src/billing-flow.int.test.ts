@@ -19,7 +19,7 @@ import {
   type PromoInput,
   testDb,
 } from 'testing/db';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import {
   type Actor,
   http,
@@ -419,18 +419,180 @@ describe('promo codes at checkout', () => {
     expect(rows[0].redemptions_count).toBe(1);
   });
 
-  // Known issue (PROGRESS.md step 14): `full_free` doesn't auto-activate yet;
-  // the plan waits for a payment of 0. Flip to `it` when it does.
-  it.fails(
-    'a full_free code activates the plan at once, with no payment to wait for',
-    async () => {
-      const { res, b } = await buyWith({ discountType: 'full_free', value: 0 });
-      expect(res.status).toBe(201);
-      const { rows } = await q(
-        'select status, price_minor_snapshot from subscriptions where company_id = $1',
-        [b.companyId],
-      );
-      expect(rows[0]).toEqual({ status: 'active', price_minor_snapshot: 0 });
-    },
-  );
+  it('a full_free code activates the plan at once, with no payment to wait for', async () => {
+    const { res, b } = await buyWith({ discountType: 'full_free', value: 0 });
+    expect(res.status).toBe(201);
+    expect(res.body.proforma).toBeNull();
+    const { rows } = await q(
+      `select s.status, s.price_minor_snapshot, s.ends_at > now() as running,
+              (select count(*)::int from proformas p where p.subscription_id = s.id) as proformas
+         from subscriptions s where s.company_id = $1`,
+      [b.companyId],
+    );
+    expect(rows[0]).toEqual({
+      status: 'active',
+      price_minor_snapshot: 0,
+      running: true,
+      proformas: 0,
+    });
+    const audit = await q(
+      `select action from staff_audit_log where entity_id = $1`,
+      [res.body.subscription.id],
+    );
+    expect(audit.rows).toEqual([{ action: 'subscription.free_activation' }]);
+  });
+
+  it('a paused code is not accepted', async () => {
+    const code = await insertPromoCode({ discountType: 'percent', value: 20 });
+    await q('update promo_codes set is_active = false where id = $1', [
+      code.id,
+    ]);
+    const res = await purchase(await buyer(), { promoCode: code.code });
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe('PROMO_NOT_ACTIVE');
+  });
+});
+
+// Campaigns apply to every purchase; these run on `sljaka`, which no other
+// test here buys, and are switched off after each test.
+describe('public campaigns at checkout', () => {
+  const hour = 3_600_000;
+  const campaign = async (
+    discountType: 'percent' | 'full_free',
+    value: number,
+    packages: string[] = ['sljaka'],
+  ) =>
+    (
+      await q(
+        `insert into promo_codes (kind, code, discount_type, value, valid_from,
+           valid_to, applicable_packages, max_per_company)
+         values ('campaign', $1, $2, $3, $4, $5, $6, 1) returning id, code`,
+        [
+          `KAMPANJA-TEST-${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
+          discountType,
+          value,
+          new Date(Date.now() - hour),
+          new Date(Date.now() + hour),
+          packages,
+        ],
+      )
+    ).rows[0] as { id: string; code: string };
+  const sub = async (companyId: string) =>
+    (
+      await q(
+        `select s.status, s.price_minor_snapshot as p, s.applied_promo_code as c,
+                (select count(*)::int from proformas pf where pf.subscription_id = s.id) as proformas
+           from subscriptions s where s.company_id = $1`,
+        [companyId],
+      )
+    ).rows[0];
+  afterEach(async () => {
+    await q(`update promo_codes set is_active = false where kind = 'campaign'`);
+  });
+
+  it('a running campaign applies without any code', async () => {
+    const c = await campaign('percent', 20);
+    const b = await buyer();
+    const res = await purchase(b, { packageCode: 'sljaka' });
+    expect(res.status).toBe(201);
+    expect(await sub(b.companyId)).toEqual({
+      status: 'pending_payment',
+      p: discountedMinorFromPromo(4700, 'percent', 20),
+      c: c.code,
+      proformas: 1,
+    });
+  });
+
+  it('a free campaign activates the plan with no proforma, once per company', async () => {
+    await campaign('full_free', 0);
+    const b = await buyer();
+    expect((await purchase(b, { packageCode: 'sljaka' })).status).toBe(201);
+    expect(await sub(b.companyId)).toMatchObject({
+      status: 'active',
+      p: 0,
+      proformas: 0,
+    });
+    // The second purchase pays: the campaign is used up for this company.
+    const again = await purchase(b, { packageCode: 'sljaka' });
+    expect(again.status).toBe(201);
+    expect(again.body.proforma.totalMinor).toBe(4700);
+  });
+
+  it('with a typed code too, the lower price wins and only one is applied', async () => {
+    await campaign('percent', 20);
+    const better = await insertPromoCode({
+      discountType: 'percent',
+      value: 50,
+    });
+    const b1 = await buyer();
+    await purchase(b1, { packageCode: 'sljaka', promoCode: better.code });
+    expect(await sub(b1.companyId)).toMatchObject({
+      p: discountedMinorFromPromo(4700, 'percent', 50),
+      c: better.code,
+    });
+
+    const worse = await insertPromoCode({ discountType: 'percent', value: 10 });
+    const b2 = await buyer();
+    await purchase(b2, { packageCode: 'sljaka', promoCode: worse.code });
+    const got = await sub(b2.companyId);
+    expect(got.p).toBe(discountedMinorFromPromo(4700, 'percent', 20));
+    expect(got.c).toMatch(/^KAMPANJA-/);
+  });
+
+  it("a campaign's internal code can't be typed, and other packages pay full price", async () => {
+    const c = await campaign('percent', 30);
+    const typed = await purchase(await buyer(), {
+      packageCode: 'sljaka',
+      promoCode: c.code,
+    });
+    expect(typed.status).toBe(400);
+    expect(typed.body.error.code).toBe('PROMO_CODE_INVALID');
+
+    const b = await buyer();
+    await purchase(b, { packageCode: 'tezga' });
+    expect(await sub(b.companyId)).toMatchObject({ p: 3700, c: null });
+  });
+
+  it('admin: overlapping campaigns are refused; the public endpoint shows one without a code; pausing hides it', async () => {
+    const now = Date.now();
+    const body = {
+      discountType: 'percent',
+      value: 25,
+      validFrom: new Date(now - hour).toISOString(),
+      validTo: new Date(now + hour).toISOString(),
+      applicablePackages: ['sljaka'],
+    };
+    const created = await http(app)
+      .post('/api/admin/campaigns')
+      .set(admin.headers)
+      .send(body)
+      .expect(201);
+    const clash = await http(app)
+      .post('/api/admin/campaigns')
+      .set(admin.headers)
+      .send({ ...body, validFrom: new Date(now).toISOString() });
+    expect(clash.status).toBe(409);
+    expect(clash.body.error.code).toBe('CAMPAIGN_OVERLAP');
+
+    const shown = await http(app).get('/api/public/campaign').expect(200);
+    expect(shown.body.campaign).toMatchObject({
+      discountType: 'percent',
+      value: 25,
+    });
+    expect(JSON.stringify(shown.body)).not.toContain('KAMPANJA');
+
+    await http(app)
+      .patch(`/api/admin/campaigns/${created.body.id}`)
+      .set(admin.headers)
+      .send({ isActive: false })
+      .expect(200);
+    const hidden = await http(app).get('/api/public/campaign').expect(200);
+    expect(hidden.body).toEqual({ campaign: null });
+  });
+
+  it('private promo codes never show up publicly', async () => {
+    await insertPromoCode({ code: 'INFLUENCER50', value: 50 });
+    const res = await http(app).get('/api/public/campaign').expect(200);
+    expect(res.body).toEqual({ campaign: null });
+  });
 });

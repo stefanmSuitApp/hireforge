@@ -5,7 +5,11 @@ import type {
   AdminJobCategoryCreateBody,
   AdminJobCategoryPatchBody,
   AdminJobPatchPublishBody,
+  AdminCampaignsListResponse,
   AdminPromoCodesListResponse,
+  CampaignCreateBody,
+  CampaignPatchBody,
+  CampaignResponse,
   AdminUserListResponse,
   AdminUserPatchBody,
   PromoCodeCreateBody,
@@ -96,6 +100,34 @@ export async function getStaffEmployerList(
 ): Promise<StaffEmployerListResponse> {
   const { data } = await webHttp.get<StaffEmployerListResponse>(
     `/api/moderator/employers?${query}`,
+  );
+  return data;
+}
+
+export async function getAdminCampaigns(): Promise<AdminCampaignsListResponse> {
+  const { data } = await webHttp.get<AdminCampaignsListResponse>(
+    '/api/admin/campaigns',
+  );
+  return data;
+}
+
+export async function postAdminCampaign(
+  body: CampaignCreateBody,
+): Promise<CampaignResponse> {
+  const { data } = await webHttp.post<CampaignResponse>(
+    '/api/admin/campaigns',
+    body,
+  );
+  return data;
+}
+
+export async function patchAdminCampaign(
+  id: string,
+  body: CampaignPatchBody,
+): Promise<CampaignResponse> {
+  const { data } = await webHttp.patch<CampaignResponse>(
+    `/api/admin/campaigns/${id}`,
+    body,
   );
   return data;
 }

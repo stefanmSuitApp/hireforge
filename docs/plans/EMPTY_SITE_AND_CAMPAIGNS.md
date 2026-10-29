@@ -4,7 +4,13 @@ Written 2026-10-29 from `main` at `7e36941`. Stefan's decisions, 2026-10-29:
 
 - **Order:** these two first (E, then P), then account deletion (C2 in
   `LEGAL_AND_INVOICES.md`).
-- **Campaigns** are public promo codes, not a site-wide switch.
+- **Two kinds of discount** (Stefan, 2026-10-29, second answer):
+  - **Promo codes stay private.** They are typed at checkout, handed out
+    through influencers, ads and sales, and **never advertised on the
+    site**.
+  - **Campaigns are public and automatic:** a free week or weekend, or a
+    percentage off. They show in the home banner and apply without typing,
+    have a length in days, and can be paused.
 - **A free activation** issues no proforma or invoice; only the redemption
   and the audit entry are recorded, until the accountant says otherwise.
 - **The banner** must show automatically for any public campaign: a free
@@ -56,63 +62,95 @@ Written 2026-10-29 from `main` at `7e36941`. Stefan's decisions, 2026-10-29:
     - after a job is published, the normal list returns.
   - Unit: the checklist state mapping.
 
-## P — Public promo campaigns (one or two PRs)
+## P — Public campaigns, next to private promo codes
 
-**Data:** migration on `promo_codes`:
+**Two kinds, one table.** `promo_codes` gains `kind`:
 
-- `is_public boolean not null default false`;
-- `is_active boolean not null default true`;
-- `banner_sr` and `banner_en` (text, nullable). When empty, the banner
-  text is generated from the discount: "Besplatni oglasi do {date}" /
-  "{n}% popusta na pakete do {date}".
+- **`code`** (today's rows): private and typed. Never shown on the site:
+  no banner, no hint, no pre-fill.
+- **`campaign`:** public and automatic.
+  - No typing: its `code` is generated (e.g. `KAMPANJA-20261107`) only to
+    tie redemptions and audit rows to it, and it is never shown.
+  - Discount: `full_free` or `percent`. No fixed amounts, which would need
+    a currency per campaign.
 
-**Admin** (existing promo-codes screen):
+Both kinds reuse the existing window, package, per-company and total-cap
+checks and the redemption records.
 
-- **"Javna kampanja" (public campaign) toggle:** at most one public
-  campaign active at a time, checked on save.
-- **Length presets:** "Vikend" (Friday 00:00 to Sunday 23:59), "7 dana" and
-  "X dana". They fill `valid_from` and `valid_to`, in Belgrade time.
-- **"Pauziraj / Nastavi"** (pause / resume) via `is_active`. The admin list
-  shows the status: scheduled, running, paused or ended.
+**Data:** one migration on `promo_codes`:
+
+- `kind text not null default 'code'`, with a check `code | campaign`;
+- `is_active boolean not null default true`: pause and resume, for both
+  kinds;
+- `banner_sr` and `banner_en` (text, nullable, campaigns only). When empty,
+  the banner says "Besplatni oglasi do {date}" or "{n}% popusta na pakete
+  do {date}".
+- **No overlap:** two active campaigns may not have overlapping windows
+  (checked on save, under a lock).
+
+**Admin:**
+
+- **A new "Kampanje" screen**, separate from "Promo kodovi" so the two are
+  never confused. Fields:
+  - name (internal);
+  - free or percent, and the value;
+  - packages (default all);
+  - start;
+  - length: "Vikend" (Friday 00:00 to Sunday 23:59), "7 dana" or "X dana",
+    in Belgrade time; this sets `valid_from` and `valid_to`;
+  - optional banner text in sr and en;
+  - optional total cap. One use per company is the default.
+- **Status list:** scheduled, running, paused or ended, with "Pauziraj" and
+  "Nastavi" buttons.
+- **"Promo kodovi":** gains the same pause button. Campaigns don't appear
+  there.
 
 **Public side:**
 
-- `GET /api/public/campaign`: the running public campaign (code, discount,
-  end date, banner text), or null. Cached briefly; the BFF route has no
-  auth.
+- `GET /api/public/campaign` returns the running campaign (discount, end
+  date, banner text), or null. It never includes a code.
 - **Home banner:** reads that endpoint. The Sanity campaign calendar stays
-  only as a fallback for non-promo announcements.
+  only for non-promo announcements.
 - **Packages page:** while a campaign runs, a callout ("Besplatno do
-  {date}" / "−{n}% do {date}"), the code pre-filled and applied, and
-  prices shown discounted. The employer can clear the code.
-- **Checkout:** applies the campaign through the existing validation (the
-  window, packages, per-company and total caps). An inactive or paused code
-  is `PROMO_NOT_ACTIVE`.
+  {date}" / "−{n}% do {date}") and discounted prices. Nothing to type.
+- **Checkout** (server side, never trusting the browser):
+  - with no typed code, the running campaign applies automatically if the
+    package qualifies;
+  - with a valid typed private code too, the employer gets **the lower
+    price of the two, never both**;
+  - a paused code or campaign is `PROMO_NOT_ACTIVE`.
 
-**Free activation (`full_free`, total 0):**
+**Free activation (total 0, from a free campaign or a private
+`full_free` code):**
 
-- The subscription becomes `active` at once, with its start and end
-  dates, and no proforma or invoice is issued.
-- The redemption, an audit row `subscription.free_activation` and an
-  outbox event (for the email) are recorded.
+- The subscription becomes `active` at once, with its start and end dates.
+  No proforma or invoice is issued.
+- The redemption and an audit row `subscription.free_activation` are
+  recorded. The employer goes straight to the job composer.
+- **Not built yet:** a confirmation email for a free activation; it needs
+  a worker template.
 - The pinned `it.fails` in `billing-flow.int.test.ts` flips to `it`.
 
-**Abuse limits** (the existing checks): a verified email, `max_per_company`
-(default 1 for public campaigns), an optional package restriction, and an
-optional total cap.
+**Abuse limits:** a verified email, one use per company per campaign, the
+package restriction, and the optional total cap.
 
 **Tests:**
 
 - Integration:
-  - free activation with no documents;
-  - pause gives `PROMO_NOT_ACTIVE`;
-  - only one public campaign;
-  - the public endpoint is empty outside the window.
+  - a campaign applies with no code;
+  - the lower of campaign and typed code wins, never both;
+  - a free activation has no documents;
+  - paused gives `PROMO_NOT_ACTIVE`;
+  - overlapping campaigns are refused;
+  - the public endpoint is empty outside the window and never contains a
+    code;
+  - a private code never shows up publicly.
 - e2e:
-  - an admin starts a weekend campaign and the home banner shows it;
+  - an admin starts a weekend campaign and the home banner and the
+    packages callout appear;
   - an employer buys at 0 and can post right away;
-  - after the end time the banner is gone.
-- Unit: the length presets in Belgrade time across DST.
+  - pausing removes the banner.
+- Unit: the length presets in Belgrade time, across DST.
 
 ## Open (⚖ accountant)
 

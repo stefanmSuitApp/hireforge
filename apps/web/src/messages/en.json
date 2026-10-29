@@ -244,6 +244,15 @@
     "registerCandidate": "Create a candidate account",
     "prepareCv": "Prepare your profile and CV"
   },
+  "Campaign": {
+    "bannerFree": "Post job ads for free until {date}. Post an ad →",
+    "bannerPercent": "{percent}% off packages until {date}. Post an ad →",
+    "calloutFree": "Campaign: packages are free until {date}. The discount applies automatically, no code needed.",
+    "calloutPercent": "Campaign: {percent}% off packages until {date}. The discount applies automatically, no code needed.",
+    "calloutPackages": "Applies to: {packages}.",
+    "campaignPrice": "Campaign price",
+    "freeActivated": "Your package is active. You can write your ad right away."
+  },
   "JobDetail": {
     "fallbackTitle": "Job details",
     "backToJobs": "Back to jobs",
@@ -909,6 +918,7 @@
     "navUsers": "Users",
     "navTaxonomy": "Job categories",
     "navPromoCodes": "Promo codes",
+    "navCampaigns": "Campaigns",
     "navCompanies": "Companies",
     "navBillingEnterprise": "Enterprise billing",
     "navAudit": "Audit log",
@@ -1036,7 +1046,47 @@
       "colValue": "Value",
       "colRedemptions": "Uses",
       "colWindow": "Window",
-      "fieldCurrency": "Currency"
+      "fieldCurrency": "Currency",
+      "pause": "Pause",
+      "resume": "Resume"
+    },
+    "campaigns": {
+      "pageHeading": "Campaigns",
+      "pageLead": "Public offers: free job ads or a discount on packages for a set number of days. They apply automatically, without a code, and show on the home page. Promo codes for influencers and ads are separate and never shown on the site.",
+      "createHeading": "New campaign",
+      "fieldDiscount": "Discount",
+      "discountFree": "Free",
+      "discountPercent": "Percent off",
+      "fieldPercent": "Percent",
+      "fieldStart": "Start",
+      "pickDate": "Pick a date",
+      "fieldLength": "Length",
+      "length": {
+        "weekend": "Weekend (Friday–Sunday)",
+        "week": "7 days",
+        "days": "Number of days"
+      },
+      "fieldDays": "Number of days",
+      "windowPreview": "Runs from {from} to {to} (Belgrade time).",
+      "fieldPackages": "Packages",
+      "fieldPackagesHint": "Nothing ticked means all packages.",
+      "fieldBannerSr": "Banner text (Serbian)",
+      "fieldBannerEn": "Banner text (English)",
+      "bannerHint": "Empty: the text is generated, e.g. \"Post job ads for free until 8 November\".",
+      "fieldMaxRedemptions": "Maximum uses in total (optional)",
+      "createSubmit": "Start the campaign",
+      "listHeading": "Campaigns",
+      "empty": "No campaigns yet.",
+      "allPackages": "All packages",
+      "redemptions": "Used: {n}",
+      "status": {
+        "scheduled": "Scheduled",
+        "running": "Running",
+        "paused": "Paused",
+        "ended": "Ended"
+      },
+      "pause": "Pause",
+      "resume": "Resume"
     },
     "billingEnterprise": {
       "heading": "GAZDA subscriptions awaiting activation",
@@ -1166,7 +1216,9 @@
     "SUBSCRIPTION_FORBIDDEN": "You are not allowed to manage this subscription.",
     "PROMO_CURRENCY_MISMATCH": "This promo code does not apply to purchases in this currency.",
     "tableRenderFailed": "Could not render this table right now.",
-    "apiNotConfigured": "The service is not available right now. Please try again in a few minutes."
+    "apiNotConfigured": "The service is not available right now. Please try again in a few minutes.",
+    "CAMPAIGN_NOT_FOUND": "That campaign was not found.",
+    "CAMPAIGN_OVERLAP": "Another active campaign already runs in that period. Pause it or pick other dates."
   },
   "Candidate": {
     "workspaceLabel": "Candidate account",

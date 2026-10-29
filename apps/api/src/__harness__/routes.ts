@@ -122,6 +122,12 @@ export const ROUTES: Record<string, Access> = {
   'GET /api/admin/promo-codes': ADMIN,
   'POST /api/admin/promo-codes': ADMIN,
   'PATCH /api/admin/promo-codes/:id': ADMIN,
+  'GET /api/admin/campaigns': ADMIN,
+  'GET /api/public/campaign': PUBLIC(
+    'running campaign for the banner; never a code',
+  ),
+  'POST /api/admin/campaigns': ADMIN,
+  'PATCH /api/admin/campaigns/:id': ADMIN,
   'GET /api/admin/companies/:id/assignment-history': ADMIN,
   'POST /api/admin/companies/:id/reassign': ADMIN,
   'GET /api/admin/users': ADMIN,

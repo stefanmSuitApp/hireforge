@@ -244,6 +244,15 @@
     "registerCandidate": "Napravi nalog kandidata",
     "prepareCv": "Pripremi profil i CV"
   },
+  "Campaign": {
+    "bannerFree": "Besplatno objavljivanje oglasa do {date}. Objavi oglas →",
+    "bannerPercent": "{percent}% popusta na pakete do {date}. Objavi oglas →",
+    "calloutFree": "Kampanja: paketi su besplatni do {date}. Popust se primenjuje sam, bez koda.",
+    "calloutPercent": "Kampanja: {percent}% popusta na pakete do {date}. Popust se primenjuje sam, bez koda.",
+    "calloutPackages": "Važi za: {packages}.",
+    "campaignPrice": "Cena u kampanji",
+    "freeActivated": "Paket je aktivan. Možeš odmah da napišeš oglas."
+  },
   "JobDetail": {
     "fallbackTitle": "Detalji posla",
     "backToJobs": "Nazad na poslove",
@@ -909,6 +918,7 @@
     "navUsers": "Korisnici",
     "navTaxonomy": "Kategorije poslova",
     "navPromoCodes": "Promo kodovi",
+    "navCampaigns": "Kampanje",
     "navCompanies": "Kompanije",
     "navBillingEnterprise": "Enterprise naplata",
     "navAudit": "Zapis aktivnosti",
@@ -1036,7 +1046,47 @@
       "colValue": "Vrednost",
       "colRedemptions": "Upotrebe",
       "colWindow": "Period",
-      "fieldCurrency": "Valuta"
+      "fieldCurrency": "Valuta",
+      "pause": "Pauziraj",
+      "resume": "Nastavi"
+    },
+    "campaigns": {
+      "pageHeading": "Kampanje",
+      "pageLead": "Javne akcije: besplatni oglasi ili popust na pakete na određeni broj dana. Primenjuju se same, bez koda, i prikazuju se na naslovnoj. Promo kodovi za influensere i reklame su odvojeni i ne prikazuju se na sajtu.",
+      "createHeading": "Nova kampanja",
+      "fieldDiscount": "Popust",
+      "discountFree": "Besplatno",
+      "discountPercent": "Procenat popusta",
+      "fieldPercent": "Procenat",
+      "fieldStart": "Početak",
+      "pickDate": "Izaberi datum",
+      "fieldLength": "Trajanje",
+      "length": {
+        "weekend": "Vikend (petak–nedelja)",
+        "week": "7 dana",
+        "days": "Broj dana"
+      },
+      "fieldDays": "Broj dana",
+      "windowPreview": "Traje od {from} do {to} (beogradsko vreme).",
+      "fieldPackages": "Paketi",
+      "fieldPackagesHint": "Ništa označeno znači svi paketi.",
+      "fieldBannerSr": "Tekst banera (srpski)",
+      "fieldBannerEn": "Tekst banera (engleski)",
+      "bannerHint": "Prazno: tekst se pravi sam, npr. „Besplatno objavljivanje oglasa do 8. novembra“.",
+      "fieldMaxRedemptions": "Najviše korišćenja ukupno (opciono)",
+      "createSubmit": "Pokreni kampanju",
+      "listHeading": "Kampanje",
+      "empty": "Još nema kampanja.",
+      "allPackages": "Svi paketi",
+      "redemptions": "Iskorišćeno: {n}",
+      "status": {
+        "scheduled": "Zakazana",
+        "running": "Traje",
+        "paused": "Pauzirana",
+        "ended": "Završena"
+      },
+      "pause": "Pauziraj",
+      "resume": "Nastavi"
     },
     "billingEnterprise": {
       "heading": "GAZDA pretplate koje čekaju aktivaciju",
@@ -1166,7 +1216,9 @@
     "SUBSCRIPTION_FORBIDDEN": "Nemaš pravo da upravljaš ovom pretplatom.",
     "PROMO_CURRENCY_MISMATCH": "Promo kod ne važi za kupovinu u ovoj valuti.",
     "tableRenderFailed": "Tabelu trenutno nije moguće prikazati.",
-    "apiNotConfigured": "Usluga trenutno nije dostupna. Pokušaj ponovo za nekoliko minuta."
+    "apiNotConfigured": "Usluga trenutno nije dostupna. Pokušaj ponovo za nekoliko minuta.",
+    "CAMPAIGN_NOT_FOUND": "Ta kampanja nije pronađena.",
+    "CAMPAIGN_OVERLAP": "U tom periodu već postoji aktivna kampanja. Pauziraj je ili izaberi druge datume."
   },
   "Candidate": {
     "workspaceLabel": "Kandidatski nalog",

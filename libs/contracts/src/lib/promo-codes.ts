@@ -98,6 +98,8 @@ export const promoCodePatchBodySchema = z
     applicableCategories: z.array(taxonomySlug).optional().nullable(),
     maxRedemptions: positiveIntOrNull,
     maxPerCompany: positiveIntOrNull,
+    /** Pause (false) or resume (true) without touching the dates. */
+    isActive: z.boolean().optional(),
   })
   .superRefine((val, ctx) => {
     if (
@@ -146,6 +148,7 @@ export const promoCodeResponseSchema = z.object({
   maxRedemptions: z.number().int().positive().nullable(),
   maxPerCompany: z.number().int().positive().nullable(),
   redemptionsCount: z.number().int().nonnegative(),
+  isActive: z.boolean(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });

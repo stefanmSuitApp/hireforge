@@ -3,6 +3,7 @@ export type AdminWorkspaceNavKey =
   | 'users'
   | 'taxonomy'
   | 'promoCodes'
+  | 'campaigns'
   | 'companies'
   | 'billing'
   | 'audit';
@@ -12,6 +13,7 @@ export type AdminWorkspaceMessageKey =
   | 'navUsers'
   | 'navTaxonomy'
   | 'navPromoCodes'
+  | 'navCampaigns'
   | 'navCompanies'
   | 'navBillingEnterprise'
   | 'navAudit';
@@ -32,6 +34,11 @@ export const ADMIN_WORKSPACE_LINKS: ReadonlyArray<{
     href: '/admin/promo-codes',
     navKey: 'promoCodes',
     messageKey: 'navPromoCodes',
+  },
+  {
+    href: '/admin/campaigns',
+    navKey: 'campaigns',
+    messageKey: 'navCampaigns',
   },
   {
     href: '/admin/companies',
@@ -61,6 +68,9 @@ export function getAdminWorkspaceNavKey(
   }
   if (pathname.startsWith('/admin/promo-codes')) {
     return 'promoCodes';
+  }
+  if (pathname.startsWith('/admin/campaigns')) {
+    return 'campaigns';
   }
   if (pathname.startsWith('/admin/companies')) {
     return 'companies';

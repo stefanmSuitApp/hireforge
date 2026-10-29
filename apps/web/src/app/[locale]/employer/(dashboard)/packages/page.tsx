@@ -7,6 +7,7 @@ import {
 import { EmployerPackagesHashScroll } from '@/features/employer/components/employer-packages-hash-scroll';
 import { loadEmployerSessionOrRedirect } from '@/lib/employer-workspace-load';
 import { fetchEmployerPackageCatalog } from '@/lib/fetch-employer-catalog';
+import { fetchPublicCampaign } from '@/lib/public-campaign';
 import { fetchEmployerSubscriptions } from '@/lib/fetch-employer-subscriptions';
 
 export default async function EmployerPackagesPage({
@@ -83,6 +84,7 @@ export default async function EmployerPackagesPage({
           companyId={session.workspace.company.id}
           emailVerified={session.workspace.user.emailVerified}
           items={catalog.data.items}
+          campaign={await fetchPublicCampaign()}
         />
       </section>
     </div>

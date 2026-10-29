@@ -106,7 +106,8 @@ export const subscriptionProformaSummarySchema = z.object({
 
 export const employerSubscriptionPurchaseResponseSchema = z.object({
   subscription: subscriptionResponseSchema,
-  proforma: subscriptionProformaSummarySchema,
+  /** Null for a free activation: the plan is active at once and nothing is billed. */
+  proforma: subscriptionProformaSummarySchema.nullable(),
 });
 
 export type EmployerSubscriptionPurchaseResponse = z.infer<
