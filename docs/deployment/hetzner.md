@@ -359,7 +359,8 @@ runtime.
 
 **What staging shares with production** (copied from
 `/opt/hireforge/deploy/.env.production` before every staging release, so a
-key rotated on production reaches staging by itself): the Sanity read token
+key rotated on production reaches staging by itself): the Sanity project,
+dataset and read token
 (same CMS content), the bucket keys (dumps under `backups/postgres/staging/`)
 and the Resend key, the latter **only with `EMAIL_REDIRECT_TO` set**: every
 staging email then goes to that inbox, its subject naming the real
