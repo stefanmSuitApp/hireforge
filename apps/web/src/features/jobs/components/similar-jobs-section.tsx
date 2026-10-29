@@ -79,7 +79,10 @@ export function SimilarJobsSection({
                 href={`/jobs/${publicJobUrlSegment(job)}`}
                 className="hf-lift group block h-full rounded-[22px] border border-border bg-card p-5 no-underline"
               >
-                <CompanyInitials name={job.company.name} />
+                <CompanyInitials
+                  name={job.company.name}
+                  slug={job.company.slug}
+                />
                 <span className="mt-3.5 block text-lg font-bold leading-snug text-foreground group-hover:text-primary">
                   {job.title}
                 </span>

@@ -243,6 +243,7 @@ export function JobListingPreview({
         <div className="px-6 pb-6 @2xl:px-8 @2xl:pb-8">
           <CompanyInitials
             name={job.company.name}
+            slug={job.company.slug}
             className="-mt-10 size-20 rounded-[22px] border border-border bg-card text-lg shadow-[0_12px_30px_-18px_oklch(0.34_0.06_182_/_0.6)]"
           />
           {listingState === 'expired' ? (
@@ -400,6 +401,7 @@ export function JobListingPreview({
         >
           <CompanyInitials
             name={job.company.name}
+            slug={job.company.slug}
             className="size-16 rounded-[18px]"
           />
           <div className="min-w-0 flex-[1_1_220px]">

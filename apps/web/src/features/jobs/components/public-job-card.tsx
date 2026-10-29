@@ -77,7 +77,11 @@ export function PublicJobCard({
         onClick={onCardLinkClick}
       />
       <div className="pointer-events-none relative z-10 flex items-start gap-3.5">
-        <CompanyInitials name={job.company.name} className="size-[52px]" />
+        <CompanyInitials
+          name={job.company.name}
+          slug={job.company.slug}
+          className="size-[52px]"
+        />
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
             <h2 className="m-0 text-lg font-bold leading-snug text-foreground">

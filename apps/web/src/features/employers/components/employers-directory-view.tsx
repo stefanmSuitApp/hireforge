@@ -108,6 +108,7 @@ export async function EmployersDirectoryView(props: Props) {
               {row ? (
                 <CompanyInitials
                   name={row.name}
+                  slug={row.slug}
                   className="aspect-square size-auto w-full rounded-[20px] text-2xl"
                 />
               ) : (
@@ -178,6 +179,7 @@ export async function EmployersDirectoryView(props: Props) {
                 <span className="flex flex-1 flex-col px-5 pb-5">
                   <CompanyInitials
                     name={row.name}
+                    slug={row.slug}
                     className="-mt-8 size-16 rounded-[18px] border border-border bg-card"
                   />
                   <span className="mt-3 text-lg font-bold text-foreground group-hover:text-primary">

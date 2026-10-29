@@ -31,21 +31,21 @@ footer): https://claude.ai/artifact/TwJpGaQHuiJBXbd7H3cRhU
 
 ## Data map (no backend change unless marked)
 
-| Design element                               | Source                                                                         |
-| -------------------------------------------- | ------------------------------------------------------------------------------ |
-| Featured / popular / recent jobs, badges     | public job list                                                                |
-| Total open positions (Poslovi, landings)     | `total` of the job list                                                        |
-| 10 categories, 5 cities with photos          | taxonomy + CMS spotlight images (today's city rail)                            |
-| Promo bar + promo in "Za poslodavce"         | admin-started campaigns (#57) only (Stefan, 2026-10-29)                        |
-| Footer tagline, links, cities, categories    | CMS site settings + taxonomy                                                   |
-| Job page incl. promo image                   | job detail (`pngCreativeUrl`)                                                  |
-| Company "Zašto kod nas", "Utisci zaposlenih" | CMS employer branding (benefits, testimonials)                                 |
-| Employers list with job counts               | employers directory (`publishedJobCount`)                                      |
-| City hero photo                              | CMS spotlight city images                                                      |
-| About page                                   | `Editorial.about*` copy + CMS body                                             |
-| Per-city / per-category counts on tiles      | **none** → not shown                                                           |
-| Company logo, cover photo                    | **none** → styled initials; logos later via a Sanity field (no backend change) |
-| Homepage hero photo                          | a static image Stefan chooses → placeholder until then                         |
+| Design element                               | Source                                                                   |
+| -------------------------------------------- | ------------------------------------------------------------------------ |
+| Featured / popular / recent jobs, badges     | public job list                                                          |
+| Total open positions (Poslovi, landings)     | `total` of the job list                                                  |
+| 10 categories, 5 cities with photos          | taxonomy + CMS spotlight images (today's city rail)                      |
+| Promo bar + promo in "Za poslodavce"         | admin-started campaigns (#57) only (Stefan, 2026-10-29)                  |
+| Footer tagline, links, cities, categories    | CMS site settings + taxonomy                                             |
+| Job page incl. promo image                   | job detail (`pngCreativeUrl`)                                            |
+| Company "Zašto kod nas", "Utisci zaposlenih" | CMS employer branding (benefits, testimonials)                           |
+| Employers list with job counts               | employers directory (`publishedJobCount`)                                |
+| City hero photo                              | CMS spotlight city images                                                |
+| About page                                   | `Editorial.about*` copy + CMS body                                       |
+| Per-city / per-category counts on tiles      | **none** → not shown                                                     |
+| Company logo, cover photo                    | Sanity Employer branding → Logo (step 6), else initials; cover: gradient |
+| Homepage hero photo                          | a static image Stefan chooses → placeholder until then                   |
 
 ## Steps
 

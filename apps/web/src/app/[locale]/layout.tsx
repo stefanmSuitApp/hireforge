@@ -11,6 +11,8 @@ import {
 import { notFound } from 'next/navigation';
 
 import { AppQueryProvider } from '../../components/providers/app-query-provider';
+import { CompanyLogosProvider } from '../../components/providers/company-logos-provider';
+import { fetchCmsEmployerLogos } from '../../lib/cms-content';
 import { SiteShell } from '../../components/site-shell';
 import { AppToaster } from '../../components/app-toaster';
 import { THEME_SCRIPT } from '../../components/theme-toggle';
@@ -105,7 +107,10 @@ export default async function LocaleLayout({
     notFound();
   }
   setRequestLocale(locale);
-  const messages = await getMessages();
+  const [messages, companyLogos] = await Promise.all([
+    getMessages(),
+    fetchCmsEmployerLogos(),
+  ]);
 
   return (
     <html lang={locale} className={inter.variable} suppressHydrationWarning>
@@ -117,7 +122,9 @@ export default async function LocaleLayout({
         <AppQueryProvider>
           <NextIntlClientProvider locale={locale} messages={messages}>
             <AppToaster />
-            <SiteShell>{children}</SiteShell>
+            <CompanyLogosProvider logos={companyLogos}>
+              <SiteShell>{children}</SiteShell>
+            </CompanyLogosProvider>
           </NextIntlClientProvider>
         </AppQueryProvider>
       </body>

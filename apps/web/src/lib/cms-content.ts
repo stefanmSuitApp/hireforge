@@ -156,6 +156,47 @@ export async function fetchCmsEmployerBranding(
   }
 }
 
+/** Company slug → square logo URL, for every branding document with one. */
+export type CmsEmployerLogos = Record<string, string>;
+
+const fetchCmsEmployerLogosCached = unstable_cache(
+  async (): Promise<CmsEmployerLogos> => {
+    const client = getCmsClient();
+    const builder = getSanityImageBuilder();
+    if (!client || !builder) return {};
+    try {
+      const rows = await client.fetch<
+        Array<{ companySlug: string | null; logo: Record<string, unknown> }>
+      >(
+        `*[_type == "employerBranding" && defined(logo.asset) && !(_id in path("drafts.**"))]{
+          companySlug,
+          logo
+        }`,
+      );
+      const logos: CmsEmployerLogos = {};
+      for (const row of rows) {
+        if (!row.companySlug) continue;
+        logos[row.companySlug] = builder
+          .image(row.logo as never)
+          .width(192)
+          .height(192)
+          .fit('crop')
+          .auto('format')
+          .url();
+      }
+      return logos;
+    } catch {
+      return {};
+    }
+  },
+  ['cms-employer-logos'],
+  { revalidate: 300, tags: ['cms:employerLogos'] },
+);
+
+export async function fetchCmsEmployerLogos(): Promise<CmsEmployerLogos> {
+  return fetchCmsEmployerLogosCached();
+}
+
 export type CmsEditorialPage = {
   title: string | null;
   excerpt: string | null;

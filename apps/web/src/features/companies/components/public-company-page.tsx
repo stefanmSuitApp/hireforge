@@ -121,6 +121,7 @@ export async function PublicCompanyPage({
           <div className="min-w-0">
             <CompanyInitials
               name={company.name}
+              slug={company.slug}
               className="-mt-12 size-24 rounded-[26px] border border-border bg-card text-2xl shadow-[0_16px_36px_-20px_oklch(0.34_0.06_182_/_0.6)] md:-mt-14 md:size-28"
             />
             <h1 className="m-0 mt-4 text-[clamp(2rem,4.5vw,3rem)] font-extrabold leading-[1.08] tracking-tight text-foreground">

@@ -1,13 +1,43 @@
+'use client';
+
+import { useCompanyLogo } from '@/components/providers/company-logos-provider';
 import { cn } from '@/lib/cn';
 
-/** Stand-in for a company logo until logos exist (docs/plans/REDESIGN_A.md). */
+/**
+ * The company's logo from CMS (employer branding → Logo), else its
+ * initials on the placeholder colour. Decorative: the name is always next
+ * to it.
+ */
 export function CompanyInitials({
   name,
+  slug,
   className,
 }: {
   name: string;
+  /** Company slug: looks up the CMS logo. */
+  slug?: string;
   className?: string;
 }) {
+  const logo = useCompanyLogo(slug);
+  if (logo) {
+    return (
+      <span
+        aria-hidden
+        className={cn(
+          'flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-[14px] border border-border bg-card',
+          className,
+        )}
+      >
+        <img
+          src={logo}
+          alt=""
+          className="size-full object-contain"
+          loading="lazy"
+          decoding="async"
+        />
+      </span>
+    );
+  }
   const initials = name
     .replace(/\b(d\.?\s?o\.?\s?o\.?|a\.?d\.?|doo|ad)\b/gi, '')
     .split(/\s+/)

@@ -55,7 +55,7 @@ export function PublicJobTeaserCard({
       )}
     >
       <div className="flex items-start justify-between gap-3">
-        <CompanyInitials name={job.company.name} />
+        <CompanyInitials name={job.company.name} slug={job.company.slug} />
         {isFeatured && featuredRibbonLabel ? (
           <span className="shrink-0 rounded-full bg-featured-soft px-2.5 py-1 text-xs font-bold text-featured-soft-foreground">
             {featuredRibbonLabel}

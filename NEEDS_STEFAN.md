@@ -11,7 +11,14 @@ priority. Remove an item when it is done. **No secrets in this file.**
    → `sljakam.com revalidate` → Edit → HTTP header
    `x-sanity-webhook-secret` = the new `SANITY_WEBHOOK_SECRET` from the
    server (`grep ^SANITY_WEBHOOK_SECRET= deploy/.env.production | cut -d= -f2-`).
-2. When convenient: `sudo systemctl restart docker` (item 2), Sentry (3),
+2. Redesign A (2026-10-29, #60–#64): staging has every step; production
+   is the manual `deploy-production` run when you are happy with staging.
+   After it: deploy the Studio so editors see the new **Logo** field on
+   Employer branding (`cd apps/cms && SANITY_STUDIO_PROJECT_ID=o85214ma
+SANITY_STUDIO_DATASET=production pnpm exec sanity deploy`), then upload
+   logos; cards show initials until then. Content: the About document still
+   says "Hireforge" and its body is English on `/sr/about`.
+3. When convenient: `sudo systemctl restart docker` (item 2), Sentry (3),
    accountant (4), legal texts (5), Phase T decisions, social profiles,
    analytics, Google Indexing API.
 
