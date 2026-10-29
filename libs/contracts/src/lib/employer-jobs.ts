@@ -217,6 +217,10 @@ export type EmployerJobListItem = {
   updatedAt: string;
   submittedAt: string | null;
   publishedAt: string | null;
+  /** When a published ad ends (null: no end date set). */
+  expiresAt: string | null;
+  /** Applications that weren't withdrawn. */
+  applicationCount: number;
 };
 
 /** `GET /api/employer/jobs/:jobId/applications` row. */

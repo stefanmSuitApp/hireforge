@@ -105,6 +105,9 @@ function ExternalApplyCta({
   );
 }
 
+/** Roughly a screen of text: past this the top apply button is out of view. */
+const LONG_DESCRIPTION_CHARS = 1200;
+
 const chipClass = cn(
   'rounded-md bg-muted px-2 py-1 text-xs font-semibold text-foreground',
 );
@@ -183,7 +186,12 @@ export function JobListingPreview({
     setSignUpOpen(true);
   }
 
-  /** The one action of the page: right under the title and again at the end. */
+  // A second button at the end only helps when the first one has scrolled
+  // away; on a short ad it sat on the same screen as the first.
+  const longDescription = job.description.length > LONG_DESCRIPTION_CHARS;
+  const endCtaClass = stickyApply ? 'hidden md:inline-flex' : undefined;
+
+  /** The page's one action: under the title (and at the end of a long ad). */
   function applyCta(ctaClass?: string) {
     if (listingState !== 'live') return null;
     return job.applyMode === 'external' ? (
@@ -243,6 +251,9 @@ export function JobListingPreview({
         {listingState === 'preview' && !job.publishedAt
           ? t('previewNotPublished')
           : `${t('publishedLabel')} ${publishedMedium(job.publishedAt)}`}
+        {listingState === 'live' && job.expiresAt
+          ? ` · ${t('expiresLabel')} ${publishedMedium(job.expiresAt)}`
+          : null}
       </p>
 
       <div className="mt-3 flex flex-wrap gap-1.5">
@@ -324,14 +335,14 @@ export function JobListingPreview({
             <p className="mb-3.5 mt-0 text-muted-foreground">
               {t('applyHintExternal')}
             </p>
-            {applyCta()}
+            {longDescription ? applyCta(endCtaClass) : null}
           </>
         ) : (
           <>
             <p className="mb-3.5 mt-0 text-muted-foreground">
               {t('applyHint')}
             </p>
-            {applyCta()}
+            {longDescription ? applyCta(endCtaClass) : null}
             {guest ? (
               <p className="mb-0 mt-3 text-sm text-muted-foreground">
                 {t('applyHaveAccount')}{' '}

@@ -187,18 +187,12 @@ export async function PublicCompanyPage({
           </h2>
           <ul className="m-0 flex list-none flex-col gap-3 p-0">
             {jobs.map((job) => {
-              const city =
+              const cityLabel =
                 job.city == null
                   ? null
                   : locale === 'en' && job.city.nameEn
                     ? job.city.nameEn
                     : job.city.nameSr;
-              const cityLabel =
-                city == null
-                  ? null
-                  : job.city?.postalCode
-                    ? `${city} (${job.city.postalCode})`
-                    : city;
               const category =
                 job.category == null
                   ? null

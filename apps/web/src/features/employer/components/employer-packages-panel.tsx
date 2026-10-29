@@ -7,6 +7,7 @@ import {
   type PublicCampaign,
 } from 'contracts';
 import { useLocale, useTranslations } from 'next-intl';
+import { Check, Minus } from 'lucide-react';
 import * as React from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -14,7 +15,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SelectField } from '@/components/ui/select';
-import { Link, useRouter } from '@/i18n/navigation';
+import { useRouter } from '@/i18n/navigation';
 import {
   getTranslatedApiErrorMessage,
   type ErrorsTranslator,
@@ -22,7 +23,7 @@ import {
 import { CheckoutLegalNotice } from '@/features/legal/legal-links';
 import { webHttp } from '@/lib/http/web-axios';
 
-import { packageCardUpgradeRowsForPicker } from '../lib/package-card-upgrade-features';
+import { packageCardFeatureRows } from '../lib/package-card-upgrade-features';
 
 type Props = {
   companyId: string;
@@ -94,6 +95,19 @@ export function EmployerPackagesPanel({
     return init;
   });
   const [busy, setBusy] = React.useState<string | null>(null);
+  const featureLabel = (key: string) =>
+    (tFeat as (k: string) => string)(`${key}.label`);
+
+  function packageTitle(pkg: EmployerPackageCatalogItem): string {
+    const cmsTitle =
+      locale === 'en'
+        ? (pkg.titleEn ?? pkg.titleSr)
+        : (pkg.titleSr ?? pkg.titleEn);
+    return cmsTitle && cmsTitle.trim().length > 0
+      ? cmsTitle
+      : t(`codes.${pkg.code}.title`);
+  }
+  const titleByCode = new Map(items.map((p) => [p.code, packageTitle(p)]));
   const [error, setError] = React.useState<string | null>(null);
   const [promoCode, setPromoCode] = React.useState('');
 
@@ -195,14 +209,7 @@ export function EmployerPackagesPanel({
         className="scroll-mt-24 grid gap-4 md:grid-cols-1"
       >
         {items.map((pkg) => {
-          const cmsTitle =
-            locale === 'en'
-              ? (pkg.titleEn ?? pkg.titleSr)
-              : (pkg.titleSr ?? pkg.titleEn);
-          const title =
-            cmsTitle && cmsTitle.trim().length > 0
-              ? cmsTitle
-              : t(`codes.${pkg.code}.title`);
+          const title = packageTitle(pkg);
           const cmsBlurb =
             locale === 'en'
               ? (pkg.marketingDescriptionEn ?? pkg.marketingDescriptionSr)
@@ -214,7 +221,7 @@ export function EmployerPackagesPanel({
           const sel = selected[pkg.code] ?? pickDefaultPrice(pkg);
           const priceOptions = pkg.prices;
           const isEnterprise = pkg.isEnterprise;
-          const upgradeRows = packageCardUpgradeRowsForPicker(pkg);
+          const featureRows = packageCardFeatureRows(pkg, items);
 
           return (
             <Card key={pkg.code} className="p-5">
@@ -239,43 +246,64 @@ export function EmployerPackagesPanel({
                       })}
                     </li>
                   </ul>
-                  {upgradeRows.length ? (
-                    <ul className="mt-2 space-y-1 border-t border-border pt-2 text-xs text-muted-foreground">
-                      {upgradeRows.map((row) => {
-                        const fk = row.featureKey;
-                        const label = (tFeat as (key: string) => string)(
-                          `${fk}.label`,
-                        );
-                        const cmsMsg =
-                          locale === 'en'
-                            ? (row.cmsMessageEn ?? row.cmsMessageSr)
-                            : (row.cmsMessageSr ?? row.cmsMessageEn);
-                        const body =
-                          cmsMsg?.trim() ||
-                          (tFeat as (key: string) => string)(
-                            `${fk}.hintLocked`,
-                          );
-                        return (
-                          <li key={row.featureKey}>
-                            <span className="font-medium text-foreground/90">
-                              {label}
-                            </span>
-                            {' — '}
-                            {body}
+                  {featureRows.included.length ? (
+                    <div className="mt-2 border-t border-border pt-2">
+                      <p className="m-0 text-xs font-semibold text-foreground">
+                        {t('includedTitle')}
+                      </p>
+                      <ul className="m-0 mt-1 list-none space-y-1 p-0 text-xs text-foreground">
+                        {featureRows.included.map((fk) => (
+                          <li key={fk} className="flex items-start gap-1.5">
+                            <Check
+                              className="mt-px h-3.5 w-3.5 shrink-0 text-success"
+                              aria-hidden
+                            />
+                            {featureLabel(fk)}
                           </li>
-                        );
-                      })}
-                    </ul>
+                        ))}
+                      </ul>
+                    </div>
                   ) : null}
-                  <p className="text-xs">
-                    <Link
-                      href="/employer/packages#employer-package-cards"
-                      locale={locale}
-                      className="text-primary underline-offset-4 hover:underline"
-                    >
-                      {t('compareFeatures')}
-                    </Link>
-                  </p>
+                  {featureRows.notIncluded.length ? (
+                    <div className="mt-2 border-t border-border pt-2">
+                      <p className="m-0 text-xs font-semibold text-muted-foreground">
+                        {t('notIncludedTitle')}
+                      </p>
+                      <ul className="m-0 mt-1 list-none space-y-1 p-0 text-xs text-muted-foreground">
+                        {featureRows.notIncluded.map((row) => {
+                          const cmsMsg =
+                            locale === 'en'
+                              ? (row.cmsMessageEn ?? row.cmsMessageSr)
+                              : (row.cmsMessageSr ?? row.cmsMessageEn);
+                          const where = row.availableIn
+                            .map((code) => titleByCode.get(code) ?? code)
+                            .join(', ');
+                          const note =
+                            cmsMsg ??
+                            (where
+                              ? t('availableIn', { packages: where })
+                              : '');
+                          return (
+                            <li
+                              key={row.featureKey}
+                              className="flex items-start gap-1.5"
+                            >
+                              <Minus
+                                className="mt-px h-3.5 w-3.5 shrink-0"
+                                aria-hidden
+                              />
+                              <span>
+                                <span className="line-through decoration-muted-foreground/60">
+                                  {featureLabel(row.featureKey)}
+                                </span>
+                                {note ? ` — ${note}` : null}
+                              </span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  ) : null}
                 </div>
                 <div className="flex w-full flex-col justify-between h-full border-t border-border pt-3 md:w-56 md:border-t-0 md:pl-4 md:pt-0">
                   <div>

@@ -431,6 +431,30 @@ Found with a scripted sweep of the live public pages at 375 and 1440 px
   `home-jobs-discovery.test.ts`, `employer-job-applications-table.test.tsx`,
   `i18n/request.test.ts`; each shown failing without its fix.
 
+### Design review 02 (`design/review-02.md`, 2026-10-29)
+
+Full sweep: 178 page views (every route × role × 375/1440 × light/dark) plus
+the live site in launch state (empty DB). Findings and a Now/Next/Later
+roadmap in the review; other sessions took the empty states, search and
+known bugs. This branch (`feat/dashboards-packages-job-page`) fixes:
+
+- **Dashboards with real data.** Candidate: applications in progress, the
+  3 newest with status, saved jobs (no other page lists them), and a prompt
+  when the name or a CV is missing. Employer: live / in review / applicants
+  / free package slots, ads ending within 7 days, jobs with applicants. The
+  employer jobs list (`GET /employer/jobs`) now returns `applicationCount`
+  (withdrawn excluded) and `expiresAt`.
+- **Packages:** each card lists "Uključeno" (✓) and "Nije uključeno" (—,
+  with the packages that have it or the CMS upgrade message) instead of
+  upsell lines that read like features; the dead "Uporedi sve pakete" link
+  and the `OPTIONAL-PROMO` placeholder are gone.
+- **Job page:** one apply button on a short ad (a second one at the end only
+  past ~1200 characters, hidden on phones where the sticky bar is), the end
+  date ("Ističe:") next to the published date, and no postal code in city
+  names (cards, job page, company page; pickers and JSON-LD keep it).
+- Test: `e2e/dashboards-and-job-page.spec.ts` (4 tests, all shown failing
+  without the change) + unit tests for the overview and package helpers.
+
 ## Guest access option B (`docs/plans/GUEST_ACCESS_B.md`)
 
 - **B1 + B2** (branch `feat/guest-access-b1`):

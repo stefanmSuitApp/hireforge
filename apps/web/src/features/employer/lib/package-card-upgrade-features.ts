@@ -44,32 +44,51 @@ export function entitlementIncludesPackageCardFeature(
   }
 }
 
-export type PackageCardUpgradeRow = {
+export type PackageCardNotIncludedRow = {
   featureKey: PackageCardUpgradeFeatureKey;
+  /** Codes of the other packages in the catalogue that include it. */
+  availableIn: EmployerPackageCatalogItem['code'][];
   cmsMessageSr: string | null;
   cmsMessageEn: string | null;
 };
 
+export type PackageCardFeatureRows = {
+  included: PackageCardUpgradeFeatureKey[];
+  notIncluded: PackageCardNotIncludedRow[];
+};
+
 /**
- * Locked (omitted) package capabilities on the picker; CMS overrides message per feature when present.
+ * What a package card lists: the features it has, and the ones it doesn't with
+ * the packages that do (or the CMS upgrade message for that feature). Keeping
+ * them apart stops a missing feature reading like an included one.
  */
-export function packageCardUpgradeRowsForPicker(
+export function packageCardFeatureRows(
   item: EmployerPackageCatalogItem,
-): PackageCardUpgradeRow[] {
+  catalogue: readonly EmployerPackageCatalogItem[],
+): PackageCardFeatureRows {
   const cmsByKey = new Map(
     (item.upgradeMessages ?? []).map((row) => [row.featureKey, row]),
   );
-  const out: PackageCardUpgradeRow[] = [];
+  const included: PackageCardUpgradeFeatureKey[] = [];
+  const notIncluded: PackageCardNotIncludedRow[] = [];
   for (const key of PACKAGE_CARD_UPGRADE_FEATURE_KEYS) {
     if (entitlementIncludesPackageCardFeature(item.entitlements, key)) {
+      included.push(key);
       continue;
     }
     const cms = cmsByKey.get(key);
-    out.push({
+    notIncluded.push({
       featureKey: key,
+      availableIn: catalogue
+        .filter(
+          (other) =>
+            other.code !== item.code &&
+            entitlementIncludesPackageCardFeature(other.entitlements, key),
+        )
+        .map((other) => other.code),
       cmsMessageSr: cms?.messageSr?.trim() ? cms.messageSr.trim() : null,
       cmsMessageEn: cms?.messageEn?.trim() ? cms.messageEn.trim() : null,
     });
   }
-  return out;
+  return { included, notIncluded };
 }
