@@ -194,6 +194,16 @@ agent was editing the main checkout at the same time.
        site has no live job;
      - the employer dashboard has a first-job checklist (workspace
        `jobCounts`).
+   - **Campaigns, P** (branch `feat/promo-campaigns`, migration 0037):
+     - `promo_codes.kind` separates private codes (typed, never shown on the
+       site) from public campaigns;
+     - campaigns apply without a code, are advertised in the home banner and
+       on the packages page, and have a Belgrade-time length (weekend, 7
+       days or X days) plus pause;
+     - with a typed code too, the lower price wins;
+     - a free total activates the plan with no proforma or invoice (the old
+       `it.fails` now passes);
+     - admin screen "Kampanje"; promo codes gained pause.
 2. Invoices: SEF is not needed for a paušalac outside VAT (checked, plan
    §1). Invoice fields and credit notes are plan C3 and C4. `full_free`
    promo auto-activation (zero-value invoices) still needs the

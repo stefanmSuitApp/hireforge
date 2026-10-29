@@ -1162,6 +1162,17 @@ export const promoCodes = pgTable(
     maxPerCompany: integer('max_per_company'),
     /** Denormalized counter; service increments on redemption inside TX. */
     redemptionsCount: integer('redemptions_count').notNull().default(0),
+    /**
+     * `code`: typed at checkout, private (never shown on the site).
+     * `campaign`: applied automatically and advertised; its code is generated
+     * and only ties redemptions to it (0037).
+     */
+    kind: text('kind').notNull().default('code'),
+    /** Pause without touching the dates. */
+    isActive: boolean('is_active').notNull().default(true),
+    /** Campaign banner overrides; generated from the discount when empty. */
+    bannerSr: text('banner_sr'),
+    bannerEn: text('banner_en'),
     createdAt: timestamp('created_at', { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -1171,6 +1182,7 @@ export const promoCodes = pgTable(
   },
   (t) => [
     uniqueIndex('promo_codes_code_unique').on(t.code),
+    check('promo_codes_kind_check', sql`${t.kind} IN ('code', 'campaign')`),
     check(
       'promo_codes_discount_type_check',
       sql`${t.discountType} IN ('percent', 'fixed', 'full_free')`,

@@ -2,6 +2,7 @@ import type {
   AdminAuditListResponse,
   AdminCompanyAssignmentHistoryResponse,
   AdminJobCategoryListResponse,
+  AdminCampaignsListResponse,
   AdminPromoCodesListResponse,
   AdminUserListResponse,
   PendingSubscriptionQueueResponse,
@@ -125,6 +126,15 @@ export async function fetchAdminPromoCodesList(
   const base = 'admin/promo-codes';
   const path = searchParams ? `${base}?${searchParams}` : base;
   return staffGet<AdminPromoCodesListResponse>(accessToken, path);
+}
+
+export async function fetchAdminCampaigns(
+  accessToken: string,
+): Promise<
+  | { ok: true; data: AdminCampaignsListResponse }
+  | { ok: false; status: number; body: string }
+> {
+  return staffGet<AdminCampaignsListResponse>(accessToken, 'admin/campaigns');
 }
 
 export async function fetchAdminAudit(

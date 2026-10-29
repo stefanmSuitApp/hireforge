@@ -18,6 +18,7 @@ export * from './lib/packages';
 export * from './lib/permissions';
 export * from './lib/promo-codes';
 export * from './lib/promo-checkout-math';
+export * from './lib/promo-campaigns';
 export * from './lib/prose-plain';
 export * from './lib/public-jobs';
 export * from './lib/staff-admin';

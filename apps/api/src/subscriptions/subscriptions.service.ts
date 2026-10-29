@@ -16,7 +16,18 @@ import {
   promoWindowContainsNow,
   subscriptionPurchaseRequestSchema,
 } from 'contracts';
-import { and, count, desc, eq, isNull, lt, or, sql } from 'drizzle-orm';
+import {
+  and,
+  count,
+  desc,
+  eq,
+  gte,
+  isNull,
+  lt,
+  lte,
+  or,
+  sql,
+} from 'drizzle-orm';
 import {
   companies,
   employers,
@@ -72,6 +83,12 @@ function billingRedisCache(): RedisStringCache | undefined {
 function subscriptionYearUtc(d: Date): number {
   return d.getUTCFullYear();
 }
+
+type PromoRefusalCode =
+  | 'PROMO_NOT_ACTIVE'
+  | 'PROMO_PACKAGE_INELIGIBLE'
+  | 'PROMO_MAX_PER_COMPANY'
+  | 'PROMO_CURRENCY_MISMATCH';
 
 function addDurationDaysUtc(start: Date, durationDays: number): Date {
   return new Date(start.getTime() + durationDays * 86_400_000);
@@ -251,22 +268,82 @@ export class SubscriptionsService {
         );
       }
 
-      let priceMinorSnapshot = priceRow.amountMinor;
-      let proformaTotalMinor = priceRow.amountMinor;
-      let appliedPromoCode: string | null = null;
-      let promoForRedeem: typeof promoCodes.$inferSelect | null = null;
+      type PromoRow = typeof promoCodes.$inferSelect;
+      const priceWith = (promo: PromoRow) =>
+        discountedMinorFromPromo(
+          priceRow.amountMinor,
+          promo.discountType as PromoDiscountType,
+          promo.value,
+        );
+      /** Why `promo` can't be used for this purchase, or null when it can. */
+      const promoRefusal = async (
+        promo: PromoRow,
+      ): Promise<{ code: PromoRefusalCode; message: string } | null> => {
+        if (
+          !promo.isActive ||
+          !promoWindowContainsNow(promo.validFrom, promo.validTo, now)
+        ) {
+          return {
+            code: 'PROMO_NOT_ACTIVE',
+            message: 'This promo code is not valid at this time',
+          };
+        }
+        if (
+          !promoAppliesToPackageCode(
+            promo.applicablePackages ?? null,
+            req.packageCode,
+          )
+        ) {
+          return {
+            code: 'PROMO_PACKAGE_INELIGIBLE',
+            message: 'This promo does not apply to the selected package',
+          };
+        }
+        if (promo.maxPerCompany != null) {
+          const [cntRow] = await tx
+            .select({ n: count() })
+            .from(promoRedemptions)
+            .where(
+              and(
+                eq(promoRedemptions.promoCodeId, promo.id),
+                eq(promoRedemptions.companyId, req.companyId),
+              ),
+            );
+          if (Number(cntRow?.n ?? 0) >= promo.maxPerCompany) {
+            return {
+              code: 'PROMO_MAX_PER_COMPANY',
+              message:
+                'Your company has already used this promo the maximum number of times',
+            };
+          }
+        }
+        if (promo.discountType === 'fixed' && promo.currency !== req.currency) {
+          return {
+            code: 'PROMO_CURRENCY_MISMATCH',
+            message:
+              'This promo code does not apply to purchases in this currency',
+          };
+        }
+        return null;
+      };
 
+      let typed: PromoRow | null = null;
       if (req.promoCode) {
         const [promoRow] = await tx
           .select()
           .from(promoCodes)
-          .where(eq(promoCodes.code, req.promoCode))
+          .where(
+            and(
+              eq(promoCodes.code, req.promoCode),
+              // A campaign's generated code is not something to type.
+              eq(promoCodes.kind, 'code'),
+            ),
+          )
           // Serializes purchases using this code, so the per-company count
-          // below sees committed redemptions (parallel requests could each
-          // pass the max_per_company check before).
+          // sees committed redemptions (parallel requests could each pass
+          // the max_per_company check before).
           .for('update')
           .limit(1);
-
         if (!promoRow) {
           throw codedBadRequest(
             'PROMO_CODE_INVALID',
@@ -274,67 +351,52 @@ export class SubscriptionsService {
             undefined,
           );
         }
-
-        if (
-          !promoWindowContainsNow(promoRow.validFrom, promoRow.validTo, now)
-        ) {
-          throw codedBadRequest(
-            'PROMO_NOT_ACTIVE',
-            'This promo code is not valid at this time',
-            undefined,
-          );
+        const refusal = await promoRefusal(promoRow);
+        if (refusal) {
+          throw codedBadRequest(refusal.code, refusal.message, undefined);
         }
-
-        if (
-          !promoAppliesToPackageCode(
-            promoRow.applicablePackages ?? null,
-            req.packageCode,
-          )
-        ) {
-          throw codedBadRequest(
-            'PROMO_PACKAGE_INELIGIBLE',
-            'This promo does not apply to the selected package',
-            undefined,
-          );
-        }
-
-        if (promoRow.maxPerCompany != null) {
-          const [cntRow] = await tx
-            .select({ n: count() })
-            .from(promoRedemptions)
-            .where(
-              and(
-                eq(promoRedemptions.promoCodeId, promoRow.id),
-                eq(promoRedemptions.companyId, req.companyId),
-              ),
-            );
-          if (Number(cntRow?.n ?? 0) >= promoRow.maxPerCompany) {
-            throw codedBadRequest(
-              'PROMO_MAX_PER_COMPANY',
-              'Your company has already used this promo the maximum number of times',
-              undefined,
-            );
-          }
-        }
-
-        if (
-          promoRow.discountType === 'fixed' &&
-          promoRow.currency !== req.currency
-        ) {
-          throw codedBadRequest(
-            'PROMO_CURRENCY_MISMATCH',
-            'This promo code does not apply to purchases in this currency',
-          );
-        }
-        promoForRedeem = promoRow;
-        appliedPromoCode = promoRow.code;
-        priceMinorSnapshot = discountedMinorFromPromo(
-          priceRow.amountMinor,
-          promoRow.discountType as PromoDiscountType,
-          promoRow.value,
-        );
-        proformaTotalMinor = priceMinorSnapshot;
+        typed = promoRow;
       }
+
+      // The running public campaign applies by itself; when it can't (wrong
+      // package, already used, sold out) the purchase simply goes without it.
+      const [campaignRow] = await tx
+        .select()
+        .from(promoCodes)
+        .where(
+          and(
+            eq(promoCodes.kind, 'campaign'),
+            eq(promoCodes.isActive, true),
+            lte(promoCodes.validFrom, now),
+            gte(promoCodes.validTo, now),
+          ),
+        )
+        .orderBy(desc(promoCodes.validFrom))
+        .for('update')
+        .limit(1);
+      const campaign =
+        campaignRow &&
+        !(await promoRefusal(campaignRow)) &&
+        (campaignRow.maxRedemptions == null ||
+          campaignRow.redemptionsCount < campaignRow.maxRedemptions)
+          ? campaignRow
+          : null;
+
+      // One discount per purchase: the lower price; a tie goes to the typed
+      // code so the partner who handed it out gets the credit.
+      const promoForRedeem =
+        typed && campaign
+          ? priceWith(campaign) < priceWith(typed)
+            ? campaign
+            : typed
+          : (typed ?? campaign);
+      const appliedPromoCode = promoForRedeem?.code ?? null;
+      const priceMinorSnapshot = promoForRedeem
+        ? priceWith(promoForRedeem)
+        : priceRow.amountMinor;
+      // Nothing to pay: active at once, no proforma or invoice (Stefan,
+      // 2026-10-29; zero-value invoices wait for the accountant).
+      const freeActivation = promoForRedeem != null && priceMinorSnapshot === 0;
 
       const [sub] = await tx
         .insert(subscriptions)
@@ -346,7 +408,14 @@ export class SubscriptionsService {
           priceMinorSnapshot,
           currencySnapshot: priceRow.currency,
           entitlementsJsonSnapshot: entitlements,
-          status: 'pending_payment',
+          status: freeActivation ? 'active' : 'pending_payment',
+          ...(freeActivation
+            ? {
+                startsAt: now,
+                endsAt: addDurationDaysUtc(now, req.durationDays),
+                enabledByUserId: employerUserId,
+              }
+            : {}),
           appliedPromoCode,
           createdAt: now,
           updatedAt: now,
@@ -360,40 +429,46 @@ export class SubscriptionsService {
         );
       }
 
-      const { number: proformaNumber } = await BillingNumberingService.allocate(
-        tx,
-        'proforma',
-        subscriptionYearUtc(now),
-      );
+      let prof: typeof proformas.$inferSelect | null = null;
+      let updated = sub;
+      if (!freeActivation) {
+        const { number: proformaNumber } =
+          await BillingNumberingService.allocate(
+            tx,
+            'proforma',
+            subscriptionYearUtc(now),
+          );
 
-      const [prof] = await tx
-        .insert(proformas)
-        .values({
-          subscriptionId: sub.id,
-          number: proformaNumber,
-          totalMinor: proformaTotalMinor,
-          currency: priceRow.currency,
-          issuedAt: now,
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning();
+        [prof] = await tx
+          .insert(proformas)
+          .values({
+            subscriptionId: sub.id,
+            number: proformaNumber,
+            totalMinor: priceMinorSnapshot,
+            currency: priceRow.currency,
+            issuedAt: now,
+            createdAt: now,
+            updatedAt: now,
+          })
+          .returning();
 
-      if (!prof) {
-        throw codedBadRequest('VALIDATION_FAILED', 'Proforma insert failed');
-      }
+        if (!prof) {
+          throw codedBadRequest('VALIDATION_FAILED', 'Proforma insert failed');
+        }
 
-      const [updated] = await tx
-        .update(subscriptions)
-        .set({ proformaId: prof.id, updatedAt: now })
-        .where(eq(subscriptions.id, sub.id))
-        .returning();
+        const [withProforma] = await tx
+          .update(subscriptions)
+          .set({ proformaId: prof.id, updatedAt: now })
+          .where(eq(subscriptions.id, sub.id))
+          .returning();
 
-      if (!updated) {
-        throw codedBadRequest(
-          'VALIDATION_FAILED',
-          'Subscription update failed',
-        );
+        if (!withProforma) {
+          throw codedBadRequest(
+            'VALIDATION_FAILED',
+            'Subscription update failed',
+          );
+        }
+        updated = withProforma;
       }
 
       if (promoForRedeem && appliedPromoCode) {
@@ -431,32 +506,48 @@ export class SubscriptionsService {
         });
       }
 
-      const [co] = await tx
-        .select({ invoiceLanguage: companies.invoiceLanguage })
-        .from(companies)
-        .where(eq(companies.id, req.companyId))
-        .limit(1);
-      const invoiceLanguagePayload = co?.invoiceLanguage === 'en' ? 'en' : 'sr';
-
-      await tx.insert(outboxEvents).values({
-        eventType: 'proforma_issued',
-        correlationId: getCorrelationId() ?? null,
-        payload: {
-          proformaId: prof.id,
-          subscriptionId: sub.id,
-          companyId: req.companyId,
-          invoiceLanguage: invoiceLanguagePayload,
-        },
-      });
+      if (prof) {
+        const [co] = await tx
+          .select({ invoiceLanguage: companies.invoiceLanguage })
+          .from(companies)
+          .where(eq(companies.id, req.companyId))
+          .limit(1);
+        await tx.insert(outboxEvents).values({
+          eventType: 'proforma_issued',
+          correlationId: getCorrelationId() ?? null,
+          payload: {
+            proformaId: prof.id,
+            subscriptionId: sub.id,
+            companyId: req.companyId,
+            invoiceLanguage: co?.invoiceLanguage === 'en' ? 'en' : 'sr',
+          },
+        });
+      } else {
+        await tx.insert(staffAuditLog).values({
+          actorUserId: employerUserId,
+          action: 'subscription.free_activation',
+          entityType: 'subscription',
+          entityId: sub.id,
+          metadata: {
+            companyId: req.companyId,
+            promoCode: appliedPromoCode,
+            promoKind: promoForRedeem?.kind ?? null,
+            listPriceMinor: priceRow.amountMinor,
+            currency: priceRow.currency,
+          },
+        });
+      }
 
       return {
         subscription: this.toSubscriptionResponse(updated),
-        proforma: {
-          id: prof.id,
-          number: prof.number,
-          totalMinor: prof.totalMinor,
-          currency: prof.currency,
-        },
+        proforma: prof
+          ? {
+              id: prof.id,
+              number: prof.number,
+              totalMinor: prof.totalMinor,
+              currency: prof.currency,
+            }
+          : null,
       };
     });
 
@@ -468,12 +559,14 @@ export class SubscriptionsService {
       });
     }
 
-    try {
-      await this.billingPdf.generateProformaPdf(result.proforma.id);
-    } catch (e) {
-      this.log.error(
-        `generateProformaPdf failed for ${result.proforma.id}: ${String(e)}`,
-      );
+    if (result.proforma) {
+      try {
+        await this.billingPdf.generateProformaPdf(result.proforma.id);
+      } catch (e) {
+        this.log.error(
+          `generateProformaPdf failed for ${result.proforma.id}: ${String(e)}`,
+        );
+      }
     }
     return result;
   }

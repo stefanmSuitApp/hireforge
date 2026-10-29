@@ -1,6 +1,11 @@
 'use client';
 
-import type { EmployerPackageCatalogItem } from 'contracts';
+import {
+  discountedMinorFromPromo,
+  promoAppliesToPackageCode,
+  type EmployerPackageCatalogItem,
+  type PublicCampaign,
+} from 'contracts';
 import { useLocale, useTranslations } from 'next-intl';
 import * as React from 'react';
 
@@ -23,6 +28,8 @@ type Props = {
   companyId: string;
   emailVerified: boolean;
   items: EmployerPackageCatalogItem[];
+  /** The running public campaign; applied by the server without a code. */
+  campaign?: PublicCampaign | null;
 };
 
 function pickDefaultPrice(pkg: EmployerPackageCatalogItem) {
@@ -50,12 +57,22 @@ export function EmployerPackagesPanel({
   companyId,
   emailVerified,
   items,
+  campaign = null,
 }: Props) {
   const t = useTranslations('Employer.packages');
   const tFeat = useTranslations('Employer.packages.upgradeFeatures');
   const tErrors = useTranslations('Errors');
+  const tCampaign = useTranslations('Campaign');
   const locale = useLocale();
   const router = useRouter();
+  const campaignPrice = (code: string, amountMinor: number) =>
+    campaign && promoAppliesToPackageCode(campaign.applicablePackages, code)
+      ? discountedMinorFromPromo(
+          amountMinor,
+          campaign.discountType,
+          campaign.value,
+        )
+      : null;
   const [selected, setSelected] = React.useState<
     Record<
       string,
@@ -104,10 +121,14 @@ export function EmployerPackagesPanel({
 
       const { data } = await webHttp.post<{
         subscription: { id: string };
-        proforma: { id: string };
+        proforma: { id: string } | null;
       }>('/api/employer/subscriptions', body);
-      void data.subscription.id;
-      router.push(`/employer/billing/proforma/${data.proforma.id}`);
+      // Free (campaign or code): active at once, straight to writing the ad.
+      router.push(
+        data.proforma
+          ? `/employer/billing/proforma/${data.proforma.id}`
+          : `/employer/jobs/new?subscriptionId=${data.subscription.id}`,
+      );
     } catch (e) {
       setError(getTranslatedApiErrorMessage(e, tErrors as ErrorsTranslator));
     } finally {
@@ -117,6 +138,35 @@ export function EmployerPackagesPanel({
 
   return (
     <div className="space-y-6">
+      {campaign ? (
+        <p
+          role="status"
+          className="m-0 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm font-medium text-foreground"
+        >
+          {tCampaign(
+            campaign.discountType === 'full_free'
+              ? 'calloutFree'
+              : 'calloutPercent',
+            {
+              percent: campaign.value,
+              date: new Intl.DateTimeFormat(
+                locale === 'sr' ? 'sr-Latn-RS' : 'en-GB',
+                { day: 'numeric', month: 'long', timeZone: 'Europe/Belgrade' },
+              ).format(new Date(campaign.validTo)),
+            },
+          )}
+          {campaign.applicablePackages?.length
+            ? ` ${tCampaign('calloutPackages', {
+                packages: items
+                  .filter((i) => campaign.applicablePackages?.includes(i.code))
+                  .map((i) =>
+                    locale === 'en' ? (i.titleEn ?? i.titleSr) : i.titleSr,
+                  )
+                  .join(', '),
+              })}`
+            : null}
+        </p>
+      ) : null}
       <div className="rounded-lg border border-border bg-muted/20 px-4 py-3">
         <Label htmlFor="promo" className="text-muted-foreground">
           {t('promoLabel')}
@@ -229,11 +279,30 @@ export function EmployerPackagesPanel({
                 </div>
                 <div className="flex w-full flex-col justify-between h-full border-t border-border pt-3 md:w-56 md:border-t-0 md:pl-4 md:pt-0">
                   <div>
-                    <p className="text-lg font-bold tabular-nums text-right">
-                      {isEnterprise
-                        ? t('enterprisePrice')
-                        : formatMinor(sel.amountMinor, sel.currency, locale)}
-                    </p>
+                    {!isEnterprise &&
+                    campaignPrice(pkg.code, sel.amountMinor) !== null ? (
+                      <p className="m-0 text-right">
+                        <span className="block text-xs text-muted-foreground line-through tabular-nums">
+                          {formatMinor(sel.amountMinor, sel.currency, locale)}
+                        </span>
+                        <span className="block text-lg font-bold tabular-nums text-primary">
+                          <span className="sr-only">
+                            {tCampaign('campaignPrice')}:{' '}
+                          </span>
+                          {formatMinor(
+                            campaignPrice(pkg.code, sel.amountMinor) ?? 0,
+                            sel.currency,
+                            locale,
+                          )}
+                        </span>
+                      </p>
+                    ) : (
+                      <p className="text-lg font-bold tabular-nums text-right">
+                        {isEnterprise
+                          ? t('enterprisePrice')
+                          : formatMinor(sel.amountMinor, sel.currency, locale)}
+                      </p>
+                    )}
                     {/* Fixed slot so price + CTA align when this package has no duration picker */}
                     <div className="flex flex-col justify-start space-y-1">
                       {!isEnterprise && priceOptions.length > 1 ? (

@@ -22,6 +22,8 @@ import {
   adminSubscriptionMaxActiveJobsPatchBodySchema,
   adminUserListQuerySchema,
   adminUserPatchBodySchema,
+  campaignCreateBodySchema,
+  campaignPatchBodySchema,
   promoCodeCreateBodySchema,
   promoCodePatchBodySchema,
 } from 'contracts';
@@ -33,6 +35,7 @@ import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 import { codedBadRequest } from '../http/coded-http';
 import { firstQueryString } from '../http/query-string';
+import { AdminCampaignsService } from './admin-campaigns.service';
 import { AdminPromoCodesService } from './admin-promo-codes.service';
 import { AdminService } from './admin.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
@@ -45,6 +48,7 @@ export class AdminController {
     private readonly admin: AdminService,
     private readonly subscriptions: SubscriptionsService,
     private readonly promoCodes: AdminPromoCodesService,
+    private readonly campaigns: AdminCampaignsService,
   ) {}
 
   private userId(req: Request): string {
@@ -102,6 +106,41 @@ export class AdminController {
       );
     }
     return this.promoCodes.patch(this.userId(req), id, parsed.data);
+  }
+
+  @Get('campaigns')
+  listCampaigns() {
+    return this.campaigns.list();
+  }
+
+  @Post('campaigns')
+  createCampaign(@Req() req: Request, @Body() body: unknown) {
+    const parsed = campaignCreateBodySchema.safeParse(body);
+    if (!parsed.success) {
+      throw codedBadRequest(
+        'VALIDATION_FAILED',
+        'Invalid request body',
+        z.flattenError(parsed.error),
+      );
+    }
+    return this.campaigns.create(this.userId(req), parsed.data);
+  }
+
+  @Patch('campaigns/:id')
+  patchCampaign(
+    @Req() req: Request,
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() body: unknown,
+  ) {
+    const parsed = campaignPatchBodySchema.safeParse(body);
+    if (!parsed.success) {
+      throw codedBadRequest(
+        'VALIDATION_FAILED',
+        'Invalid request body',
+        z.flattenError(parsed.error),
+      );
+    }
+    return this.campaigns.patch(this.userId(req), id, parsed.data);
   }
 
   @Get('companies/:id/assignment-history')

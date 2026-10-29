@@ -8,7 +8,7 @@ import type {
   PromoCodeResponse,
   PromoDiscountType,
 } from 'contracts';
-import { asc, count, eq } from 'drizzle-orm';
+import { and, asc, count, eq } from 'drizzle-orm';
 import { promoCodes } from 'database';
 
 import { getDb } from '../database';
@@ -36,6 +36,7 @@ function rowToResponse(row: typeof promoCodes.$inferSelect): PromoCodeResponse {
     maxRedemptions: row.maxRedemptions ?? null,
     maxPerCompany: row.maxPerCompany ?? null,
     redemptionsCount: row.redemptionsCount,
+    isActive: row.isActive,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
@@ -56,13 +57,17 @@ export class AdminPromoCodesService {
       );
     }
 
+    // Campaigns have their own screen (AdminCampaignsService).
+    const privateCodes = eq(promoCodes.kind, 'code');
     const [totalRow] = await database.db
       .select({ n: count() })
-      .from(promoCodes);
+      .from(promoCodes)
+      .where(privateCodes);
 
     const rows = await database.db
       .select()
       .from(promoCodes)
+      .where(privateCodes)
       .orderBy(asc(promoCodes.code))
       .limit(query.limit)
       .offset(query.offset);
@@ -155,7 +160,7 @@ export class AdminPromoCodesService {
     const [existing] = await database.db
       .select()
       .from(promoCodes)
-      .where(eq(promoCodes.id, id))
+      .where(and(eq(promoCodes.id, id), eq(promoCodes.kind, 'code')))
       .limit(1);
 
     if (!existing) {
@@ -239,6 +244,7 @@ export class AdminPromoCodesService {
         applicableCategories,
         maxRedemptions,
         maxPerCompany,
+        ...(body.isActive !== undefined ? { isActive: body.isActive } : {}),
         updatedAt: now,
       })
       .where(eq(promoCodes.id, id))
@@ -257,7 +263,10 @@ export class AdminPromoCodesService {
       action: 'promo_code.patch',
       entityType: 'promo_code',
       entityId: id,
-      metadata: { code: updated.code },
+      metadata: {
+        code: updated.code,
+        ...(body.isActive !== undefined ? { isActive: body.isActive } : {}),
+      },
     });
 
     return rowToResponse(updated);

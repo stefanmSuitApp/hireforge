@@ -1,4 +1,5 @@
 export { AdminEnterprisePendingPanel } from './components/admin-enterprise-pending-panel';
+export { AdminCampaignsPanel } from './admin-campaigns-panel';
 export { AdminPromoCodesPanel } from './admin-promo-codes-panel';
 export { AdminCompanyReassignPanel } from './admin-company-reassign-panel';
 export { AdminAuditSection } from './admin-audit-section';

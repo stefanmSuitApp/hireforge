@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
 
 import { AdminController } from '../admin/admin.controller';
+import { AdminCampaignsService } from '../admin/admin-campaigns.service';
 import { AdminPromoCodesService } from '../admin/admin-promo-codes.service';
+import { PublicCampaignController } from '../admin/public-campaign.controller';
 import { AdminService } from '../admin/admin.service';
 import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
 import { StaffAuditService } from './staff-audit.service';
@@ -21,12 +23,14 @@ import { StaffJoinRequestsService } from './staff-join-requests.service';
     StaffJoinRequestsService,
     AdminService,
     AdminPromoCodesService,
+    AdminCampaignsService,
   ],
   controllers: [
     StaffCompaniesController,
     StaffEmployersController,
     StaffJoinRequestsController,
     AdminController,
+    PublicCampaignController,
   ],
   exports: [StaffAuditService],
 })

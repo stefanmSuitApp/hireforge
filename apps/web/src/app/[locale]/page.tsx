@@ -21,6 +21,7 @@ import {
   buildCmsCitySpotlightTiles,
 } from '@/lib/home-jobs-discovery';
 import { resolveNestPublicOrigin } from '@/lib/nest-api-url';
+import { campaignEndDate, fetchPublicCampaign } from '@/lib/public-campaign';
 import { fetchPublicJobsList, fetchPublicJobTaxonomy } from '@/lib/public-jobs';
 import { getUnifiedAuthSession } from '@/lib/unified-auth';
 import { Link } from '@/i18n/navigation';
@@ -66,10 +67,32 @@ export default async function HomePage({
   const t = await getTranslations('Home');
   const tJBadge = await getTranslations('JobDetail');
   const featuredRibbonLabel = tJBadge('featuredBadge');
-  const [authSession, promoBanner] = await Promise.all([
+  const [authSession, cmsBanner, campaign, tCampaign] = await Promise.all([
     getUnifiedAuthSession(),
     fetchCmsHomePromoBanner(locale),
+    fetchPublicCampaign(),
+    getTranslations('Campaign'),
   ]);
+  // A running campaign is the banner; the CMS calendar is for announcements.
+  const promoBanner = campaign
+    ? {
+        text:
+          (locale === 'en' ? campaign.bannerEn : campaign.bannerSr) ??
+          tCampaign(
+            campaign.discountType === 'full_free'
+              ? 'bannerFree'
+              : 'bannerPercent',
+            {
+              percent: campaign.value,
+              date: campaignEndDate(campaign, locale),
+            },
+          ),
+        href:
+          authSession.role === 'employer'
+            ? '/employer/packages'
+            : '/employer/register',
+      }
+    : cmsBanner;
   /** Valid access token (not merely cookie presence), so guest CTAs show when truly signed out. */
   const isAuthenticated = authSession.isAuthenticated;
   /**
