@@ -163,6 +163,7 @@ export function JobsListScreen({
         <JobsListPreviewPane
           jobSegment={selectedSegment}
           apiBasePresent={apiBasePresent}
+          guest={!signedIn}
         />
       </div>
     ) : null;

@@ -231,8 +231,11 @@
     "applyHintExternal": "Applications for this role are handled on the employer’s website. Opens in a new tab.",
     "applyButton": "Apply for this job",
     "applyButtonExternal": "Apply on the employer's site",
-    "applySignIn": "Sign in to apply",
-    "applyCreateAccount": "Create a candidate account",
+    "applyHaveAccount": "Already have an account?",
+    "applySignIn": "Sign in",
+    "applySheetTitle": "Create an account to apply",
+    "applySheetBody": "After you sign up, confirm your email from the message we send you, then send your application.",
+    "applySheetClose": "Close",
     "errorNoApi": "This job is not available right now. Please try again in a few minutes.",
     "errorNotFound": "This job is missing, unpublished, or no longer available.",
     "errorGeneric": "Could not load this job right now.",
@@ -244,6 +247,12 @@
     "expiredBrowseLive": "See current jobs",
     "metaDescriptionLead": "{hasCity, select, yes {Job at {company}, {city}.} other {Job at {company}.}}",
     "moreFromCompany": "More jobs at {company}"
+  },
+  "SignUpBar": {
+    "text": "Create an account to apply and save jobs.",
+    "cta": "Create an account",
+    "dismiss": "Close",
+    "label": "Create an account"
   },
   "Company": {
     "fallbackTitle": "Company",

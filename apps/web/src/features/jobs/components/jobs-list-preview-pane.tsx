@@ -31,9 +31,14 @@ function JobListingPreviewSkeleton() {
 type Props = {
   jobSegment: string;
   apiBasePresent: boolean;
+  guest: boolean;
 };
 
-export function JobsListPreviewPane({ jobSegment, apiBasePresent }: Props) {
+export function JobsListPreviewPane({
+  jobSegment,
+  apiBasePresent,
+  guest,
+}: Props) {
   const t = useTranslations('Jobs');
   const tDetail = useTranslations('JobDetail');
   const isMdUp = useMediaQuery('(min-width: 768px)');
@@ -75,7 +80,12 @@ export function JobsListPreviewPane({ jobSegment, apiBasePresent }: Props) {
     );
   } else if (query.data) {
     body = (
-      <JobListingPreview job={query.data} listingState="live" titleAs="h2" />
+      <JobListingPreview
+        job={query.data}
+        listingState="live"
+        titleAs="h2"
+        guest={guest}
+      />
     );
   } else {
     body = (

@@ -12,6 +12,7 @@ import {
 } from '@/lib/public-jobs';
 import { breadcrumbJsonLd, jobPostingJsonLd } from '@/lib/seo/json-ld';
 import { absoluteSiteOrigin } from '@/lib/site-origin';
+import { hasAnyAuthSession } from '@/lib/unified-auth';
 
 import { JobDetailScreen } from './job-detail-screen';
 
@@ -89,6 +90,7 @@ export async function JobDetailRoute({ params, structuredData }: Props) {
         kind="ok"
         job={job}
         viewedSegment={jobRef}
+        guest={!(await hasAnyAuthSession())}
         moreFromCompany={moreFromCompany}
       />
     </>
