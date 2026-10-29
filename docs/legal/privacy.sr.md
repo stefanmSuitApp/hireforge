@@ -6,7 +6,7 @@ Ova politika objašnjava koje podatke o ličnosti prikuplja Šljakam (sljakam.co
 
 Rukovalac je **Stefan Matić PR veb portali WEBLEGION Niš (Medijana)**, Rentgenova 10/4, 18108 Niš, Srbija, matični broj 67907442, PIB 114857284.
 
-Za sva pitanja o podacima o ličnosti piši na **[TODO(Stefan): e-adresa za zahteve o privatnosti]**.
+Za sva pitanja o podacima o ličnosti piši na [maticstefan1996@gmail.com](mailto:maticstefan1996@gmail.com).
 
 ## Koje podatke prikupljamo
 
@@ -38,7 +38,7 @@ Ne prodajemo podatke i ne koristimo ih za oglašavanje. Ne donosimo automatizova
 - **Osoblje Šljakama** (moderatori i administratori) pristupa podacima samo koliko je potrebno za podršku, proveru oglasa i naplatu.
 - **Obrađivači** koji za nas pružaju tehničke usluge, po ugovoru i samo po našem nalogu:
   - Hetzner Online GmbH, Nemačka: serveri, baza podataka, fajlovi i rezervne kopije (centar podataka u Nirnbergu);
-  - Resend, Inc., SAD: slanje e-pošte (tvoja e-adresa i sadržaj poruke). [⚖ pravni osnov za prenos u SAD]
+  - Resend, Inc., SAD: slanje e-pošte (tvoja e-adresa i sadržaj poruke).
 - **Državni organi**, kada to zakon nalaže.
 
 Sadržaj sajta (tekstovi, oglasne kampanje) uređujemo u Sanity CMS-u; tamo se ne nalaze podaci o korisnicima.
@@ -53,13 +53,11 @@ Sadržaj sajta (tekstovi, oglasne kampanje) uređujemo u Sanity CMS-u; tamo se n
 - **Evidencija radnji osoblja:** trajno.
 - **Rezervne kopije baze:** do 30 dana.
 
-[⚖ Rokovi za prijave i CV-ove: proveriti sa pravnikom.]
-
 ## Tvoja prava
 
 Imaš pravo da tražiš: pristup svojim podacima i kopiju, ispravku netačnih podataka, brisanje, ograničenje obrade, prenos podataka drugom rukovaocu i da uložiš prigovor na obradu zasnovanu na legitimnom interesu.
 
-Nalog možeš obrisati sam u podešavanjima naloga, a za ostale zahteve piši na adresu iz odeljka „Ko je rukovalac podacima". Odgovaramo bez odlaganja, najkasnije u roku od 30 dana.
+Za brisanje naloga i sve ostale zahteve piši na adresu iz odeljka „Ko je rukovalac podacima". Odgovaramo bez odlaganja, najkasnije u roku od 30 dana.
 
 Ako smatraš da obrada nije u skladu sa zakonom, možeš podneti pritužbu Povereniku za informacije od javnog značaja i zaštitu podataka o ličnosti, Bulevar kralja Aleksandra 15, 11000 Beograd, [www.poverenik.rs](https://www.poverenik.rs).
 
@@ -79,7 +77,7 @@ Sajt radi isključivo preko HTTPS-a, lozinke se čuvaju kao kriptografski otisci
 
 ## Maloletnici
 
-Nalog kandidata mogu otvoriti osobe koje imaju najmanje 15 godina. [⚖ potvrditi sa pravnikom]
+Nalog kandidata mogu otvoriti osobe koje imaju najmanje 15 godina.
 
 ## Izmene politike
 

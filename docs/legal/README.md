@@ -1,9 +1,9 @@
-# Legal texts — drafts for review
+# Legal texts
 
-Drafts of the privacy policy, terms of use and refund policy, in Serbian and
-English. Written 2026-10-29 by Claude from templates and from what the code
-actually does (plan: `docs/plans/LEGAL_AND_INVOICES.md`, C1). **Not reviewed
-by a lawyer.**
+The privacy policy, terms of use and refund policy, in Serbian and English.
+Written 2026-10-29 by Claude from templates and from what the code actually
+does (plan: `docs/plans/LEGAL_AND_INVOICES.md`, C1). **Published 2026-10-29
+on Stefan's approval, version `2026-10-29`; not yet reviewed by a lawyer.**
 
 | File                 | Page on the site             |
 | -------------------- | ---------------------------- |
@@ -27,18 +27,18 @@ starting draft and the copy for the lawyer.
 
 ## Open items
 
-- `TODO(Stefan)`: privacy contact email, support email, refund payout days.
-- `[⚖ …]` notes for the lawyer:
+- Filled by Stefan (2026-10-29): contact `maticstefan1996@gmail.com` (the
+  domain has no mailbox yet), refunds paid within 15 days.
+- For the lawyer (the published text states these without caveats):
   - the legal basis for sending email through Resend (USA);
   - the retention periods for applications and CVs;
   - the minimum age for a candidate account (15);
   - "not an employment agency" against the Law on Employment;
   - the liability cap and the court in Niš.
-- The privacy policy promises things built in later phases:
-  - self-service account deletion with a 30-day grace (C2);
-  - anonymising applications after 24 months (C5).
-
-  Publish it after C2 ships, or soften those lines.
+- Account deletion is by email request until C2 ships; then the privacy
+  policy and terms should mention the settings page (a Sanity edit with a
+  new "Effective from").
+- Anonymising applications after 24 months is stated but built in C5.
 
 ## Facts the texts rely on (for the lawyer)
 

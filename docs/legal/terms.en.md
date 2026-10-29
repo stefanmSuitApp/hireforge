@@ -6,14 +6,14 @@ These terms apply to everyone who uses Šljakam (sljakam.com): candidates, emplo
 
 Šljakam is a job board. Employers publish job ads; candidates search them and apply. The site is run by **Stefan Matić PR veb portali WEBLEGION Niš (Medijana)**, Rentgenova 10/4, 18108 Niš, Serbia, registration number (MB) 67907442, tax ID (PIB) 114857284 ("Šljakam", "we").
 
-Šljakam is neither an employer nor an employment agency: it does not hire candidates, does not broker employment contracts and does not decide who gets a job. Only the employer decides that. [⚖ check against the Serbian Law on Employment and Unemployment Insurance]
+Šljakam is neither an employer nor an employment agency: it does not hire candidates, does not broker employment contracts and does not decide who gets a job. Only the employer decides that.
 
 ## 2. Your account
 
 - Applying for jobs and publishing job ads need an account. Browsing job ads is free.
 - What you enter must be accurate and yours. One person has one candidate account.
 - Keep your password safe; you are responsible for what is done with your account unless you report misuse to us.
-- You can delete your account at any time in the account settings.
+- You can ask for your account to be deleted at any time, by email to the address in section 12.
 
 ## 3. Candidates
 
@@ -53,7 +53,7 @@ Automated copying of the site's content (scraping) without our permission, unsol
 
 - We work to keep Šljakam running without interruptions or errors, but cannot guarantee it.
 - We do not guarantee that a candidate will get a job or that an employer will find a candidate. We are not responsible for the accuracy of job ads and CVs published by users, or for the relationship between candidate and employer.
-- Towards employers, our total liability is limited to the amount the employer paid Šljakam in the previous 12 months, except for damage caused intentionally or by gross negligence. [⚖]
+- Towards employers, our total liability is limited to the amount the employer paid Šljakam in the previous 12 months, except for damage caused intentionally or by gross negligence.
 
 ## 9. Ending use
 
@@ -65,8 +65,8 @@ We may change these terms; a new version applies from the "Last updated" date at
 
 ## 11. Governing law and disputes
 
-These terms are governed by the law of the Republic of Serbia. We try to settle disputes by agreement; failing that, the competent court in Niš has jurisdiction. [⚖]
+These terms are governed by the law of the Republic of Serbia. We try to settle disputes by agreement; failing that, the competent court in Niš has jurisdiction.
 
 ## 12. Contact
 
-Questions about these terms: **[TODO(Stefan): support email]**.
+Questions about these terms: [maticstefan1996@gmail.com](mailto:maticstefan1996@gmail.com).

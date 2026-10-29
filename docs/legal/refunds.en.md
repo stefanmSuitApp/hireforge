@@ -19,10 +19,10 @@ If you decide not to fix it, or we still can't approve it after the fix, **we re
 
 ## How we refund
 
-For every refund we issue a credit note referring to the original invoice, and pay the money back to the account the payment came from, within [TODO(Stefan): number] days of approving the refund.
+For every refund we issue a credit note referring to the original invoice, and pay the money back to the account the payment came from, within 15 days of approving the refund.
 
 Packages activated with a free promo code have no refund, as nothing was paid.
 
 ## Contact
 
-Send a refund request or question to **[TODO(Stefan): support email]**, with the proforma or invoice number.
+Send a refund request or question to [maticstefan1996@gmail.com](mailto:maticstefan1996@gmail.com), with the proforma or invoice number.
