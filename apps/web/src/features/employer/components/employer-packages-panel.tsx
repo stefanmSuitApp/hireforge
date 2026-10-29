@@ -14,6 +14,7 @@ import {
   getTranslatedApiErrorMessage,
   type ErrorsTranslator,
 } from '@/lib/http/api-error-message';
+import { CheckoutLegalNotice } from '@/features/legal/legal-links';
 import { webHttp } from '@/lib/http/web-axios';
 
 import { packageCardUpgradeRowsForPicker } from '../lib/package-card-upgrade-features';
@@ -131,6 +132,7 @@ export function EmployerPackagesPanel({
         />
         <p className="mt-1 text-xs text-muted-foreground">{t('promoHint')}</p>
       </div>
+      <CheckoutLegalNotice />
 
       {error ? (
         <p className="text-sm text-destructive" role="alert">

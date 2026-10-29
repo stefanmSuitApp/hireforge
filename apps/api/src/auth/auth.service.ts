@@ -45,6 +45,11 @@ function assertSlugFormat(slug: string): void {
   }
 }
 
+/** Recorded only when the sign-up form showed published terms (see BFF). */
+function termsAcceptance(version: string | undefined) {
+  return version ? { termsVersion: version, termsAcceptedAt: new Date() } : {};
+}
+
 @Injectable()
 export class AuthService {
   constructor(private readonly authEmail: AuthEmailService) {}
@@ -148,6 +153,7 @@ export class AuthService {
           email,
           passwordHash,
           role: 'employer',
+          ...termsAcceptance(input.acceptedTermsVersion),
         })
         .returning({ id: users.id, role: users.role });
 
@@ -196,6 +202,7 @@ export class AuthService {
     password: string;
     fullName?: string;
     locale?: 'sr' | 'en';
+    acceptedTermsVersion?: string;
   }): Promise<{ accessToken: string; refreshToken: string }> {
     const database = getDb();
     if (!database) {
@@ -227,6 +234,7 @@ export class AuthService {
           email,
           passwordHash,
           role: 'candidate',
+          ...termsAcceptance(input.acceptedTermsVersion),
         })
         .returning({ id: users.id, role: users.role });
 

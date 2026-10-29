@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import {
   fetchCmsHomeJobsDiscovery,
   fetchCmsSiteSettings,
+  type LegalPageKind,
 } from '@/lib/cms-content';
 import { topLandingLinks } from '@/features/jobs/lib/landing';
 import {
@@ -35,7 +36,12 @@ async function footerLandingLinks(locale: string) {
   };
 }
 
-export async function SiteFooter() {
+export async function SiteFooter({
+  legal,
+}: {
+  /** Published legal pages, in display order. */
+  legal: readonly LegalPageKind[];
+}) {
   const locale = await getLocale();
   const t = await getTranslations('Footer');
   const navT = await getTranslations('Nav');
@@ -233,6 +239,23 @@ export async function SiteFooter() {
                 {t('integration')}
               </Link>
             </Button>
+          ) : null}
+          {legal.length ? (
+            <nav aria-label={t('legalNav')}>
+              <ul className="m-0 flex list-none flex-wrap gap-x-5 gap-y-2 p-0 text-xs">
+                {legal.map((kind) => (
+                  <li key={kind}>
+                    <Link
+                      href={`/${kind}`}
+                      locale={locale}
+                      className="text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+                    >
+                      {t(kind)}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
           ) : null}
           <p className="m-0 text-xs text-muted-foreground">
             <Link

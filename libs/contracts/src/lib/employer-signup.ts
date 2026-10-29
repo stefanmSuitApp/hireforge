@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { termsVersionSchema } from './candidate';
+
 import {
   companyDomesticInputSchema,
   companyForeignInputSchema,
@@ -12,6 +14,7 @@ export const employerSelfSignupBodySchema = z
     companySlug: z.string().min(1).max(80).optional(),
     /** UI locale, used for the verification email language and link. */
     locale: z.enum(['sr', 'en']).optional(),
+    acceptedTermsVersion: termsVersionSchema.optional(),
     company: z.discriminatedUnion('isForeign', [
       companyDomesticInputSchema,
       companyForeignInputSchema,

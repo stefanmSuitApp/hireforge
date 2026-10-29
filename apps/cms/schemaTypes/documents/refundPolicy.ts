@@ -2,7 +2,9 @@ import { defineField, defineType } from 'sanity';
 
 export const refundPolicy = defineType({
   name: 'refundPolicy',
-  title: 'Refund policy',
+  title: 'Refund policy (old)',
+  description:
+    'Replaced by Legal pages → Refund policy; its summary is used only while that page is unpublished.',
   type: 'document',
   fields: [
     defineField({
