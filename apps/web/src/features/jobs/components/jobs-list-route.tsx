@@ -14,9 +14,8 @@ import {
 
 import {
   buildListQuery,
-  GUEST_LIST_SIZE,
   jobsListFilterSignature,
-  JOBS_LIST_PAGE_SIZE,
+  resolveListPageSize,
   type JobsSearchParams,
 } from '../lib/jobs-list-query';
 
@@ -48,16 +47,7 @@ export async function JobsListRoute({
 
   const signedIn = await hasAnyAuthSession();
   // Guests get one page of GUEST_LIST_SIZE (the API caps it too).
-  const pageSize = signedIn
-    ? Math.min(
-        50,
-        Math.max(
-          1,
-          parseInt(sp.pageSize ?? String(JOBS_LIST_PAGE_SIZE), 10) ||
-            JOBS_LIST_PAGE_SIZE,
-        ),
-      )
-    : GUEST_LIST_SIZE;
+  const pageSize = resolveListPageSize(sp, signedIn);
 
   /**
    * The requested page (`?page=N`, so crawlers can paginate through real
