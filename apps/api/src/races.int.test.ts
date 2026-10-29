@@ -270,38 +270,35 @@ describe('two people sign up the same new company at once', () => {
     billingContactName: 'Ista Osoba',
   });
 
-  // Known issue (PROGRESS.md): both requests see no company with that PIB, both
-  // insert, and the loser hits companies_pib_unique → unhandled 500 instead of
-  // becoming a join request. Flip to `it` when sign-up handles the race.
-  it.fails(
-    'one creates the company, the other becomes a pending join request — no 500',
-    async () => {
-      const results = await Promise.all(
-        ['prvi', 'drugi'].map((who) =>
-          http(app)
-            .post('/api/auth/employer/register')
-            .send({
-              email: `${who}-istovremeno@primer.rs`,
-              password: 'Lozinka-123',
-              company: company('109000001', '23900001'),
-            }),
-        ),
-      );
-      expect(results.map((r) => r.status)).toEqual([201, 201]);
-      expect(
-        await count(
-          `select count(*)::int as n from companies where pib = '109000001'`,
-          [],
-        ),
-      ).toBe(1);
-      expect(
-        await count(
-          `select count(*)::int as n from company_join_requests r join companies c on c.id = r.company_id where c.pib = '109000001'`,
-          [],
-        ),
-      ).toBe(1);
-    },
-  );
+  // Company sign-ups take an advisory lock, so the second request sees the
+  // first one's company and becomes a join request (it used to hit
+  // companies_pib_unique → 500).
+  it('one creates the company, the other becomes a pending join request — no 500', async () => {
+    const results = await Promise.all(
+      ['prvi', 'drugi'].map((who) =>
+        http(app)
+          .post('/api/auth/employer/register')
+          .send({
+            email: `${who}-istovremeno@primer.rs`,
+            password: 'Lozinka-123',
+            company: company('109000001', '23900001'),
+          }),
+      ),
+    );
+    expect(results.map((r) => r.status)).toEqual([201, 201]);
+    expect(
+      await count(
+        `select count(*)::int as n from companies where pib = '109000001'`,
+        [],
+      ),
+    ).toBe(1);
+    expect(
+      await count(
+        `select count(*)::int as n from company_join_requests r join companies c on c.id = r.company_id where c.pib = '109000001'`,
+        [],
+      ),
+    ).toBe(1);
+  });
 
   it('whatever happens, there is never a second company with the same PIB', async () => {
     await Promise.all(

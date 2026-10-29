@@ -1061,6 +1061,7 @@
     "AUTH_REFRESH_INVALID": "Sesija nije važeća. Prijavi se ponovo.",
     "AUTH_USER_REMOVED": "Ovaj nalog više ne postoji.",
     "HTTP_EXCEPTION": "Zahtev nije mogao da se završi.",
+    "PAYLOAD_TOO_LARGE": "Zahtev je prevelik.",
     "NOT_FOUND": "Ništa nije pronađeno za ovaj zahtev.",
     "SERVICE_UNAVAILABLE": "Servis trenutno nije dostupan. Pokušaj kasnije.",
     "CONFLICT": "Ova radnja je u sukobu sa postojećim podacima.",

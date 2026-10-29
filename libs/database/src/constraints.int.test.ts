@@ -422,23 +422,19 @@ describe('deleting companies, jobs and users', () => {
     expect(rows[0].assigned_moderator_id).toBeNull();
   });
 
-  // Known issue (PROGRESS.md): staff_audit_log.actor_user_id is ON DELETE
-  // CASCADE, so deleting a staff user erases their audit trail. No API deletes
-  // users today; flip to `it` when the FK becomes SET NULL.
-  it.fails(
-    'deleting a staff user keeps the audit rows of what they did',
-    async () => {
-      const admin = await insertAdmin();
-      await q(
-        `insert into staff_audit_log (actor_user_id, action, entity_type, entity_id)
+  // actor_user_id is ON DELETE SET NULL (0034): the audit rows outlive the
+  // staff user.
+  it('deleting a staff user keeps the audit rows of what they did', async () => {
+    const admin = await insertAdmin();
+    await q(
+      `insert into staff_audit_log (actor_user_id, action, entity_type, entity_id)
        values ($1, 'subscription.mark_paid', 'subscription', 'x')`,
-        [admin.id],
-      );
-      await q('delete from users where id = $1', [admin.id]);
-      const { rowCount } = await q(
-        `select 1 from staff_audit_log where action = 'subscription.mark_paid'`,
-      );
-      expect(rowCount).toBe(1);
-    },
-  );
+      [admin.id],
+    );
+    await q('delete from users where id = $1', [admin.id]);
+    const { rowCount } = await q(
+      `select 1 from staff_audit_log where action = 'subscription.mark_paid'`,
+    );
+    expect(rowCount).toBe(1);
+  });
 });

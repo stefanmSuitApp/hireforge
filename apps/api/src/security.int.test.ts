@@ -220,24 +220,20 @@ describe('tokens', () => {
 });
 
 describe('request bodies', () => {
-  // Known issue (PROGRESS.md): body-parser's PayloadTooLargeError is not an
-  // HttpException, so AllExceptionsFilter answers 500 and logs a crash.
-  // Flip to `it` once the filter maps body-parser errors to their status.
-  it.fails(
-    'a JSON body over the size limit is a 413, not a crash',
-    async () => {
-      const res = await http(app)
-        .post('/api/auth/candidate/login')
-        .set('content-type', 'application/json')
-        .send(
-          JSON.stringify({
-            email: 'a@b.rs',
-            password: 'x'.repeat(2 * 1024 * 1024),
-          }),
-        );
-      expect(res.status).toBe(413);
-    },
-  );
+  // body-parser's PayloadTooLargeError is not an HttpException; the filter
+  // maps such client errors to their own status instead of a 500 crash.
+  it('a JSON body over the size limit is a 413, not a crash', async () => {
+    const res = await http(app)
+      .post('/api/auth/candidate/login')
+      .set('content-type', 'application/json')
+      .send(
+        JSON.stringify({
+          email: 'a@b.rs',
+          password: 'x'.repeat(2 * 1024 * 1024),
+        }),
+      );
+    expect(res.status).toBe(413);
+  });
 
   it('malformed JSON is a 400, not a crash', async () => {
     const res = await http(app)

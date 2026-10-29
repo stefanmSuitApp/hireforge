@@ -1061,6 +1061,7 @@
     "AUTH_REFRESH_INVALID": "Your session is invalid. Please sign in again.",
     "AUTH_USER_REMOVED": "This account no longer exists.",
     "HTTP_EXCEPTION": "The request could not be completed.",
+    "PAYLOAD_TOO_LARGE": "The request is too large.",
     "NOT_FOUND": "Nothing was found for this request.",
     "SERVICE_UNAVAILABLE": "Service is temporarily unavailable. Try again later.",
     "CONFLICT": "This action conflicts with existing data.",

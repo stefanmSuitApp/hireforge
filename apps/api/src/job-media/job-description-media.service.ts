@@ -4,9 +4,9 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { entitlementsBlobSchema } from 'contracts';
-import { eq } from 'drizzle-orm';
-import { jobDescriptionMedia, jobs, subscriptions } from 'database';
+import { entitlementsBlobSchema, type UserRole } from 'contracts';
+import { and, eq } from 'drizzle-orm';
+import { employers, jobDescriptionMedia, jobs, subscriptions } from 'database';
 import sharp from 'sharp';
 
 import {
@@ -44,9 +44,15 @@ function publicUrlForMediaId(mediaId: string): string {
 export class JobDescriptionMediaService {
   constructor(private readonly storage: JobMediaStorageService) {}
 
+  /**
+   * Images of published jobs are public. Any other status (draft, in review,
+   * rejected, archived) only for staff and the job's own company, so the
+   * editor preview works; everyone else gets the same 404 as an unknown id.
+   */
   async getPublicFile(
     mediaId: string,
-  ): Promise<{ buffer: Buffer; mimeType: string } | null> {
+    viewer?: { id: string; role: UserRole },
+  ): Promise<{ buffer: Buffer; mimeType: string; public: boolean } | null> {
     const database = getDb();
     if (!database) {
       return null;
@@ -55,18 +61,47 @@ export class JobDescriptionMediaService {
       .select({
         storageKey: jobDescriptionMedia.storageKey,
         mimeType: jobDescriptionMedia.mimeType,
+        jobStatus: jobs.status,
+        companyId: jobs.companyId,
       })
       .from(jobDescriptionMedia)
+      .innerJoin(jobs, eq(jobDescriptionMedia.jobId, jobs.id))
       .where(eq(jobDescriptionMedia.id, mediaId))
       .limit(1);
     if (!row) {
+      return null;
+    }
+    const isPublic = row.jobStatus === 'published';
+    if (!isPublic && !(await this.mayPreview(viewer, row.companyId))) {
       return null;
     }
     const buf = await this.storage.get(row.storageKey);
     if (!buf) {
       return null;
     }
-    return { buffer: buf, mimeType: row.mimeType };
+    return { buffer: buf, mimeType: row.mimeType, public: isPublic };
+  }
+
+  private async mayPreview(
+    viewer: { id: string; role: UserRole } | undefined,
+    companyId: string,
+  ): Promise<boolean> {
+    if (!viewer) return false;
+    if (viewer.role === 'moderator' || viewer.role === 'admin') return true;
+    if (viewer.role !== 'employer') return false;
+    const database = getDb();
+    if (!database) return false;
+    const [member] = await database.db
+      .select({ userId: employers.userId })
+      .from(employers)
+      .where(
+        and(
+          eq(employers.userId, viewer.id),
+          eq(employers.companyId, companyId),
+        ),
+      )
+      .limit(1);
+    return member != null;
   }
 
   private async assertJobAllowsImageUpload(jobId: string): Promise<{
@@ -150,10 +185,8 @@ export class JobDescriptionMediaService {
     }
     const { job } = await this.assertJobAllowsImageUpload(jobId);
     if (job.companyId !== companyId) {
-      throw codedForbidden(
-        'JOB_FORBIDDEN_COMPANY',
-        'Job belongs to another company',
-      );
+      // Same answer as an unknown id: never confirm another company's job exists.
+      throw codedNotFound('JOB_NOT_FOUND', 'Job not found');
     }
     const { buffer, width, height } = await this.transformUpload(file);
 

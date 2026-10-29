@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray, sql } from 'drizzle-orm';
 import type { EmployerSelfSignupBody } from 'contracts';
 import {
   candidates,
@@ -81,6 +81,13 @@ export class AuthService {
         );
       }
 
+      // One company sign-up at a time: two people registering the same new
+      // company at once would both see no match and both insert, and the
+      // second hit the unique PIB (500) instead of becoming a join request.
+      // Rare and short (the password is hashed before the transaction).
+      await tx.execute(
+        sql`select pg_advisory_xact_lock(hashtext('hireforge:company-self-signup'))`,
+      );
       const existingCompanyId = await findExistingCompanyIdForSelfSignup(
         tx,
         companyPayload,

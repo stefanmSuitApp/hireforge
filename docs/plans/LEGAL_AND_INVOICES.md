@@ -140,7 +140,7 @@ As built (branch `feat/legal-pages`):
   - The packages page shows a refunds and terms line.
   - The proforma PDF footer URL and an email footer link are left for C3.
 - **Sign-up acceptance:**
-  - Migration 0034 adds `users.terms_accepted_at` and
+  - Migration 0035 adds `users.terms_accepted_at` and
     `users.terms_version`.
   - The register BFF routes set `acceptedTermsVersion` themselves, from the
     published terms and only under the same condition as the notice. A

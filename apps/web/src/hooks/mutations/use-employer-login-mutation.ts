@@ -7,6 +7,7 @@ import { stripLocalePrefix, type AppLocale } from '@/i18n/localized-path';
 import { navigateWithFreshSession } from '@/lib/session-navigation';
 
 import { postEmployerLogin, type EmployerLoginBody } from '@/api/employer-auth';
+import { isSafeReturnPath } from '@/lib/safe-return-path';
 
 type Vars = { body: EmployerLoginBody; returnTo?: string | null };
 
@@ -17,7 +18,7 @@ export function useEmployerLoginMutation() {
     mutationFn: (vars: Vars) => postEmployerLogin(vars.body),
     onSuccess: (_data, variables) => {
       const ret = variables.returnTo;
-      if (ret?.startsWith('/') && !ret.startsWith('//')) {
+      if (isSafeReturnPath(ret)) {
         // `returnTo` may carry the locale; strip it so it is not added twice.
         navigateWithFreshSession(locale, stripLocalePrefix(ret));
         return;

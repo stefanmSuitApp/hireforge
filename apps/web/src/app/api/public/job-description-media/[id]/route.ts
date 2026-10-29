@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { nestApiUrl, resolveNestServerOrigin } from '@/lib/nest-api-url';
+import { viewerAuthHeaders } from '@/lib/viewer-access-token';
 
 /** Path segment is a UUID (Nest `ParseUUIDPipe`). */
 const UUID_RE = /^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i;
@@ -23,7 +24,11 @@ export async function GET(
     );
   }
 
-  const upstream = await fetch(url, { headers: { accept: 'image/*' } });
+  // The signed-in viewer's token lets a company (or staff) see images of its
+  // unpublished jobs, e.g. in the editor preview.
+  const upstream = await fetch(url, {
+    headers: { accept: 'image/*', ...(await viewerAuthHeaders()) },
+  });
   if (!upstream.ok) {
     const text = await upstream.text();
     return new NextResponse(text, {

@@ -161,7 +161,7 @@ export const users = pgTable(
     /** Optional phone shown to employers for the assigned moderator. */
     publicPhone: text('public_phone'),
     role: userRoleEnum('role').notNull(),
-    /** Sign-up acceptance of the terms of use (0034); null before that. */
+    /** Sign-up acceptance of the terms of use (0035); null before that. */
     termsAcceptedAt: timestamp('terms_accepted_at', { withTimezone: true }),
     /** The accepted terms' "effective from" date (`YYYY-MM-DD`). */
     termsVersion: text('terms_version'),
@@ -278,8 +278,9 @@ export const staffAuditLog = pgTable(
      * Human staff actor when present; `NULL` for automated writers (e.g. CMS
      * package sync webhook / scheduled reconcile — Step 6).
      */
+    // SET NULL: deleting a staff user keeps the audit rows of what they did.
     actorUserId: uuid('actor_user_id').references(() => users.id, {
-      onDelete: 'cascade',
+      onDelete: 'set null',
     }),
     action: text('action').notNull(),
     entityType: text('entity_type').notNull(),
