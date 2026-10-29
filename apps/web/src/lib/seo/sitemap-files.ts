@@ -23,10 +23,20 @@ const ABOUT_SLUGS = new Set(['about-hireforge', 'about']);
 export async function loadSitemapFiles(): Promise<Map<string, SitemapEntry[]>> {
   const files = new Map<string, SitemapEntry[]>();
   const publicJobs = publicJobsEnabled();
+  const base = resolveNestPublicOrigin();
+  const live =
+    publicJobs && base ? await fetchPublicSitemap(base, { fresh: true }) : null;
+  if (live && !live.ok) {
+    // Fail loud: an empty job sitemap would tell crawlers every job is gone.
+    throw new Error(`sitemap data unavailable: ${live.error}`);
+  }
   const cms = await fetchCmsEditorialSlugs();
 
   const pages: SitemapEntry[] = [{ path: '' }];
-  if (publicJobs) pages.push({ path: '/jobs' }, { path: '/employers' });
+  // `/jobs` is noindex while nothing is live; listing it then only earns a
+  // "submitted URL marked noindex" warning in Search Console.
+  if (live?.data.jobs.length) pages.push({ path: '/jobs' });
+  if (publicJobs) pages.push({ path: '/employers' });
   const about = cms.filter((p) => ABOUT_SLUGS.has(p.slug));
   if (about.length) {
     pages.push({ path: '/about', lastmod: about[0]?.updatedAt ?? null });
@@ -37,14 +47,7 @@ export async function loadSitemapFiles(): Promise<Map<string, SitemapEntry[]>> {
     }
   }
   files.set('pages.xml', pages);
-
-  const base = resolveNestPublicOrigin();
-  if (!publicJobs || !base) return files;
-  const live = await fetchPublicSitemap(base, { fresh: true });
-  if (!live.ok) {
-    // Fail loud: an empty job sitemap would tell crawlers every job is gone.
-    throw new Error(`sitemap data unavailable: ${live.error}`);
-  }
+  if (!live) return files;
 
   const add = (prefix: string, entries: SitemapEntry[]) =>
     chunk(entries).forEach((part, i) => files.set(`${prefix}-${i}.xml`, part));
