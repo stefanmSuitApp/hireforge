@@ -383,7 +383,7 @@
       "upgradeFeatures": {
         "featured_listing": {
           "label": "Featured listing",
-          "hintLocked": "Upgrade your package to feature listings in search results."
+          "hintLocked": "Your ad sits at the top of search results with a gold badge. Every visitor sees it, signed in or not."
         },
         "png_creative": {
           "label": "PNG creative",
