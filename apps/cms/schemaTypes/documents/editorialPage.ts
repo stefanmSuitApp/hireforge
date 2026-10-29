@@ -42,7 +42,7 @@ export const editorialPage = defineType({
     defineField({
       name: 'body',
       title: 'Body',
-      type: 'blockContent',
+      type: 'localeBlockContent',
     }),
     defineField({
       name: 'seoTitle',

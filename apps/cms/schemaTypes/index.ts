@@ -21,13 +21,14 @@ import { employerBenefit } from './objects/employerBenefit';
 import { employerBenefitLocalized } from './objects/employerBenefitLocalized';
 import { employerTestimonial } from './objects/employerTestimonial';
 import { employerTestimonialLocalized } from './objects/employerTestimonialLocalized';
-import { localeString, localeText } from './objects/locale';
+import { localeBlockContent, localeString, localeText } from './objects/locale';
 import { navLink } from './objects/navLink';
 
 export const schemaTypes: SchemaTypeDefinition[] = [
   blockContent,
   localeString,
   localeText,
+  localeBlockContent,
   navLink,
   campaignSlot,
   packagePriceRow,

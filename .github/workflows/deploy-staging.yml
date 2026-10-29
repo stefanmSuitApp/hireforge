@@ -82,7 +82,7 @@ jobs:
             NEXT_PUBLIC_API_URL=http://api:4000
             NEXT_PUBLIC_DEFAULT_LOCALE=sr
             NEXT_PUBLIC_SUPPORTED_LOCALES=sr,en
-            NEXT_PUBLIC_SANITY_PROJECT_ID=845zdl9k
+            NEXT_PUBLIC_SANITY_PROJECT_ID=o85214ma
             NEXT_PUBLIC_SANITY_DATASET=production
           cache-from: type=gha,scope=web
           cache-to: type=gha,mode=max,scope=web

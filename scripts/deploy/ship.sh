@@ -53,7 +53,7 @@ for svc in api worker web; do
       --build-arg "NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://api:4000}"
       --build-arg "NEXT_PUBLIC_DEFAULT_LOCALE=${NEXT_PUBLIC_DEFAULT_LOCALE:-sr}"
       --build-arg "NEXT_PUBLIC_SUPPORTED_LOCALES=${NEXT_PUBLIC_SUPPORTED_LOCALES:-sr,en}"
-      --build-arg "NEXT_PUBLIC_SANITY_PROJECT_ID=${NEXT_PUBLIC_SANITY_PROJECT_ID:-845zdl9k}"
+      --build-arg "NEXT_PUBLIC_SANITY_PROJECT_ID=${NEXT_PUBLIC_SANITY_PROJECT_ID:-o85214ma}"
       --build-arg "NEXT_PUBLIC_SANITY_DATASET=${NEXT_PUBLIC_SANITY_DATASET:-production}"
     )
   fi
