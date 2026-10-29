@@ -14,20 +14,29 @@ compose() { docker compose -f compose.prod.yml "$@"; }
 # psql in the postgres container against database $1, SQL on stdin.
 pg() { compose exec -T postgres sh -c 'psql -v ON_ERROR_STOP=1 -qtA -U "$POSTGRES_USER" -d "$0"' "$1"; }
 
+DOWNLOADED=
 if [[ $# -ge 1 ]]; then
   FILE=$1
 else
   mkdir -p backups/restore-check
-  name=$(compose --profile tools run --rm --no-deps -T -v "$ROOT/backups/restore-check:/out" \
+  # As this user, not the image's root: the copy holds every account and is
+  # deleted again below.
+  name=$(compose --profile tools run --rm --no-deps -T --user "$(id -u):$(id -g)" \
+    -v "$ROOT/backups/restore-check:/out" \
     migrate node scripts/db/backup-offsite.mjs latest /out | tail -1)
   FILE=backups/restore-check/$(basename "$name")
+  DOWNLOADED=$FILE
 fi
 [[ -s $FILE ]] || { echo "no dump at $FILE" >&2; exit 1; }
 echo "=== restoring $FILE into $CHECK_DB"
 
-cleanup() { echo "DROP DATABASE IF EXISTS $CHECK_DB;" | pg postgres >/dev/null; }
+drop_check_db() { echo "DROP DATABASE IF EXISTS $CHECK_DB;" | pg postgres >/dev/null; }
+cleanup() {
+  drop_check_db
+  if [[ -n $DOWNLOADED ]]; then rm -f "$DOWNLOADED"; fi
+}
 trap cleanup EXIT
-cleanup
+drop_check_db
 echo "CREATE DATABASE $CHECK_DB;" | pg postgres >/dev/null
 gunzip -c "$FILE" | pg "$CHECK_DB" >/dev/null
 

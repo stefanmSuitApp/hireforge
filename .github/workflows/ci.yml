@@ -1,13 +1,15 @@
 name: CI
 
+# Pull requests, and on main through deploy-staging (which deploys only when
+# this passes).
 on:
   pull_request:
-  push:
-    branches: [main]
+  workflow_call:
 
+# A newer push cancels a PR's run; never a run a staging deploy waits on.
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   checks:

@@ -1,0 +1,110 @@
+name: deploy-staging
+
+# main → CI (checks + e2e) + integration → images built once, for this commit →
+# staging.sljakam.com. Production is the manual deploy-production workflow,
+# which promotes these exact images (they stay on the server).
+on:
+  push:
+    branches: [main]
+    # Docs change nothing that ships.
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One staging deploy at a time; a newer merge waits instead of racing on the
+# server (release.sh also locks against a production release).
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  integration:
+    uses: ./.github/workflows/integration.yml
+
+  deploy:
+    needs: [ci, integration]
+    runs-on: ubuntu-latest
+    environment: staging
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # ship.sh checks the commit is on origin/main.
+          fetch-depth: 0
+
+      - name: Image tag
+        id: meta
+        run: echo "sha=$(git rev-parse --short=12 HEAD)" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      # Same names and build args as scripts/deploy/ship.sh, which then finds
+      # them here and only ships them.
+      - name: Build api
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.api
+          platforms: linux/amd64
+          load: true
+          tags: hireforge-production-api:${{ steps.meta.outputs.sha }}
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,mode=max,scope=api
+
+      - name: Build worker
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.worker
+          platforms: linux/amd64
+          load: true
+          tags: hireforge-production-worker:${{ steps.meta.outputs.sha }}
+          cache-from: type=gha,scope=worker
+          cache-to: type=gha,mode=max,scope=worker
+
+      - name: Build web
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.web
+          platforms: linux/amd64
+          load: true
+          tags: hireforge-production-web:${{ steps.meta.outputs.sha }}
+          build-args: |
+            NEXT_PUBLIC_APP_URL=https://sljakam.com
+            NEXT_PUBLIC_API_URL=http://api:4000
+            NEXT_PUBLIC_DEFAULT_LOCALE=sr
+            NEXT_PUBLIC_SUPPORTED_LOCALES=sr,en
+            NEXT_PUBLIC_SANITY_PROJECT_ID=845zdl9k
+            NEXT_PUBLIC_SANITY_DATASET=production
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,mode=max,scope=web
+
+      - uses: ./.github/actions/ssh-setup
+        with:
+          host: ${{ vars.DEPLOY_HOST }}
+          user: ${{ vars.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          host-key: ${{ vars.DEPLOY_HOST_KEY }}
+
+      - name: Ship and release (rolls back by itself if not healthy)
+        env:
+          HIREFORGE_SSH: hireforge
+          HIREFORGE_SSH_KEY: /home/runner/.ssh/deploy_key
+        run: ./scripts/deploy/ship.sh staging
+
+      - name: Through Caddy, with the basic-auth login
+        run: |
+          ssh hireforge 'cd /opt/hireforge-staging \
+            && u=$(grep -E "^STAGING_BASIC_AUTH_USER=" deploy/.env.staging | cut -d= -f2-) \
+            && p=$(grep -E "^STAGING_BASIC_AUTH_PASSWORD=" deploy/.env.staging | cut -d= -f2-) \
+            && curl -fsS -o /dev/null --retry 5 --retry-delay 3 --retry-all-errors \
+              --resolve staging.sljakam.com:443:127.0.0.1 -u "$u:$p" https://staging.sljakam.com/sr'
+          echo "staging runs ${{ steps.meta.outputs.sha }}; promote it with the deploy-production workflow"

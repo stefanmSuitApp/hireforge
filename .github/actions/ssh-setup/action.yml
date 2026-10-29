@@ -1,0 +1,44 @@
+name: ssh-setup
+description: >
+  Prepares plain ssh to the deploy host as `ssh hireforge`, with the host key pinned
+  (no trust-on-first-use). Replaces third-party SSH actions, which would see the deploy key.
+inputs:
+  host:
+    description: Server IP (DEPLOY_HOST variable)
+    required: true
+  user:
+    description: SSH user (DEPLOY_USER variable)
+    required: true
+  key:
+    description: Private key of the CI deploy key (DEPLOY_SSH_KEY secret)
+    required: true
+  host-key:
+    description: The server's public host key, e.g. "ssh-ed25519 AAAA…" (DEPLOY_HOST_KEY variable)
+    required: true
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        HOST: ${{ inputs.host }}
+        USER_NAME: ${{ inputs.user }}
+        KEY: ${{ inputs.key }}
+        HOST_KEY: ${{ inputs.host-key }}
+      run: |
+        set -euo pipefail
+        [[ -n "$HOST_KEY" ]] || { echo "DEPLOY_HOST_KEY variable is missing" >&2; exit 1; }
+        install -m 700 -d ~/.ssh
+        printf '%s\n' "$KEY" > ~/.ssh/deploy_key
+        chmod 600 ~/.ssh/deploy_key
+        printf '%s %s\n' "$HOST" "$HOST_KEY" > ~/.ssh/known_hosts
+        cat > ~/.ssh/config <<EOF
+        Host hireforge
+          HostName $HOST
+          User $USER_NAME
+          IdentityFile ~/.ssh/deploy_key
+          IdentitiesOnly yes
+          StrictHostKeyChecking yes
+          UserKnownHostsFile ~/.ssh/known_hosts
+          ServerAliveInterval 30
+        EOF
+        ssh hireforge true
