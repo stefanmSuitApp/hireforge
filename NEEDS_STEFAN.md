@@ -97,15 +97,6 @@ Privacy policy, terms of use and refund policy pages need real legal copy
 
 ## Phase T: decisions (found by the new tests)
 
-- [ ] **Moderator scope for employer accounts:** may a moderator move an
-      employer into a company outside their pipeline (today: any)? Same for
-      `GET /moderator/employers` (lists every employer) and
-      `POST /moderator/jobs` / the job composer bootstrap (any company).
-- [ ] **Cover letters:** should employers see them? Collected and stored,
-      never shown.
-- [ ] **Draft images:** may images of unpublished jobs be fetched by URL? If
-      not, `getPublicFile` needs a status check (and the editor preview must
-      load drafts' images through an authenticated route).
 - [ ] **Billing emails** go to one arbitrary employer of the company, not to
       the company's `billing_email`, and failures are not retried. Intended?
 - [ ] **Worker without `RESEND_API_KEY` in production:** every notification

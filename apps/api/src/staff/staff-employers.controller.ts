@@ -21,6 +21,7 @@ import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 import { codedBadRequest } from '../http/coded-http';
 import { firstQueryString } from '../http/query-string';
+import { type StaffActor } from './staff-company-access';
 import { StaffEmployersService } from './staff-employers.service';
 
 @Controller('moderator/employers')
@@ -29,12 +30,12 @@ import { StaffEmployersService } from './staff-employers.service';
 export class StaffEmployersController {
   constructor(private readonly employers: StaffEmployersService) {}
 
-  private userId(req: Request): string {
-    const id = req.hireforgeUser?.id;
-    if (!id) {
+  private actor(req: Request): StaffActor {
+    const user = req.hireforgeUser;
+    if (!user) {
       throw new UnauthorizedException();
     }
-    return id;
+    return { actorUserId: user.id, actorRole: user.role };
   }
 
   @Get()
@@ -54,7 +55,7 @@ export class StaffEmployersController {
         z.flattenError(parsed.error),
       );
     }
-    return this.employers.list(parsed.data);
+    return this.employers.list(this.actor(req), parsed.data);
   }
 
   @Patch(':employerId')
@@ -71,6 +72,6 @@ export class StaffEmployersController {
         z.flattenError(parsed.error),
       );
     }
-    return this.employers.patch(this.userId(req), employerId, parsed.data);
+    return this.employers.patch(this.actor(req), employerId, parsed.data);
   }
 }

@@ -503,6 +503,23 @@ Found with a scripted sweep of the live public pages at 375 and 1440 px
     passes. Verified on the server: Caddy reaches staging as `staging-web`,
     and sljakam.com is production's.
 
+## Moderator scope (branch `fix/moderator-company-scope`, 2026-10-29)
+
+- **Decided (Stefan):** moderators act only on their own companies and the
+  lead pool (`unassigned`, `closed_lost`), like company details already did;
+  admins on everything.
+- **Done:** one rule in `apps/api/src/staff/staff-company-access.ts`
+  (`staffCanAccessCompany`, its SQL form `staffCompanyScope`,
+  `assertStaffCanAccessCompany`), applied to the employer list, moving an
+  employer (both the current and the target company), creating a job on
+  behalf of a company and the job composer bootstrap. Out of scope → 403
+  `STAFF_COMPANY_VIEW_FORBIDDEN`.
+- **Tests:** the pinned `it.fails` flipped, 5 new integration tests and
+  e2e `moderator-scope.spec.ts` (the seed moderator's employer list); each
+  failed before the fix.
+- **Not changed:** the moderation queue (publish / reject) stays shared by
+  all moderators.
+
 ## Known bugs, round 1 (branch `fix/known-bugs-security`, 2026-10-29)
 
 Fixed, each pinned `it.fails` test flipped to `it` (failed before the fix):
@@ -523,9 +540,6 @@ Fixed, each pinned `it.fails` test flipped to `it` (failed before the fix):
 Phase T pinned these with an `it.fails` test named after the fix; fixing the
 bug turns it red and it is flipped to `it`.
 
-- Moderators can move any employer into any company
-  (`PATCH /api/moderator/employers/:id` has no pipeline check) —
-  `company-isolation.int.test.ts`. Needs a decision (NEEDS_STEFAN.md).
 - Cover letters are stored but no route shows them to the employer.
 - Uploaded CV file names lose Serbian letters (`Petrović` → `Petrovi__`:
   multer reads names as latin1, `safeBasename` keeps ASCII only).

@@ -54,6 +54,56 @@ export async function createOwnedCompany(): Promise<ExistingCompany> {
   return company;
 }
 
+/**
+ * A company with one employer member, assigned to `assignedTo` (a staff user
+ * id) in `salesStatus`. Returns the member's email.
+ */
+export async function createCompanyWithEmployer(opts: {
+  assignedTo: string | null;
+  salesStatus: 'unassigned' | 'pipeline' | 'closed_won' | 'closed_lost';
+}): Promise<{ companyId: string; employerEmail: string }> {
+  const suffix = randomInt(100000, 999999);
+  const companyId = randomUUID();
+  const employerEmail = `clan-${suffix}@firma.example`;
+  await withDb(async (db) => {
+    await db.query(
+      `INSERT INTO companies (id, slug, legal_name, pib, mb, country_code, source,
+         sales_status, assigned_moderator_id, billing_email)
+       VALUES ($1, $2, $3, $4, $5, 'RS', 'moderator_lead', $6, $7,
+         'billing@firma.example')`,
+      [
+        companyId,
+        `firma-${suffix}`,
+        `Firma ${suffix} d.o.o.`,
+        String(randomInt(100000000, 999999999)),
+        String(randomInt(10000000, 99999999)),
+        opts.salesStatus,
+        opts.assignedTo,
+      ],
+    );
+    const user = await db.query<{ id: string }>(
+      `INSERT INTO users (email, password_hash, role)
+       VALUES ($1, 'not-a-login', 'employer') RETURNING id`,
+      [employerEmail],
+    );
+    await db.query(
+      `INSERT INTO employers (user_id, company_id) VALUES ($1, $2)`,
+      [user.rows[0].id, companyId],
+    );
+  });
+  return { companyId, employerEmail };
+}
+
+export async function staffUserId(email: string): Promise<string> {
+  return withDb(async (db) => {
+    const r = await db.query<{ id: string }>(
+      'SELECT id FROM users WHERE email = $1',
+      [email],
+    );
+    return r.rows[0].id;
+  });
+}
+
 export async function employerCompanyIdsForEmail(
   email: string,
 ): Promise<string[]> {

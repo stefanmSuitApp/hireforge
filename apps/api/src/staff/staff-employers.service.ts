@@ -1,21 +1,30 @@
 import { Injectable } from '@nestjs/common';
 import type { StaffEmployerListItem, StaffEmployerPatchBody } from 'contracts';
-import { count, desc, eq, ilike, or, sql } from 'drizzle-orm';
+import { and, count, desc, eq, ilike, or } from 'drizzle-orm';
 import { companies, employers, users } from 'database';
 
 import { codedNotFound, codedServiceUnavailable } from '../http/coded-http';
 import { getDb } from '../database';
 import { StaffAuditService } from './staff-audit.service';
+import {
+  assertStaffCanAccessCompany,
+  staffCompanyScope,
+  type StaffActor,
+} from './staff-company-access';
 
 @Injectable()
 export class StaffEmployersService {
   constructor(private readonly audit: StaffAuditService) {}
 
-  async list(input: {
-    q?: string;
-    limit: number;
-    offset: number;
-  }): Promise<{ items: StaffEmployerListItem[]; total: number }> {
+  /** Moderators see employers of their own and lead-pool companies only. */
+  async list(
+    actor: StaffActor,
+    input: {
+      q?: string;
+      limit: number;
+      offset: number;
+    },
+  ): Promise<{ items: StaffEmployerListItem[]; total: number }> {
     const database = getDb();
     if (!database) {
       throw codedServiceUnavailable(
@@ -25,20 +34,23 @@ export class StaffEmployersService {
     }
 
     const q = input.q?.trim();
-    const whereExpr = q
-      ? or(
-          ilike(users.email, `%${q}%`),
-          ilike(companies.legalName, `%${q}%`),
-          ilike(companies.slug, `%${q}%`),
-        )
-      : undefined;
+    const whereExpr = and(
+      staffCompanyScope(actor),
+      q
+        ? or(
+            ilike(users.email, `%${q}%`),
+            ilike(companies.legalName, `%${q}%`),
+            ilike(companies.slug, `%${q}%`),
+          )
+        : undefined,
+    );
 
     const [totalRow] = await database.db
       .select({ n: count() })
       .from(employers)
       .innerJoin(users, eq(employers.userId, users.id))
       .innerJoin(companies, eq(employers.companyId, companies.id))
-      .where(whereExpr ?? sql`true`);
+      .where(whereExpr);
 
     const rows = await database.db
       .select({
@@ -52,7 +64,7 @@ export class StaffEmployersService {
       .from(employers)
       .innerJoin(users, eq(employers.userId, users.id))
       .innerJoin(companies, eq(employers.companyId, companies.id))
-      .where(whereExpr ?? sql`true`)
+      .where(whereExpr)
       .orderBy(desc(employers.createdAt))
       .limit(input.limit)
       .offset(input.offset);
@@ -70,7 +82,7 @@ export class StaffEmployersService {
   }
 
   async patch(
-    actorUserId: string,
+    actor: StaffActor,
     employerId: string,
     body: StaffEmployerPatchBody,
   ): Promise<{ ok: true }> {
@@ -99,15 +111,10 @@ export class StaffEmployersService {
       );
     }
 
-    const [targetCompany] = await database.db
-      .select({ id: companies.id })
-      .from(companies)
-      .where(eq(companies.id, body.companyId))
-      .limit(1);
-
-    if (!targetCompany) {
-      throw codedNotFound('COMPANY_NOT_FOUND', 'Company not found');
-    }
+    // Both ends: a moderator may neither move someone into another
+    // moderator's client nor pull them out of one.
+    await assertStaffCanAccessCompany(emp.companyId, actor);
+    await assertStaffCanAccessCompany(body.companyId, actor);
 
     if (emp.companyId === body.companyId) {
       return { ok: true };
@@ -120,7 +127,7 @@ export class StaffEmployersService {
       .where(eq(employers.id, employerId));
 
     await this.audit.log({
-      actorUserId,
+      actorUserId: actor.actorUserId,
       action: 'employer.reassign_company',
       entityType: 'employer',
       entityId: employerId,
