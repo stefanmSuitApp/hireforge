@@ -31,7 +31,7 @@ Stefan: [`NEEDS_STEFAN.md`](./NEEDS_STEFAN.md).
 - **Backups:** nightly + per deploy, on the VM and in the bucket
   `hireforge` (DEVLEGION, nbg1; `backups/postgres/{production,staging}/`,
   30 days); restore from the bucket checked on prod 2026-10-29.
-- **Staging:** https://staging.sljakam.com (basic auth) on the same VM,
+- **Staging:** https://staging.sljakam.com (open, `noindex`) on the same VM,
   own checkout `/opt/hireforge-staging`, `compose.staging.yml`, memory caps
   (~310 MB in use). Seed accounts = production's, with production's
   password hashes; shares the Sanity read token, the bucket and the Resend
@@ -431,11 +431,12 @@ Found with a scripted sweep of the live public pages at 375 and 1440 px
   - A staging release ran from the new folder: lock, key sync, backup
     uploaded to `staging/`, migrate, all gates green.
   - The new restore check passed on prod and left no file behind.
-- **Not set up yet:** the CI deploy key and the `production` approval were
-  blocked for Claude (server access for CI is Stefan's call): NEEDS_STEFAN
-  item 1. Then run `deploy-staging` once, and after it set
-  `EMAIL_REDIRECT_TO` (staging-init `STAGING_EMAIL_TO=…`) once the redirect
-  code is live on staging.
+- **Live:** Stefan added the CI deploy key and the `production` environment
+  (creating server access for CI was his call). The first full
+  `deploy-staging` run (#37) was green end to end. `EMAIL_REDIRECT_TO` is
+  set on staging, and a test reset email reached Stefan's inbox.
+- **Staging login removed** (Stefan, 2026-10-29): open, `noindex` header;
+  optional via `STAGING_BASIC_AUTH_PASSWORD`.
 
 ### Incident 2026-10-29: sljakam.com served staging (~08:13–08:55 UTC)
 

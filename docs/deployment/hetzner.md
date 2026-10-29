@@ -331,8 +331,11 @@ checkout `/opt/hireforge-staging`, `compose.staging.yml` (project
 `hireforge-staging`) runs **the same images** as production with its own
 Postgres and Redis, memory caps (~1.2 GB in all) so it can't starve
 production, and no ports: production's Caddy proxies `staging.sljakam.com`
-to it over the `hireforge-edge` network, behind basic auth, with
-`X-Robots-Tag: noindex`. `release.sh` attaches staging's web to that
+to it over the `hireforge-edge` network with `X-Robots-Tag: noindex` on
+every response (crawling stays allowed so search engines see that header).
+No login since 2026-10-29 (Stefan); to require one, set
+`STAGING_BASIC_AUTH_PASSWORD` in `deploy/.env.staging` and re-run
+`staging-init.sh`. `release.sh` attaches staging's web to that
 network itself, as `staging-web` only: through Compose it would also be
 named `web` there, which is production's upstream (on 2026-10-29
 sljakam.com served staging that way for ~40 minutes). Every release checks
@@ -366,8 +369,7 @@ Once (done 2026-10-29):
    `STAGING_EMAIL_TO=<inbox> ./scripts/deploy/staging-init.sh` writes
    `deploy/.env.staging` (new secrets; never commit), the shared keys, and,
    once DNS resolves, the Caddy site
-   `/opt/hireforge/deploy/caddy-sites/staging.caddy`. Login:
-   `grep STAGING_BASIC_AUTH deploy/.env.staging`.
+   `/opt/hireforge/deploy/caddy-sites/staging.caddy`.
 
 Rollback: `./scripts/deploy/release.sh <sha> staging` from
 `/opt/hireforge-staging` (see `/opt/hireforge/backups/releases-staging.log`).
