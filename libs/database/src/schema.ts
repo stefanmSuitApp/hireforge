@@ -274,8 +274,9 @@ export const staffAuditLog = pgTable(
      * Human staff actor when present; `NULL` for automated writers (e.g. CMS
      * package sync webhook / scheduled reconcile — Step 6).
      */
+    // SET NULL: deleting a staff user keeps the audit rows of what they did.
     actorUserId: uuid('actor_user_id').references(() => users.id, {
-      onDelete: 'cascade',
+      onDelete: 'set null',
     }),
     action: text('action').notNull(),
     entityType: text('entity_type').notNull(),

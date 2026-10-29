@@ -59,10 +59,8 @@ describe.each(HOOKS)('%s sign-in', (_, useLogin, home) => {
     expect(await signInWith(returnTo)).toBe(home);
   });
 
-  // Known issue (PROGRESS.md): only "//" is refused; "/\host" is a
-  // protocol-relative URL in browsers. Not exploitable while next-intl uses
-  // localePrefix "always" (it becomes /sr/\host); flip to `it` when refused.
-  it.fails('ignores returnTo="/\\evil.example" too', async () => {
+  // "/\host" is a protocol-relative URL in browsers, like "//host".
+  it('ignores returnTo="/\\evil.example" too', async () => {
     expect(await signInWith('/\\evil.example')).toBe(home);
   });
 });

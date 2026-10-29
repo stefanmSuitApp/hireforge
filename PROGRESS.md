@@ -491,6 +491,21 @@ Found with a scripted sweep of the live public pages at 375 and 1440 px
     passes. Verified on the server: Caddy reaches staging as `staging-web`,
     and sljakam.com is production's.
 
+## Known bugs, round 1 (branch `fix/known-bugs-security`, 2026-10-29)
+
+Fixed, each pinned `it.fails` test flipped to `it` (failed before the fix):
+
+- Another company's job id answers 404 `JOB_NOT_FOUND`, like an unknown id
+  (was 403 `JOB_FORBIDDEN_COMPANY`, which confirmed the id exists).
+- Two simultaneous sign-ups of the same new company: the second becomes a
+  join request (transaction advisory lock), no more 500 on the unique PIB.
+- Images of unpublished jobs: 404 for everyone except the job's company and
+  staff, who get them `private, no-store` (editor preview keeps working).
+- A JSON body over the size limit is a 413 `PAYLOAD_TOO_LARGE`, not a crash.
+- `staff_audit_log.actor_user_id` is ON DELETE SET NULL (migration 0034).
+- Sign-in `returnTo` refuses `/\host` and control characters too (one shared
+  `isSafeReturnPath`).
+
 ## Known issues not yet scheduled
 
 Phase T pinned these with an `it.fails` test named after the fix; fixing the
@@ -499,23 +514,12 @@ bug turns it red and it is flipped to `it`.
 - Moderators can move any employer into any company
   (`PATCH /api/moderator/employers/:id` has no pipeline check) —
   `company-isolation.int.test.ts`. Needs a decision (NEEDS_STEFAN.md).
-- Employer job routes answer 403 `JOB_FORBIDDEN_COMPANY` for another
-  company's job (confirms the id exists) instead of 404.
-- Two simultaneous sign-ups of the same new company → 500 for the second
-  (unique PIB) instead of a join request — `races.int.test.ts`.
 - Cover letters are stored but no route shows them to the employer.
-- Job-description images of drafts / rejected / archived jobs are public to
-  anyone with the URL (`getPublicFile` has no status check).
 - Uploaded CV file names lose Serbian letters (`Petrović` → `Petrovi__`:
   multer reads names as latin1, `safeBasename` keeps ASCII only).
-- A JSON body over the size limit → 500 (and a crash log) instead of 413.
-- `staff_audit_log.actor_user_id` is ON DELETE CASCADE: deleting a staff user
-  erases their audit trail.
 - Search has no word forms (`kuvari` doesn't find `Kuvar`).
 - CV wizard: experience / education / skill row labels aren't tied to their
   inputs (screen readers).
-- Sign-in `returnTo` refuses `//host` but not `/\host` (safe while
-  `localePrefix: 'always'`).
 - Contracts' `applicationResponseSchema` is unused (`POST
 /candidate/applications` answers `{ id }`).
 

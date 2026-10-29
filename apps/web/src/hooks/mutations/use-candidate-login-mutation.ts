@@ -10,6 +10,7 @@ import {
   postCandidateLogin,
   type CandidateLoginBody,
 } from '@/api/candidate-auth';
+import { isSafeReturnPath } from '@/lib/safe-return-path';
 
 type Vars = { body: CandidateLoginBody; returnTo?: string | null };
 
@@ -20,7 +21,7 @@ export function useCandidateLoginMutation() {
     mutationFn: (vars: Vars) => postCandidateLogin(vars.body),
     onSuccess: (_data, variables) => {
       const ret = variables.returnTo;
-      if (ret?.startsWith('/') && !ret.startsWith('//')) {
+      if (isSafeReturnPath(ret)) {
         // `returnTo` may carry the locale (`/sr/jobs/x/apply`, from the apply
         // page); strip it so it is not added twice (`/sr/sr/…`).
         navigateWithFreshSession(locale, stripLocalePrefix(ret));

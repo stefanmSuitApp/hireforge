@@ -28,6 +28,34 @@ function formatErrorChain(exception: unknown): string {
   return parts.join(' | ');
 }
 
+/**
+ * body-parser (and other http-errors) failures such as a body over the size
+ * limit: not HttpExceptions, but deliberate 4xx answers whose message is safe
+ * to show (`expose`).
+ */
+function clientHttpError(
+  exception: unknown,
+): { status: number; message: string } | null {
+  if (typeof exception !== 'object' || exception === null) return null;
+  const e = exception as {
+    status?: unknown;
+    expose?: unknown;
+    message?: unknown;
+  };
+  if (
+    typeof e.status === 'number' &&
+    e.status >= 400 &&
+    e.status < 500 &&
+    e.expose === true
+  ) {
+    return {
+      status: e.status,
+      message: typeof e.message === 'string' ? e.message : 'Bad request',
+    };
+  }
+  return null;
+}
+
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost): void {
@@ -46,8 +74,16 @@ export class AllExceptionsFilter implements ExceptionFilter {
     let code = 'INTERNAL_ERROR';
     let message = 'Internal server error';
     let details: unknown;
+    const clientError = clientHttpError(exception);
 
-    if (exception instanceof HttpException) {
+    if (clientError) {
+      status = clientError.status;
+      message = clientError.message;
+      code =
+        status === HttpStatus.PAYLOAD_TOO_LARGE
+          ? 'PAYLOAD_TOO_LARGE'
+          : 'HTTP_EXCEPTION';
+    } else if (exception instanceof HttpException) {
       status = exception.getStatus();
       const resBody = exception.getResponse();
       let applicationCode: string | undefined;
