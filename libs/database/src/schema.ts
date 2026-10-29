@@ -161,6 +161,10 @@ export const users = pgTable(
     /** Optional phone shown to employers for the assigned moderator. */
     publicPhone: text('public_phone'),
     role: userRoleEnum('role').notNull(),
+    /** Sign-up acceptance of the terms of use (0034); null before that. */
+    termsAcceptedAt: timestamp('terms_accepted_at', { withTimezone: true }),
+    /** The accepted terms' "effective from" date (`YYYY-MM-DD`). */
+    termsVersion: text('terms_version'),
     createdAt: timestamp('created_at', { withTimezone: true })
       .notNull()
       .defaultNow(),

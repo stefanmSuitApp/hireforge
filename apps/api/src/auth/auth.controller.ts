@@ -6,7 +6,10 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import { employerSelfSignupBodySchema } from 'contracts';
+import {
+  candidateRegisterBodySchema,
+  employerSelfSignupBodySchema,
+} from 'contracts';
 import type { Request } from 'express';
 import { z } from 'zod';
 
@@ -32,10 +35,7 @@ const loginSchema = z.object({
 
 const localeSchema = z.enum(['sr', 'en']).optional();
 
-const candidateRegisterSchema = z.object({
-  email: z.email().max(320),
-  password: z.string().min(8).max(128),
-  fullName: z.string().min(1).max(120).optional(),
+const candidateRegisterSchema = candidateRegisterBodySchema.extend({
   locale: localeSchema,
 });
 

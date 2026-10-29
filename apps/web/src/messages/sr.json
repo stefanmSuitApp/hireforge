@@ -32,8 +32,8 @@
   },
   "Footer": {
     "copyright": "© Šljakam. Sva prava zadržana.",
-    "privacy": "Privatnost",
-    "terms": "Uslovi",
+    "privacy": "Politika privatnosti",
+    "terms": "Uslovi korišćenja",
     "integration": "Status sistema (dev)",
     "columnDiscover": "Otkrij",
     "columnJobSeekers": "Kandidati",
@@ -47,7 +47,9 @@
     "candidateSignIn": "Prijava",
     "employerRegister": "Registracija kompanije",
     "employerSignIn": "Prijava",
-    "moderatorPortal": "Prijava za osoblje"
+    "moderatorPortal": "Prijava za osoblje",
+    "refunds": "Povraćaj novca",
+    "legalNav": "Pravne informacije"
   },
   "GlobalError": {
     "title": "Došlo je do greške",
@@ -83,6 +85,23 @@
     "aboutCtaBody": "Pogledaj aktuelne pozicije ili se prijavi u svoj radni prostor.",
     "aboutCtaJobs": "Pogledaj poslove",
     "aboutCtaSignIn": "Prijavi se"
+  },
+  "Legal": {
+    "lastUpdated": "Poslednja izmena: {date}",
+    "signUpNotice": "Registracijom prihvataš <terms>Uslove korišćenja</terms> i potvrđuješ da ti je poznata <privacy>Politika privatnosti</privacy>.",
+    "checkoutNotice": "Pre kupovine pročitaj <refunds>pravila o povraćaju novca</refunds> i <terms>uslove korišćenja</terms>.",
+    "privacy": {
+      "title": "Politika privatnosti",
+      "description": "Koje podatke o ličnosti Šljakam prikuplja, zašto, koliko ih čuva i koja prava imaš."
+    },
+    "terms": {
+      "title": "Uslovi korišćenja",
+      "description": "Pravila korišćenja Šljakam platforme za kandidate i poslodavce."
+    },
+    "refunds": {
+      "title": "Politika povraćaja novca",
+      "description": "Kada i kako poslodavci dobijaju povraćaj novca za plaćene pakete."
+    }
   },
   "SignIn": {
     "metaTitle": "Prijava",

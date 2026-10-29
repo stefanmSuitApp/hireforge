@@ -10,6 +10,7 @@ import {
   EMPLOYER_REFRESH_COOKIE_MAX_AGE,
 } from '@/lib/employer-session';
 import { forwardClientIpHeaders } from '@/lib/client-ip';
+import { withAcceptedTerms } from '@/features/legal/accepted-terms';
 
 export async function POST(req: Request) {
   const origin = resolveNestServerOrigin();
@@ -34,7 +35,7 @@ export async function POST(req: Request) {
       'Content-Type': 'application/json',
       ...forwardClientIpHeaders(req.headers),
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify(await withAcceptedTerms(body)),
   });
   const text = await upstream.text();
   if (!upstream.ok) {

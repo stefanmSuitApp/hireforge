@@ -109,48 +109,56 @@ Each phase is its own PR, checked, shipped and verified live, as usual.
 
 ### C1 — Legal pages and sign-up acceptance
 
+As built (branch `feat/legal-pages`):
+
 - **Sanity `legalPage` type:**
-  - `kind`: `privacy | terms | refunds`.
-  - Bilingual title and body, both required (SSOT §13.3).
-  - `version` (e.g. `2026-11-01`) and `effectiveFrom`.
-  - A dedicated type, not `editorialPage`, so legal texts stay out of
-    `/p/*` and carry a version.
-  - It replaces `refundPolicy`: the proforma excerpt reads the new
-    `refunds` page's summary field, and the old type is removed after
-    migration.
+  - One document per page, with fixed ids `legal-privacy`, `legal-terms`
+    and `legal-refunds`, under "Legal pages" in Studio. No create or
+    delete.
+  - Bilingual title and body, both required before publish (SSOT §13.3).
+  - `effectiveFrom` (date): shown as "last updated", and it is the terms
+    version recorded at sign-up.
+  - `summary` (refunds only) now feeds the proforma excerpt. The old
+    `refundPolicy` type is the fallback and is marked "(old)".
+- **Drafts stay private:**
+  - The web's read token can see drafts, so every query reads the
+    published ids only.
+  - A draft goes live only when someone presses Publish in Studio. That
+    replaces the planned "Nacrt" header line (D2).
 - **Routes:**
   - `/{locale}/privacy`, `/{locale}/terms` and `/{locale}/refunds`.
-  - Indexable, listed in the sitemap, with "last updated" from `version`.
-  - Return 404 while the document isn't published.
-  - The revalidation webhook gets a `legalPage` branch.
-- **Links:** footer (all three), checkout/packages page (refunds, terms),
-  proforma page, the PDF footer URL, and the email footer (privacy).
+  - They 404 until published; once published they're indexable and in the
+    sitemap.
+  - The revalidation webhook refreshes all three on any `legalPage`
+    change.
+- **Links:**
+  - The site shell reads which pages are published once and shares it
+    through a context.
+  - The footer links each published page.
+  - The register forms (and so the sign-up sheet on job pages) show the
+    acceptance line once terms and privacy are both published.
+  - The packages page shows a refunds and terms line.
+  - The proforma PDF footer URL and an email footer link are left for C3.
 - **Sign-up acceptance:**
-  - A line under both register forms: "Registracijom prihvataš Uslove
-    korišćenja i potvrđuješ da si pročitao Politiku privatnosti" (D3).
-  - Migration: `users.terms_accepted_at` and `users.terms_version` (text).
-    Set on registration; existing users stay null.
-  - Contracts get an optional `acceptedTermsVersion`. The BFF fills it from
-    the current published terms. The strict employer schema gets the field.
-- **Draft texts:** Claude writes sr and en drafts of all three.
-  - They are built from the app's real data flows: accounts, CVs,
-    applications shared with employers, emails, saved searches, billing
-    records.
-  - They name the real processors: Hetzner (server and backups, EU),
-    Resend (email), Sanity (content, no personal data).
-  - They state the retention rules from SSOT §10.7, the rights under
-    ZZPL/GDPR, and the complaint route (Poverenik).
-  - Refund rules come from SSOT §10.5.
-  - Operator details come from the seller block (C3) or are
-    `TODO(Stefan)`.
-  - Every draft carries a header line "Nacrt — čeka pravni pregled" until
-    Stefan removes it.
-  - Delivered as a Sanity seed (`pnpm cms:seed --only legal`) **and** as
-    Markdown in `docs/legal/` for the lawyer.
+  - Migration 0034 adds `users.terms_accepted_at` and
+    `users.terms_version`.
+  - The register BFF routes set `acceptedTermsVersion` themselves, from the
+    published terms and only under the same condition as the notice. A
+    value sent by the browser is dropped.
+- **Draft texts:**
+  - `docs/legal/{privacy,terms,refunds}.{sr,en}.md`, plus a README for the
+    lawyer.
+  - They're built from a personal-data inventory of the code.
+  - `pnpm cms:seed:legal` loads them as unpublished drafts and never
+    overwrites an existing page.
 - **Tests:**
-  - e2e: footer link to privacy, terms and refunds, each returning 200;
-    register stores `terms_accepted_at`; an unpublished page returns 404.
-  - Unit: the GROQ/body mapping.
+  - Unit: the notices hide links to unpublished pages; the BFF helper
+    ignores a client-sent version; the sitemap lists only published pages.
+  - Integration (`auth-flow`): sign-up stores the version, stores nothing
+    without one, and rejects a malformed one. It fails without the API
+    change.
+  - e2e runs without Sanity, so there the pages 404 and the notices are
+    hidden.
 
 ### C2 — Account deletion (self-service, 30-day grace)
 

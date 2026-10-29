@@ -1,6 +1,9 @@
 import { publicJobsEnabled } from 'shared';
 
-import { fetchCmsEditorialSlugs } from '@/lib/cms-content';
+import {
+  fetchCmsEditorialSlugs,
+  fetchCmsPublishedLegalPages,
+} from '@/lib/cms-content';
 import { resolveNestPublicOrigin } from '@/lib/nest-api-url';
 import { fetchPublicSitemap } from '@/lib/public-jobs';
 
@@ -30,7 +33,10 @@ export async function loadSitemapFiles(): Promise<Map<string, SitemapEntry[]>> {
     // Fail loud: an empty job sitemap would tell crawlers every job is gone.
     throw new Error(`sitemap data unavailable: ${live.error}`);
   }
-  const cms = await fetchCmsEditorialSlugs();
+  const [cms, legal] = await Promise.all([
+    fetchCmsEditorialSlugs(),
+    fetchCmsPublishedLegalPages(),
+  ]);
 
   const pages: SitemapEntry[] = [{ path: '' }];
   // `/jobs` is noindex while nothing is live; listing it then only earns a
@@ -45,6 +51,9 @@ export async function loadSitemapFiles(): Promise<Map<string, SitemapEntry[]>> {
     if (!ABOUT_SLUGS.has(page.slug)) {
       pages.push({ path: `/p/${page.slug}`, lastmod: page.updatedAt });
     }
+  }
+  for (const page of legal) {
+    pages.push({ path: `/${page.kind}`, lastmod: page.updatedAt });
   }
   files.set('pages.xml', pages);
   if (!live) return files;

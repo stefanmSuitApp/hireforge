@@ -31,10 +31,14 @@ export type CandidateWithdrawApplicationBody = z.infer<
   typeof candidateWithdrawApplicationBodySchema
 >;
 
+/** A published terms version: its "effective from" date. Set by the BFF. */
+export const termsVersionSchema = z.iso.date();
+
 export const candidateRegisterBodySchema = z.object({
   email: z.email().max(320),
   password: z.string().min(8).max(128),
   fullName: z.string().min(1).max(120).optional(),
+  acceptedTermsVersion: termsVersionSchema.optional(),
 });
 
 export type CandidateRegisterBody = z.infer<typeof candidateRegisterBodySchema>;

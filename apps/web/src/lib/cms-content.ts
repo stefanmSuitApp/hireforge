@@ -227,6 +227,98 @@ export const fetchCmsEditorialSlugs = unstable_cache(
   { revalidate: 3600 },
 );
 
+export const LEGAL_PAGE_KINDS = ['privacy', 'terms', 'refunds'] as const;
+export type LegalPageKind = (typeof LEGAL_PAGE_KINDS)[number];
+
+export type CmsLegalPage = {
+  title: string | null;
+  /** `YYYY-MM-DD`; also the version recorded when terms are accepted. */
+  effectiveFrom: string | null;
+  body: CmsPortableTextBody | null;
+};
+
+// Fixed ids, never `drafts.legal-*`: the read token can see drafts, and an
+// unpublished legal text must not reach the site.
+const legalId = (kind: LegalPageKind) => `legal-${kind}`;
+
+export async function fetchCmsLegalPage(
+  kind: LegalPageKind,
+  locale: string,
+): Promise<CmsLegalPage | null> {
+  const cached = unstable_cache(
+    async () => {
+      const client = getCmsClient();
+      if (!client) return null;
+      try {
+        const doc = await client.fetch<
+          | (Omit<CmsLegalPage, 'body'> & {
+              body: Parameters<typeof pickLocalizedBody>[0];
+            })
+          | null
+        >(
+          `*[_type == "legalPage" && _id == $id][0]{
+            "title": coalesce(title[$locale], title.sr, title.en),
+            effectiveFrom,
+            body
+          }`,
+          { id: legalId(kind), locale },
+        );
+        return doc && { ...doc, body: pickLocalizedBody(doc.body, locale) };
+      } catch {
+        return null;
+      }
+    },
+    ['cms-legal-page', kind, locale],
+    { revalidate: 300, tags: [`cms:legalPage:${kind}`] },
+  );
+
+  const doc = await cached();
+  if (!doc?.title?.trim() || !doc.body?.length) return null;
+  return doc;
+}
+
+export type CmsLegalPageRef = {
+  kind: LegalPageKind;
+  effectiveFrom: string | null;
+  updatedAt: string | null;
+};
+
+/** Published legal pages: footer links, sign-up notice, sitemap. */
+export const fetchCmsPublishedLegalPages = unstable_cache(
+  async (): Promise<CmsLegalPageRef[]> => {
+    const client = getCmsClient();
+    if (!client) return [];
+    try {
+      const rows = await client.fetch<
+        Array<{ id: string; effectiveFrom: string | null; updatedAt: string }>
+      >(
+        `*[_type == "legalPage" && _id in $ids]{
+          "id": _id,
+          effectiveFrom,
+          "updatedAt": _updatedAt
+        }`,
+        { ids: LEGAL_PAGE_KINDS.map(legalId) },
+      );
+      return LEGAL_PAGE_KINDS.flatMap((kind) => {
+        const row = rows.find((r) => r.id === legalId(kind));
+        return row
+          ? [
+              {
+                kind,
+                effectiveFrom: row.effectiveFrom,
+                updatedAt: row.updatedAt,
+              },
+            ]
+          : [];
+      });
+    } catch {
+      return [];
+    }
+  },
+  ['cms-legal-pages'],
+  { revalidate: 300, tags: ['cms:legalPage'] },
+);
+
 export type CmsCvTemplateRow = {
   code: string;
   name: string;

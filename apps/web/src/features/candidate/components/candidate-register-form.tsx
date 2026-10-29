@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useState, type SubmitEvent } from 'react';
 
 import { Button, Input, Label, PasswordInput } from '@/components/ui';
+import { SignUpLegalNotice } from '@/features/legal/legal-links';
 import { useCandidateRegisterMutation } from '@/hooks/mutations';
 import {
   getTranslatedApiErrorMessage,
@@ -113,6 +114,7 @@ export function CandidateRegisterForm({ returnTo }: Props) {
       >
         {register.isPending ? t('creatingAccount') : t('createAccount')}
       </Button>
+      <SignUpLegalNotice />
     </form>
   );
 }

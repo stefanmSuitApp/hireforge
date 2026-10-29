@@ -239,6 +239,13 @@
       "when": 1778200000000,
       "tag": "0033_jobs_search_serbian_fold",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1778300000000,
+      "tag": "0034_users_terms_acceptance",
+      "breakpoints": true
     }
   ]
 }

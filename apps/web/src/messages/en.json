@@ -32,8 +32,8 @@
   },
   "Footer": {
     "copyright": "© Šljakam. All rights reserved.",
-    "privacy": "Privacy",
-    "terms": "Terms",
+    "privacy": "Privacy policy",
+    "terms": "Terms of use",
     "integration": "System status (dev)",
     "columnDiscover": "Discover",
     "columnJobSeekers": "Job seekers",
@@ -47,7 +47,9 @@
     "candidateSignIn": "Sign in",
     "employerRegister": "Register company",
     "employerSignIn": "Sign in",
-    "moderatorPortal": "Staff sign in"
+    "moderatorPortal": "Staff sign in",
+    "refunds": "Refund policy",
+    "legalNav": "Legal"
   },
   "GlobalError": {
     "title": "Something went wrong",
@@ -83,6 +85,23 @@
     "aboutCtaBody": "Browse current roles or sign in to access your tailored workspace.",
     "aboutCtaJobs": "Browse jobs",
     "aboutCtaSignIn": "Sign in"
+  },
+  "Legal": {
+    "lastUpdated": "Last updated: {date}",
+    "signUpNotice": "By creating an account you accept the <terms>Terms of use</terms> and confirm you have read the <privacy>Privacy policy</privacy>.",
+    "checkoutNotice": "Before you buy, read the <refunds>refund policy</refunds> and the <terms>terms of use</terms>.",
+    "privacy": {
+      "title": "Privacy policy",
+      "description": "What personal data Šljakam collects, why, how long it is kept and what your rights are."
+    },
+    "terms": {
+      "title": "Terms of use",
+      "description": "The rules for using Šljakam, for candidates and employers."
+    },
+    "refunds": {
+      "title": "Refund policy",
+      "description": "When and how employers get their money back for paid packages."
+    }
   },
   "SignIn": {
     "metaTitle": "Sign in",

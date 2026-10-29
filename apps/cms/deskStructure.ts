@@ -1,5 +1,6 @@
 import type { StructureResolver } from 'sanity/structure';
 
+import { LEGAL_PAGE_KINDS } from './schemaTypes/documents/legalPage';
 import { singletonTypes } from './singletons';
 
 export const deskStructure: StructureResolver = (S) =>
@@ -32,6 +33,26 @@ export const deskStructure: StructureResolver = (S) =>
             .schemaType('homeJobsDiscovery')
             .documentId('homeJobsDiscovery')
             .title('Home job discovery rails'),
+        ),
+      S.listItem()
+        .title('Legal pages')
+        .id('legal-pages')
+        .child(
+          S.list()
+            .title('Legal pages')
+            .items(
+              LEGAL_PAGE_KINDS.map(({ title, value }) =>
+                S.listItem()
+                  .title(title)
+                  .id(`legal-${value}`)
+                  .child(
+                    S.document()
+                      .schemaType('legalPage')
+                      .documentId(`legal-${value}`)
+                      .title(title),
+                  ),
+              ),
+            ),
         ),
       S.divider(),
       ...S.documentTypeListItems().filter((item) => {
