@@ -19,6 +19,9 @@ export default getRequestConfig(async ({ requestLocale }) => {
 
   return {
     locale,
+    // Without it the server formats dates in its own zone (UTC) and the
+    // browser in the visitor's: near midnight they disagree on the day.
+    timeZone: 'Europe/Belgrade',
     messages:
       messagesByLocale[locale as keyof typeof messagesByLocale] ?? srMessages,
   };

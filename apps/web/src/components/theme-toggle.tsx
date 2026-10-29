@@ -2,7 +2,7 @@
 
 import { Monitor, Moon, Sun } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 
 type ThemeChoice = 'system' | 'light' | 'dark';
 
@@ -37,8 +37,12 @@ export function ThemeToggle() {
   const t = useTranslations('Nav');
   const [choice, setChoice] = useState<ThemeChoice>('system');
 
-  useEffect(() => {
-    setChoice(readChoice());
+  // Switching language re-renders <html> without the class THEME_SCRIPT set,
+  // so re-apply the saved theme before paint whenever the header mounts.
+  useLayoutEffect(() => {
+    const saved = readChoice();
+    setChoice(saved);
+    applyTheme(saved);
   }, []);
 
   useEffect(() => {

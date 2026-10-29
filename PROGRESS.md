@@ -343,6 +343,31 @@ Deployed 2026-10-29 (main@96244e2, PR #22).
   class before paint (no flash); `color-scheme` for native controls. All
   token contrast pairs pass in dark; axe passes on key pages in dark.
 
+### UI fixes (branch `fix/ui-brand-and-header-jump`, 2026-10-29)
+
+Found with a scripted sweep of the live public pages at 375 and 1440 px
+(overflow, console errors, failed requests, broken links, alt text, CLS).
+
+- **Header nav jumped ~7px** between short and long pages (Employers is the
+  shortest): the scrollbar came and went. `scrollbar-gutter: stable` on
+  `:root`, and `body[data-scroll-locked]` keeps no extra margin so Radix
+  menus/dialogs don't shift the page either.
+- **Language switch reset the theme to light:** it re-renders `<html>`
+  without the class the head script set; `ThemeToggle` re-applies the saved
+  theme in a layout effect.
+- **Broken category links** (home tiles + footer, 6 of 8 were 404s): CMS
+  spotlight slugs the database doesn't have are dropped.
+- **Hydration errors on dates:** no next-intl `timeZone` (server UTC vs
+  browser), and signed-in tables used bare `toLocaleString()` (server
+  en-US/UTC vs browser). Now `Europe/Belgrade` and `format.dateTime`.
+- **"Hireforge" on the About page** came from the CMS seed (title, SEO,
+  English body on the Serbian page). Seed now says Šljakam with a Serbian
+  body; the live CMS document is patched separately. Internal names (repo,
+  CMS doc id/slug `about-hireforge`, log prefixes) stay.
+- Tests: `e2e/header-stability.spec.ts` (runs with real scrollbars),
+  `home-jobs-discovery.test.ts`, `employer-job-applications-table.test.tsx`,
+  `i18n/request.test.ts`; each shown failing without its fix.
+
 ## Known issues not yet scheduled
 
 Phase T pinned these with an `it.fails` test named after the fix; fixing the

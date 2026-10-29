@@ -2,7 +2,7 @@
 
 import type { EmployerJobListItem } from 'contracts';
 import { ArrowUpRight, Eye, MoreHorizontal, Pencil, Users } from 'lucide-react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import * as React from 'react';
 
 import {
@@ -25,6 +25,7 @@ type Props = { items: EmployerJobListItem[] };
 export function EmployerJobsListTable({ items }: Props) {
   const locale = useLocale();
   const t = useTranslations('Employer.jobList');
+  const format = useFormatter();
   const tStatus = useTranslations('Employer.jobStatus');
 
   const columns = React.useMemo<DataTableColumn<EmployerJobListItem>[]>(
@@ -54,7 +55,10 @@ export function EmployerJobsListTable({ items }: Props) {
         cell: (row) => (
           <span className="text-muted-foreground">
             <time dateTime={row.updatedAt}>
-              {new Date(row.updatedAt).toLocaleString()}
+              {format.dateTime(new Date(row.updatedAt), {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+              })}
             </time>
           </span>
         ),
