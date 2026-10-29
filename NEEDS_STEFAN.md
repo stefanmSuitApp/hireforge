@@ -5,17 +5,27 @@ priority. Remove an item when it is done. **No secrets in this file.**
 
 ## ▶ Next, in order (updated 2026-10-29)
 
-1. Production admin: set its password from the reset email (2026-10-29).
-2. Rotate the secrets that were visible in a screenshot (item 2).
-3. Server (~2 min): set `INDEXNOW_KEY` (see "Values").
-4. Google Search Console + Bing Webmaster Tools, submit the sitemap
-   (see "Values"). Worth doing now: verification takes days to settle.
-5. When convenient: `sudo systemctl restart docker` (item 3), Sentry (4),
-   accountant (5), legal texts (6), Phase T decisions, social profiles,
-   analytics.
+1. Sanity webhook (~1 min): the webhook secret was rotated at 11:41 UTC, so
+   the webhook still sends the old one and the site answers 401 (CMS edits
+   then take up to 5 minutes). Sanity → project `o85214ma` → API → Webhooks
+   → `sljakam.com revalidate` → Edit → HTTP header
+   `x-sanity-webhook-secret` = the new `SANITY_WEBHOOK_SECRET` from the
+   server (`grep ^SANITY_WEBHOOK_SECRET= deploy/.env.production | cut -d= -f2-`).
+2. When convenient: `sudo systemctl restart docker` (item 2), Sentry (3),
+   accountant (4), legal texts (5), Phase T decisions, social profiles,
+   analytics, Google Indexing API.
 
 ## ✅ Done
 
+- **Launch setup** (2026-10-29): production admin password set from the
+  reset email; the secrets seen in a screenshot rotated; `INDEXNOW_KEY` set
+  (public by design, served at `/<key>.txt`; the worker announces every
+  published job); Search Console (Domain property, DNS TXT) and Bing
+  (imported from Google) verified, `https://sljakam.com/sitemap.xml`
+  submitted in both, status Success.
+- **Seed sample job** gone: the production database was wiped of users,
+  companies and jobs on 2026-10-29 (config kept; backup
+  `hireforge-postgres-20261029T085158Z.sql.gz`).
 - **Sanity project `o85214ma`** (2026-10-29): owned by Stefan, content
   seeded and rebranded, Studio at https://sljakam.sanity.studio, publish
   webhook verified (an edit is live on sljakam.com in ~2 s).
@@ -54,27 +64,7 @@ priority. Remove an item when it is done. **No secrets in this file.**
 
 ## 🟠 Soon
 
-### 2. Rotate the secrets seen in a screenshot
-
-On 2026-10-29 a screenshot of `deploy/.env.production` showed these; replace
-each on the VM (`nano deploy/.env.production`), never in chat:
-
-- `SANITY_API_WRITE_TOKEN`: production doesn't need it (only the manual
-  `cms:seed`). Delete the token at sanity.io/manage → API → Tokens and leave
-  the line empty.
-- `RESEND_API_KEY`: resend.com → API Keys → create (sending, sljakam.com),
-  replace, delete the old key.
-- `SANITY_API_READ_TOKEN` of the new project `o85214ma` (also shown in chat
-  by mistake, 2026-10-29): new Viewer token in that project, replace,
-  delete the old one. Staging copies it on its next deploy.
-- `SANITY_WEBHOOK_SECRET`: `openssl rand -hex 32`; also edit the Sanity
-  webhook URL (`…/api/revalidate/sanity?secret=<new>`).
-- `CMS_SYNC_SECRET`: `openssl rand -hex 32` (nothing else to update).
-
-Then `docker compose -f compose.prod.yml up -d --no-build --pull never --wait`
-(or say "secrets rotated"). Staging takes the shared ones on its next deploy.
-
-### 3. Free the Docker daemon's memory (optional)
+### 2. Free the Docker daemon's memory (optional)
 
 The Docker daemon still holds ~1.8 GB from loading the old 4.5 GB images.
 Swap (4 GB, added 2026-10-29) covers it, so this is no longer urgent; when
@@ -84,12 +74,12 @@ downtime, containers come back; check no deploy is running). It needs the
 → the server → Rescue → Reset root password, then the web Console as root:
 `passwd deploy`.
 
-### 4. Sentry
+### 3. Sentry
 
 Create a Sentry project (or say which error tracker you want) and put the
 DSN in `deploy/.env.production` as `SENTRY_DSN`; wiring is Phase D.
 
-### 5. Accountant: VAT status and invoice content (Phase D)
+### 4. Accountant: VAT status and invoice content (Phase D)
 
 The billing design assumes no VAT and in-house numbered PDFs. Confirm with
 an accountant: is the legal entity in the VAT system, does B2B invoicing
@@ -97,7 +87,7 @@ need SEF (eFaktura), and which fields the invoice must carry (seller/buyer
 PIB, MB, address, line items, date of supply). Code has `TODO(Stefan)`
 markers where this matters.
 
-### 6. Legal texts
+### 5. Legal texts
 
 Privacy policy, terms of use and refund policy pages need real legal copy
 (Serbian + English). The pages and footer links are Phase D; send the texts
@@ -142,39 +132,12 @@ The full to-do list for search and reach, ordered by impact:
 - [ ] **Social profiles** for Organization `sameAs` (JSON-LD): official
       Instagram / LinkedIn / Facebook URLs, if any. Code:
       `SOCIAL_PROFILES` in `apps/web/src/lib/seo/json-ld.ts`.
-- [ ] **Search Console and Bing Webmaster Tools.** Easiest: in Search
-      Console add a **Domain** property `sljakam.com` and verify with the DNS
-      TXT record at the domain registrar (no server change; covers `www`).
-      Then Bing Webmaster Tools → "Import from Google Search Console". Submit
-      `https://sljakam.com/sitemap.xml` in both. Meta tag method instead:
-      put the codes in `deploy/.env.production` as
-      `GOOGLE_SITE_VERIFICATION` / `BING_SITE_VERIFICATION` /
-      `YANDEX_SITE_VERIFICATION` and recreate `web`.
 - [ ] **Google Indexing API**: in Google Cloud create a service account,
       enable the "Web Search Indexing API", download its JSON key, add the
       account's email as an **Owner** of sljakam.com in Search Console, and
       put the key base64-encoded (`base64 -i key.json`) in
       `deploy/.env.production` as `GOOGLE_INDEXING_SA_JSON`; restart
       `worker`. Not in chat.
-- [ ] **`INDEXNOW_KEY`** (not secret; served at `/<key>.txt`). On the VM:
-
-  ```bash
-  cd /opt/hireforge
-  grep -q '^INDEXNOW_KEY=' deploy/.env.production || echo "INDEXNOW_KEY=$(openssl rand -hex 16)" >> deploy/.env.production
-  docker compose -f compose.prod.yml up -d --no-build --force-recreate web worker
-  curl -s https://sljakam.com/$(grep '^INDEXNOW_KEY=' deploy/.env.production | cut -d= -f2).txt; echo
-  ```
-
-  The last line prints the key back when it works. Every published job is
-  announced.
-
 - [ ] **Analytics**: none is installed (by design in this branch). Choose GA4
       (needs the cookie consent banner) or a cookieless tool (Plausible,
       Umami, Cloudflare Web Analytics: no banner needed).
-
-- [ ] **Archive the seed sample job on prod**: "Senior TypeScript developer"
-      (DEVLEGION, `20000000-0000-4000-8000-000000000001`, from
-      `scripts/db/seed-domain-baseline.sql`). Since #31 every job is public,
-      so this fake ad is indexed with JobPosting markup (against Google's
-      job-posting rules). Archive it from the moderator/admin UI before
-      submitting the sitemap (or say so and it gets archived).
