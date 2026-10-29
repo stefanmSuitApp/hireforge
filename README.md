@@ -45,7 +45,7 @@ Default local URLs (from `.env.example`): **web** `http://localhost:3000`, **api
 
 For `apps/cms`, set `SANITY_STUDIO_PROJECT_ID` and `SANITY_STUDIO_DATASET` (or the `NEXT_PUBLIC_SANITY_*` equivalents) in the repo-root `.env`. The Studio now fails fast when they are missing, instead of silently connecting to a fallback project.
 
-Sanity publish webhook (Phase 8.3): configure a webhook in Sanity to `POST` to `http://localhost:3000/api/revalidate/sanity?secret=<SANITY_WEBHOOK_SECRET>` (or your deployed web URL). This revalidates CMS tags/paths without redeploy.
+Sanity publish webhook (Phase 8.3): `POST` to `/api/revalidate/sanity` with the header `x-sanity-webhook-secret: <SANITY_WEBHOOK_SECRET>`; it revalidates CMS tags/paths without a redeploy. Production setup: `docs/deployment/hetzner.md` §6.
 
 ## Domain & roles
 

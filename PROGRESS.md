@@ -5,7 +5,7 @@ Living status file. **Trust this over the `Status:` lines in
 which went stale during the Cursor phase (Steps 4, 5, 14, 15 say "pending"
 but shipped). Update this file in the same PR as the work.
 
-Last updated: 2026-10-28 (SEO & quality gates, Phase D, Phase T tests). Open items for
+Last updated: 2026-10-29 (Sanity project move, no Actions on PRs, launch setup). Open items for
 Stefan: [`NEEDS_STEFAN.md`](./NEEDS_STEFAN.md).
 
 ## Current state
@@ -78,7 +78,7 @@ pnpm build` (+ `pnpm check:i18n`) = `pnpm verify`; PRs run it locally, CI on
   indexed; guests browse page 1 (20 jobs) of lists and searches, advanced
   filters and page 2+ need an account, similar jobs show 3 + a prompt.
   `PUBLIC_JOBS=false` still walls everything.
-- **No GitHub Actions on PRs (2026-10-29):** the Actions budget is nearly
+- **No GitHub Actions on PRs (2026-10-29, #32):** the Actions budget is nearly
   used up. PRs are checked locally (`pnpm verify`, `pnpm e2e`, plus
   `pnpm test:integration` for API/DB changes; see AGENTS.md "Checks run
   locally"); on `main`, `deploy-staging` runs CI + Integration before it
@@ -393,6 +393,8 @@ Found with a scripted sweep of the live public pages at 375 and 1440 px
   Editorial bodies are now bilingual (`localeBlockContent`); the web still
   accepts the old single array (rollback, staging on the old env). Studio
   hosted at https://sljakam.sanity.studio. Setup: `docs/deployment/hetzner.md` §6.
+  Live since release `48358d134e6c` (#41); production and staging env on
+  `o85214ma`; publish webhook verified (an edit is live in ~2 s).
 - Tests: `e2e/header-stability.spec.ts` (runs with real scrollbars),
   `home-jobs-discovery.test.ts`, `employer-job-applications-table.test.tsx`,
   `i18n/request.test.ts`; each shown failing without its fix.
