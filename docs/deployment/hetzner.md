@@ -332,7 +332,11 @@ checkout `/opt/hireforge-staging`, `compose.staging.yml` (project
 Postgres and Redis, memory caps (~1.2 GB in all) so it can't starve
 production, and no ports: production's Caddy proxies `staging.sljakam.com`
 to it over the `hireforge-edge` network, behind basic auth, with
-`X-Robots-Tag: noindex`. The web app takes its origin from `SITE_ORIGIN` at
+`X-Robots-Tag: noindex`. `release.sh` attaches staging's web to that
+network itself, as `staging-web` only: through Compose it would also be
+named `web` there, which is production's upstream (on 2026-10-29
+sljakam.com served staging that way for ~40 minutes). Every release checks
+that `web` in production's Caddy is production's web container. The web app takes its origin from `SITE_ORIGIN` at
 runtime.
 
 **What staging shares with production** (copied from
