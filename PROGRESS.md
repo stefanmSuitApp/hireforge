@@ -57,7 +57,7 @@ pnpm build` (+ `pnpm check:i18n`); CI runs it on PRs. Husky: pre-commit
 | 12 Apply              | Done; verify-before-first-apply gate now satisfiable                                                 |
 | 14 Promo              | Done exc. `full_free` auto-activation; currency + per-company cap fixed                              |
 | 15 Discovery          | Done: public jobs, sitemaps, JSON-LD, landing pages, IndexNow / Indexing API (see SEO section)       |
-| 16 GDPR / 17 CI gates | GDPR not started (needs legal copy); CI with checks + e2e exists                                     |
+| 16 GDPR / 17 CI gates | GDPR not started (needs legal copy); CI on `main` only, PRs checked locally (`pnpm verify`, e2e)     |
 | 18 Hardening          | Auth limits, prod env guard, verification, reset, notifications done; no Sentry, no token revocation |
 
 ## Decisions (2026-10-27/28, Stefan)
@@ -68,6 +68,10 @@ pnpm build` (+ `pnpm check:i18n`); CI runs it on PRs. Husky: pre-commit
   indexed; guests browse page 1 (20 jobs) of lists and searches, advanced
   filters and page 2+ need an account, similar jobs show 3 + a prompt.
   `PUBLIC_JOBS=false` still walls everything.
+- **No GitHub Actions on PRs (2026-10-29):** the Actions budget is nearly
+  used up. PRs are checked locally (`pnpm verify`, `pnpm e2e`, plus
+  `pnpm test:integration` for API/DB changes; see AGENTS.md "Checks run
+  locally"); CI, Integration and the quality report still run on `main`.
 - Copy voice: **ti everywhere**; apply = "Konkuriši", "Prijava/Prijavi se"
   only means sign-in; enum labels in Serbian unless Serbians use the English
   word (Junior/Medior/Senior).

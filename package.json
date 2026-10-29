@@ -27,6 +27,7 @@
     "lint:cms": "nx lint cms",
     "format": "prettier --check .",
     "format:write": "prettier --write .",
+    "verify": "pnpm lint && pnpm format && pnpm check:i18n && pnpm typecheck && pnpm test && pnpm build",
     "check:i18n": "node scripts/check-i18n.mjs",
     "check:design": "node scripts/design/check-design.mjs",
     "check:contrast": "node scripts/design/check-contrast.mjs",

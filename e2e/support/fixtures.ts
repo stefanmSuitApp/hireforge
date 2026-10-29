@@ -35,9 +35,11 @@ const WCAG_AA = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 
 /** WCAG 2.1 A/AA scan of the current page; the failure lists each rule with the offending elements. */
 export async function expectNoA11yViolations(page: Page): Promise<void> {
-  // Next streams <title> with the metadata; scanning before it lands is a
-  // false `document-title` failure.
-  await page.waitForFunction(() => document.title.trim() !== '');
+  // Next streams <title> with the metadata, and the auth pages call
+  // router.refresh() on mount, which drops <title> while the head re-renders.
+  // Scanning before either settles is a false `document-title` failure.
+  await page.waitForLoadState('networkidle');
+  await expect(page).toHaveTitle(/\S/);
   const { violations } = await new AxeBuilder({ page })
     .withTags(WCAG_AA)
     .analyze();

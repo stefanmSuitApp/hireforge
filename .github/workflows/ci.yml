@@ -1,9 +1,11 @@
 name: CI
 
+# Not on pull requests: the Actions budget is limited, so PRs are checked
+# locally (`pnpm verify` + `pnpm e2e`, see AGENTS.md). Main still runs it.
 on:
-  pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}
