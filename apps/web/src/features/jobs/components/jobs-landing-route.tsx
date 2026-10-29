@@ -13,7 +13,7 @@ import {
   PublicApiUnavailableError,
 } from '@/lib/public-jobs';
 import { breadcrumbJsonLd } from '@/lib/seo/json-ld';
-import { fetchCmsHomeJobsDiscovery } from '@/lib/cms-content';
+import { fetchCmsLandingSpotlight } from '@/lib/cms-content';
 import { absoluteSiteOrigin } from '@/lib/site-origin';
 
 import {
@@ -25,17 +25,25 @@ import type { JobsSearchParams } from '../lib/jobs-list-query';
 
 import { JobsListRoute } from './jobs-list-route';
 
-/** The city's (else the category's) photo from the homepage tiles in CMS. */
-async function landingImage(
+/**
+ * Hero photo and intro from the homepage tiles in CMS: the city's (else the
+ * category's) image; the CMS intro only on a single city or category page,
+ * where it describes exactly that page.
+ */
+async function landingCms(
   locale: string,
   key: LandingKey,
-): Promise<string | null> {
-  const cms = await fetchCmsHomeJobsDiscovery(locale);
-  if (!cms) return null;
-  const row = key.city
-    ? cms.citySpotlights.find((r) => r.slug === key.city)
-    : cms.categorySpotlights.find((r) => r.slug === key.category);
-  return row?.imageUrl ?? null;
+): Promise<{ imageUrl: string | null; intro: string | null }> {
+  const spot = key.city
+    ? await fetchCmsLandingSpotlight('city', key.city, locale)
+    : key.category
+      ? await fetchCmsLandingSpotlight('category', key.category, locale)
+      : null;
+  const single = Boolean(key.city) !== Boolean(key.category);
+  return {
+    imageUrl: spot?.imageUrl ?? null,
+    intro: single ? (spot?.intro ?? null) : null,
+  };
 }
 
 /**
@@ -115,6 +123,7 @@ export async function JobsLandingRoute({
   if (!info) notFound();
 
   const { t, title, intro } = await landingText(locale, info);
+  const cms = await landingCms(locale, key);
   const tNav = await getTranslations({ locale, namespace: 'Nav' });
   const origin = absoluteSiteOrigin();
   const crumbs = [
@@ -141,7 +150,12 @@ export async function JobsLandingRoute({
       params={params}
       searchParams={searchParams}
       fixed={key}
-      heading={{ title, intro, imageUrl: await landingImage(locale, key) }}
+      heading={{
+        title,
+        // The CMS intro says what the page is; the live-jobs count follows.
+        intro: cms.intro ? `${cms.intro} ${intro}` : intro,
+        imageUrl: cms.imageUrl,
+      }}
       before={
         <>
           <JsonLd
