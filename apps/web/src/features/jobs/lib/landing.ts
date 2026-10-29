@@ -11,8 +11,6 @@ export type LandingInfo = {
   cityName: string | null;
   categoryName: string | null;
   liveJobs: number;
-  /** Live featured jobs: what a guest sees in full (decides indexing). */
-  featuredJobs: number;
   otherCities: LandingLink[];
   otherCategories: LandingLink[];
 };
@@ -49,9 +47,7 @@ export function resolveLanding(
   const matches = (f: PublicSitemapResponse['facets'][number]) =>
     (!key.city || f.city === key.city) &&
     (!key.category || f.category === key.category);
-  const matched = facets.filter(matches);
-  const liveJobs = matched.reduce((n, f) => n + f.liveJobs, 0);
-  const featuredJobs = matched.reduce((n, f) => n + f.featuredJobs, 0);
+  const liveJobs = facets.filter(matches).reduce((n, f) => n + f.liveJobs, 0);
 
   /** Sum live jobs by `dim` over facets that keep the other dimension fixed. */
   function neighbours(
@@ -88,7 +84,6 @@ export function resolveLanding(
     cityName: city ? labelFor(city, locale) : null,
     categoryName: category ? labelFor(category, locale) : null,
     liveJobs,
-    featuredJobs,
     otherCities: neighbours('city', taxonomy.cities),
     otherCategories: neighbours('category', taxonomy.categories),
   };

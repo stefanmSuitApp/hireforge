@@ -131,3 +131,14 @@ Estimated effort: B1 ½ day, B2 1 day, B3 1 day, B4 ½ day.
 ## 9. Log
 
 Implementing agents add dated entries here: what shipped, PR, what was skipped and why.
+
+- **2026-10-29, B1 + B2 together** (branch `feat/guest-access-b1`). Shipped as one PR because B1 alone would have left the site inconsistent: the infinite list would fetch page 2 and get page 1 back, and the filter chips would hit 401s.
+  - **API:** every detail is public; guests get page 1, capped at 20 (`guestLimited`). Advanced filters return 401 `JOBS_SIGN_IN_REQUIRED`. Similar jobs show 3 plus `moreAvailable`; the company page shows 20 plus `totalJobs`. The sitemap lists every live job.
+  - **Worker, sitemap, landing pages, job page, `llms.txt`:** restored to their pre-#20 versions (JSON-LD on every job, no sign-in redirect).
+  - **Web:**
+    - `GuestBrowseCta` after the 20th card; guests get a page size of 20.
+    - Locked filter chips open a sign-in sheet, and `returnTo` carries the chosen filter.
+    - A filtered URL opened as a guest explains that it needs an account.
+    - Page 2+ of lists and landing pages is `noindex`.
+  - **Tests:** e2e axe now waits for `<title>` (the streamed-metadata flake).
+  - **Skipped:** B3 (inline sign-up on "Konkuriši", bottom bar) is next.

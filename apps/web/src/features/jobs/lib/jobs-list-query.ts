@@ -1,4 +1,6 @@
 export const JOBS_LIST_PAGE_SIZE = 12;
+/** What a guest sees of any list (option B; the API enforces the same cap). */
+export const GUEST_LIST_SIZE = 20;
 
 export type JobsSearchParams = {
   page?: string;

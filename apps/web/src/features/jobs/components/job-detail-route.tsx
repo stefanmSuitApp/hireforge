@@ -1,4 +1,4 @@
-import { notFound, permanentRedirect, redirect } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 import { JsonLd } from '@/components/json-ld';
@@ -40,12 +40,6 @@ export async function JobDetailRoute({ params, structuredData }: Props) {
     if (result.status === 404 || result.status === 400) {
       notFound();
     }
-    // Not featured and not signed in: guests only get the teaser card.
-    if (result.status === 401) {
-      redirect(
-        `/${locale}/sign-in?returnTo=${encodeURIComponent(`/${locale}/jobs/${jobRef}`)}`,
-      );
-    }
     if (isPublicApiOutage(result)) {
       throw new PublicApiUnavailableError('job', result);
     }
@@ -74,8 +68,7 @@ export async function JobDetailRoute({ params, structuredData }: Props) {
 
   return (
     <>
-      {/* Only featured jobs are public pages (others need sign-in). */}
-      {structuredData && job.featured ? (
+      {structuredData ? (
         <JsonLd
           data={[
             jobPostingJsonLd(job, {

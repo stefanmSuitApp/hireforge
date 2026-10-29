@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import type { PublicJobTaxonomyResponse } from 'contracts';
 
 import { resolveNestPublicOrigin } from '@/lib/nest-api-url';
+import { hasAnyAuthSession } from '@/lib/unified-auth';
 import {
   fetchPublicJobTaxonomy,
   fetchPublicJobsList,
@@ -13,6 +14,7 @@ import {
 
 import {
   buildListQuery,
+  GUEST_LIST_SIZE,
   jobsListFilterSignature,
   JOBS_LIST_PAGE_SIZE,
   type JobsSearchParams,
@@ -44,14 +46,18 @@ export async function JobsListRoute({
   const sp = { ...(await searchParams), ...fixed };
   setRequestLocale(locale);
 
-  const pageSize = Math.min(
-    50,
-    Math.max(
-      1,
-      parseInt(sp.pageSize ?? String(JOBS_LIST_PAGE_SIZE), 10) ||
-        JOBS_LIST_PAGE_SIZE,
-    ),
-  );
+  const signedIn = await hasAnyAuthSession();
+  // Guests get one page of GUEST_LIST_SIZE (the API caps it too).
+  const pageSize = signedIn
+    ? Math.min(
+        50,
+        Math.max(
+          1,
+          parseInt(sp.pageSize ?? String(JOBS_LIST_PAGE_SIZE), 10) ||
+            JOBS_LIST_PAGE_SIZE,
+        ),
+      )
+    : GUEST_LIST_SIZE;
 
   /**
    * The requested page (`?page=N`, so crawlers can paginate through real
@@ -80,10 +86,11 @@ export async function JobsListRoute({
 
     taxonomy = taxonomyResult.ok ? taxonomyResult.data : emptyTaxonomy;
 
-    if (!result.ok && isPublicApiOutage(result)) {
+    if (!result.ok && result.status === 401) {
+      body = { kind: 'guest-filters' };
+    } else if (!result.ok && isPublicApiOutage(result)) {
       throw new PublicApiUnavailableError('jobs list', result);
-    }
-    if (!result.ok) {
+    } else if (!result.ok) {
       body = {
         kind: 'error',
         message: result.error,
@@ -119,6 +126,7 @@ export async function JobsListRoute({
         easyApply: sp.easyApply === '1' || sp.easyApply === 'true',
       }}
       apiBasePresent={Boolean(base)}
+      signedIn={signedIn}
       taxonomy={taxonomy}
       body={body}
       heading={heading}

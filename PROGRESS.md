@@ -368,6 +368,16 @@ Found with a scripted sweep of the live public pages at 375 and 1440 px
   `home-jobs-discovery.test.ts`, `employer-job-applications-table.test.tsx`,
   `i18n/request.test.ts`; each shown failing without its fix.
 
+## Guest access option B (`docs/plans/GUEST_ACCESS_B.md`)
+
+- **B1 + B2** (branch `feat/guest-access-b1`):
+  - Every job ad is public and indexed again.
+  - Guests browse the first 20 of any list, search or company page.
+  - The advanced filters and page 2+ need an account.
+  - Similar jobs show 3 plus a prompt.
+  - Replaces the #20 teaser model.
+- **Next: B3**, the inline sign-up on "Konkuriši" and the bottom bar.
+
 ## Known issues not yet scheduled
 
 Phase T pinned these with an `it.fails` test named after the fix; fixing the

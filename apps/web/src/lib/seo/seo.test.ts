@@ -68,37 +68,11 @@ describe('sitemaps', () => {
     expect(parts.map((p) => p.length)).toEqual([2500, 2500, 1]);
   });
 
-  it('lists only landing pages and companies with a live featured job', () => {
+  it('lists only landing pages and companies with live jobs', () => {
     const entries = landingEntries([
-      {
-        city: 'beograd',
-        category: 'it',
-        liveJobs: 2,
-        featuredJobs: 1,
-        lastmod: '2026-10-02',
-      },
-      {
-        city: 'nis',
-        category: null,
-        liveJobs: 1,
-        featuredJobs: 1,
-        lastmod: '2026-10-01',
-      },
-      // Live but only teasers for guests: thin, not listed.
-      {
-        city: 'kragujevac',
-        category: 'it',
-        liveJobs: 3,
-        featuredJobs: 0,
-        lastmod: '2026-10-03',
-      },
-      {
-        city: 'novi-sad',
-        category: 'it',
-        liveJobs: 0,
-        featuredJobs: 0,
-        lastmod: null,
-      },
+      { city: 'beograd', category: 'it', liveJobs: 2, lastmod: '2026-10-02' },
+      { city: 'nis', category: null, liveJobs: 1, lastmod: '2026-10-01' },
+      { city: 'novi-sad', category: 'it', liveJobs: 0, lastmod: null },
     ]).map((e) => e.path);
     expect(entries).toEqual([
       '/jobs/category/it',
@@ -108,9 +82,8 @@ describe('sitemaps', () => {
     ]);
     expect(
       companyEntries([
-        { slug: 'a', liveJobs: 1, featuredJobs: 1, lastmod: null },
-        { slug: 'b', liveJobs: 0, featuredJobs: 0, lastmod: null },
-        { slug: 'c', liveJobs: 2, featuredJobs: 0, lastmod: null },
+        { slug: 'a', liveJobs: 1, lastmod: null },
+        { slug: 'b', liveJobs: 0, lastmod: null },
       ]).map((e) => e.path),
     ).toEqual(['/companies/a']);
   });
