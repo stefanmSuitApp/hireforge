@@ -63,13 +63,15 @@ test('employer signup marks the field to fix and moves focus to it', async ({
   await page.getByRole('button', { name: 'Dalje' }).click();
   const email = page.locator('#reg-email');
   await expect(email).toHaveAttribute('aria-invalid', 'true');
-  await expect(email).toBeFocused();
+  // Focus goes to the first field to fix (the name, above the email).
+  await expect(page.locator('#reg-name')).toBeFocused();
   await expect(page.getByText('Unesi ispravnu adresu e-pošte.')).toBeVisible();
   await expect(page.locator('#reg-password')).toHaveAttribute(
     'aria-invalid',
     'true',
   );
 
+  await page.locator('#reg-name').fill('Mira Firma');
   await email.fill('firma@example.com');
   await page.locator('#reg-password').fill('Lozinka123!');
   await page.getByRole('button', { name: 'Dalje' }).click();

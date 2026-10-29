@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
+import { WorkspaceNav } from '@/components/workspace-nav';
 import {
   ADMIN_WORKSPACE_LINKS,
   getAdminWorkspaceNavKey,
@@ -10,69 +11,41 @@ import {
   getModeratorWorkspaceNavKey,
   MODERATOR_WORKSPACE_LINKS,
 } from '@/features/moderator/moderator-workspace-links';
-import { Link, usePathname } from '@/i18n/navigation';
-import { cn } from '@/lib/utils';
+import { usePathname } from '@/i18n/navigation';
 
 type Props = {
   staffRole: 'moderator' | 'admin';
+  /** Admin area labels its nav as admin. */
+  ariaLabel?: string;
 };
 
-export function ModeratorWorkspaceNav({ staffRole }: Props) {
+/** Staff nav: moderator links, plus the admin links for admins. */
+export function ModeratorWorkspaceNav({ staffRole, ariaLabel }: Props) {
   const tModerator = useTranslations('Moderator');
   const tAdmin = useTranslations('Admin');
   const pathname = usePathname();
   const moderatorCurrent = getModeratorWorkspaceNavKey(pathname);
   const adminCurrent = getAdminWorkspaceNavKey(pathname);
-
+  const groups = [
+    MODERATOR_WORKSPACE_LINKS.map(({ href, navKey, messageKey }) => ({
+      href,
+      label: tModerator(messageKey),
+      active: moderatorCurrent === navKey,
+    })),
+  ];
+  if (staffRole === 'admin') {
+    groups.push(
+      ADMIN_WORKSPACE_LINKS.map(({ href, navKey, messageKey }) => ({
+        href,
+        label: tAdmin(messageKey),
+        active: adminCurrent === navKey,
+      })),
+    );
+  }
   return (
-    <nav
-      aria-label={tModerator('navAria')}
-      className="sticky top-16 z-20 -mx-4 my-8 border-y border-border/70 bg-background/95 px-4 py-2 backdrop-blur"
-    >
-      <div className="flex flex-wrap gap-2">
-        {MODERATOR_WORKSPACE_LINKS.map(({ href, navKey, messageKey }) => {
-          const isActive = moderatorCurrent === navKey;
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={cn(
-                'rounded-full px-4 py-2 text-sm font-medium transition-colors',
-                isActive
-                  ? 'bg-foreground text-background'
-                  : 'border border-border/70 bg-card text-foreground hover:bg-muted',
-              )}
-            >
-              {tModerator(messageKey)}
-            </Link>
-          );
-        })}
-        {staffRole === 'admin' ? (
-          <>
-            <span
-              aria-hidden="true"
-              className="mx-1 self-stretch border-l border-border/70"
-            />
-            {ADMIN_WORKSPACE_LINKS.map(({ href, navKey, messageKey }) => {
-              const isActive = adminCurrent === navKey;
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  className={cn(
-                    'rounded-full px-4 py-2 text-sm font-medium transition-colors',
-                    isActive
-                      ? 'bg-foreground text-background'
-                      : 'border border-border/70 bg-card text-foreground hover:bg-muted',
-                  )}
-                >
-                  {tAdmin(messageKey)}
-                </Link>
-              );
-            })}
-          </>
-        ) : null}
-      </div>
-    </nav>
+    <WorkspaceNav
+      ariaLabel={ariaLabel ?? tModerator('navAria')}
+      groups={groups}
+    />
   );
 }

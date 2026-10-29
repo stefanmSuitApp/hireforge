@@ -25,7 +25,10 @@
     "roleModerator": "Moderator",
     "roleAdmin": "Administrator",
     "skipToContent": "Preskoči na sadržaj",
-    "closeMenu": "Zatvori meni"
+    "closeMenu": "Zatvori meni",
+    "themeSystem": "Tema: kao sistem (promeni)",
+    "themeLight": "Tema: svetla (promeni)",
+    "themeDark": "Tema: tamna (promeni)"
   },
   "Footer": {
     "copyright": "© Šljakam. Sva prava zadržana.",
@@ -293,7 +296,6 @@
     "workspaceNavPublicCompany": "Javna stranica kompanije",
     "workspaceNavPackages": "Paketi",
     "workspaceStatus": "Radni prostor kompanije",
-    "publicSlug": "Javni URL identifikator",
     "logout": "Odjavi se",
     "dashboardTitle": "Zdravo!",
     "dashboardBody": "Upravljaj oglasima, šalji nacrte na moderaciju i pregledaj kandidate za svoje oglase.",
@@ -593,7 +595,6 @@
     "register": {
       "stepAccount": "Nalog",
       "stepCompany": "Kompanija",
-      "stepAddress": "Adresa",
       "stepBilling": "Banka i fakturisanje",
       "back": "Nazad",
       "next": "Dalje",
@@ -626,7 +627,10 @@
       "validationFailed": "Ispravi označena polja.",
       "fieldRequired": "Ovo polje je obavezno.",
       "fieldEmail": "Unesi ispravnu adresu e-pošte.",
-      "fieldPassword": "Lozinka mora da ima bar 8 znakova."
+      "fieldPassword": "Lozinka mora da ima bar 8 znakova.",
+      "yourName": "Ime i prezime",
+      "billingEmailDomestic": "E-pošta za račune",
+      "billingEmailHint": "Na ovu adresu šaljemo profakture i račune."
     },
     "emailVerificationBanner": "Potvrdi e-poštu da otključaš kupovinu paketa. Link za potvrdu smo poslali na tvoju adresu.",
     "signIn": "Prijavi se",
@@ -645,7 +649,8 @@
       "companyLabel": "Kompanija:",
       "pendingBody": "Ova kompanija već postoji na Šljakam. Da bismo zaštitili njene podatke, naš tim mora da potvrdi da pripadaš kompaniji. Prijavi se ponovo kasnije da proveriš status zahteva.",
       "rejectedBody": "Nismo mogli da potvrdimo da pripadaš ovoj kompaniji. Ako misliš da je ovo greška, javi se našoj podršci."
-    }
+    },
+    "viewPublicProfile": "Pogledaj javni profil"
   },
   "Moderator": {
     "loginTitle": "Prijava osoblja",

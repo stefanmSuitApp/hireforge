@@ -319,6 +319,25 @@ Deployed 2026-10-29 (main@b71a292, PR #20), verified on sljakam.com.
   real 404s and locked jobs real 307s.
 - Visual baselines re-rendered (font).
 
+Deployed 2026-10-29 (main@96244e2, PR #22).
+
+### Design phase 3 — "Later" (branch `feat/design-later`)
+
+- **One workspace shell:** `WorkspaceShell` + `WorkspaceNav`
+  (`components/`) replace four copied shells and navs; links set
+  `aria-current="page"`, 44px on phones, pages sit in `<main>`, the container
+  matches the header (`max-w-6xl`). Employer header: "Pogledaj javni profil"
+  instead of the raw slug.
+- **Employer signup: 2 steps for Serbian companies** (name + email +
+  password → company, address and billing email prefilled from the account
+  email), 3 for foreign ones (bank details for international invoices). The
+  API still needs address and billing at signup; moving billing to checkout
+  would need API + checkout work (not done).
+- **Dark mode:** follows the system by default; header button cycles
+  system / light / dark (saved in localStorage); a `<head>` script sets the
+  class before paint (no flash); `color-scheme` for native controls. All
+  token contrast pairs pass in dark; axe passes on key pages in dark.
+
 ## Known issues not yet scheduled
 
 Phase T pinned these with an `it.fails` test named after the fix; fixing the

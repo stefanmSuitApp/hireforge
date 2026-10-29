@@ -13,6 +13,7 @@ import { notFound } from 'next/navigation';
 import { AppQueryProvider } from '../../components/providers/app-query-provider';
 import { SiteShell } from '../../components/site-shell';
 import { AppToaster } from '../../components/app-toaster';
+import { THEME_SCRIPT } from '../../components/theme-toggle';
 import { buildLocaleAlternates, SITE_NAME } from '../../i18n/metadata';
 import { absoluteSiteOrigin } from '../../lib/site-origin';
 import { routing } from '../../i18n/routing';
@@ -108,6 +109,10 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} className={inter.variable} suppressHydrationWarning>
+      <head>
+        {/* Before paint: no light flash for dark-mode visitors. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body className="min-h-dvh font-sans antialiased">
         <AppQueryProvider>
           <NextIntlClientProvider locale={locale} messages={messages}>

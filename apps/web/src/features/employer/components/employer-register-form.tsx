@@ -122,7 +122,10 @@ function buildSignupBody(
         bankCountryCode: d.bankCountryCode.trim().toUpperCase() || undefined,
         accountCurrency: d.accountCurrency.trim().toUpperCase() || undefined,
         billingPhone: d.billingPhone.trim() || undefined,
-        responsiblePerson: d.responsiblePerson.trim() || undefined,
+        responsiblePerson:
+          d.responsiblePerson.trim() ||
+          d.billingContactName.trim() ||
+          undefined,
         responsiblePosition: d.responsiblePosition.trim() || undefined,
         registrationNumber: d.registrationNumber.trim() || undefined,
       },
@@ -175,7 +178,7 @@ function readDraft(): DraftFields | null {
     return {
       ...emptyDraft(),
       ...parsed,
-      step: Math.min(Math.max(parsed.step ?? 0, 0), 3),
+      step: Math.min(Math.max(parsed.step ?? 0, 0), 2),
     };
   } catch {
     return null;
@@ -232,12 +235,12 @@ export function EmployerRegisterForm() {
     });
   }
 
-  const steps = [
-    tReg('stepAccount'),
-    tReg('stepCompany'),
-    tReg('stepAddress'),
-    tReg('stepBilling'),
-  ];
+  // Domestic companies: account + company (2 steps). Foreign ones also need
+  // bank details for international invoices (3 steps).
+  const steps = isDomestic
+    ? [tReg('stepAccount'), tReg('stepCompany')]
+    : [tReg('stepAccount'), tReg('stepCompany'), tReg('stepBilling')];
+  const lastStep = steps.length - 1;
 
   /** Errors per field id for a step; empty when the step is valid. */
   function stepErrors(step: number): Record<string, string> {
@@ -246,6 +249,7 @@ export function EmployerRegisterForm() {
       if (!value.trim()) errors[id] = tReg('fieldRequired');
     };
     if (step === 0) {
+      required('reg-name', draft.billingContactName);
       if (!draft.email.includes('@')) errors['reg-email'] = tReg('fieldEmail');
       if (password.length < 8) errors['reg-password'] = tReg('fieldPassword');
     }
@@ -260,12 +264,15 @@ export function EmployerRegisterForm() {
         required('reg-tax', draft.taxId);
       }
     }
-    if (step === 2) {
+    if (step === 1) {
       required('reg-a1', draft.addressLine1);
       required('reg-zip', draft.addressPostalCode);
       required('reg-city', draft.addressCity);
+      if (isDomestic && !draft.billingEmail.includes('@')) {
+        errors['reg-bille'] = tReg('fieldEmail');
+      }
     }
-    if (step === 3) {
+    if (step === 2) {
       required('reg-bille', draft.billingEmail);
       required('reg-billn', draft.billingContactName);
       if (!isDomestic) {
@@ -292,7 +299,12 @@ export function EmployerRegisterForm() {
 
   function goNext() {
     if (!validateStep(draft.step)) return;
-    setDraft((d) => ({ ...d, step: Math.min(d.step + 1, 3) }));
+    setDraft((d) => ({
+      ...d,
+      // Invoices go to the account email unless changed.
+      billingEmail: d.billingEmail || d.email.trim(),
+      step: Math.min(d.step + 1, lastStep),
+    }));
   }
 
   function goBack() {
@@ -303,11 +315,11 @@ export function EmployerRegisterForm() {
 
   function onSubmit(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (draft.step < 3) {
+    if (draft.step < lastStep) {
       goNext();
       return;
     }
-    if (!validateStep(3)) return;
+    if (!validateStep(lastStep)) return;
     setError(null);
     const body = {
       ...buildSignupBody(draft, password),
@@ -353,6 +365,26 @@ export function EmployerRegisterForm() {
 
       {draft.step === 0 ? (
         <>
+          <div className="space-y-2">
+            <Label
+              className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+              htmlFor="reg-name"
+            >
+              {tReg('yourName')}
+            </Label>
+            <Input
+              id="reg-name"
+              {...fieldErrorProps('reg-name', fieldErrors['reg-name'])}
+              name="name"
+              autoComplete="name"
+              required
+              value={draft.billingContactName}
+              onChange={(e) =>
+                setDraft((d) => ({ ...d, billingContactName: e.target.value }))
+              }
+            />
+            <FieldError id="reg-name" message={fieldErrors['reg-name']} />
+          </div>
           <div className="space-y-2">
             <Label
               className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
@@ -566,7 +598,7 @@ export function EmployerRegisterForm() {
         </>
       ) : null}
 
-      {draft.step === 2 ? (
+      {draft.step === 1 ? (
         <>
           <div className="space-y-2">
             <Label
@@ -660,10 +692,39 @@ export function EmployerRegisterForm() {
               }
             />
           </div>
+          {isDomestic ? (
+            <div className="space-y-2">
+              <Label
+                className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                htmlFor="reg-bille"
+              >
+                {tReg('billingEmailDomestic')}
+              </Label>
+              <Input
+                id="reg-bille"
+                {...fieldErrorProps('reg-bille', fieldErrors['reg-bille'])}
+                type="email"
+                autoComplete="email"
+                value={draft.billingEmail}
+                onChange={(e) =>
+                  setDraft((d) => ({ ...d, billingEmail: e.target.value }))
+                }
+                aria-describedby={
+                  fieldErrors['reg-bille']
+                    ? 'reg-bille-error'
+                    : 'reg-bille-hint'
+                }
+              />
+              <p id="reg-bille-hint" className="text-xs text-muted-foreground">
+                {tReg('billingEmailHint')}
+              </p>
+              <FieldError id="reg-bille" message={fieldErrors['reg-bille']} />
+            </div>
+          ) : null}
         </>
       ) : null}
 
-      {draft.step === 3 ? (
+      {draft.step === 2 && !isDomestic ? (
         <>
           {!isDomestic ? (
             <p className="text-xs text-muted-foreground">
@@ -968,7 +1029,7 @@ export function EmployerRegisterForm() {
             {tReg('back')}
           </Button>
         ) : null}
-        {draft.step < 3 ? (
+        {draft.step < lastStep ? (
           <Button
             type="button"
             onClick={goNext}
