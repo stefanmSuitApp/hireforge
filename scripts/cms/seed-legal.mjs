@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 /**
- * Loads the legal drafts from `docs/legal/<kind>.<locale>.md` into Sanity as
+ * Loads the legal texts from `docs/legal/<kind>.<locale>.md` into Sanity as
  * UNPUBLISHED drafts (`drafts.legal-<kind>`). Nothing reaches the site until
- * someone reads the draft in Studio and presses Publish.
+ * someone reads the draft in Studio and presses Publish. With --publish they
+ * are created published instead (only on the operator's explicit approval).
  *
  * Never overwrites: a kind that already has a draft or a published document
  * is skipped, so edits made in Studio are safe.
  *
- * Usage: pnpm cms:seed:legal [--dry-run]
+ * Usage: pnpm cms:seed:legal [--dry-run] [--publish]
  * Needs SANITY_PROJECT_ID, SANITY_DATASET and SANITY_API_WRITE_TOKEN (.env);
  * --dry-run only converts and prints, without a token.
  */
@@ -22,8 +23,9 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 config({ path: join(root, '.env') });
 
 const KINDS = ['privacy', 'terms', 'refunds'];
-/** Placeholder; set the real date in Studio when publishing. */
+/** The texts' version; change it in Studio whenever the text changes. */
 const EFFECTIVE_FROM = '2026-10-29';
+const PUBLISH = process.argv.includes('--publish');
 
 const REFUND_SUMMARY = {
   sr: 'Neplaćen predračun ističe posle 14 dana. Ako ne odobrimo oglas, a nijedan oglas iz paketa nije objavljen, vraćamo ceo iznos paketa. Posle objave oglasa nema srazmernog povraćaja. Ceo tekst: sljakam.com/sr/refunds',
@@ -105,7 +107,7 @@ function legalDoc(kind) {
   const sr = read('sr');
   const en = read('en');
   return {
-    _id: `drafts.legal-${kind}`,
+    _id: PUBLISH ? `legal-${kind}` : `drafts.legal-${kind}`,
     _type: 'legalPage',
     title: { _type: 'localeString', sr: sr.title, en: en.title },
     effectiveFrom: EFFECTIVE_FROM,
@@ -148,17 +150,19 @@ async function main() {
   });
 
   for (const doc of docs) {
-    const published = doc._id.replace(/^drafts\./, '');
+    const id = doc._id.replace(/^drafts\./, '');
     const existing = await client.fetch(`count(*[_id in [$a, $b]])`, {
-      a: doc._id,
-      b: published,
+      a: `drafts.${id}`,
+      b: id,
     });
     if (existing > 0) {
-      console.log(`skip ${published}: already in Sanity`);
+      console.log(`skip ${id}: already in Sanity`);
       continue;
     }
     await client.create(doc);
-    console.log(`created draft ${doc._id} (${projectId}/${dataset})`);
+    console.log(
+      `created ${PUBLISH ? 'published' : 'draft'} ${doc._id} (${projectId}/${dataset})`,
+    );
   }
 }
 

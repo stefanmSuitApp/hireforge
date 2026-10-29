@@ -19,10 +19,10 @@ Ako odlučiš da oglas ne ispravljaš, ili ga ni posle ispravke ne možemo odobr
 
 ## Kako vraćamo novac
 
-Za svaki povraćaj izdajemo knjižno odobrenje koje se odnosi na prvobitni račun i vraćamo novac na račun sa kog je uplata stigla, u roku od [TODO(Stefan): broj] dana od odobrenja povraćaja.
+Za svaki povraćaj izdajemo knjižno odobrenje koje se odnosi na prvobitni račun i vraćamo novac na račun sa kog je uplata stigla, u roku od 15 dana od odobrenja povraćaja.
 
 Paketi aktivirani besplatnim promotivnim kodom nemaju povraćaj, jer nisu plaćeni.
 
 ## Kontakt
 
-Zahtev za povraćaj ili pitanje pošalji na **[TODO(Stefan): e-adresa za podršku]**, uz broj predračuna ili računa.
+Zahtev za povraćaj ili pitanje pošalji na **[maticstefan1996@gmail.com](mailto:maticstefan1996@gmail.com)**, uz broj predračuna ili računa.

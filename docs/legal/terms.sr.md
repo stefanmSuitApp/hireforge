@@ -6,14 +6,14 @@ Ovi uslovi važe za svakoga ko koristi Šljakam (sljakam.com): kandidate, poslod
 
 Šljakam je sajt za oglase za posao. Poslodavci objavljuju oglase, a kandidati ih pretražuju i na njih se prijavljuju. Sajt vodi **Stefan Matić PR veb portali WEBLEGION Niš (Medijana)**, Rentgenova 10/4, 18108 Niš, matični broj 67907442, PIB 114857284 (u daljem tekstu: „Šljakam", „mi").
 
-Šljakam nije poslodavac ni agencija za zapošljavanje: ne zapošljava kandidate, ne posreduje u zaključivanju ugovora o radu i ne odlučuje ko će dobiti posao. O tome odlučuje isključivo poslodavac. [⚖ proveriti u odnosu na Zakon o zapošljavanju i osiguranju za slučaj nezaposlenosti]
+Šljakam nije poslodavac ni agencija za zapošljavanje: ne zapošljava kandidate, ne posreduje u zaključivanju ugovora o radu i ne odlučuje ko će dobiti posao. O tome odlučuje isključivo poslodavac.
 
 ## 2. Nalog
 
 - Za prijavu na oglas i objavu oglasa potreban je nalog. Pregled oglasa je slobodan.
 - Podaci koje uneseš moraju biti tačni i tvoji. Jedna osoba ima jedan nalog kandidata.
 - Lozinku čuvaš ti; za sve što se uradi sa tvojim nalogom odgovoran si ti, osim ako nam prijaviš zloupotrebu.
-- Nalog možeš obrisati u bilo kom trenutku u podešavanjima naloga.
+- Brisanje naloga možeš zatražiti u bilo kom trenutku, e-poštom na adresu iz tačke 12.
 
 ## 3. Kandidati
 
@@ -53,7 +53,7 @@ Zabranjeno je: automatsko preuzimanje sadržaja sa sajta (scraping) bez naše do
 
 - Trudimo se da Šljakam radi bez prekida i grešaka, ali to ne možemo garantovati.
 - Ne garantujemo da će kandidat dobiti posao niti da će poslodavac naći kandidata. Ne odgovaramo za tačnost oglasa i CV-ova koje objavljuju korisnici niti za odnos između kandidata i poslodavca.
-- Prema poslodavcima, naša ukupna odgovornost je ograničena na iznos koji je poslodavac platio Šljakamu u poslednjih 12 meseci, osim za štetu prouzrokovanu namerno ili krajnjom nepažnjom. [⚖]
+- Prema poslodavcima, naša ukupna odgovornost je ograničena na iznos koji je poslodavac platio Šljakamu u poslednjih 12 meseci, osim za štetu prouzrokovanu namerno ili krajnjom nepažnjom.
 
 ## 9. Prestanak
 
@@ -65,8 +65,8 @@ Uslove možemo menjati; nova verzija važi od datuma „Poslednja izmena" na vrh
 
 ## 11. Merodavno pravo i sporovi
 
-Na ove uslove primenjuje se pravo Republike Srbije. Sporove pokušavamo da rešimo dogovorom; ako to ne uspe, nadležan je stvarno nadležni sud u Nišu. [⚖]
+Na ove uslove primenjuje se pravo Republike Srbije. Sporove pokušavamo da rešimo dogovorom; ako to ne uspe, nadležan je stvarno nadležni sud u Nišu.
 
 ## 12. Kontakt
 
-Pitanja o ovim uslovima: **[TODO(Stefan): e-adresa za podršku]**.
+Pitanja o ovim uslovima: **[maticstefan1996@gmail.com](mailto:maticstefan1996@gmail.com)**.

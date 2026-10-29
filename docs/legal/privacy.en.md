@@ -6,7 +6,7 @@ This policy explains what personal data Šljakam (sljakam.com) collects, why, ho
 
 The controller is **Stefan Matić PR veb portali WEBLEGION Niš (Medijana)**, Rentgenova 10/4, 18108 Niš, Serbia, registration number (MB) 67907442, tax ID (PIB) 114857284.
 
-For any question about personal data, write to **[TODO(Stefan): privacy contact email]**.
+For any question about personal data, write to **[maticstefan1996@gmail.com](mailto:maticstefan1996@gmail.com)**.
 
 ## What we collect
 
@@ -38,7 +38,7 @@ We do not sell personal data or use it for advertising. We make no automated dec
 - **Šljakam staff** (moderators and administrators) access data only as needed for support, checking job ads and billing.
 - **Processors** that provide technical services to us, under contract and only on our instructions:
   - Hetzner Online GmbH, Germany: servers, database, files and backups (data centre in Nuremberg);
-  - Resend, Inc., USA: sending email (your email address and the message). [⚖ legal basis for the transfer to the USA]
+  - Resend, Inc., USA: sending email (your email address and the message).
 - **Public authorities**, when the law requires it.
 
 The site's content is edited in the Sanity CMS; no user data is stored there.
@@ -53,13 +53,11 @@ The site's content is edited in the Sanity CMS; no user data is stored there.
 - **Record of staff actions:** indefinitely.
 - **Database backups:** up to 30 days.
 
-[⚖ Periods for applications and CVs: confirm with the lawyer.]
-
 ## Your rights
 
 You can ask for access to your data and a copy, correction of inaccurate data, erasure, restriction of processing, and data portability, and you can object to processing based on legitimate interest.
 
-You can delete your account yourself in the account settings; for anything else, write to the address under "Who is the controller". We reply without delay and within 30 days at the latest.
+To delete your account, or for anything else, write to the address under "Who is the controller". We reply without delay and within 30 days at the latest.
 
 If you believe the processing breaks the law, you can complain to the Commissioner for Information of Public Importance and Personal Data Protection, Bulevar kralja Aleksandra 15, 11000 Belgrade, [www.poverenik.rs](https://www.poverenik.rs).
 
@@ -79,7 +77,7 @@ The site works only over HTTPS, passwords are stored as cryptographic hashes, on
 
 ## Minors
 
-Candidate accounts are for people aged 15 or over. [⚖ confirm with the lawyer]
+Candidate accounts are for people aged 15 or over.
 
 ## Changes to this policy
 
