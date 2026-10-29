@@ -41,6 +41,14 @@ export const employerBranding = defineType({
           return true;
         }),
     }),
+    {
+      name: 'logo',
+      title: 'Logo',
+      description:
+        'Square logo shown on job cards, the job page and the company profile (initials until set).',
+      type: 'image',
+      options: { hotspot: true },
+    },
     defineField({
       name: 'heroHeadline',
       title: 'Hero headline',

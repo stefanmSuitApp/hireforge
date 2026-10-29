@@ -644,6 +644,16 @@ shared components, CSS-only motion within the Lighthouse budgets.
     and its body is in English on `/sr/about` (content, not code).
   - Tests: `about.spec.ts` (failed before); `about` added to the visual
     baselines.
+- **Step 6, logos** (branch `feat/company-logos`):
+  - Sanity: a square **Logo** image on Employer branding (no backend
+    change). The web loads every logo once (`fetchCmsEmployerLogos`, tag
+    `cms:employerLogos`, revalidated by the Sanity webhook) and hands the
+    map to a client `CompanyLogosProvider` in the layout.
+  - `CompanyInitials` takes the company slug and shows the logo when there
+    is one, else the initials: job cards, job page, similar jobs,
+    employers list and company page.
+  - Needs the Studio deployed to show the field (NEEDS_STEFAN).
+  - Test: `company-initials.test.tsx` (the logo case failed before).
 
 ## Sign-up draft, job search layout, employers pitch (branch `fix/signup-draft-and-job-list`, 2026-10-29)
 

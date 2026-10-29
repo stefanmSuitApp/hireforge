@@ -60,6 +60,7 @@ export async function POST(req: NextRequest) {
   // Type-specific cache invalidation + likely page paths.
   if (changedType === 'employerBranding' && changedCompanySlug) {
     revalidateTag(`cms:employerBranding:${changedCompanySlug}`, 'max');
+    revalidateTag('cms:employerLogos', 'max');
     revalidatePath(`/sr/companies/${changedCompanySlug}`);
     revalidatePath(`/en/companies/${changedCompanySlug}`);
   }
