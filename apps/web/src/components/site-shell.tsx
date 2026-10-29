@@ -1,10 +1,14 @@
 import { getTranslations } from 'next-intl/server';
 
+import { hasAnyAuthSession } from '@/lib/unified-auth';
+
+import { GuestSignUpBar } from './guest-sign-up-bar';
 import { SiteFooter } from './site-footer';
 import { SiteHeader } from './site-header';
 
 export async function SiteShell({ children }: { children: React.ReactNode }) {
   const t = await getTranslations('Nav');
+  const guest = !(await hasAnyAuthSession());
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       {/* First tab stop: past the sticky header (and workspace nav) to the page. */}
@@ -23,6 +27,7 @@ export async function SiteShell({ children }: { children: React.ReactNode }) {
         {children}
       </div>
       <SiteFooter />
+      <GuestSignUpBar guest={guest} />
     </div>
   );
 }

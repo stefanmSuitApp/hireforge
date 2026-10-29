@@ -142,3 +142,7 @@ Implementing agents add dated entries here: what shipped, PR, what was skipped a
     - Page 2+ of lists and landing pages is `noindex`.
   - **Tests:** e2e axe now waits for `<title>` (the streamed-metadata flake).
   - **Skipped:** B3 (inline sign-up on "Konkuriši", bottom bar) is next.
+- **2026-10-29, B3** (branch `feat/guest-access-b3`).
+  - "Konkuriši" stays a link to the apply page (middle-click and no-JS still work); a plain click by a guest opens the sign-up sheet instead. External-apply jobs are unchanged.
+  - **Copy change from §5:** the bar says "Napravi nalog da konkurišeš i čuvaš oglase." Job alerts aren't live yet and "30 sekundi" is unmeasured, so neither is promised.
+  - The bar counts distinct job pages in the existing recently-viewed list (any time, not per session) and stays off job pages on phones, where the sticky apply bar is.

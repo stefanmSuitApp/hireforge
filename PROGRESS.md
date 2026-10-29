@@ -383,7 +383,16 @@ Found with a scripted sweep of the live public pages at 375 and 1440 px
   - The advanced filters and page 2+ need an account.
   - Similar jobs show 3 plus a prompt.
   - Replaces the #20 teaser model.
-- **Next: B3**, the inline sign-up on "Konkuriši" and the bottom bar.
+- **B3** (branch `feat/guest-access-b3`):
+  - A guest's "Konkuriši" opens a sign-up sheet over the job. Signing up
+    continues to the apply form, which asks to confirm the email first.
+  - Signed-in visitors go straight to the apply form; the old "Prijavi se da
+    konkurišeš · Napravi nalog" line no longer shows to them.
+  - From the 3rd distinct job page a guest opens, a dismissible bar offers an
+    account. Hidden on auth/apply pages and on job pages on phones (the
+    sticky apply bar is there); retired for good once dismissed or signed in.
+- **Next: B4** — archive the seed job and resubmit the sitemap in Search
+  Console (Stefan), reword the packages page (`TODO(Stefan)`).
 
 ## Known issues not yet scheduled
 
