@@ -334,11 +334,30 @@ html body[data-scroll-locked] {
   .hf-slide-down {
     animation: hf-slide-down 0.5s var(--ease-bounce) both;
   }
+  /* About: photo cards pop in (rotation from --hf-r), then drift. */
+  .hf-pop {
+    animation:
+      hf-pop 0.9s var(--ease-bounce) both,
+      hf-float 7s ease-in-out infinite;
+  }
+  /* A row of words that scrolls forever; the list is rendered twice. */
+  .hf-marquee {
+    animation: hf-marquee 36s linear infinite;
+  }
+  .hf-draw {
+    transform-origin: left;
+    animation: hf-draw 1.6s var(--ease-soft) 0.3s both;
+  }
   @supports (animation-timeline: view()) {
     .hf-reveal {
       animation: hf-reveal linear both;
       animation-timeline: view();
       animation-range: entry 0% cover 28%;
+    }
+    .hf-draw {
+      animation: hf-draw linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 45%;
     }
   }
   .hf-gradient-text {
@@ -413,7 +432,10 @@ html body[data-scroll-locked] {
   .hf-reveal,
   .hf-float,
   .hf-appear,
-  .hf-slide-down {
+  .hf-slide-down,
+  .hf-pop,
+  .hf-marquee,
+  .hf-draw {
     animation: none;
   }
 }
@@ -444,6 +466,33 @@ html body[data-scroll-locked] {
 @keyframes hf-float {
   50% {
     translate: 0 -10px;
+  }
+}
+
+@keyframes hf-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) rotate(var(--hf-r, 0deg)) scale(0.9);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(-6px) rotate(var(--hf-r, 0deg)) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(var(--hf-r, 0deg));
+  }
+}
+
+@keyframes hf-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes hf-draw {
+  from {
+    transform: scaleX(0);
   }
 }
 

@@ -629,6 +629,21 @@ shared components, CSS-only motion within the Lighthouse budgets.
     title, intro and count on a card; related cities/categories as pills.
   - Test: `campaigns.spec.ts` also checks the campaign line in the
     employers pitch (failed before).
+- **Step 5, O platformi** (branch `feat/redesign-about`):
+  - New editorial page: huge title with a gold highlight, a collage of the
+    homepage category photos from CMS (soft tiles without them), a ticker
+    of the real categories, a sticky deck of the three pillars (teal, gold,
+    white), the CMS text with its excerpt as a pull quote, a timeline whose
+    gold line draws on scroll, and a dark CTA.
+  - The page no longer 404s without the CMS document: the CMS text is now
+    an extra section. "Pogledaj poslove" shows to everyone (jobs are
+    public), "Prijavi se" to guests.
+  - New motion utilities: `hf-pop`, `hf-marquee`, `hf-draw` (off under
+    reduced motion).
+  - **For Stefan:** the About document in Sanity still says "Hireforge"
+    and its body is in English on `/sr/about` (content, not code).
+  - Tests: `about.spec.ts` (failed before); `about` added to the visual
+    baselines.
 
 ## Sign-up draft, job search layout, employers pitch (branch `fix/signup-draft-and-job-list`, 2026-10-29)
 

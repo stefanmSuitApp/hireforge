@@ -61,7 +61,7 @@
     "fallbackTitle": "Page",
     "defaultDescription": "Editorial content on Šljakam.",
     "aboutHeroEyebrow": "Our mission",
-    "aboutHeroTitle": "Building trusted hiring in Serbia",
+    "aboutHeroTitle": "Building <mark>trusted</mark> hiring in Serbia",
     "aboutHeroSubtitle": "Šljakam helps candidates and employers connect through clear listings, practical workflows, and better quality signals.",
     "headerEyebrow": "About Šljakam",
     "headerChipTrust": "Jobs from employers across Serbia",
@@ -85,7 +85,8 @@
     "aboutCtaTitle": "Ready to explore the platform?",
     "aboutCtaBody": "Browse current roles or sign in to access your tailored workspace.",
     "aboutCtaJobs": "Browse jobs",
-    "aboutCtaSignIn": "Sign in"
+    "aboutCtaSignIn": "Sign in",
+    "aboutPillarsTitle": "Three things we care about"
   },
   "Legal": {
     "lastUpdated": "Last updated: {date}",
