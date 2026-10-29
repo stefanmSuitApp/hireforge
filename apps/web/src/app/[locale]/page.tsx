@@ -10,6 +10,7 @@ import { HomeHowItWorks } from '@/features/home/home-how-it-works';
 import { HomePopularJobsStrip } from '@/features/home/home-popular-jobs-strip';
 import { HomeRecentJobsStrip } from '@/features/home/home-recent-jobs-strip';
 import { HomeSpotlightRail } from '@/features/home/home-spotlight-rail';
+import { SiteLaunchPanel } from '@/features/jobs/components/site-launch-panel';
 import { buildListQuery } from '@/features/jobs/lib/jobs-list-query';
 import {
   fetchCmsHomeJobsDiscovery,
@@ -79,6 +80,8 @@ export default async function HomePage({
 
   const base = resolveNestPublicOrigin();
   let allItems: PublicJobListItem[] = [];
+  /** Page 1 of the unfiltered list is empty: the site has no live job. */
+  let siteEmpty = false;
   let taxonomy: PublicJobTaxonomyResponse = emptyTaxonomy;
   let cmsHomeDiscovery: Awaited<ReturnType<typeof fetchCmsHomeJobsDiscovery>> =
     null;
@@ -93,6 +96,7 @@ export default async function HomePage({
     cmsHomeDiscovery = discovery;
     if (listRes.ok) {
       allItems = listRes.data.items;
+      siteEmpty = allItems.length === 0;
     }
     if (taxRes.ok) {
       taxonomy = taxRes.data;
@@ -196,6 +200,9 @@ export default async function HomePage({
       <div className="mx-auto max-w-6xl space-y-14 px-4 pb-20 md:space-y-28">
         {/* Job listing sections grouped with tighter spacing */}
         <div className="space-y-12">
+          {siteEmpty ? (
+            <SiteLaunchPanel viewer={authSession.role} variant="home" />
+          ) : null}
           <HomeFeaturedJobsStrip
             locale={locale}
             items={featuredJobs}

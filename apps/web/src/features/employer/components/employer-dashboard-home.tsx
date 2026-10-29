@@ -5,6 +5,9 @@ import type { EmployerWorkspacePayload } from '@/lib/fetch-employer-workspace';
 import { resolveEmployerAddListingHref } from '@/lib/employer-add-listing-href';
 import { Link } from '@/i18n/navigation';
 
+import { firstJobSteps } from '../lib/first-job-steps';
+import { EmployerFirstJobChecklist } from './employer-first-job-checklist';
+
 type Props = { workspace: EmployerWorkspacePayload };
 
 export async function EmployerDashboardHome({ workspace }: Props) {
@@ -13,9 +16,11 @@ export async function EmployerDashboardHome({ workspace }: Props) {
   const th = await getTranslations('Employer.home');
   const mod = workspace.assignedModerator;
   const addListingHref = resolveEmployerAddListingHref(workspace);
+  const steps = firstJobSteps(workspace);
 
   return (
     <div className="space-y-6">
+      {steps ? <EmployerFirstJobChecklist steps={steps} /> : null}
       <section className="rounded-2xl border border-border/70 bg-card p-6 shadow-sm">
         <h2 className="text-xl font-semibold text-foreground">
           {t('dashboardTitle')}

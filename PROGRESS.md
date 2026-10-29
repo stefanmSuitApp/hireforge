@@ -176,14 +176,24 @@ agent was editing the main checkout at the same time.
 1. **Legal pages, account deletion, invoices and credit notes:** plan
    `docs/plans/LEGAL_AND_INVOICES.md` (C1–C5, Stefan's decisions
    2026-10-29).
-   - **C1 built** (branch `feat/legal-pages`): CMS legal pages
-     `/privacy`, `/terms` and `/refunds`, published-only footer, sign-up
-     and checkout links, and the terms version recorded at sign-up
-     (migration 0035).
-   - Drafts are in `docs/legal/`. They go live after Stefan seeds them
-     (`pnpm cms:seed:legal`, needs a write token for `o85214ma`), reads
-     them in Studio and publishes.
-   - Next: C2 account deletion.
+   - **C1 live** (2026-10-29, #49, #52, #53): CMS legal pages `/privacy`,
+     `/terms` and `/refunds`, published-only footer, sign-up and checkout
+     links, and the terms version recorded at sign-up (migration 0035).
+   - The texts were published on Stefan's approval (version `2026-10-29`,
+     contact his Gmail since sljakam.com has no mailbox) and are pending
+     lawyer review (`docs/legal/README.md`).
+   - CMS rich text is now styled (the `prose` classes did nothing).
+   - Stefan still has to redeploy the hosted Studio to edit them there.
+   - Next, by Stefan's order (2026-10-29): the empty-site fixes and promo
+     campaigns (`docs/plans/EMPTY_SITE_AND_CAMPAIGNS.md`), then C2
+     (account deletion).
+   - **Empty site, E** (branch `feat/empty-site`):
+     - the fake "Nedelja besplatnih oglasa" slot ended in Sanity and is
+       removed from the seed;
+     - jobs and home pages show a "just getting started" panel when the
+       site has no live job;
+     - the employer dashboard has a first-job checklist (workspace
+       `jobCounts`).
 2. Invoices: SEF is not needed for a paušalac outside VAT (checked, plan
    §1). Invoice fields and credit notes are plan C3 and C4. `full_free`
    promo auto-activation (zero-value invoices) still needs the

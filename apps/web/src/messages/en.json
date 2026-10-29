@@ -234,6 +234,16 @@
     "guestRegister": "Create account",
     "similarMoreSignIn": "Sign in for more similar jobs"
   },
+  "Launch": {
+    "title": "Šljakam is just getting started",
+    "body": "The first job ads are on their way. If you are hiring, post yours today and it will be one of the first candidates see.",
+    "bodyCandidate": "The first job ads are on their way. Get your profile and CV ready so you can apply as soon as they appear.",
+    "homeTitle": "Be one of the first employers",
+    "homeBody": "Šljakam is a new job board for Serbia. Post your first ad and it will be one of the first candidates see.",
+    "postFirstJob": "Post the first job",
+    "registerCandidate": "Create a candidate account",
+    "prepareCv": "Prepare your profile and CV"
+  },
   "JobDetail": {
     "fallbackTitle": "Job details",
     "backToJobs": "Back to jobs",
@@ -681,7 +691,42 @@
       "pendingBody": "This company is already on Šljakam. To protect its data, our team needs to confirm you belong to it. Sign in again later to check the status of your request.",
       "rejectedBody": "We could not confirm that you belong to this company. If you think this is a mistake, contact our support."
     },
-    "viewPublicProfile": "View public profile"
+    "viewPublicProfile": "View public profile",
+    "firstJob": {
+      "title": "Your first job ad",
+      "intro": "The steps to an ad candidates can see. This list goes away once your first ad is published.",
+      "doneLabel": "done",
+      "steps": {
+        "verifyEmail": {
+          "title": "Confirm your email",
+          "hint": "The link is in the email we sent you; you can resend it above."
+        },
+        "choosePackage": {
+          "title": "Choose a package",
+          "hint": "The package sets how many ads you can run and for how long.",
+          "action": "Choose a package"
+        },
+        "payment": {
+          "title": "Pay the proforma invoice",
+          "hint": "The package is activated as soon as the payment arrives.",
+          "action": "Open the proforma"
+        },
+        "writeAd": {
+          "title": "Write the ad",
+          "hint": "Title, description, city and how to apply. You can save it as a draft.",
+          "action": "Write the ad"
+        },
+        "submit": {
+          "title": "Send the ad for review",
+          "hint": "A moderator checks every ad before it goes live.",
+          "action": "My ads"
+        },
+        "published": {
+          "title": "Your ad is live",
+          "hint": "As soon as a moderator approves the ad, candidates can see it and we email you."
+        }
+      }
+    }
   },
   "Moderator": {
     "loginTitle": "Staff sign in",
