@@ -229,6 +229,7 @@
     "filtersToggle": "{count, plural, =0 {Filteri} other {Filteri (#)}}",
     "guestBrowseTitle": "{count, plural, one {Prijavi se da vidiš # oglas} few {Prijavi se da vidiš sva # oglasa} other {Prijavi se da vidiš svih # oglasa}}",
     "guestBrowseBody": "Bez naloga vidiš prvih 20 oglasa. Nalog je besplatan i pravi se za pola minuta.",
+    "guestMoreFilters": "Više filtera",
     "guestFiltersTitle": "Prijavi se da koristiš ove filtere",
     "guestSignIn": "Prijavi se",
     "guestRegister": "Napravi nalog",
@@ -328,7 +329,11 @@
     "cardInsightLow": "Fokusiran ciklus zapošljavanja sa pažljivo odabranim pozicijama.",
     "empty": "Još nema poslodavaca sa objavljenim oglasima.",
     "errorNoApi": "Spisak poslodavaca trenutno nije dostupan. Pokušaj ponovo za nekoliko minuta.",
-    "errorGeneric": "Ne možemo da učitamo spisak poslodavaca."
+    "errorGeneric": "Ne možemo da učitamo spisak poslodavaca.",
+    "pitchTitle": "Zapošljavaš?",
+    "pitchBody": "Objavi oglas po pristupačnoj ceni i dođi do kandidata koji traže baš takav posao. Svaki oglas pregledamo pre objave.",
+    "pitchRegister": "Napravi nalog poslodavca",
+    "pitchSignIn": "Prijavi se"
   },
   "Employer": {
     "loginTitle": "Prijava poslodavca",

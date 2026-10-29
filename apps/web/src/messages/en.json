@@ -229,6 +229,7 @@
     "filtersToggle": "{count, plural, =0 {Filters} other {Filters (#)}}",
     "guestBrowseTitle": "{count, plural, one {Sign in to see # job} other {Sign in to see all # jobs}}",
     "guestBrowseBody": "Without an account you see the first 20 jobs. An account is free and takes half a minute.",
+    "guestMoreFilters": "More filters",
     "guestFiltersTitle": "Sign in to use these filters",
     "guestSignIn": "Sign in",
     "guestRegister": "Create account",
@@ -328,7 +329,11 @@
     "cardInsightLow": "A focused hiring cycle with selected open opportunities.",
     "empty": "No employers with published listings yet.",
     "errorNoApi": "The employer list is not available right now. Please try again in a few minutes.",
-    "errorGeneric": "Could not load the employer directory right now."
+    "errorGeneric": "Could not load the employer directory right now.",
+    "pitchTitle": "Hiring?",
+    "pitchBody": "Post a job at an affordable price and reach candidates looking for exactly that job. We review every ad before it goes live.",
+    "pitchRegister": "Create an employer account",
+    "pitchSignIn": "Sign in"
   },
   "Employer": {
     "loginTitle": "Employer sign in",

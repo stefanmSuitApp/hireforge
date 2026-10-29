@@ -80,17 +80,21 @@ test('page 2 of a list is out of the index and shows a guest page 1', async ({
   expect(html).toContain('Prijavi se da vidiš sva 22 oglasa');
 });
 
-test('an advanced filter asks a guest to sign in, then applies it', async ({
+// Guests get one locked "Više filtera" button, not a dozen locked chips
+// (Stefan, 2026-10-29); signing in comes back to the same search.
+test('more filters ask a guest to sign in, then the filters are there', async ({
   page,
 }) => {
   await createPublishedJob({ featured: false });
-  await gotoHydrated(page, '/sr/jobs', 'main button[aria-pressed]');
-  await page.getByRole('button', { name: 'Rad od kuće' }).click();
+  await gotoHydrated(page, '/sr/jobs?q=e2e', 'main input[name="q"]');
+  await expect(page.getByRole('button', { name: 'Rad od kuće' })).toHaveCount(
+    0,
+  );
+  await page.getByRole('button', { name: 'Više filtera' }).click();
   const sheet = page.getByRole('dialog', {
     name: 'Prijavi se da koristiš ove filtere',
   });
   await expect(sheet).toBeVisible();
-  await expect(page).not.toHaveURL(/workModel=/);
 
   await sheet.getByRole('link', { name: 'Prijavi se' }).click();
   await page.getByRole('link', { name: 'Prijava kandidata' }).click();
@@ -99,9 +103,11 @@ test('an advanced filter asks a guest to sign in, then applies it', async ({
   await page.locator('#candidate-password').fill(SEED_PASSWORD);
   await page.locator('button[type="submit"]').click();
   await page.waitForURL(
-    (url) =>
-      url.pathname === '/sr/jobs' &&
-      url.searchParams.get('workModel') === 'remote',
+    (url) => url.pathname === '/sr/jobs' && url.searchParams.get('q') === 'e2e',
+  );
+  await page.getByRole('button', { name: 'Rad od kuće' }).click();
+  await page.waitForURL(
+    (url) => url.searchParams.get('workModel') === 'remote',
   );
   await expect(
     page.getByRole('button', { name: 'Rad od kuće' }),
