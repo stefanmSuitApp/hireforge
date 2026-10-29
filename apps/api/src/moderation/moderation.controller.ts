@@ -31,6 +31,7 @@ import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 import { codedBadRequest } from '../http/coded-http';
 import { ModerationService } from './moderation.service';
+import { type StaffActor } from '../staff/staff-company-access';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 
 import { JobDescriptionMediaService } from '../job-media/job-description-media.service';
@@ -55,6 +56,14 @@ export class ModerationController {
     return id;
   }
 
+  private actor(req: Request): StaffActor {
+    const user = req.hireforgeUser;
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+    return { actorUserId: user.id, actorRole: user.role };
+  }
+
   @Get('me')
   me(@Req() req: Request) {
     return this.moderation.getMe(this.userId(req));
@@ -70,10 +79,7 @@ export class ModerationController {
         z.flattenError(parsed.error),
       );
     }
-    return this.moderation.createJobDraftOnBehalf(
-      this.userId(req),
-      parsed.data,
-    );
+    return this.moderation.createJobDraftOnBehalf(this.actor(req), parsed.data);
   }
 
   @Get('jobs/queue')
@@ -119,9 +125,13 @@ export class ModerationController {
 
   @Get('companies/:companyId/job-composer-bootstrap')
   jobComposerBootstrap(
+    @Req() req: Request,
     @Param('companyId', new ParseUUIDPipe()) companyId: string,
   ) {
-    return this.moderation.getCompanyJobComposerBootstrap(companyId);
+    return this.moderation.getCompanyJobComposerBootstrap(
+      this.actor(req),
+      companyId,
+    );
   }
 
   @Patch('jobs/:id')

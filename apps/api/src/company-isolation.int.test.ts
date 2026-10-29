@@ -3,6 +3,7 @@
 import type { INestApplication } from '@nestjs/common';
 import { COMPANY_A, COMPANY_B } from 'testing';
 import {
+  insertAdmin,
   insertApplication,
   insertCandidate,
   insertCompany,
@@ -524,36 +525,136 @@ describeIsolation({
   ],
 });
 
+// Stefan, 2026-10-29: moderators act only on their own companies and the
+// lead pool (unassigned / closed-lost), like company details; admins on all.
 describe('moderator scoping of employer memberships', () => {
-  // Known issue (PROGRESS.md, NEEDS_STEFAN.md): PATCH /moderator/employers/:id
-  // has no pipeline check, so any moderator can move any employer account into
-  // any company, including another moderator's closed-won client. Flip to `it`
-  // once moderators are limited to their own companies + the lead pool.
-  it.fails(
-    "moderator B can't move an employer into moderator A's closed-won company",
-    async () => {
-      const { a, b } = await moderatorParties();
-      const client = await insertCompany({
-        salesStatus: 'closed_won',
-        assignedModeratorId: a.userId,
-      });
-      const lead = await insertCompany();
-      const outsider = await insertEmployer(lead.id);
-      const { rows } = await q('select id from employers where user_id = $1', [
-        outsider.id,
-      ]);
-      const res = await http(app)
-        .patch(`/api/moderator/employers/${rows[0].id}`)
-        .set(b.headers)
-        .send({ companyId: client.id });
-      expect([403, 404]).toContain(res.status);
-      const after = await q(
-        'select company_id from employers where user_id = $1',
-        [outsider.id],
-      );
-      expect(after.rows[0].company_id).toBe(lead.id);
-    },
-  );
+  it("moderator B can't move an employer into moderator A's closed-won company", async () => {
+    const { a, b } = await moderatorParties();
+    const client = await insertCompany({
+      salesStatus: 'closed_won',
+      assignedModeratorId: a.userId,
+    });
+    const lead = await insertCompany();
+    const outsider = await insertEmployer(lead.id);
+    const { rows } = await q('select id from employers where user_id = $1', [
+      outsider.id,
+    ]);
+    const res = await http(app)
+      .patch(`/api/moderator/employers/${rows[0].id}`)
+      .set(b.headers)
+      .send({ companyId: client.id });
+    expect([403, 404]).toContain(res.status);
+    const after = await q(
+      'select company_id from employers where user_id = $1',
+      [outsider.id],
+    );
+    expect(after.rows[0].company_id).toBe(lead.id);
+  });
+
+  it("moderator B can't pull an employer out of moderator A's client either", async () => {
+    const { a, b } = await moderatorParties();
+    const client = await insertCompany({
+      salesStatus: 'closed_won',
+      assignedModeratorId: a.userId,
+    });
+    const member = await insertEmployer(client.id);
+    const lead = await insertCompany();
+    const { rows } = await q('select id from employers where user_id = $1', [
+      member.id,
+    ]);
+    const res = await http(app)
+      .patch(`/api/moderator/employers/${rows[0].id}`)
+      .set(b.headers)
+      .send({ companyId: lead.id });
+    expect(res.status).toBe(403);
+    expect(res.body.error.code).toBe('STAFF_COMPANY_VIEW_FORBIDDEN');
+  });
+
+  it('a moderator moves employers between their own and lead-pool companies', async () => {
+    const { a } = await moderatorParties();
+    const mine = await insertCompany({
+      salesStatus: 'pipeline',
+      assignedModeratorId: a.userId,
+    });
+    const lead = await insertCompany();
+    const member = await insertEmployer(lead.id);
+    const { rows } = await q('select id from employers where user_id = $1', [
+      member.id,
+    ]);
+    await http(app)
+      .patch(`/api/moderator/employers/${rows[0].id}`)
+      .set(a.headers)
+      .send({ companyId: mine.id })
+      .expect(200);
+  });
+
+  it("the employer list hides another moderator's clients from B, not from an admin", async () => {
+    const { a, b } = await moderatorParties();
+    const client = await insertCompany({
+      salesStatus: 'closed_won',
+      assignedModeratorId: a.userId,
+    });
+    const member = await insertEmployer(client.id);
+    const admin = await signIn(server(), await insertAdmin());
+    const listed = async (headers: Record<string, string>) =>
+      JSON.stringify(
+        (
+          await http(app)
+            .get('/api/moderator/employers?limit=100')
+            .set(headers)
+            .expect(200)
+        ).body,
+      ).includes(member.id);
+    expect(await listed(a.headers)).toBe(true);
+    expect(await listed(b.headers)).toBe(false);
+    expect(await listed(admin.headers)).toBe(true);
+  });
+});
+
+describe('moderator scoping of jobs on behalf of a company', () => {
+  it("moderator B can't create a job or open the composer for A's client", async () => {
+    const { a, b } = await moderatorParties();
+    const client = await insertCompany({
+      salesStatus: 'closed_won',
+      assignedModeratorId: a.userId,
+    });
+    await insertSubscription(client.id);
+    const created = await http(app)
+      .post('/api/moderator/jobs')
+      .set(b.headers)
+      .send({ ...DRAFT, companyId: client.id });
+    expect(created.status).toBe(403);
+    const bootstrap = await http(app)
+      .get(`/api/moderator/companies/${client.id}/job-composer-bootstrap`)
+      .set(b.headers);
+    expect(bootstrap.status).toBe(403);
+    const { rows } = await q(
+      'select count(*)::int as n from jobs where company_id = $1',
+      [client.id],
+    );
+    expect(rows[0].n).toBe(0);
+  });
+
+  it('the assigned moderator and an admin still can', async () => {
+    const { a } = await moderatorParties();
+    const client = await insertCompany({
+      salesStatus: 'closed_won',
+      assignedModeratorId: a.userId,
+    });
+    await insertSubscription(client.id);
+    const admin = await signIn(server(), await insertAdmin());
+    for (const headers of [a.headers, admin.headers]) {
+      await http(app)
+        .get(`/api/moderator/companies/${client.id}/job-composer-bootstrap`)
+        .set(headers)
+        .expect(200);
+      await http(app)
+        .post('/api/moderator/jobs')
+        .set(headers)
+        .send({ ...DRAFT, companyId: client.id })
+        .expect(201);
+    }
+  });
 });
 
 // A 1×1 PNG and the smallest PDF the upload accepts.

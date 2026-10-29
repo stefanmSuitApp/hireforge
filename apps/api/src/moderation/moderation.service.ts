@@ -34,6 +34,10 @@ import { getCorrelationId } from '../observability/correlation-storage';
 import { assertPromoJobCategoryAllowed } from '../promo/assert-promo-job-category';
 import { EmployerService } from '../employer/employer.service';
 import { StaffAuditService } from '../staff/staff-audit.service';
+import {
+  assertStaffCanAccessCompany,
+  type StaffActor,
+} from '../staff/staff-company-access';
 import { publishFailure } from './publish-failure';
 
 @Injectable()
@@ -231,6 +235,7 @@ export class ModerationService {
   }
 
   async getCompanyJobComposerBootstrap(
+    actor: StaffActor,
     companyId: string,
   ): Promise<ModeratorJobComposerBootstrapResponse> {
     const database = getDb();
@@ -240,6 +245,7 @@ export class ModerationService {
         'Database is not configured (DATABASE_URL)',
       );
     }
+    await assertStaffCanAccessCompany(companyId, actor);
 
     const [co] = await database.db
       .select({
@@ -269,18 +275,19 @@ export class ModerationService {
   }
 
   async createJobDraftOnBehalf(
-    actorUserId: string,
+    actor: StaffActor,
     body: ModeratorCreateJobDraftBody,
   ): Promise<{ id: string }> {
     const { companyId, ...draft } = body;
+    await assertStaffCanAccessCompany(companyId, actor);
     const { id } = await this.employers.createDraftJobForCompanyAsStaff(
       companyId,
-      actorUserId,
+      actor.actorUserId,
       draft,
     );
 
     await this.audit.log({
-      actorUserId,
+      actorUserId: actor.actorUserId,
       action: 'job.create_on_behalf',
       entityType: 'job',
       entityId: id,
