@@ -452,7 +452,17 @@ Found with a scripted sweep of the live public pages at 375 and 1440 px
   `deploy-staging` run (#37) was green end to end. `EMAIL_REDIRECT_TO` is
   set on staging, and a test reset email reached Stefan's inbox.
 - **Staging login removed** (Stefan, 2026-10-29): open, `noindex` header;
-  optional via `STAGING_BASIC_AUTH_PASSWORD`.
+  optional via `STAGING_BASIC_AUTH_PASSWORD` (#38).
+- **Follow-ups the same day:**
+  - #39: visual baselines for #28 (scrollbar gutter) and #34 (B3 copy). The
+    visual job is 12/12 again.
+  - #40: `deploy-production` resolves a short SHA in a `resolve` job before
+    the approval. `actions/checkout` takes only a full SHA.
+  - #42: staging copies the Sanity project and dataset together with the
+    read token. After the move to project `o85214ma` (#41), staging had the
+    new token with the old project.
+- **First production deploy through `deploy-production`:** run
+  40863970186, `10c8004` (#43), approved by Stefan, all gates green.
 
 ### Incident 2026-10-29: sljakam.com served staging (~08:13–08:55 UTC)
 
