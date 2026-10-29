@@ -13,6 +13,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { Link, usePathname, useRouter } from '@/i18n/navigation';
+import { cn } from '@/lib/cn';
 import { useSearchParams } from 'next/navigation';
 
 import { jobEnumLabel } from '../lib/job-enum-label';
@@ -30,6 +31,8 @@ const EMP_TYPES = [
   'temporary',
 ] as const;
 const POSTED = ['1d', '7d', '30d'] as const;
+
+type Patch = Record<string, string | undefined>;
 
 type Props = {
   /** Not signed in: these filters ask for an account (option B). */
@@ -147,129 +150,132 @@ export function JobsFilterChipsBar({ guest = false }: Props) {
   // 2026-10-29); signing in comes back to the same search.
   if (guest) {
     return (
-      <div className="border-b border-border pb-4">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         {signInSheet}
         <Button
           type="button"
           variant="outline"
-          className="min-h-11 rounded-full px-4 md:h-9 md:min-h-0"
+          className="hf-press min-h-11 rounded-full bg-card px-[18px] font-semibold"
           onClick={() => setPendingFilter({})}
         >
-          <Lock className="size-3.5" aria-hidden />
+          <Lock className="size-4" aria-hidden />
           {t('guestMoreFilters')}
         </Button>
+        <span className="text-sm text-muted-foreground">
+          {t('guestMoreFiltersHint')}
+        </span>
       </div>
     );
   }
 
+  const rows: Array<{
+    label: string;
+    chips: Array<{ key: string; label: string; on: boolean; patch: Patch }>;
+  }> = [
+    {
+      label: t('chipWorkModel'),
+      chips: WORK_MODELS.map((v) => ({
+        key: v,
+        label: jobEnumLabel(tEnum, 'workModel', v),
+        on: wm === v,
+        patch: { workModel: wm === v ? undefined : v },
+      })),
+    },
+    {
+      label: t('chipEmploymentType'),
+      chips: EMP_TYPES.map((v) => ({
+        key: v,
+        label: jobEnumLabel(tEnum, 'employmentType', v),
+        on: et === v,
+        patch: { employmentType: et === v ? undefined : v },
+      })),
+    },
+    {
+      label: t('chipPostedWithin'),
+      chips: POSTED.map((v) => ({
+        key: v,
+        label:
+          v === '1d'
+            ? t('posted1d')
+            : v === '7d'
+              ? t('posted7d')
+              : t('posted30d'),
+        on: pw === v,
+        patch: { postedWithin: pw === v ? undefined : v },
+      })),
+    },
+    {
+      label: t('chipApplyRow'),
+      chips: [
+        {
+          key: 'easyApply',
+          label: t('chipEasyApply'),
+          on: ez,
+          patch: { easyApply: ez ? undefined : '1' },
+        },
+      ],
+    },
+  ];
+
   return (
-    <div className="space-y-3 border-b border-border pb-4">
+    <div className="rounded-[22px] border border-border bg-card px-5 py-4">
       {signInSheet}
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="text-xs font-bold uppercase tracking-[0.1em] text-muted-foreground">
           {t('filtersChipBarLabel')}
         </span>
-        {hasChipFilters || hasTextFilters ? (
+        <span className="flex flex-wrap gap-1">
+          {hasChipFilters || hasTextFilters ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="hf-press rounded-full font-semibold text-primary"
+              onClick={() => clearAllFilters()}
+            >
+              {t('chipClearAll')}
+            </Button>
+          ) : null}
           <Button
             type="button"
             variant="ghost"
             size="sm"
-            className="h-8 text-xs"
-            onClick={() => clearAllFilters()}
+            className="hf-press rounded-full font-semibold text-primary"
+            onClick={() => void saveAlert()}
           >
-            {t('chipClearAll')}
+            {t('jobAlertCreate')}
           </Button>
-        ) : null}
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="h-8 text-xs"
-          onClick={() => void saveAlert()}
-        >
-          {t('jobAlertCreate')}
-        </Button>
+        </span>
       </div>
 
-      <div className="flex flex-wrap gap-y-2 gap-x-3">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-xs text-muted-foreground">
-            {t('chipWorkModel')}:
-          </span>
-          {WORK_MODELS.map((v) => (
-            <Button
-              key={v}
-              type="button"
-              size="sm"
-              variant={wm === v ? 'default' : 'outline'}
-              aria-pressed={wm === v}
-              className="min-h-11 rounded-full px-3 text-sm md:h-8 md:min-h-0 md:px-2.5 md:text-xs"
-              onClick={() => choose({ workModel: wm === v ? undefined : v })}
-            >
-              {lockIcon}
-              {jobEnumLabel(tEnum, 'workModel', v)}
-            </Button>
-          ))}
-        </div>
-
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-xs text-muted-foreground">
-            {t('chipEmploymentType')}:
-          </span>
-          {EMP_TYPES.map((v) => (
-            <Button
-              key={v}
-              type="button"
-              size="sm"
-              variant={et === v ? 'default' : 'outline'}
-              aria-pressed={et === v}
-              className="min-h-11 rounded-full px-3 text-sm md:h-8 md:min-h-0 md:px-2.5 md:text-xs"
-              onClick={() =>
-                choose({ employmentType: et === v ? undefined : v })
-              }
-            >
-              {lockIcon}
-              {jobEnumLabel(tEnum, 'employmentType', v)}
-            </Button>
-          ))}
-        </div>
-
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-xs text-muted-foreground">
-            {t('chipPostedWithin')}:
-          </span>
-          {POSTED.map((v) => (
-            <Button
-              key={v}
-              type="button"
-              size="sm"
-              variant={pw === v ? 'default' : 'outline'}
-              aria-pressed={pw === v}
-              className="min-h-11 rounded-full px-3 text-sm md:h-8 md:min-h-0 md:px-2.5 md:text-xs"
-              onClick={() => choose({ postedWithin: pw === v ? undefined : v })}
-            >
-              {lockIcon}
-              {v === '1d'
-                ? t('posted1d')
-                : v === '7d'
-                  ? t('posted7d')
-                  : t('posted30d')}
-            </Button>
-          ))}
-        </div>
-
-        <Button
-          type="button"
-          size="sm"
-          variant={ez ? 'default' : 'outline'}
-          aria-pressed={ez}
-          className="min-h-11 rounded-full px-3 text-sm md:h-8 md:min-h-0 md:px-2.5 md:text-xs"
-          onClick={() => choose({ easyApply: ez ? undefined : '1' })}
+      {rows.map((row) => (
+        <div
+          key={row.label}
+          className="mt-3 flex flex-wrap items-center gap-2"
+          role="group"
+          aria-label={row.label}
         >
-          {lockIcon}
-          {t('chipEasyApply')}
-        </Button>
-      </div>
+          <span className="w-full text-sm text-muted-foreground sm:w-auto sm:min-w-28">
+            {row.label}
+          </span>
+          {row.chips.map((chip) => (
+            <Button
+              key={chip.key}
+              type="button"
+              variant={chip.on ? 'default' : 'outline'}
+              aria-pressed={chip.on}
+              className={cn(
+                'hf-press min-h-11 rounded-full px-3.5 text-sm md:min-h-10',
+                chip.on ? 'font-semibold' : 'bg-card font-medium',
+              )}
+              onClick={() => choose(chip.patch)}
+            >
+              {lockIcon}
+              {chip.label}
+            </Button>
+          ))}
+        </div>
+      ))}
     </div>
   );
 }

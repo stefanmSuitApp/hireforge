@@ -5,13 +5,16 @@ import * as React from 'react';
 
 import type { PublicJobTaxonomyResponse } from 'contracts';
 
+import {
+  SearchCard,
+  SearchField,
+  searchFieldInputClass,
+  searchFieldTriggerClass,
+} from '@/components/search-card';
 import { Button } from '@/components/ui/button';
 import { Combobox } from '@/components/ui/combobox';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { SelectField, type SelectFieldOption } from '@/components/ui/select';
 import { Link } from '@/i18n/navigation';
-import { cn } from '@/lib/utils';
 
 import { pickLocalizedBilingual } from '../lib/bilingual-label';
 import { buildJobCityComboboxSections } from '../lib/job-city-combobox-sections';
@@ -113,16 +116,13 @@ export function JobsFilterForm({
         <input type="hidden" name="easyApply" value="1" />
       ) : null}
 
-      {/* Inline pill filter bar */}
-      <div className="flex flex-col gap-3 rounded-2xl border border-border/50 bg-card/80 p-4 backdrop-blur-sm sm:flex-row sm:items-end sm:gap-3">
-        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-          <Label
-            htmlFor="jobs-filter-q"
-            className="text-xs font-semibold text-muted-foreground"
-          >
-            {t('searchLabel')}
-          </Label>
-          <Input
+      <SearchCard>
+        <SearchField
+          label={t('searchLabel')}
+          htmlFor="jobs-filter-q"
+          basis="flex-[2_1_240px]"
+        >
+          <input
             id="jobs-filter-q"
             type="search"
             name="q"
@@ -130,17 +130,16 @@ export function JobsFilterForm({
             defaultValue={defaultQ}
             autoComplete="off"
             maxLength={200}
-            className="h-10 rounded-full border-input bg-background px-4"
+            className={searchFieldInputClass}
           />
-        </div>
+        </SearchField>
 
-        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-          <Label
-            htmlFor="jobs-filter-city"
-            className="text-xs font-semibold text-muted-foreground"
-          >
-            {t('cityLabel')}
-          </Label>
+        <SearchField
+          label={t('cityLabel')}
+          htmlFor="jobs-filter-city"
+          basis="flex-[1_1_170px]"
+          divider
+        >
           <input type="hidden" name="city" value={city} aria-hidden />
           <Combobox
             id="jobs-filter-city"
@@ -151,17 +150,16 @@ export function JobsFilterForm({
             placeholder={t('cityAny')}
             searchPlaceholder={t('citySearchPlaceholder')}
             emptyText={t('cityEmpty')}
-            className="h-10 rounded-full border-input bg-background px-4"
+            className={searchFieldTriggerClass}
           />
-        </div>
+        </SearchField>
 
-        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-          <Label
-            htmlFor="jobs-filter-category"
-            className="text-xs font-semibold text-muted-foreground"
-          >
-            {t('categoryLabel')}
-          </Label>
+        <SearchField
+          label={t('categoryLabel')}
+          htmlFor="jobs-filter-category"
+          basis="flex-[1_1_170px]"
+          divider
+        >
           <input type="hidden" name="category" value={category} aria-hidden />
           <SelectField
             id="jobs-filter-category"
@@ -171,29 +169,30 @@ export function JobsFilterForm({
               setCategory(v === JOBS_FILTER_ANY_VALUE ? '' : v)
             }
             placeholder={t('categoryAny')}
-            classNames={{
-              trigger: cn(
-                'w-full h-10 rounded-full border-input bg-background px-4 font-normal',
-              ),
-            }}
+            classNames={{ trigger: searchFieldTriggerClass }}
           />
-        </div>
+        </SearchField>
 
-        <div className="flex shrink-0 items-end gap-3">
-          <Button type="submit" className="h-10 rounded-full px-6">
+        {/* Phones: the button gets its own full-width row. */}
+        <div className="flex w-full items-center gap-1 sm:w-auto sm:flex-none">
+          <Button
+            type="submit"
+            size="lg"
+            className="hf-press min-h-14 flex-1 rounded-[18px] px-7 text-base font-bold sm:flex-none"
+          >
             {t('applySearch')}
           </Button>
           {hasFilters ? (
             <Button
               variant="ghost"
-              className="h-10 rounded-full px-4 text-muted-foreground"
+              className="min-h-11 rounded-full px-4 text-muted-foreground"
               asChild
             >
               <Link href="/jobs">{t('clearFilters')}</Link>
             </Button>
           ) : null}
         </div>
-      </div>
+      </SearchCard>
 
       <input type="hidden" name="pageSize" value={String(pageSize)} />
     </form>

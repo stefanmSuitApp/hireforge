@@ -174,13 +174,20 @@ export function JobsListScreen({
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 pb-14 md:py-12 md:pb-16">
       {before}
-      <header className="mb-8">
-        <h1 className="m-0 mb-2 text-h1 text-foreground">
-          {heading?.title ?? t('title')}
-        </h1>
-        <p className="m-0 max-w-xl text-sm leading-relaxed text-muted-foreground md:text-base">
-          {heading?.intro ?? t('listDescription')}
-        </p>
+      <header className="mb-7 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="m-0 text-[clamp(2.125rem,5vw,3.25rem)] font-extrabold leading-[1.05] tracking-tight text-foreground">
+            {heading?.title ?? t('title')}
+          </h1>
+          <p className="m-0 mt-2.5 max-w-xl text-base leading-relaxed text-muted-foreground md:text-[1.0625rem]">
+            {heading?.intro ?? t('listDescription')}
+          </p>
+        </div>
+        {body.kind === 'list' ? (
+          <span className="rounded-full bg-featured-soft px-3.5 py-2 text-sm font-bold text-featured-soft-foreground">
+            {t('openPositions', { count: body.initialPage.total })}
+          </span>
+        ) : null}
       </header>
 
       {apiBasePresent ? (
@@ -210,7 +217,7 @@ export function JobsListScreen({
               <Button
                 type="button"
                 variant="outline"
-                className="mb-4 min-h-11 w-full justify-center md:hidden"
+                className="mb-4 min-h-11 w-full justify-center rounded-full md:hidden"
                 aria-expanded={filtersOpen}
                 aria-controls="jobs-filters"
                 onClick={() => setFiltersOpen((v) => !v)}
