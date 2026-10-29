@@ -221,7 +221,25 @@ export async function createPublishedJob(
     featured?: boolean;
   } = {},
 ): Promise<SeededJob> {
-  const shortId = randomBytes(3).toString('hex').slice(0, 4);
+  // Short ids are 4 chars (see shortIdFromJobSlug); specs that create dozens
+  // of jobs can still collide, so retry on the unique slug.
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await insertPublishedJob(opts);
+    } catch (e) {
+      const duplicate =
+        e instanceof Error && /jobs_slug|short_id/.test(e.message);
+      if (!duplicate || attempt >= 4) throw e;
+    }
+  }
+}
+
+async function insertPublishedJob(
+  opts: Parameters<typeof createPublishedJob>[0] = {},
+): Promise<SeededJob> {
+  const shortId = randomInt(36 ** 4)
+    .toString(36)
+    .padStart(4, '0');
   const title = opts.title ?? `E2E inženjer ${shortId}`;
   const slug = `e2e-inzenjer-beograd-${shortId}`;
   const r = await withDb((db) =>

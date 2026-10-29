@@ -4,11 +4,13 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { buildPublicPageMetadata } from '@/i18n/metadata';
 import { resolveNestPublicOrigin } from '@/lib/nest-api-url';
 import { fetchPublicJobsList } from '@/lib/public-jobs';
+import { hasAnyAuthSession } from '@/lib/unified-auth';
 import { landingPath } from '@/lib/seo/sitemap';
 
 import {
   buildListQuery,
   JOBS_LIST_PAGE_SIZE,
+  resolveListPageSize,
   type JobsSearchParams,
 } from './jobs-list-query';
 
@@ -72,7 +74,12 @@ export async function buildJobsListMetadata(
   if (base && !noindex) {
     const list = await fetchPublicJobsList(
       base,
-      buildListQuery(sp, page, JOBS_LIST_PAGE_SIZE),
+      // Same query as the page (see resolveListPageSize).
+      buildListQuery(
+        sp,
+        page,
+        resolveListPageSize(sp, await hasAnyAuthSession()),
+      ),
     );
     empty = list.ok && list.data.items.length === 0;
   }

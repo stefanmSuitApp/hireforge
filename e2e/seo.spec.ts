@@ -87,3 +87,18 @@ test('public pages carry a snippet-length meta description', async ({
     expect(description.length, path).toBeLessThanOrEqual(170);
   }
 });
+
+test('canonical and description are in <head> of the public lists, not streamed into <body>', async ({
+  request,
+}) => {
+  await createPublishedJob();
+  for (const path of ['/sr/jobs', '/en/jobs', '/sr/jobs/city/beograd', '/sr']) {
+    const html = await (await request.get(path)).text();
+    const headEnd = html.indexOf('</head>');
+    for (const tag of ['rel="canonical"', 'name="description"']) {
+      const at = html.indexOf(tag);
+      expect(at, `${path}: ${tag}`).toBeGreaterThan(-1);
+      expect(at, `${path}: ${tag} after </head>`).toBeLessThan(headEnd);
+    }
+  }
+});
