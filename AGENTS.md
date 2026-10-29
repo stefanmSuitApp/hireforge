@@ -61,7 +61,8 @@ on 2026-10-28). Deploy from a clean checkout of a commit on `origin/main`
 with `./scripts/deploy/ship.sh`: it builds off the VM, ships, backs up,
 migrates, gates on health with automatic rollback and keeps the images of
 the last 3 releases. Rollback: `scripts/deploy/release.sh <sha>` on the
-server. Details: `docs/deployment/hetzner.md` §9.
+server. Staging (same VM, same images): `ship.sh staging` first, then
+`ship.sh`. Details: `docs/deployment/hetzner.md` §9–10.
 
 ## Never
 

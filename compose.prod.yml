@@ -29,8 +29,14 @@ services:
       - '443:443'
     volumes:
       - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      # Optional extra sites written on the server (staging-init.sh).
+      - ./deploy/caddy-sites:/etc/caddy/sites:ro
       - caddy_data:/data
       - caddy_config:/config
+    # `edge` reaches the staging stack (compose.staging.yml) on this VM.
+    networks:
+      - default
+      - edge
 
   web:
     <<: *app-env
@@ -162,3 +168,9 @@ volumes:
   caddy_data:
   postgres_data:
   redis_data:
+
+networks:
+  # Created by scripts/deploy/release.sh (docker network create hireforge-edge).
+  edge:
+    external: true
+    name: hireforge-edge

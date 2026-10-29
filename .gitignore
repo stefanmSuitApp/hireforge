@@ -19,6 +19,11 @@ lerna-debug.log*
 .env.test
 .env.production
 deploy/.env.production
+deploy/.env.staging
+# Server-generated Caddy sites (staging basic auth): scripts/deploy/staging-init.sh
+deploy/caddy-sites/
+# Server-side dumps and release logs (scripts/deploy/*)
+/backups/
 
 # temp directory
 .temp

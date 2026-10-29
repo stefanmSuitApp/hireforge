@@ -5,13 +5,17 @@
 # scripts/deploy/release.sh there (backup, migrate, health gates, automatic
 # rollback, image retention).
 #
-#   ./scripts/deploy/ship.sh
+#   ./scripts/deploy/ship.sh              # production
+#   ./scripts/deploy/ship.sh staging      # staging.sljakam.com, same images
 #
 # The commit must be on origin/main and the working tree clean.
 # HIREFORGE_SSH (deploy@178.105.128.190) and HIREFORGE_SSH_KEY
 # (~/.ssh/hetzner_hireforge) select the server.
 set -euo pipefail
 
+TARGET=${1:-production}
+[[ $TARGET == production || $TARGET == staging ]] ||
+  { echo "usage: ship.sh [production|staging]" >&2; exit 1; }
 cd "$(git rev-parse --show-toplevel)"
 SSH_TARGET=${HIREFORGE_SSH:-deploy@178.105.128.190}
 SSH_KEY=${HIREFORGE_SSH_KEY:-$HOME/.ssh/hetzner_hireforge}
@@ -58,4 +62,4 @@ fi
 
 echo "=== server checkout → $SHA"
 remote "cd $REMOTE_DIR && git fetch -q origin && git merge -q --ff-only $FULL_SHA && git log --oneline -1"
-remote "cd $REMOTE_DIR && ./scripts/deploy/release.sh $SHA"
+remote "cd $REMOTE_DIR && ./scripts/deploy/release.sh $SHA $TARGET"

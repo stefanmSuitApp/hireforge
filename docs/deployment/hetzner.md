@@ -192,9 +192,24 @@ cd /opt/hireforge && ./scripts/deploy/install-backup-cron.sh
 
 Manual backup at any time: `./scripts/deploy/backup-postgres.sh`. Dumps go
 to `./backups/postgres` (override with `HIREFORGE_BACKUP_DIR`, retention with
-`HIREFORGE_BACKUP_KEEP_DAYS`). They live on the same disk as the database:
-**copy them off the VM** (Hetzner Storage Box / Object Storage) — see
-`NEEDS_STEFAN.md`.
+`HIREFORGE_BACKUP_KEEP_DAYS`), and every deploy takes one first.
+
+**Off-server copies.** With `S3_BACKUP_BUCKET` (plus `S3_ENDPOINT`,
+`S3_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`) in
+`deploy/.env.production`, each dump is also uploaded to
+`s3://<bucket>/<S3_BACKUP_PREFIX>` and checked by size; the bucket keeps
+`S3_BACKUP_KEEP_DAYS` (30) days. The upload runs with the api image
+(`scripts/db/backup-offsite.mjs`). If it fails the local dump stays, the
+script exits 3 and the cron log (`backups/backup-cron.log`) says
+`OFF-SERVER UPLOAD FAILED`; a deploy warns and carries on.
+
+**Restore check** (safe on production; restores into a throwaway database,
+compares it with the live one, drops it):
+
+```bash
+./scripts/deploy/restore-check.sh                       # newest dump in the bucket
+./scripts/deploy/restore-check.sh backups/postgres/<file>.sql.gz
+```
 
 Restore (destroys current data; take a fresh dump first):
 
@@ -249,7 +264,7 @@ server):
 ```bash
 ssh -i ~/.ssh/hetzner_hireforge deploy@<server>
 cd /opt/hireforge && cat backups/releases.log   # last line is live
-./scripts/deploy/release.sh <previous-sha>        # or "legacy": the pre-script images
+./scripts/deploy/release.sh <previous-sha>        # any sha in releases.log
 ```
 
 Migrations are forward-only: an older release runs against the newer
@@ -264,11 +279,40 @@ pnpm lighthouse https://sljakam.com  # scores vs scripts/perf-budgets.json; HTML
 
 or re-run the "quality report" GitHub workflow by hand.
 
-Rollback: before shipping, record the running image ids
-(`docker inspect --format '{{.Image}}' hireforge-production-api-1`, same for
-`worker` / `web`), then `docker tag <id> hireforge-production-<svc>:latest`
-and `up -d --no-build`. Migrations are forward-only: restore a dump if a
-schema change must be undone.
-
 `./scripts/deploy/deploy-hetzner.sh` still builds on the VM (sequentially);
 use it only after adding swap or resizing the server, and prefer `ship.sh`.
+
+## 10. Staging (staging.sljakam.com)
+
+Staging runs on the same VM as production, like autofind:
+`compose.staging.yml` (project `hireforge-staging`) runs **the same images**
+as production with its own Postgres and Redis, memory caps (~1.2 GB in all)
+so it can't starve production, and no ports: production's Caddy proxies
+`staging.sljakam.com` to it over the `hireforge-edge` network, behind basic
+auth, with `X-Robots-Tag: noindex` (robots.txt already disallows every host
+but sljakam.com). The web app takes its origin from `SITE_ORIGIN` at runtime.
+
+Staging never reaches the outside world: no email (`RESEND_API_KEY` empty),
+no CMS writes (read token only), no object storage, no search-engine pings,
+billing in test mode. An empty staging database gets the RS locations and
+the dev seed (staging only; the seed users' password is the dev one).
+
+Once:
+
+1. DNS: an `A` record `staging.sljakam.com` → the VM's address.
+2. On the server: `./scripts/deploy/staging-init.sh` writes
+   `deploy/.env.staging` (new secrets; never commit) and, once DNS resolves,
+   the Caddy site `deploy/caddy-sites/staging.caddy`. Re-run it after adding
+   DNS. Login: `grep STAGING_BASIC_AUTH deploy/.env.staging`.
+
+Then, for every change (images are built once and reused):
+
+```bash
+./scripts/deploy/ship.sh staging     # check it on https://staging.sljakam.com
+./scripts/deploy/ship.sh             # same images to production
+```
+
+Rollback: `./scripts/deploy/release.sh <sha> staging` (see
+`backups/releases-staging.log`). Image pruning keeps the last 3 releases of
+both environments. Reset staging data: `docker compose -f
+compose.staging.yml down -v`, then ship again (fresh database and seed).

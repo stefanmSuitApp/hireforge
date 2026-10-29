@@ -33,3 +33,15 @@ echo "Wrote Postgres backup: $OUT_FILE"
 # this script created are touched.
 KEEP_DAYS="${HIREFORGE_BACKUP_KEEP_DAYS:-14}"
 find "$BACKUP_DIR" -maxdepth 1 -name 'hireforge-postgres-*.sql.gz' -mtime "+$KEEP_DAYS" -print -delete
+
+# Off-server copy when S3_BACKUP_BUCKET is set (scripts/db/backup-offsite.mjs,
+# run with the api image). A failed upload keeps the local dump and exits 3:
+# cron logs it, release.sh warns and carries on.
+if grep -qE '^S3_BACKUP_BUCKET=.+' "$ENV_FILE"; then
+  if ! docker compose -f "$COMPOSE_FILE" --profile tools run --rm --no-deps -T \
+    -v "$BACKUP_DIR:/backups:ro" migrate \
+    node scripts/db/backup-offsite.mjs upload "/backups/$(basename "$OUT_FILE")"; then
+    echo "OFF-SERVER UPLOAD FAILED: $OUT_FILE exists only on this server" >&2
+    exit 3
+  fi
+fi
