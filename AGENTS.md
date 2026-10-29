@@ -57,10 +57,11 @@ Compose + Caddy on one Hetzner VM.
 ## Deploy
 
 **Never build images on the VM** (3.8 GB RAM, no swap: it took the site down
-on 2026-10-28). Build `linux/amd64` images off the VM, `docker save | ssh …
-docker load`, back up Postgres, run the `migrate` service, then
-`docker compose -f compose.prod.yml up -d --no-build`. Details:
-`docs/deployment/hetzner.md`.
+on 2026-10-28). Deploy from a clean checkout of a commit on `origin/main`
+with `./scripts/deploy/ship.sh`: it builds off the VM, ships, backs up,
+migrates, gates on health with automatic rollback and keeps the images of
+the last 3 releases. Rollback: `scripts/deploy/release.sh <sha>` on the
+server. Details: `docs/deployment/hetzner.md` §9.
 
 ## Never
 

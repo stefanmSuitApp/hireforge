@@ -125,7 +125,7 @@ docker compose -f compose.prod.yml ps
 Production-safe seed data:
 
 ```bash
-docker compose -f compose.prod.yml --profile tools run --rm migrate pnpm db:seed:rs
+docker compose -f compose.prod.yml --profile tools run --rm migrate node scripts/db/seed-rs-locations.mjs
 ```
 
 Do not run `pnpm db:seed:domain` in production unless you intentionally want the development users and sample company/job.
@@ -213,34 +213,47 @@ Also back up Docker volumes:
 
 **Do not build images on the VM.** It has 3.8 GB RAM and no swap; building
 web/api/worker there starved the machine and took sljakam.com offline for
-~18 minutes on 2026-10-28. Build `linux/amd64` images elsewhere (a Mac with
-OrbStack/Docker Desktop or CI) and ship them:
+~18 minutes on 2026-10-28. Images are built on a Mac (OrbStack/Docker
+Desktop) and shipped. From a clean checkout of a commit that is on
+`origin/main`:
 
 ```bash
-# 1. On the build machine, from a clean checkout of main (bash, not zsh):
-for svc in api worker web; do
-  args=()
-  [ "$svc" = web ] && args=(--build-arg NEXT_PUBLIC_APP_URL=https://sljakam.com \
-    --build-arg NEXT_PUBLIC_API_URL=http://api:4000 --build-arg NEXT_PUBLIC_DEFAULT_LOCALE=sr \
-    --build-arg NEXT_PUBLIC_SUPPORTED_LOCALES=sr,en --build-arg NEXT_PUBLIC_SANITY_PROJECT_ID=845zdl9k \
-    --build-arg NEXT_PUBLIC_SANITY_DATASET=production)
-  docker buildx build --platform linux/amd64 --load -f "Dockerfile.${svc}" ${args[@]+"${args[@]}"} \
-    -t "hireforge-production-${svc}:latest" .
-done
-docker tag hireforge-production-api:latest hireforge-production-migrate:latest
-
-# 2. Back up, then ship the images (~2 min):
-ssh deploy@<server> 'cd /opt/hireforge && ./scripts/deploy/backup-postgres.sh'
-docker save hireforge-production-{api,worker,web,migrate}:latest | gzip -1 \
-  | ssh deploy@<server> 'gunzip | docker load'
-
-# 3. On the server: code (compose/Caddyfile/migrations), migrate, restart.
-cd /opt/hireforge && git pull --ff-only
-set -a && . deploy/.env.production && set +a
-docker compose -f compose.prod.yml --profile tools run --rm migrate
-docker compose -f compose.prod.yml up -d --no-build --remove-orphans
-docker compose -f compose.prod.yml exec -T caddy caddy reload --config /etc/caddy/Caddyfile
+./scripts/deploy/ship.sh
 ```
+
+`ship.sh` (build machine) builds `hireforge-production-{api,worker,web}:<sha>`
+for `linux/amd64`, sends the server only the images it lacks, fast-forwards
+`/opt/hireforge` to that commit and runs `scripts/deploy/release.sh <sha>`
+there, which:
+
+1. backs up Postgres (`backups/postgres/`);
+2. runs the migrations with the new api image (one transaction; on failure
+   nothing has been restarted);
+3. retags `<sha>` → `:latest`, `docker compose up --wait`, then gates: all
+   containers healthy, the worker logged `worker_started`, `/sr` answers
+   through Caddy. **Any failure restores the previous images** and exits
+   non-zero;
+4. records the release in `backups/releases.log` and removes images of all
+   but the **last 3 releases** (so the disk doesn't fill up again: before
+   this, every deploy left ~14 GB of images behind).
+
+Images are small: the web image is Next's `standalone` output, the api and
+worker images install only the packages their build requires
+(`dist/apps/*/package.json` + trimmed lockfile, written by Nx). The api
+image also runs migrations (`migrate` service) and carries the production
+seed `scripts/db/seed-rs-locations.mjs`; the dev seed is not in the image.
+
+**Rollback** to one of the last 3 releases (seconds; images are on the
+server):
+
+```bash
+ssh -i ~/.ssh/hetzner_hireforge deploy@<server>
+cd /opt/hireforge && cat backups/releases.log   # last line is live
+./scripts/deploy/release.sh <previous-sha>        # or "legacy": the pre-script images
+```
+
+Migrations are forward-only: an older release runs against the newer
+schema; restore a dump if a schema change must be undone.
 
 After every deploy, from the build machine (report only, never blocks):
 
@@ -258,4 +271,4 @@ and `up -d --no-build`. Migrations are forward-only: restore a dump if a
 schema change must be undone.
 
 `./scripts/deploy/deploy-hetzner.sh` still builds on the VM (sequentially);
-use it only after adding swap or resizing the server.
+use it only after adding swap or resizing the server, and prefer `ship.sh`.
