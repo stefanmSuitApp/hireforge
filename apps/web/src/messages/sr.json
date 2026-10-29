@@ -235,6 +235,16 @@
     "guestRegister": "Napravi nalog",
     "similarMoreSignIn": "Prijavi se za još sličnih oglasa"
   },
+  "Launch": {
+    "title": "Šljakam tek počinje",
+    "body": "Prvi oglasi stižu uskoro. Ako zapošljavaš, objavi oglas danas i budi među prvima koje kandidati vide.",
+    "bodyCandidate": "Prvi oglasi stižu uskoro. Do tada pripremi profil i CV, pa se prijavi čim se pojave.",
+    "homeTitle": "Budi među prvim poslodavcima",
+    "homeBody": "Šljakam je nov sajt za oglase za posao u Srbiji. Objavi prvi oglas i budi među prvima koje kandidati vide.",
+    "postFirstJob": "Objavi prvi oglas",
+    "registerCandidate": "Napravi nalog kandidata",
+    "prepareCv": "Pripremi profil i CV"
+  },
   "JobDetail": {
     "fallbackTitle": "Detalji posla",
     "backToJobs": "Nazad na poslove",
@@ -686,7 +696,42 @@
       "pendingBody": "Ova kompanija već postoji na Šljakam. Da bismo zaštitili njene podatke, naš tim mora da potvrdi da pripadaš kompaniji. Prijavi se ponovo kasnije da proveriš status zahteva.",
       "rejectedBody": "Nismo mogli da potvrdimo da pripadaš ovoj kompaniji. Ako misliš da je ovo greška, javi se našoj podršci."
     },
-    "viewPublicProfile": "Pogledaj javni profil"
+    "viewPublicProfile": "Pogledaj javni profil",
+    "firstJob": {
+      "title": "Tvoj prvi oglas",
+      "intro": "Koraci do oglasa koji kandidati vide. Ovaj spisak nestaje kad prvi oglas bude objavljen.",
+      "doneLabel": "urađeno",
+      "steps": {
+        "verifyEmail": {
+          "title": "Potvrdi e-adresu",
+          "hint": "Link je u mejlu koji smo ti poslali; možeš ga poslati ponovo iznad."
+        },
+        "choosePackage": {
+          "title": "Izaberi paket",
+          "hint": "Paket određuje koliko oglasa možeš da imaš i koliko dugo traju.",
+          "action": "Izaberi paket"
+        },
+        "payment": {
+          "title": "Uplati po profakturi",
+          "hint": "Paket se aktivira čim uplata stigne.",
+          "action": "Otvori profakturu"
+        },
+        "writeAd": {
+          "title": "Napiši oglas",
+          "hint": "Naslov, opis, grad i način prijave. Možeš ga sačuvati kao nacrt.",
+          "action": "Napiši oglas"
+        },
+        "submit": {
+          "title": "Pošalji oglas na proveru",
+          "hint": "Moderator pregleda svaki oglas pre objave.",
+          "action": "Moji oglasi"
+        },
+        "published": {
+          "title": "Oglas je objavljen",
+          "hint": "Čim moderator odobri oglas, kandidati ga vide i javljamo ti mejlom."
+        }
+      }
+    }
   },
   "Moderator": {
     "loginTitle": "Prijava osoblja",

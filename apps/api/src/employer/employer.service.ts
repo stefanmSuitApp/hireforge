@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type {
   EmployerJobApplicationItem,
   EmployerJobDetailResponse,
+  EmployerJobCounts,
   EmployerJobDraftBody,
   EmployerJobListItem,
   EmployerJoinRequestResponse,
@@ -589,7 +590,32 @@ export class EmployerService {
           : null,
       jobPosting: await this.resolveJobPostingEligibility(row.companyId),
       jobPostingSlots: await this.listActiveJobPostingSlots(row.companyId),
+      jobCounts: await this.countCompanyJobs(row.companyId),
     };
+  }
+
+  private async countCompanyJobs(
+    companyId: string,
+  ): Promise<EmployerJobCounts> {
+    const counts: EmployerJobCounts = {
+      draft: 0,
+      submitted: 0,
+      published: 0,
+      rejected: 0,
+      ended: 0,
+    };
+    const database = getDb();
+    if (!database) return counts;
+    const rows = await database.db
+      .select({ status: jobs.status, n: count() })
+      .from(jobs)
+      .where(eq(jobs.companyId, companyId))
+      .groupBy(jobs.status);
+    for (const { status, n } of rows) {
+      if (status === 'archived' || status === 'expired') counts.ended += n;
+      else counts[status] += n;
+    }
+    return counts;
   }
 
   private async latestJoinRequest(userId: string) {

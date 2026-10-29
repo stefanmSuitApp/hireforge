@@ -20,6 +20,7 @@ import { JobsFilterForm } from './jobs-filter-form';
 import { JobsInfiniteList } from './jobs-infinite-list';
 import { JobsListPreviewPane } from './jobs-list-preview-pane';
 import { GuestBrowseCta } from './guest-browse-cta';
+import { type LaunchViewer, SiteLaunchPanel } from './site-launch-panel';
 
 export type JobsListBody =
   | { kind: 'no-api' }
@@ -29,7 +30,7 @@ export type JobsListBody =
       missingApiUrl: boolean;
       httpStatus?: number;
     }
-  | { kind: 'empty' }
+  | { kind: 'empty'; siteEmpty: boolean; viewer: LaunchViewer }
   /** A guest opened a URL with filters that need an account. */
   | { kind: 'guest-filters' }
   | {
@@ -108,6 +109,8 @@ export function JobsListScreen({
         </p>
       </div>
     );
+  } else if (body.kind === 'empty' && body.siteEmpty) {
+    main = <SiteLaunchPanel viewer={body.viewer} variant="jobs" />;
   } else if (body.kind === 'empty') {
     const filtered = Boolean(
       defaults.q ||
