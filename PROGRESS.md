@@ -56,11 +56,11 @@ pnpm build` (+ `pnpm check:i18n`); CI runs it on PRs. Husky: pre-commit
 ## Decisions (2026-10-27/28, Stefan)
 
 - ~~Jobs list/detail stay behind login~~ → ~~public since the SEO branch~~ →
-  **featured public, the rest teased** (2026-10-28 evening): guests see
-  featured jobs (Šef/Gazda, `jobs.featured`) in full, public and indexed;
-  every other job is a teaser (title, city, date) whose page needs sign-in.
-  The API decides (any valid access token unlocks); `PUBLIC_JOBS=false` still
-  walls everything.
+  ~~featured public, the rest teased (#20)~~ → **option B (2026-10-29,
+  planned in `docs/plans/GUEST_ACCESS_B.md`)**: every job ad public and
+  indexed; guests browse page 1 (20 jobs) of lists and searches, advanced
+  filters and page 2+ need an account, similar jobs show 3 + a prompt.
+  `PUBLIC_JOBS=false` still walls everything.
 - Copy voice: **ti everywhere**; apply = "Konkuriši", "Prijava/Prijavi se"
   only means sign-in; enum labels in Serbian unless Serbians use the English
   word (Junior/Medior/Senior).
