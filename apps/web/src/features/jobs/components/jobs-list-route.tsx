@@ -27,7 +27,7 @@ type Props = {
   searchParams: Promise<JobsSearchParams>;
   /** Landing pages: filters fixed by the path (`/jobs/city/beograd`). */
   fixed?: { city?: string; category?: string };
-  heading?: { title: string; intro: string };
+  heading?: { title: string; intro: string; imageUrl?: string | null };
   /** Rendered above the heading (breadcrumbs) and below the list (related links). */
   before?: ReactNode;
   after?: ReactNode;

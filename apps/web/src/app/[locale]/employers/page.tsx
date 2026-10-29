@@ -7,6 +7,7 @@ import { getCandidateAccessToken } from '@/lib/candidate-access-cookie';
 import { getEmployerAccessToken } from '@/lib/employer-access-cookie';
 import { getStaffAccessToken } from '@/lib/moderator-access-cookie';
 import { resolveNestPublicOrigin } from '@/lib/nest-api-url';
+import { resolvePromoBanner } from '@/lib/promo-banner';
 import { fetchPublicEmployersDirectory } from '@/lib/public-jobs';
 import { requireSessionUnlessPublicJobs } from '@/lib/public-jobs-gate';
 import { publicJobsEnabled } from 'shared';
@@ -56,11 +57,14 @@ export default async function EmployersPage({
     return <EmployersDirectoryView kind="error" locale={locale} />;
   }
 
+  // The pitch speaks to employers, so the campaign shows here for everyone.
+  const promo = await resolvePromoBanner(locale, null);
   return (
     <EmployersDirectoryView
       kind="ok"
       locale={locale}
       items={result.data.items}
+      promo={promo?.text}
     />
   );
 }

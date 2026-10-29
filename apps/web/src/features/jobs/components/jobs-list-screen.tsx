@@ -49,7 +49,7 @@ export type JobsListScreenProps = {
   taxonomy: PublicJobTaxonomyResponse;
   body: JobsListBody;
   /** Landing pages replace the generic heading and add breadcrumbs / links. */
-  heading?: { title: string; intro: string };
+  heading?: { title: string; intro: string; imageUrl?: string | null };
   before?: ReactNode;
   after?: ReactNode;
 };
@@ -174,21 +174,48 @@ export function JobsListScreen({
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 pb-14 md:py-12 md:pb-16">
       {before}
-      <header className="mb-7 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="m-0 text-[clamp(2.125rem,5vw,3.25rem)] font-extrabold leading-[1.05] tracking-tight text-foreground">
-            {heading?.title ?? t('title')}
-          </h1>
-          <p className="m-0 mt-2.5 max-w-xl text-base leading-relaxed text-muted-foreground md:text-[1.0625rem]">
-            {heading?.intro ?? t('listDescription')}
-          </p>
-        </div>
-        {body.kind === 'list' ? (
-          <span className="rounded-full bg-featured-soft px-3.5 py-2 text-sm font-bold text-featured-soft-foreground">
-            {t('openPositions', { count: body.initialPage.total })}
-          </span>
-        ) : null}
-      </header>
+      {heading ? (
+        // Landings: the city/category photo (CMS) with the title on a card.
+        <header className="hf-reveal relative mb-6 flex min-h-[300px] items-end overflow-hidden rounded-[32px] bg-gradient-to-br from-placeholder to-featured-soft">
+          {heading.imageUrl ? (
+            <img
+              src={heading.imageUrl}
+              alt=""
+              className="absolute inset-0 size-full object-cover"
+              fetchPriority="high"
+            />
+          ) : null}
+          <div className="relative m-4 max-w-[620px] rounded-[24px] border border-border bg-card px-6 py-6 md:m-6 md:px-7">
+            <h1 className="m-0 text-[clamp(1.875rem,4.5vw,2.875rem)] font-extrabold leading-[1.08] tracking-tight text-foreground">
+              {heading.title}
+            </h1>
+            <p className="m-0 mt-2.5 leading-relaxed text-muted-foreground">
+              {heading.intro}
+            </p>
+            {body.kind === 'list' ? (
+              <span className="mt-3.5 inline-flex rounded-full bg-featured-soft px-3.5 py-1.5 text-sm font-bold text-featured-soft-foreground">
+                {t('openPositions', { count: body.initialPage.total })}
+              </span>
+            ) : null}
+          </div>
+        </header>
+      ) : (
+        <header className="mb-7 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h1 className="m-0 text-[clamp(2.125rem,5vw,3.25rem)] font-extrabold leading-[1.05] tracking-tight text-foreground">
+              {t('title')}
+            </h1>
+            <p className="m-0 mt-2.5 max-w-xl text-base leading-relaxed text-muted-foreground md:text-[1.0625rem]">
+              {t('listDescription')}
+            </p>
+          </div>
+          {body.kind === 'list' ? (
+            <span className="rounded-full bg-featured-soft px-3.5 py-2 text-sm font-bold text-featured-soft-foreground">
+              {t('openPositions', { count: body.initialPage.total })}
+            </span>
+          ) : null}
+        </header>
+      )}
 
       {apiBasePresent ? (
         <>

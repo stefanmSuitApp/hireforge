@@ -616,6 +616,19 @@ shared components, CSS-only motion within the Lighthouse budgets.
     rows) and `dashboards-and-job-page.spec.ts` (apply box beside the
     description), each failed before; `design-next` now checks the apply
     button is not below the description (beside it on wide screens).
+- **Step 4, Poslodavci, company, landings** (branch `feat/redesign-companies`):
+  - `/employers`: hero card with the counts and a wall of company initials
+    (plain tiles fill it up to six), the gold "Zapošljavaš?" pitch with the
+    running campaign's line, company cards with a cover band, initials and
+    the open-positions chip. The slug line on the cards is gone.
+  - Company page: cover band, big initials tile, name, CMS headline and
+    subhead, count chip; "Zašto kod nas" and "Utisci zaposlenih" (gold) as
+    two cards; open jobs as whole-row links with chips.
+  - City/category landings: a photo hero (the city's, else the category's,
+    homepage tile image from CMS; a soft gradient without one) with the
+    title, intro and count on a card; related cities/categories as pills.
+  - Test: `campaigns.spec.ts` also checks the campaign line in the
+    employers pitch (failed before).
 
 ## Sign-up draft, job search layout, employers pitch (branch `fix/signup-draft-and-job-list`, 2026-10-29)
 
