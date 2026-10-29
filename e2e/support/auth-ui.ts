@@ -3,7 +3,7 @@ import { expect, type Page } from '@playwright/test';
 import { type ExistingCompany, SEED_MODERATOR, SEED_PASSWORD } from './db';
 import { gotoHydrated } from './ui';
 
-/** Fills the 4-step employer signup with an existing company's PIB + MB. */
+/** Fills the (domestic, 2-step) employer signup with an existing company's PIB + MB. */
 export async function registerEmployerClaiming(
   page: Page,
   email: string,
@@ -11,6 +11,7 @@ export async function registerEmployerClaiming(
 ): Promise<void> {
   await gotoHydrated(page, '/sr/employer/register', '#reg-email');
 
+  await page.locator('#reg-name').fill('Napadač');
   await page.locator('#reg-email').fill(email);
   await page.locator('#reg-password').fill('Lozinka123!');
   await page.getByRole('button', { name: 'Dalje' }).click();
@@ -19,15 +20,12 @@ export async function registerEmployerClaiming(
   await page.locator('#reg-legal').fill(`Firma ${email.split('@')[0]} d.o.o.`);
   await page.locator('#reg-pib').fill(company.pib);
   await page.locator('#reg-mb').fill(company.mb);
-  await page.getByRole('button', { name: 'Dalje' }).click();
-
   await page.locator('#reg-a1').fill('Bulevar 1');
   await page.locator('#reg-zip').fill('11000');
   await page.locator('#reg-city').fill('Beograd');
-  await page.getByRole('button', { name: 'Dalje' }).click();
-
+  // Prefilled with the account email; invoices may go elsewhere.
+  await expect(page.locator('#reg-bille')).toHaveValue(email);
   await page.locator('#reg-bille').fill(`billing-${email}`);
-  await page.locator('#reg-billn').fill('Napadač');
   await page.getByRole('button', { name: 'Napravi nalog' }).click();
 }
 

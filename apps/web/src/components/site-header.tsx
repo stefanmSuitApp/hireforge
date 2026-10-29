@@ -12,6 +12,7 @@ import { BrandWordmark } from './brand-wordmark';
 import { LocaleSwitcher } from './locale-switcher';
 import { SiteMobileNav } from './site-mobile-nav';
 import { SiteMainNav, type SiteNavItem } from './site-main-nav';
+import { ThemeToggle } from './theme-toggle';
 import { UserProfileDropdown } from './user-profile-dropdown';
 
 export async function SiteHeader() {
@@ -67,8 +68,9 @@ export async function SiteHeader() {
         </nav>
 
         {/* Right: Actions */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3">
           <LocaleSwitcher />
+          <ThemeToggle />
 
           <div className="hidden md:block">
             {authSession.isAuthenticated &&

@@ -25,7 +25,10 @@
     "roleModerator": "Moderator",
     "roleAdmin": "Admin",
     "skipToContent": "Skip to content",
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "themeSystem": "Theme: system (change)",
+    "themeLight": "Theme: light (change)",
+    "themeDark": "Theme: dark (change)"
   },
   "Footer": {
     "copyright": "© Šljakam. All rights reserved.",
@@ -293,7 +296,6 @@
     "workspaceNavPublicCompany": "Public company page",
     "workspaceNavPackages": "Packages",
     "workspaceStatus": "Company workspace",
-    "publicSlug": "Public URL slug",
     "logout": "Log out",
     "dashboardTitle": "Welcome",
     "dashboardBody": "Manage your listings, submit drafts for moderation, and review applicants from your own jobs.",
@@ -593,7 +595,6 @@
     "register": {
       "stepAccount": "Account",
       "stepCompany": "Company",
-      "stepAddress": "Address",
       "stepBilling": "Bank & billing",
       "back": "Back",
       "next": "Continue",
@@ -626,7 +627,10 @@
       "validationFailed": "Please fix the highlighted fields.",
       "fieldRequired": "This field is required.",
       "fieldEmail": "Enter a valid email address.",
-      "fieldPassword": "The password needs at least 8 characters."
+      "fieldPassword": "The password needs at least 8 characters.",
+      "yourName": "Full name",
+      "billingEmailDomestic": "Billing email",
+      "billingEmailHint": "Proformas and invoices go to this address."
     },
     "emailVerificationBanner": "Confirm your email to unlock package purchases. We sent a confirmation link to your address.",
     "signIn": "Sign in",
@@ -645,7 +649,8 @@
       "companyLabel": "Company:",
       "pendingBody": "This company is already on Šljakam. To protect its data, our team needs to confirm you belong to it. Sign in again later to check the status of your request.",
       "rejectedBody": "We could not confirm that you belong to this company. If you think this is a mistake, contact our support."
-    }
+    },
+    "viewPublicProfile": "View public profile"
   },
   "Moderator": {
     "loginTitle": "Staff sign in",
