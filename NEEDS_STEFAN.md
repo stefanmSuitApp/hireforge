@@ -5,14 +5,12 @@ priority. Remove an item when it is done. **No secrets in this file.**
 
 ## ▶ Next, in order (updated 2026-10-29)
 
-1. Deploy pipeline (item 1, ~5 min): the CI deploy key and the
-   `production` approval. Until then merges don't reach staging.
+1. Production admin: set its password from the reset email (2026-10-29).
 2. Rotate the secrets that were visible in a screenshot (item 2).
 3. Server (~2 min): set `INDEXNOW_KEY` (see "Values").
-4. Admin UI: archive the seed sample job (see "Values").
-5. Google Search Console + Bing Webmaster Tools, submit the sitemap
+4. Google Search Console + Bing Webmaster Tools, submit the sitemap
    (see "Values"). Worth doing now: verification takes days to settle.
-6. When convenient: `sudo systemctl restart docker` (item 3), Sentry (4),
+5. When convenient: `sudo systemctl restart docker` (item 3), Sentry (4),
    accountant (5), legal texts (6), Phase T decisions, social profiles,
    analytics.
 
@@ -40,35 +38,18 @@ priority. Remove an item when it is done. **No secrets in this file.**
   restore from the bucket checked. Keys rotated once already (the first
   pair was visible in chat). How to rotate: `docs/deployment/hetzner.md` §8.
 - **Swap** (2026-10-29): 4 GB `/swapfile`, in `/etc/fstab`.
-- **Staging** (2026-10-29): https://staging.sljakam.com, basic auth
-  (`grep STAGING_BASIC_AUTH /opt/hireforge-staging/deploy/.env.staging` on
-  the VM), own checkout `/opt/hireforge-staging`, same seed accounts as
+- **Deploy pipeline** (2026-10-29, #35, #37): a merge to `main` deploys to
+  staging by itself; production = Actions → `deploy-production` → the
+  commit staging ran → you approve. CI deploy key (`DEPLOY_SSH_KEY`,
+  `hireforge-github-actions-deploy` on the VM) and the `production`
+  environment set up by Stefan; first run green.
+- **Staging** (2026-10-29): https://staging.sljakam.com, open (no login,
+  `noindex`), own checkout `/opt/hireforge-staging`, same seed accounts as
   production with production's passwords. Shares the Sanity read token, the
-  bucket and (once the redirect is live) the Resend key with every email
-  sent to Stefan's inbox; `docs/deployment/hetzner.md` §10.
+  bucket and the Resend key, every email sent to Stefan's inbox (test email
+  received 2026-10-29); `docs/deployment/hetzner.md` §10.
 
 ## 🟠 Soon
-
-### 1. Deploy pipeline: CI deploy key and approval (~5 min)
-
-The `deploy-staging` / `deploy-production` workflows (like autofind:
-merge → staging by itself, production by hand with your approval) need a
-key that lets GitHub Actions log in to the server as `deploy`. Claude was
-not allowed to create that access, so it is yours: on your Mac, in this
-repo, run the commands Claude gave you in chat (2026-10-29), or by hand:
-
-1. `ssh-keygen -t ed25519 -N '' -C hireforge-github-actions-deploy -f /tmp/hf-ci`
-2. Append `/tmp/hf-ci.pub` to `~/.ssh/authorized_keys` of `deploy` on the VM
-   (prefixed with `no-port-forwarding,no-agent-forwarding,no-X11-forwarding,no-pty `).
-3. `gh secret set DEPLOY_SSH_KEY < /tmp/hf-ci`, then `rm /tmp/hf-ci*`.
-4. `gh variable set DEPLOY_HOST --body 178.105.128.190`,
-   `gh variable set DEPLOY_USER --body deploy`,
-   `gh variable set DEPLOY_HOST_KEY --body "$(ssh-keyscan -t ed25519 178.105.128.190 2>/dev/null | grep -v '^#' | cut -d' ' -f2-)"`.
-5. GitHub → Settings → Environments: `staging` (no rules) and `production`
-   with **Required reviewers: you**.
-
-Then say "pipeline keys done": Claude runs `deploy-staging` once and checks
-it. After that, deploy production from Actions → `deploy-production`.
 
 ### 2. Rotate the secrets seen in a screenshot
 

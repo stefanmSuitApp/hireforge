@@ -100,11 +100,11 @@ jobs:
           HIREFORGE_SSH_KEY: /home/runner/.ssh/deploy_key
         run: ./scripts/deploy/ship.sh staging
 
-      - name: Through Caddy, with the basic-auth login
+      - name: Through Caddy (with the basic-auth login when one is set)
         run: |
           ssh hireforge 'cd /opt/hireforge-staging \
             && u=$(grep -E "^STAGING_BASIC_AUTH_USER=" deploy/.env.staging | cut -d= -f2-) \
             && p=$(grep -E "^STAGING_BASIC_AUTH_PASSWORD=" deploy/.env.staging | cut -d= -f2-) \
             && curl -fsS -o /dev/null --retry 5 --retry-delay 3 --retry-all-errors \
-              --resolve staging.sljakam.com:443:127.0.0.1 -u "$u:$p" https://staging.sljakam.com/sr'
+              --resolve staging.sljakam.com:443:127.0.0.1 ${p:+-u "$u:$p"} https://staging.sljakam.com/sr'
           echo "staging runs ${{ steps.meta.outputs.sha }}; promote it with the deploy-production workflow"
