@@ -414,7 +414,16 @@ Found with a scripted sweep of the live public pages at 375 and 1440 px
   users, companies, jobs and the dev seed. One admin account
   (Stefan's gmail, password set by reset email). Packages page: the featured
   hint now says the ad is on top of search and seen by guests too.
-  Search Console resubmit is Stefan's (needs his Google account).
+  The one orphaned CV file left in the `api_var` volume was deleted, so
+  `candidate-uploads` is empty.
+- **Search Console (2026-10-29):** sljakam.com is verified as a Domain
+  property in Stefan's Google account by a `google-site-verification` TXT
+  record in GoDaddy DNS. Keep that record. `https://sljakam.com/sitemap.xml`
+  is submitted (status Success).
+- **Sitemap without empty `/jobs`** (branch `fix/sitemap-empty-jobs`):
+  `/sr/jobs` and `/en/jobs` are noindex while no job is live, so
+  `pages.xml` now lists them only when at least one job is live. Search
+  Console would otherwise flag them as "Submitted URL marked noindex".
 
 ## Staging pipeline (branch `feat/staging-pipeline`, 2026-10-29)
 
