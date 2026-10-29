@@ -25,4 +25,4 @@ Paketi aktivirani besplatnim promotivnim kodom nemaju povraćaj, jer nisu plaće
 
 ## Kontakt
 
-Zahtev za povraćaj ili pitanje pošalji na **[maticstefan1996@gmail.com](mailto:maticstefan1996@gmail.com)**, uz broj predračuna ili računa.
+Zahtev za povraćaj ili pitanje pošalji na [maticstefan1996@gmail.com](mailto:maticstefan1996@gmail.com), uz broj predračuna ili računa.

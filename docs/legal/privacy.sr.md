@@ -6,7 +6,7 @@ Ova politika objašnjava koje podatke o ličnosti prikuplja Šljakam (sljakam.co
 
 Rukovalac je **Stefan Matić PR veb portali WEBLEGION Niš (Medijana)**, Rentgenova 10/4, 18108 Niš, Srbija, matični broj 67907442, PIB 114857284.
 
-Za sva pitanja o podacima o ličnosti piši na **[maticstefan1996@gmail.com](mailto:maticstefan1996@gmail.com)**.
+Za sva pitanja o podacima o ličnosti piši na [maticstefan1996@gmail.com](mailto:maticstefan1996@gmail.com).
 
 ## Koje podatke prikupljamo
 

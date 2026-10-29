@@ -69,4 +69,4 @@ These terms are governed by the law of the Republic of Serbia. We try to settle 
 
 ## 12. Contact
 
-Questions about these terms: **[maticstefan1996@gmail.com](mailto:maticstefan1996@gmail.com)**.
+Questions about these terms: [maticstefan1996@gmail.com](mailto:maticstefan1996@gmail.com).

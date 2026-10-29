@@ -6,7 +6,7 @@ This policy explains what personal data Šljakam (sljakam.com) collects, why, ho
 
 The controller is **Stefan Matić PR veb portali WEBLEGION Niš (Medijana)**, Rentgenova 10/4, 18108 Niš, Serbia, registration number (MB) 67907442, tax ID (PIB) 114857284.
 
-For any question about personal data, write to **[maticstefan1996@gmail.com](mailto:maticstefan1996@gmail.com)**.
+For any question about personal data, write to [maticstefan1996@gmail.com](mailto:maticstefan1996@gmail.com).
 
 ## What we collect
 

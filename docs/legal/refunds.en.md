@@ -25,4 +25,4 @@ Packages activated with a free promo code have no refund, as nothing was paid.
 
 ## Contact
 
-Send a refund request or question to **[maticstefan1996@gmail.com](mailto:maticstefan1996@gmail.com)**, with the proforma or invoice number.
+Send a refund request or question to [maticstefan1996@gmail.com](mailto:maticstefan1996@gmail.com), with the proforma or invoice number.

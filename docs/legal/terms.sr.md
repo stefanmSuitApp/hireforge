@@ -69,4 +69,4 @@ Na ove uslove primenjuje se pravo Republike Srbije. Sporove pokušavamo da reši
 
 ## 12. Kontakt
 
-Pitanja o ovim uslovima: **[maticstefan1996@gmail.com](mailto:maticstefan1996@gmail.com)**.
+Pitanja o ovim uslovima: [maticstefan1996@gmail.com](mailto:maticstefan1996@gmail.com).
