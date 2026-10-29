@@ -132,25 +132,22 @@ test.describe('on a phone', () => {
     await expect(sticky).toHaveAttribute('href', `/sr/jobs/${job.slug}/apply`);
   });
 
-  test('job results come before the filters, which open from one button', async ({
+  // Stefan, 2026-10-29: the keyword search stays visible on phones; a
+  // guest's extra filters are one locked button, not a dozen chips.
+  test('the search and the first result share the first screen; a guest gets one filter button', async ({
     page,
   }) => {
-    const job = await createPublishedJob();
-    await gotoHydrated(
-      page,
-      '/sr/jobs',
-      'main button[aria-controls="jobs-filters"]',
-    );
-    const card = page.locator(`main a[aria-label$="${job.title}"]`);
+    await createPublishedJob();
+    await gotoHydrated(page, '/sr/jobs', 'main input[name="q"]');
+    await expect(page.locator('main input[name="q"]')).toBeVisible();
+    const card = page.locator('main article').first();
     await expect(card).toBeVisible();
     expect((await card.boundingBox())?.y ?? 9999).toBeLessThan(812);
+    await expect(page.getByRole('button', { name: 'Na lokaciji' })).toHaveCount(
+      0,
+    );
     await expect(
-      page.getByRole('button', { name: 'Na lokaciji' }),
-    ).toBeHidden();
-
-    await page.getByRole('button', { name: /^Filteri/ }).click();
-    await expect(
-      page.getByRole('button', { name: 'Na lokaciji' }),
+      page.getByRole('button', { name: 'Više filtera' }),
     ).toBeVisible();
   });
 });

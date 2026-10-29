@@ -113,35 +113,58 @@ export function JobsFilterChipsBar({ guest = false }: Props) {
     );
   }
 
+  const signInSheet = (
+    <Sheet
+      open={pendingFilter !== null}
+      onOpenChange={(open) => {
+        if (!open) setPendingFilter(null);
+      }}
+    >
+      <SheetContent side="bottom" closeLabel={tNav('closeMenu')}>
+        <SheetTitle className="pr-12">{t('guestFiltersTitle')}</SheetTitle>
+        <SheetDescription className="m-0 text-sm text-muted-foreground">
+          {t('guestBrowseBody')}
+        </SheetDescription>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Link
+            href={`/sign-in?returnTo=${pendingReturnTo}`}
+            className={buttonVariants({ size: 'lg' })}
+          >
+            {t('guestSignIn')}
+          </Link>
+          <Link
+            href={`/candidate/register?returnTo=${pendingReturnTo}`}
+            className={buttonVariants({ size: 'lg', variant: 'outline' })}
+          >
+            {t('guestRegister')}
+          </Link>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+
+  // Guests: one locked button instead of a dozen locked chips (Stefan,
+  // 2026-10-29); signing in comes back to the same search.
+  if (guest) {
+    return (
+      <div className="border-b border-border pb-4">
+        {signInSheet}
+        <Button
+          type="button"
+          variant="outline"
+          className="min-h-11 rounded-full px-4 md:h-9 md:min-h-0"
+          onClick={() => setPendingFilter({})}
+        >
+          <Lock className="size-3.5" aria-hidden />
+          {t('guestMoreFilters')}
+        </Button>
+      </div>
+    );
+  }
+
   return (
-    <div className="mb-4 space-y-3 border-b border-border pb-4">
-      <Sheet
-        open={pendingFilter !== null}
-        onOpenChange={(open) => {
-          if (!open) setPendingFilter(null);
-        }}
-      >
-        <SheetContent side="bottom" closeLabel={tNav('closeMenu')}>
-          <SheetTitle className="pr-12">{t('guestFiltersTitle')}</SheetTitle>
-          <SheetDescription className="m-0 text-sm text-muted-foreground">
-            {t('guestBrowseBody')}
-          </SheetDescription>
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <Link
-              href={`/sign-in?returnTo=${pendingReturnTo}`}
-              className={buttonVariants({ size: 'lg' })}
-            >
-              {t('guestSignIn')}
-            </Link>
-            <Link
-              href={`/candidate/register?returnTo=${pendingReturnTo}`}
-              className={buttonVariants({ size: 'lg', variant: 'outline' })}
-            >
-              {t('guestRegister')}
-            </Link>
-          </div>
-        </SheetContent>
-      </Sheet>
+    <div className="space-y-3 border-b border-border pb-4">
+      {signInSheet}
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           {t('filtersChipBarLabel')}

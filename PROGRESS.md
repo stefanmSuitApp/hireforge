@@ -513,6 +513,26 @@ Found with a scripted sweep of the live public pages at 375 and 1440 px
     passes. Verified on the server: Caddy reaches staging as `staging-web`,
     and sljakam.com is production's.
 
+## Sign-up draft, job search layout, employers pitch (branch `fix/signup-draft-and-job-list`, 2026-10-29)
+
+- **Employer sign-up:** a first visit no longer shows "Vraćen je sačuvan
+  nacrt". An empty form is never saved or restored, and the restore runs
+  once per mount. A re-run used to put the empty draft back, so real drafts
+  were lost too.
+- **Job search:** the list scrolls with the page (window virtualizer), not
+  in a ~3-card box. The search form comes first and is visible on phones.
+  Guests get one locked "Više filtera" button (sign-in sheet) instead of 12
+  locked chips (Stefan's choice). Signed-in users keep the chips, behind
+  "Filteri" on phones.
+- **Employers page:** no public prices (Stefan). A short pitch says posting
+  is affordable and every ad is reviewed before it goes live, with
+  "Napravi nalog poslodavca" / "Prijavi se". The copy is a draft for Stefan.
+- **Tests:** new e2e `employer-register-draft`, `jobs-list-layout` and
+  `employers-pitch` (each failed before). `design-next`, `landing`,
+  `guest-job-visibility` and `keyboard-and-menu` were updated to the new
+  layout. Visual baselines for jobs-list and landing-city were re-rendered
+  (Linux) and reviewed.
+
 ## Moderator scope (branch `fix/moderator-company-scope`, 2026-10-29)
 
 - **Decided (Stefan):** moderators act only on their own companies and the

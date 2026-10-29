@@ -39,20 +39,15 @@ test.describe('on a phone', () => {
     await expect(toggle).toBeFocused();
   });
 
-  test('the hero search box has a name and the filter chips are big enough to tap', async ({
+  test("the hero search box has a name and a guest's filter button is big enough to tap", async ({
     page,
   }) => {
     await page.goto('/sr');
     await expect(page.getByRole('searchbox')).toHaveAccessibleName(/.+/);
 
-    await gotoHydrated(
-      page,
-      '/sr/jobs',
-      'main button[aria-controls="jobs-filters"]',
-    );
-    await page.getByRole('button', { name: /^Filteri/ }).click();
-    const chip = page.getByRole('button', { pressed: false }).first();
-    const box = await chip.boundingBox();
+    await gotoHydrated(page, '/sr/jobs', 'main input[name="q"]');
+    const more = page.getByRole('button', { name: 'Više filtera' });
+    const box = await more.boundingBox();
     expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
   });
 });

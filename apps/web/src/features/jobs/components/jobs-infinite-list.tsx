@@ -1,6 +1,6 @@
 'use client';
 
-import { useVirtualizer } from '@tanstack/react-virtual';
+import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import * as React from 'react';
 
@@ -128,10 +128,11 @@ export function JobsInfiniteList({
 
   const { fetchNextPage, hasNextPage, isFetchingNextPage } = query;
 
+  // The page scrolls, not a box inside it (a ~3-card box on phones meant
+  // scrolling inside the page), so the viewport is the root.
   React.useEffect(() => {
-    const root = parentRef.current;
     const el = loadMoreRef.current;
-    if (!root || !el) return;
+    if (!el) return;
     const obs = new IntersectionObserver(
       (entries) => {
         const [e] = entries;
@@ -139,19 +140,26 @@ export function JobsInfiniteList({
           void fetchNextPage();
         }
       },
-      { root, rootMargin: '280px 0px', threshold: 0 },
+      { rootMargin: '280px 0px', threshold: 0 },
     );
     obs.observe(el);
     return () => obs.disconnect();
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const virtEnabled = items.length > 24;
-  const virtualizer = useVirtualizer({
+  // Where the list starts on the page, for the window virtualizer.
+  const [scrollMargin, setScrollMargin] = React.useState(0);
+  React.useLayoutEffect(() => {
+    const el = parentRef.current;
+    if (!el || !virtEnabled) return;
+    setScrollMargin(el.getBoundingClientRect().top + window.scrollY);
+  }, [virtEnabled]);
+  const virtualizer = useWindowVirtualizer({
     count: virtEnabled ? items.length : 0,
-    getScrollElement: () => parentRef.current,
     estimateSize: () => PUBLIC_JOB_CARD_ESTIMATE_PX + 12,
     overscan: 6,
     enabled: virtEnabled,
+    scrollMargin,
   });
 
   const showListSkeleton =
@@ -191,7 +199,7 @@ export function JobsInfiniteList({
                 top: 0,
                 left: 0,
                 width: '100%',
-                transform: `translateY(${vi.start}px)`,
+                transform: `translateY(${vi.start - scrollMargin}px)`,
               }}
             >
               <div className="pb-3">
@@ -251,14 +259,7 @@ export function JobsInfiniteList({
 
   return (
     <>
-      <div
-        ref={parentRef}
-        className={
-          virtEnabled || items.length > 0
-            ? 'max-h-[min(70vh,720px)] overflow-y-auto pr-1'
-            : undefined
-        }
-      >
+      <div ref={parentRef}>
         {listBody}
         <div ref={loadMoreRef} className="h-2 w-full shrink-0" aria-hidden />
         {query.isFetchingNextPage ? (
