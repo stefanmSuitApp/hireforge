@@ -131,15 +131,16 @@ rollback() {
 
 log "start $SHA"
 for s in "${SERVICES[@]}"; do docker tag "$(img "$s" "$SHA")" "$(img "$s" "$LIVE_TAG")"; done
-started=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 compose up -d --no-build --pull never --remove-orphans --wait --wait-timeout 240 ||
   rollback "containers not healthy"
 
-# Read the log into a variable: `docker logs | grep -q` can fail under
-# pipefail (SIGPIPE) even when the line is there.
+# Since the container's own start: compose leaves an unchanged worker image
+# running, and then there is no new line since the deploy began. Read the log
+# into a variable: `docker logs | grep -q` can fail under pipefail (SIGPIPE).
 worker_started() {
-  local out
-  out=$(docker logs --since "$started" "$PROJECT-worker-1" 2>&1 || true)
+  local since out
+  since=$(docker inspect -f '{{.State.StartedAt}}' "$PROJECT-worker-1" 2>/dev/null) || return 1
+  out=$(docker logs --since "${since%%.*}Z" "$PROJECT-worker-1" 2>&1 || true)
   [[ $out == *worker_started* ]]
 }
 for _ in $(seq 1 30); do
