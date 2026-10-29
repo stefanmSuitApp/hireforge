@@ -383,7 +383,7 @@
       "upgradeFeatures": {
         "featured_listing": {
           "label": "Istaknut oglas",
-          "hintLocked": "Nadogradi paket i istakni oglas u pretrazi."
+          "hintLocked": "Oglas stoji na vrhu rezultata pretrage, sa zlatnom oznakom. Vide ga svi posetioci, i oni bez naloga."
         },
         "png_creative": {
           "label": "PNG kreativ",

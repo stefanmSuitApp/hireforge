@@ -126,7 +126,7 @@ Estimated effort: B1 ½ day, B2 1 day, B3 1 day, B4 ½ day.
 - **Fewer sign-ups than the teaser model.** Guests can now read every job. B3 (inline sign-up on apply) is where most accounts come from, so don't skip it.
 - **Crawling.** Page 2+ is closed to crawlers too, so the sitemap must be complete and fresh. It already is, from the API, uncached for crawlers.
 - **Duplicate-looking lists:** a guest's page 2 shows page 1's jobs. It's `noindex`, so search engines ignore it.
-- **The packages page promise:** "visible to everyone" from #20 isn't true any more. Reword it (TODO(Stefan)).
+- **The packages page promise:** reworded 2026-10-29 (Stefan chose it): "Oglas stoji na vrhu rezultata pretrage, sa zlatnom oznakom. Vide ga svi posetioci, i oni bez naloga." A CMS message for `featured_listing` still overrides it.
 
 ## 9. Log
 
