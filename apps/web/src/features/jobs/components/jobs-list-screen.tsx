@@ -233,7 +233,15 @@ export function JobsListScreen({
         </>
       ) : null}
 
-      <div className="md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] md:items-start md:gap-6">
+      {/* Split view only when there is a list to preview; empty states,
+          errors and the launch panel take the full width. */}
+      <div
+        className={
+          previewPane
+            ? 'md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] md:items-start md:gap-6'
+            : undefined
+        }
+      >
         <div>
           {main}
           {body.kind === 'list' && body.initialPage.guestLimited ? (

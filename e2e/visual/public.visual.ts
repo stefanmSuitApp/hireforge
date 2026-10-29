@@ -1,7 +1,9 @@
 import { expect, test } from '../support/fixtures';
 import { SEED_JOB_ID, setJobPublishedAt } from '../support/db';
 
-test.use({ fixedClock: true });
+// Reduced motion: scroll reveals would leave below-the-fold blocks invisible
+// in a full-page screenshot taken without scrolling.
+test.use({ fixedClock: true, reducedMotion: 'reduce' });
 
 test.beforeAll(async () => {
   // Server-rendered dates come from the DB: pin the seed job's.

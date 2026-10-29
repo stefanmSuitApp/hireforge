@@ -25,7 +25,7 @@ export function HomePopularJobsStrip({
 
   return (
     <section>
-      <h2 className="m-0 mb-8 text-2xl font-bold tracking-tight text-foreground md:text-3xl">
+      <h2 className="m-0 mb-8 text-3xl font-extrabold tracking-tight text-foreground md:text-[2.125rem]">
         {title}
       </h2>
       <ul className="m-0 grid list-none gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">

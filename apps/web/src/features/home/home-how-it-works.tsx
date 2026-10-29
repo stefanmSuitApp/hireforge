@@ -8,18 +8,16 @@ function Step({
   body: string;
 }) {
   return (
-    <div className="flex flex-col items-center text-center">
-      <div className="relative z-[1] mb-5 flex size-16 items-center justify-center rounded-full border-2 border-primary/25 bg-card">
-        <span className="text-xl font-bold text-primary">{step}</span>
-      </div>
-
-      <h3 className="m-0 mb-2 text-lg font-semibold text-foreground">
-        {title}
-      </h3>
-      <p className="m-0 max-w-xs text-sm leading-relaxed text-muted-foreground">
-        {body}
-      </p>
-    </div>
+    <li className="hf-lift hf-reveal rounded-3xl border border-border bg-card p-7">
+      <span
+        aria-hidden
+        className="flex size-12 items-center justify-center rounded-2xl bg-featured text-xl font-extrabold text-featured-foreground"
+      >
+        {step}
+      </span>
+      <h3 className="m-0 mt-5 text-xl font-bold text-foreground">{title}</h3>
+      <p className="m-0 mt-2 leading-relaxed text-muted-foreground">{body}</p>
+    </li>
   );
 }
 
@@ -42,24 +40,14 @@ export function HomeHowItWorks({
 }) {
   return (
     <section>
-      <h2 className="m-0 mb-12 text-center text-2xl font-bold tracking-tight text-foreground md:text-3xl">
+      <h2 className="m-0 mb-10 text-center text-3xl font-extrabold tracking-tight text-foreground md:text-[2.125rem]">
         {title}
       </h2>
-      <div className="relative mx-auto grid max-w-4xl gap-12 md:grid-cols-3 md:gap-8">
-        {/* Dashed line from circle 1 to circle 2 */}
-        <div
-          className="absolute left-[calc(16.67%+1.4rem)] top-[2rem] hidden h-px w-[calc(33.33%-1.5rem)] border-t-2 border-dashed border-border/60 md:block"
-          aria-hidden
-        />
-        {/* Dashed line from circle 2 to circle 3 */}
-        <div
-          className="absolute left-[calc(50%+2.1rem)] top-[2rem] hidden h-px w-[calc(33.33%-1.5rem)] border-t-2 border-dashed border-border/60 md:block"
-          aria-hidden
-        />
+      <ol className="m-0 grid list-none gap-5 p-0 md:grid-cols-3">
         <Step step="1" title={s1Title} body={s1Body} />
         <Step step="2" title={s2Title} body={s2Body} />
         <Step step="3" title={s3Title} body={s3Body} />
-      </div>
+      </ol>
     </section>
   );
 }

@@ -5,7 +5,7 @@ Living status file. **Trust this over the `Status:` lines in
 which went stale during the Cursor phase (Steps 4, 5, 14, 15 say "pending"
 but shipped). Update this file in the same PR as the work.
 
-Last updated: 2026-10-29 (Sanity project move, no Actions on PRs, launch setup). Open items for
+Last updated: 2026-10-29 (redesign A step 2: homepage). Open items for
 Stefan: [`NEEDS_STEFAN.md`](./NEEDS_STEFAN.md).
 
 ## Current state
@@ -571,6 +571,33 @@ shared components, CSS-only motion within the Lighthouse budgets.
   - Tests: `campaigns.spec.ts` checks the bar on `/sr/jobs` too (failed
     before). All 12 visual baselines were re-rendered and reviewed: only
     the background and the footer changed.
+- **Step 2, homepage** (branch `feat/redesign-home`):
+  - Hero as in the concept: trust chip, two-line title with the accent,
+    the search card (Reči + Grad side by side, the button wraps below when
+    the row is narrow), the first four categories as chips, and two
+    floating featured-job cards on wide screens (`hf-float`).
+  - Shared A job card (`PublicJobTeaserCard`, initials via
+    `CompanyInitials`) used by every job strip; how-it-works as numbered
+    cards; teal candidate and gold employer cards, the employer one with
+    the campaign line.
+  - Categories as a photo grid; the city accordion widens smoothly, its
+    label card fades in once the tile has opened, and closed tiles are one
+    big button with a pointer cursor (Stefan's feedback).
+  - **Decided (Stefan):** the promo bar shows only an admin-started
+    campaign (admin → campaigns, with its start and end). The CMS
+    announcement no longer shows anywhere; `fetchCmsHomePromoBanner` is
+    unused and can go together with its Sanity field later.
+  - "Šljakam tek počinje" panel restyled in A and laid out by its own width
+    (container query). On `/jobs` the list/preview split only appears when
+    there is a list; empty states take the full width (Stefan).
+  - SEO: home title "Oglasi za posao u Srbiji — Šljakam" and a description
+    with "tražiš posao" / "oglasi za posao" (sr + en).
+  - Visual tests run with reduced motion, and the reveal/float animations
+    are off under reduced motion, so scroll-revealed sections are in the
+    full-page baselines.
+  - Tests: `promo-banner.test.ts` (campaign only), `seo.spec.ts` (home
+    title words), `empty-site.spec.ts` (empty result spans the width); each
+    failed before.
 
 ## Sign-up draft, job search layout, employers pitch (branch `fix/signup-draft-and-job-list`, 2026-10-29)
 

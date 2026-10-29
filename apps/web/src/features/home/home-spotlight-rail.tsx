@@ -1,17 +1,23 @@
 'use client';
 
+import { ArrowRight } from 'lucide-react';
 import { useLocale } from 'next-intl';
 import * as React from 'react';
 
 import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/cn';
-import type { HomeJobsSpotlightTile } from '@/lib/home-jobs-discovery';
+import type { HomeJobsSpotlightTile as BaseTile } from '@/lib/home-jobs-discovery';
+
+/** `exploreLabel`: the whole declined button text from Sanity ("Istraži Suboticu"). */
+type HomeJobsSpotlightTile = BaseTile & { exploreLabel?: string | null };
 
 type Props = {
   title: string;
   titleAccent?: string;
   subtitle: string;
   tiles: HomeJobsSpotlightTile[];
+  /** Categories: a grid of photo tiles; cities: the photo accordion. */
+  variant?: 'accordion' | 'grid';
   initialOpenIndex?: number;
   className?: string;
   /** Button label prefix, e.g. "Explore" → "Explore IT" */
@@ -19,24 +25,42 @@ type Props = {
   isAuthenticated?: boolean;
 };
 
-const GRADIENT_PALETTES = [
-  'from-teal-600 via-teal-700 to-teal-900',
-  'from-cyan-600 via-cyan-700 to-cyan-900',
-  'from-emerald-600 via-emerald-700 to-emerald-900',
-  'from-teal-700 via-emerald-800 to-teal-900',
-  'from-cyan-700 via-teal-800 to-cyan-900',
-  'from-teal-600 via-cyan-700 to-emerald-900',
-  'from-emerald-700 via-teal-700 to-cyan-900',
-  'from-cyan-600 via-emerald-700 to-teal-900',
-  'from-teal-800 via-teal-600 to-emerald-800',
-  'from-emerald-600 via-cyan-700 to-teal-800',
-];
+/** The tile's CMS photo, else its initial on the placeholder colour. */
+function TileImage({
+  tile,
+  className,
+}: {
+  tile: HomeJobsSpotlightTile;
+  className?: string;
+}) {
+  return tile.imageUrl ? (
+    <img
+      src={tile.imageUrl}
+      alt=""
+      className={cn('h-full w-full object-cover', className)}
+      loading="lazy"
+      decoding="async"
+    />
+  ) : (
+    <div
+      className={cn(
+        'flex h-full w-full items-center justify-center bg-placeholder',
+        className,
+      )}
+    >
+      <span className="select-none text-5xl font-extrabold text-placeholder-foreground/60">
+        {tile.label.charAt(0).toUpperCase()}
+      </span>
+    </div>
+  );
+}
 
 export function HomeSpotlightRail({
   title,
   titleAccent,
   subtitle,
   tiles,
+  variant = 'accordion',
   initialOpenIndex = 0,
   className,
   exploreLabelPrefix,
@@ -51,11 +75,7 @@ export function HomeSpotlightRail({
       setActiveIdx(0);
       return;
     }
-    const clampedIdx = Math.max(
-      0,
-      Math.min(initialOpenIndex, tiles.length - 1),
-    );
-    setActiveIdx(clampedIdx);
+    setActiveIdx(Math.max(0, Math.min(initialOpenIndex, tiles.length - 1)));
   }, [initialOpenIndex, tiles.length]);
 
   if (tiles.length === 0) return null;
@@ -65,18 +85,20 @@ export function HomeSpotlightRail({
       ? jobsHref
       : `/sign-in?returnTo=${encodeURIComponent(`/${locale}${jobsHref}`)}`;
   }
+  const exploreLabel = (label: string) =>
+    exploreLabelPrefix ? `${exploreLabelPrefix} ${label}` : label;
 
   return (
-    <section className={cn('', className)} aria-labelledby={headingId}>
+    <section className={className} aria-labelledby={headingId}>
       <div className="mb-8">
         <h2
           id={headingId}
-          className="m-0 text-2xl font-bold tracking-tight text-foreground md:text-4xl"
+          className="m-0 text-3xl font-extrabold tracking-tight text-foreground md:text-[2.125rem]"
         >
           {titleAccent ? (
             <>
               {title.replace(titleAccent, '')}{' '}
-              <span className="hf-gradient-text">{titleAccent}</span>
+              <span className="text-primary">{titleAccent}</span>
             </>
           ) : (
             title
@@ -87,159 +109,92 @@ export function HomeSpotlightRail({
         </p>
       </div>
 
-      {/* Mobile: vertical accordion cards */}
-      <div className="space-y-3 md:hidden">
-        {tiles.map((tile, idx) => {
-          const isOpen = idx === activeIdx;
-          return (
-            <article
-              key={`${tile.slug}-${idx}`}
-              className={cn(
-                'overflow-hidden rounded-2xl border border-border/60 bg-card/80 transition-colors',
-                isOpen ? 'border-primary/35' : 'hover:border-border',
-              )}
-            >
-              <button
-                type="button"
-                onClick={() => setActiveIdx(idx)}
-                className="flex w-full items-center justify-between gap-3 p-4 text-left"
-                aria-expanded={isOpen}
-                aria-controls={`${headingId}-mobile-panel-${idx}`}
+      {variant === 'grid' ? (
+        <ul className="m-0 grid list-none grid-cols-2 gap-4 p-0 sm:grid-cols-3 lg:grid-cols-5">
+          {tiles.map((tile, idx) => (
+            <li key={`${tile.slug}-${idx}`} className="hf-reveal">
+              <Link
+                href={tileHref(tile.jobsHref)}
+                locale={locale}
+                className="hf-lift group block overflow-hidden rounded-[22px] border border-border bg-card no-underline"
               >
-                <span className="text-base font-semibold text-foreground">
-                  {tile.label}
-                </span>
-                <span className="text-sm font-semibold text-primary">
-                  {isOpen ? '−' : '+'}
-                </span>
-              </button>
-
-              {isOpen ? (
-                <div
-                  id={`${headingId}-mobile-panel-${idx}`}
-                  className="px-4 pb-4"
-                >
-                  <div className="relative mb-3 h-40 overflow-hidden rounded-xl">
-                    {tile.imageUrl ? (
-                      <img
-                        src={tile.imageUrl}
-                        alt=""
-                        className="h-full w-full object-cover"
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    ) : (
-                      <div
-                        className={cn(
-                          'flex h-full w-full items-center justify-center bg-gradient-to-br',
-                          GRADIENT_PALETTES[idx % GRADIENT_PALETTES.length],
-                        )}
-                      >
-                        <span className="select-none text-5xl font-bold text-white/60">
-                          {tile.label.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  <Link
-                    href={tileHref(tile.jobsHref)}
-                    className="inline-flex w-full items-center justify-center rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background no-underline transition-colors hover:bg-foreground/85"
-                  >
-                    {exploreLabelPrefix
-                      ? `${exploreLabelPrefix} ${tile.label}`
-                      : tile.label}
-                  </Link>
+                <div className="h-28 overflow-hidden">
+                  <TileImage
+                    tile={tile}
+                    className="transition-transform duration-500 group-hover:scale-105"
+                  />
                 </div>
-              ) : null}
-            </article>
-          );
-        })}
-      </div>
-
-      {/* Horizontal accordion container */}
-      <div className="hidden h-[320px] gap-1.5 overflow-hidden rounded-2xl bg-muted/40 p-3 md:flex md:h-[380px]">
-        {tiles.map((tile, idx) => {
-          const isOpen = idx === activeIdx;
-          return (
-            <div
-              key={`${tile.slug}-${idx}`}
-              className={cn(
-                'relative flex cursor-pointer overflow-hidden rounded-xl bg-card transition-all duration-500 ease-in-out',
-                isOpen
-                  ? 'flex-[3] md:flex-[4]'
-                  : 'flex-[0.5] hover:bg-muted/60 md:flex-[0.4]',
-              )}
-              onClick={() => setActiveIdx(idx)}
-              // Only collapsed tiles act as a button: the open one holds a
-              // link, and interactive controls must not be nested.
-              {...(isOpen
-                ? {}
-                : {
-                    role: 'button',
-                    tabIndex: 0,
-                    'aria-expanded': false,
-                    'aria-label': tile.label,
-                    onKeyDown: (e: React.KeyboardEvent) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        setActiveIdx(idx);
-                      }
-                    },
-                  })}
-            >
-              {isOpen ? (
-                /* Expanded card: image + label + button */
-                <div className="flex h-full w-full flex-col">
-                  <div className="relative flex-1 overflow-hidden">
-                    {tile.imageUrl ? (
-                      <img
-                        src={tile.imageUrl}
-                        alt=""
-                        className="h-full w-full object-cover"
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    ) : (
-                      <div
-                        className={cn(
-                          'flex h-full w-full items-center justify-center bg-gradient-to-br',
-                          GRADIENT_PALETTES[idx % GRADIENT_PALETTES.length],
-                        )}
-                      >
-                        <span className="select-none text-6xl font-bold text-white/60">
-                          {tile.label.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-between gap-3 px-4 py-3">
-                    <span className="text-base font-bold text-foreground md:text-lg">
+                <div className="flex items-center justify-between gap-2 px-4 py-3">
+                  <span className="text-[0.9375rem] font-bold text-foreground">
+                    {tile.label}
+                  </span>
+                  <ArrowRight
+                    className="size-4 shrink-0 text-primary transition-transform duration-200 group-hover:translate-x-0.5"
+                    aria-hidden
+                  />
+                </div>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div className="flex flex-col gap-3 md:h-[440px] md:flex-row">
+          {tiles.map((tile, idx) => {
+            const isOpen = idx === activeIdx;
+            return (
+              <div
+                key={`${tile.slug}-${idx}`}
+                className={cn(
+                  'group relative overflow-hidden rounded-3xl transition-[flex-grow,height] duration-500 ease-[var(--ease-soft)]',
+                  isOpen
+                    ? 'h-72 md:h-auto md:flex-[4_1_0%]'
+                    : 'h-16 md:h-auto md:min-w-0 md:flex-[1_1_0%]',
+                )}
+              >
+                <TileImage
+                  tile={tile}
+                  className={cn(
+                    'transition-transform duration-700 ease-[var(--ease-soft)]',
+                    !isOpen && 'group-hover:scale-110',
+                  )}
+                />
+                {isOpen ? (
+                  // Mounted on open; fades in once the card has widened, on
+                  // one line so nothing re-wraps while it grows.
+                  <div
+                    key={`open-${idx}`}
+                    className="hf-appear absolute inset-x-4 bottom-4 flex items-center justify-between gap-3 overflow-hidden whitespace-nowrap rounded-2xl border border-border bg-card px-5 py-4"
+                  >
+                    <span className="truncate text-2xl font-extrabold tracking-tight text-foreground">
                       {tile.label}
                     </span>
                     <Link
                       href={tileHref(tile.jobsHref)}
-                      className="shrink-0 rounded-full bg-foreground px-4 py-1.5 text-xs font-semibold text-background no-underline transition-colors hover:bg-foreground/80 md:text-sm"
-                      onClick={(e) => e.stopPropagation()}
+                      locale={locale}
+                      className="hf-press inline-flex min-h-11 shrink-0 items-center rounded-full bg-primary px-5 text-sm font-bold text-primary-foreground no-underline"
                     >
-                      {exploreLabelPrefix
-                        ? `${exploreLabelPrefix} ${tile.label}`
-                        : tile.label}
+                      {tile.exploreLabel ?? exploreLabel(tile.label)}
                     </Link>
                   </div>
-                </div>
-              ) : (
-                /* Collapsed card: vertical text */
-                <div className="flex h-full w-full items-center justify-center">
-                  <span className="whitespace-nowrap text-base font-semibold text-muted-foreground [writing-mode:vertical-lr] [transform:rotate(180deg)]">
-                    {tile.label}
-                  </span>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+                ) : (
+                  // The whole strip opens it: one big target, pointer cursor.
+                  <button
+                    type="button"
+                    onClick={() => setActiveIdx(idx)}
+                    aria-expanded={false}
+                    aria-label={tile.label}
+                    className="absolute inset-0 flex cursor-pointer items-end p-3"
+                  >
+                    <span className="w-full truncate rounded-2xl border border-border bg-card px-2 py-2.5 text-sm font-bold text-foreground transition-transform duration-300 ease-[var(--ease-bounce)] group-hover:-translate-y-1">
+                      {tile.label}
+                    </span>
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </section>
   );
 }

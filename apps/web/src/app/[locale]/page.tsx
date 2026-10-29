@@ -3,6 +3,8 @@ import { publicJobsEnabled } from 'shared';
 import type { PublicJobListItem, PublicJobTaxonomyResponse } from 'contracts';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 
+import { MapPin } from 'lucide-react';
+
 import { HomeAudiencePaths } from '@/features/home/home-audience-paths';
 import { HomeFeaturedJobsStrip } from '@/features/home/home-featured-jobs-strip';
 import { HomeHeroSearch } from '@/features/home/home-hero-search';
@@ -10,6 +12,7 @@ import { HomeHowItWorks } from '@/features/home/home-how-it-works';
 import { HomePopularJobsStrip } from '@/features/home/home-popular-jobs-strip';
 import { HomeRecentJobsStrip } from '@/features/home/home-recent-jobs-strip';
 import { HomeSpotlightRail } from '@/features/home/home-spotlight-rail';
+import { PublicJobTeaserCard } from '@/features/jobs/components/public-job-teaser-card';
 import { SiteLaunchPanel } from '@/features/jobs/components/site-launch-panel';
 import { buildListQuery } from '@/features/jobs/lib/jobs-list-query';
 import { fetchCmsHomeJobsDiscovery } from '@/lib/cms-content';
@@ -20,6 +23,9 @@ import {
 import { resolveNestPublicOrigin } from '@/lib/nest-api-url';
 import { fetchPublicJobsList, fetchPublicJobTaxonomy } from '@/lib/public-jobs';
 import { getUnifiedAuthSession } from '@/lib/unified-auth';
+import { cn } from '@/lib/cn';
+import { Link } from '@/i18n/navigation';
+import { resolvePromoBanner } from '@/lib/promo-banner';
 import { buildPublicPageMetadata } from '@/i18n/metadata';
 import { JsonLd } from '@/components/json-ld';
 import { organizationJsonLd, websiteJsonLd } from '@/lib/seo/json-ld';
@@ -62,8 +68,10 @@ export default async function HomePage({
   const t = await getTranslations('Home');
   const tJBadge = await getTranslations('JobDetail');
   const featuredRibbonLabel = tJBadge('featuredBadge');
-  // The promo bar is site-wide now (SiteShell → PromoBar).
   const authSession = await getUnifiedAuthSession();
+  // The promo bar is site-wide (SiteShell → PromoBar); the employer card
+  // repeats a running campaign's line.
+  const promo = await resolvePromoBanner(locale, authSession.role);
   /** Valid access token (not merely cookie presence), so guest CTAs show when truly signed out. */
   const isAuthenticated = authSession.isAuthenticated;
   /**
@@ -118,6 +126,17 @@ export default async function HomePage({
     .slice(0, 12);
 
   const heroSearchAction = `/${locale}/jobs`;
+  const heroJobs = featuredJobs.slice(0, 2);
+  // Quick links under the search: the first categories, to their landings.
+  const heroCategoryLinks = taxonomy.categories.slice(0, 4).map((c) => {
+    const path = `/jobs/category/${c.slug}`;
+    return {
+      label: locale === 'en' ? (c.nameEn ?? c.nameSr) : c.nameSr,
+      href: jobsOpen
+        ? path
+        : `/sign-in?returnTo=${encodeURIComponent(`/${locale}${path}`)}`,
+    };
+  });
   const audienceDict = {
     titlePrefix: t('audiencePathsTitlePrefix'),
     titleAccent: t('audiencePathsTitleAccent'),
@@ -140,41 +159,75 @@ export default async function HomePage({
           websiteJsonLd(absoluteSiteOrigin(), locale),
         ]}
       />
-      {/* Hero Section */}
-      <section className="relative overflow-hidden pb-16 pt-12 md:pb-32 md:pt-28">
-        {/* Decorative gradient orbs - more visible */}
-        <div
-          className="hf-hero-orb -left-24 -top-24 size-[600px] bg-primary/40"
-          aria-hidden
-        />
-        <div
-          className="hf-hero-orb -right-16 top-12 size-[500px] bg-cyan-400/30"
-          aria-hidden
-        />
-        <div
-          className="hf-hero-orb -bottom-20 left-1/4 size-[450px] bg-emerald-400/25"
-          aria-hidden
-        />
-
-        <div className="relative mx-auto max-w-6xl px-4">
-          {/* Hero card container (JoinBrands-style) */}
-          <div className="rounded-3xl border border-border/40 bg-card/70 px-5 py-8 backdrop-blur-sm md:px-14 md:py-16">
-            <header className="max-w-3xl">
-              <h1 className="m-0 text-display text-foreground">
-                {t('headline').replace(t('headlineAccent'), '').trim()}{' '}
-                <span className="hf-gradient-text">{t('headlineAccent')}</span>
-              </h1>
-              <p className="m-0 mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground md:mt-5 md:text-xl">
-                {t('subhead')}
-              </p>
-            </header>
+      {/* Hero (redesign A): search on the left, real featured jobs floating
+          on the right (large screens) until a hero photo is chosen. The title
+          and search don't animate: they are the LCP. */}
+      <section className="relative overflow-hidden pb-14 pt-10 md:pb-24 md:pt-16">
+        <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+          <div>
+            <span className="inline-flex items-center gap-2 rounded-full bg-featured-soft px-3.5 py-2 text-sm font-semibold text-featured-soft-foreground">
+              <MapPin className="size-4" aria-hidden />
+              {t('trustStrip')}
+            </span>
+            <h1 className="m-0 mt-5 text-[clamp(2.5rem,6vw,4.25rem)] font-extrabold leading-[1.02] tracking-[-0.035em] text-foreground">
+              {t('headline').replace(t('headlineAccent'), '').trim()}{' '}
+              <span className="text-primary [box-shadow:inset_0_-0.28em_0_var(--featured-soft)]">
+                {t('headlineAccent')}
+              </span>
+            </h1>
+            <p className="m-0 mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground md:text-xl">
+              {t('subhead')}
+            </p>
 
             <HomeHeroSearch
               action={heroSearchAction}
               taxonomy={taxonomy}
               isAuthenticated={jobsOpen}
             />
+
+            {heroCategoryLinks.length > 0 ? (
+              <ul className="m-0 mt-5 flex list-none flex-wrap gap-2 p-0">
+                {heroCategoryLinks.map((c) => (
+                  <li key={c.href}>
+                    <Link
+                      href={c.href}
+                      locale={locale}
+                      className="hf-press inline-flex min-h-10 items-center rounded-full border border-border bg-card px-4 text-sm font-medium text-muted-foreground no-underline hover:text-foreground"
+                    >
+                      {c.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
           </div>
+
+          {heroJobs.length > 0 ? (
+            <ul
+              aria-label={t('featuredSpotlightTitle')}
+              className="relative m-0 hidden min-h-[440px] list-none p-0 lg:block"
+            >
+              {heroJobs.map((job, i) => (
+                <li
+                  key={job.id}
+                  className={cn(
+                    'hf-float absolute w-[300px]',
+                    i === 0
+                      ? 'right-0 top-4 -rotate-2'
+                      : 'bottom-4 left-4 rotate-2 [animation-delay:-3s]',
+                  )}
+                >
+                  <PublicJobTeaserCard
+                    job={job}
+                    locale={locale}
+                    spotlight
+                    featuredRibbonLabel={featuredRibbonLabel}
+                    isAuthenticated={jobsOpen}
+                  />
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </div>
       </section>
 
@@ -217,6 +270,7 @@ export default async function HomePage({
         </div>
 
         <HomeSpotlightRail
+          variant="grid"
           title={t('spotlightCategoriesTitle')}
           titleAccent={t('spotlightCategoriesAccent')}
           subtitle={t('spotlightCategoriesSubtitle')}
@@ -246,7 +300,11 @@ export default async function HomePage({
         />
 
         {!isAuthenticated && (
-          <HomeAudiencePaths locale={locale} t={audienceDict} />
+          <HomeAudiencePaths
+            locale={locale}
+            t={audienceDict}
+            promo={promo?.text}
+          />
         )}
       </div>
     </main>

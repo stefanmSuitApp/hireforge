@@ -102,3 +102,18 @@ test('canonical and description are in <head> of the public lists, not streamed 
     }
   }
 });
+
+// Redesign A step 2 (Stefan, 2026-10-29): the home page names what people
+// search for ("oglasi za posao", "posao u Srbiji"), not only the brand.
+test('the home title and description use the words people search for', async ({
+  page,
+}) => {
+  await page.goto('/sr');
+  await expect(page).toHaveTitle(/Oglasi za posao/);
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+    'content',
+    /oglas(e|i) za posao/,
+  );
+  await page.goto('/en');
+  await expect(page).toHaveTitle(/Jobs in Serbia/);
+});
