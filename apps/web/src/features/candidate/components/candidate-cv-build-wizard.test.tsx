@@ -87,13 +87,23 @@ describe('building a CV', () => {
     });
   });
 
-  // Known issue (PROGRESS.md): Label without htmlFor in the experience,
-  // education and skill rows, so screen readers don't name those fields.
-  it.fails('every skill field has a label a screen reader reads', async () => {
+  // The experience, education and skill rows' labels used to have no
+  // htmlFor, so screen readers didn't name those fields.
+  it('every row field has a label a screen reader reads', async () => {
     renderWizard();
-    await next();
-    await next();
-    await next();
+    await next(); // experience
+    await userEvent.click(
+      screen.getByRole('button', { name: t.addExperience }),
+    );
+    for (const label of [t.employer, t.jobTitle, t.summary]) {
+      expect(screen.getByLabelText(label)).toBeInTheDocument();
+    }
+    await next(); // education
+    await userEvent.click(screen.getByRole('button', { name: t.addEducation }));
+    for (const label of [t.institution, t.degree, t.field]) {
+      expect(screen.getByLabelText(label)).toBeInTheDocument();
+    }
+    await next(); // skills
     await userEvent.click(screen.getByRole('button', { name: t.addSkill }));
     expect(screen.getByLabelText(t.skillName)).toBeInTheDocument();
   });

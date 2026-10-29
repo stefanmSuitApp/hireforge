@@ -126,10 +126,8 @@ describe('applying', () => {
     expect(JSON.stringify(mine.body)).toContain(body.id);
   });
 
-  // Known issue (PROGRESS.md, NEEDS_STEFAN.md): the cover letter is stored but
-  // no route returns it to the employer. Flip to `it` once the applicants list
-  // (or an application detail) includes it.
-  it.fails("the employer can read the candidate's cover letter", async () => {
+  // The applicants list carries the cover letter (it used to be stored only).
+  it("the employer can read the candidate's cover letter", async () => {
     const c = await candidate();
     const jobId = await job();
     await apply(c, {
@@ -241,10 +239,9 @@ describe('CVs', () => {
     );
   });
 
-  // Known issue (PROGRESS.md): multer reads multipart file names as latin1 and
-  // safeBasename keeps ASCII \w only, so "Petrović" is stored as "Petrovi__".
-  // Flip to `it` when uploads keep Serbian letters.
-  it.fails('a CV keeps the Serbian letters of its file name', async () => {
+  // multer reads multipart file names as latin1; the upload re-decodes them as
+  // UTF-8 and keeps letters of any script ("Petrović" used to become "Petrovi__").
+  it('a CV keeps the Serbian letters of its file name', async () => {
     const c = await candidate();
     const res = await http(app)
       .get(`/api/candidate/resumes/${c.cvId}/download`)

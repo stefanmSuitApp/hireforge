@@ -520,6 +520,21 @@ Found with a scripted sweep of the live public pages at 375 and 1440 px
 - **Not changed:** the moderation queue (publish / reject) stays shared by
   all moderators.
 
+## Known bugs, round 2 (branch `fix/known-bugs-candidate`, 2026-10-29)
+
+Fixed, each pinned `it.fails` test flipped to `it` (failed before the fix):
+
+- CV uploads keep Serbian letters: the name is re-decoded from multer's
+  latin1 as UTF-8 and `safeBasename` keeps letters of any script.
+- Employers read cover letters: the applicants list returns
+  `coverLetterText` and the table has a "Pročitaj" toggle (e2e
+  `cover-letter.spec.ts` clicks it as the employer).
+- CV wizard: every experience / education / skill field has a label tied to
+  its input.
+- Search finds word forms (migration 0036): query words lose a common
+  Serbian ending and are prefix-matched (`kuvari`, `kuvarima` → `Kuvar`);
+  words under 4 letters stay exact; the job index is unchanged.
+
 ## Known bugs, round 1 (branch `fix/known-bugs-security`, 2026-10-29)
 
 Fixed, each pinned `it.fails` test flipped to `it` (failed before the fix):
@@ -540,12 +555,6 @@ Fixed, each pinned `it.fails` test flipped to `it` (failed before the fix):
 Phase T pinned these with an `it.fails` test named after the fix; fixing the
 bug turns it red and it is flipped to `it`.
 
-- Cover letters are stored but no route shows them to the employer.
-- Uploaded CV file names lose Serbian letters (`Petrović` → `Petrovi__`:
-  multer reads names as latin1, `safeBasename` keeps ASCII only).
-- Search has no word forms (`kuvari` doesn't find `Kuvar`).
-- CV wizard: experience / education / skill row labels aren't tied to their
-  inputs (screen readers).
 - Contracts' `applicationResponseSchema` is unused (`POST
 /candidate/applications` answers `{ id }`).
 

@@ -31,7 +31,7 @@ import { AuthenticatedGuard } from '../auth/authenticated.guard';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 import { codedBadRequest } from '../http/coded-http';
-import { CandidateService } from './candidate.service';
+import { CandidateService, utf8FileName } from './candidate.service';
 
 const MAX_RESUME_BYTES = 5 * 1024 * 1024;
 
@@ -105,7 +105,7 @@ export class CandidateController {
     return this.candidate.saveResumeUpload({
       userId: this.userId(req),
       buffer: file.buffer,
-      originalFilename: file.originalname,
+      originalFilename: utf8FileName(file.originalname),
       mimeType: file.mimetype,
     });
   }

@@ -512,6 +512,8 @@
       "colEmail": "Candidate email",
       "colStatus": "Status",
       "colResume": "CV",
+      "colCoverLetter": "Cover letter",
+      "readCoverLetter": "Read",
       "colApplied": "Applied",
       "backToList": "Back to listings"
     },

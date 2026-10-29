@@ -227,4 +227,6 @@ export type EmployerJobApplicationItem = {
   createdAt: string;
   /** Present when candidate attached a CV to the application. */
   resumeOriginalFilename: string | null;
+  /** What the candidate wrote when applying (optional, ≤ 1500 chars). */
+  coverLetterText: string | null;
 };
