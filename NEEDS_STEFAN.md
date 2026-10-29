@@ -63,7 +63,7 @@ repo, run the commands Claude gave you in chat (2026-10-29), or by hand:
 3. `gh secret set DEPLOY_SSH_KEY < /tmp/hf-ci`, then `rm /tmp/hf-ci*`.
 4. `gh variable set DEPLOY_HOST --body 178.105.128.190`,
    `gh variable set DEPLOY_USER --body deploy`,
-   `gh variable set DEPLOY_HOST_KEY --body "$(ssh-keyscan -t ed25519 178.105.128.190 2>/dev/null | cut -d' ' -f2-)"`.
+   `gh variable set DEPLOY_HOST_KEY --body "$(ssh-keyscan -t ed25519 178.105.128.190 2>/dev/null | grep -v '^#' | cut -d' ' -f2-)"`.
 5. GitHub → Settings → Environments: `staging` (no rules) and `production`
    with **Required reviewers: you**.
 
