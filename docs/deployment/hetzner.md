@@ -251,6 +251,18 @@ GitHub runner (or a Mac) and shipped to the server, like autofind:
    Stefan's approval). It refuses a commit staging never ran; the images
    are already on the server, so production runs exactly what staging ran.
 
+How this differs from autofind (same flow, smaller server):
+
+- **No image registry.** The runner builds the images once and sends them
+  to the server over SSH, like `ship.sh`: no registry storage bill, no
+  registry login on the server.
+- **Promotion.** Production uses the images staging already left on the
+  server (each environment's last 3 releases are kept), so it runs exactly
+  what staging ran. `deploy-production` refuses a commit staging never ran.
+- **Lock.** Only one release runs on the server at a time
+  (`/opt/hireforge/backups/.release.lock`): a staging deploy from CI waits
+  for a production deploy, and the other way round.
+
 Both workflows run `scripts/deploy/ship.sh` on the runner; from a Mac it is
 the same path by hand (clean checkout of a commit on `origin/main`):
 
