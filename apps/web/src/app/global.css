@@ -324,6 +324,13 @@ html body[data-scroll-locked] {
   .hf-press:active {
     transform: scale(0.95);
   }
+  /* Appears after a parent's 0.5s resize (the city accordion). */
+  .hf-appear {
+    animation: hf-appear 0.45s var(--ease-bounce) 0.28s both;
+  }
+  .hf-float {
+    animation: hf-float 7s ease-in-out infinite;
+  }
   .hf-slide-down {
     animation: hf-slide-down 0.5s var(--ease-bounce) both;
   }
@@ -400,6 +407,17 @@ html body[data-scroll-locked] {
   }
 }
 
+/* Reduced motion: no reveal/float at all (scroll-linked animations ignore
+   the global duration override), so everything shows in its final state. */
+@media (prefers-reduced-motion: reduce) {
+  .hf-reveal,
+  .hf-float,
+  .hf-appear,
+  .hf-slide-down {
+    animation: none;
+  }
+}
+
 @keyframes hf-slide-down {
   from {
     transform: translateY(-100%);
@@ -419,5 +437,19 @@ html body[data-scroll-locked] {
   100% {
     opacity: 1;
     transform: none;
+  }
+}
+
+/* Hero cards drift gently; "translate" composes with their rotation. */
+@keyframes hf-float {
+  50% {
+    translate: 0 -10px;
+  }
+}
+
+@keyframes hf-appear {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
   }
 }

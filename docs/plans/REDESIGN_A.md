@@ -36,7 +36,7 @@ footer): https://claude.ai/artifact/TwJpGaQHuiJBXbd7H3cRhU
 | Featured / popular / recent jobs, badges     | public job list                                                                |
 | Total open positions (Poslovi, landings)     | `total` of the job list                                                        |
 | 10 categories, 5 cities with photos          | taxonomy + CMS spotlight images (today's city rail)                            |
-| Promo bar + promo in "Za poslodavce"         | campaigns (#57) or the CMS promo banner                                        |
+| Promo bar + promo in "Za poslodavce"         | admin-started campaigns (#57) only (Stefan, 2026-10-29)                        |
 | Footer tagline, links, cities, categories    | CMS site settings + taxonomy                                                   |
 | Job page incl. promo image                   | job detail (`pngCreativeUrl`)                                                  |
 | Company "Zašto kod nas", "Utisci zaposlenih" | CMS employer branding (benefits, testimonials)                                 |

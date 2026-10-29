@@ -35,7 +35,7 @@ export function HomeFeaturedJobsStrip({
     <section>
       <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="m-0 text-2xl font-bold tracking-tight text-foreground md:text-3xl">
+          <h2 className="m-0 text-3xl font-extrabold tracking-tight text-foreground md:text-[2.125rem]">
             {title}
           </h2>
           <p className="m-0 mt-2 max-w-xl text-base text-muted-foreground">

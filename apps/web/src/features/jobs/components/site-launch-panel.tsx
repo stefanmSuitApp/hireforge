@@ -1,3 +1,4 @@
+import { Rocket } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
@@ -25,49 +26,73 @@ export function SiteLaunchPanel({
   return (
     <section
       aria-labelledby={`launch-${variant}`}
-      className="rounded-2xl border border-dashed border-primary/30 bg-primary/5 px-6 py-10 text-center md:px-10"
+      className="hf-reveal @container relative overflow-hidden rounded-[28px] border border-border bg-card px-6 py-9 sm:px-10 sm:py-10"
     >
-      <h2
-        id={`launch-${variant}`}
-        className="m-0 mb-2 text-xl font-semibold text-foreground"
-      >
-        {variant === 'home' ? t('homeTitle') : t('title')}
-      </h2>
-      <p className="m-0 mx-auto max-w-xl text-[0.9375rem] leading-relaxed text-muted-foreground">
-        {candidate
-          ? t('bodyCandidate')
-          : variant === 'home'
-            ? t('homeBody')
-            : t('body')}
-      </p>
-      {staff ? null : (
-        <div className="mt-6 flex flex-wrap justify-center gap-3">
-          {candidate ? (
-            <Button asChild>
-              <Link href="/candidate/profile">{t('prepareCv')}</Link>
-            </Button>
-          ) : (
-            <>
-              <Button asChild>
-                <Link
-                  href={
-                    viewer === 'employer' ? '/employer' : '/employer/register'
-                  }
-                >
-                  {t('postFirstJob')}
-                </Link>
+      {/* Decor only: a soft gold disc behind the corner. */}
+      <div
+        aria-hidden
+        className="absolute -right-16 -top-16 size-56 rounded-full bg-featured-soft"
+      />
+      {/* Sized by its own width, not the viewport: on /jobs it sits in a
+          narrower column than on home. */}
+      <div className="relative flex flex-col gap-6 @3xl:flex-row @3xl:items-center">
+        <span
+          aria-hidden
+          className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-featured text-featured-foreground"
+        >
+          <Rocket className="size-7" />
+        </span>
+        <div className="flex-1">
+          <h2
+            id={`launch-${variant}`}
+            className="m-0 text-2xl font-extrabold tracking-tight text-foreground md:text-[1.75rem]"
+          >
+            {variant === 'home' ? t('homeTitle') : t('title')}
+          </h2>
+          <p className="m-0 mt-2 max-w-2xl text-base leading-relaxed text-muted-foreground">
+            {candidate
+              ? t('bodyCandidate')
+              : variant === 'home'
+                ? t('homeBody')
+                : t('body')}
+          </p>
+        </div>
+        {staff ? null : (
+          <div className="flex flex-wrap gap-3 @3xl:justify-end">
+            {candidate ? (
+              <Button asChild className="hf-press min-h-12 rounded-full px-6">
+                <Link href="/candidate/profile">{t('prepareCv')}</Link>
               </Button>
-              {viewer === null ? (
-                <Button variant="outline" asChild>
-                  <Link href="/candidate/register">
-                    {t('registerCandidate')}
+            ) : (
+              <>
+                <Button
+                  asChild
+                  className="hf-press min-h-12 rounded-full px-6 font-bold"
+                >
+                  <Link
+                    href={
+                      viewer === 'employer' ? '/employer' : '/employer/register'
+                    }
+                  >
+                    {t('postFirstJob')}
                   </Link>
                 </Button>
-              ) : null}
-            </>
-          )}
-        </div>
-      )}
+                {viewer === null ? (
+                  <Button
+                    variant="outline"
+                    asChild
+                    className="hf-press min-h-12 rounded-full px-6"
+                  >
+                    <Link href="/candidate/register">
+                      {t('registerCandidate')}
+                    </Link>
+                  </Button>
+                ) : null}
+              </>
+            )}
+          </div>
+        )}
+      </div>
     </section>
   );
 }

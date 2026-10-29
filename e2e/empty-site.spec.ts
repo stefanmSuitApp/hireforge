@@ -44,3 +44,20 @@ test('with jobs on the site, an empty search still points at the filters', async
   ).toBeVisible();
   await expect(page.getByText('Šljakam tek počinje')).toHaveCount(0);
 });
+
+// Stefan, 2026-10-29: the list/preview split only when there is a list; an
+// empty state (and the launch panel) spans the page instead of half of it.
+test('an empty result spans the full width on a desktop', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/sr/jobs?q=nepostojeci-posao-zzz');
+  const empty = page
+    .getByRole('heading', { name: 'Nema oglasa za ove filtere' })
+    .locator('..');
+  // The page header spans the content column; the old split gave ~half.
+  const header = page.getByRole('heading', { level: 1 }).locator('..');
+  const [emptyBox, headerBox] = [
+    await empty.boundingBox(),
+    await header.boundingBox(),
+  ];
+  expect(emptyBox!.width).toBeGreaterThan(headerBox!.width - 4);
+});
