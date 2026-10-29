@@ -46,9 +46,13 @@ export const ADMIN_WORKSPACE_LINKS: ReadonlyArray<{
   { href: '/admin/audit', navKey: 'audit', messageKey: 'navAudit' },
 ];
 
+/** `null` outside `/admin`: admins also see the moderator links. */
 export function getAdminWorkspaceNavKey(
   pathname: string,
-): AdminWorkspaceNavKey {
+): AdminWorkspaceNavKey | null {
+  if (pathname !== '/admin' && !pathname.startsWith('/admin/')) {
+    return null;
+  }
   if (pathname.startsWith('/admin/users')) {
     return 'users';
   }

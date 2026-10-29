@@ -33,9 +33,13 @@ export const MODERATOR_WORKSPACE_LINKS: ReadonlyArray<{
   },
 ];
 
+/** `null` outside `/moderator`: an admin also sees these links on admin pages. */
 export function getModeratorWorkspaceNavKey(
   pathname: string,
-): ModeratorWorkspaceNavKey {
+): ModeratorWorkspaceNavKey | null {
+  if (pathname !== '/moderator' && !pathname.startsWith('/moderator/')) {
+    return null;
+  }
   if (pathname.startsWith('/moderator/billing/')) {
     return 'billing';
   }
