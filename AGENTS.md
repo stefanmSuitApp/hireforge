@@ -24,11 +24,30 @@ Compose + Caddy on one Hetzner VM.
   `pnpm test` · build: `pnpm build` (api/worker type errors only show here)
 - e2e: `pnpm e2e` (isolated `<db>_e2e` DB, fake Resend, worker; CI uses
   `E2E_WEB=start`)
-- whole-repo check before any commit:
-  `pnpm lint && pnpm format && pnpm typecheck && pnpm test && pnpm build`
+- integration: `pnpm test:integration` (Testcontainers Postgres + Redis,
+  needs Docker)
+- whole-repo check before any commit: `pnpm verify` (lint, format, i18n,
+  typecheck, unit, build: the same steps as CI `checks`; the pre-push hook
+  runs it too)
 - migrations: add `drizzle/NNNN_*.sql` (header with rollback), its journal
   entry and the `schema.ts` change; apply with `pnpm db:migrate`. Do not use
   `pnpm db:generate` (only the 0000 snapshot exists).
+
+## Checks run locally, not on PRs
+
+GitHub Actions minutes are limited, so pull requests run no workflows. On
+`main`, `deploy-staging` runs CI and Integration before it deploys, and the
+quality report runs on push (any of them by hand: Actions → Run workflow).
+Before pushing a branch, run locally what CI would have run:
+
+- always: `pnpm verify` (the pre-push hook blocks the push if it fails);
+- any change to apps or libs: `E2E_WEB=start pnpm e2e` (what CI runs);
+- API, worker, database or migration changes: `pnpm test:integration`;
+- visual changes: `pnpm e2e:visual` (Linux container, matches the baselines).
+
+Put the results in the PR description (command and pass/fail counts). After
+merging, watch the `main` runs: two PRs green on their own can still break
+`main` together.
 
 ## Conventions
 
@@ -47,12 +66,14 @@ Compose + Caddy on one Hetzner VM.
 
 ## Definition of done
 
-1. Whole-repo check passes locally (show the output) and `pnpm e2e` is green.
+1. `pnpm verify` passes locally (show the output) and `pnpm e2e` is green;
+   `pnpm test:integration` too when the API or database changed.
 2. New behaviour has a test that fails without the change (show it failing).
 3. UI checked at 375 and 1440 px.
 4. `PROGRESS.md` updated; blockers for Stefan added to `NEEDS_STEFAN.md`.
-5. A finished phase is pushed, merged after green CI, deployed, and verified
-   on https://sljakam.com (Stefan's standing instruction).
+5. A finished phase is pushed, merged after the local checks pass, deployed
+   once `main` is green, and verified on https://sljakam.com (Stefan's
+   standing instruction).
 
 ## Deploy
 

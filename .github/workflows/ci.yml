@@ -1,15 +1,16 @@
 name: CI
 
-# Pull requests, and on main through deploy-staging (which deploys only when
-# this passes).
+# Not on pull requests (the Actions budget is limited; PRs are checked
+# locally, see AGENTS.md). On main it runs through deploy-staging, which
+# deploys only when this passes; by hand via Run workflow.
 on:
-  pull_request:
   workflow_call:
+  workflow_dispatch:
 
-# A newer push cancels a PR's run; never a run a staging deploy waits on.
+# Never cancel a run a staging deploy waits on.
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  cancel-in-progress: false
 
 jobs:
   checks:

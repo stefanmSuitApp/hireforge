@@ -5,20 +5,20 @@ priority. Remove an item when it is done. **No secrets in this file.**
 
 ## ▶ Next, in order (updated 2026-10-29)
 
-1. Sanity publish webhook on project `o85214ma` (~2 min, values in
-   `docs/deployment/hetzner.md` §6). Claude can't create it: that needs an
-   admin token. Until then CMS edits show within 5 minutes.
-2. Production admin: set its password from the reset email (2026-10-29).
-3. Rotate the secrets that were visible in a screenshot (item 2).
-4. Server (~2 min): set `INDEXNOW_KEY` (see "Values").
-5. Google Search Console + Bing Webmaster Tools, submit the sitemap
+1. Production admin: set its password from the reset email (2026-10-29).
+2. Rotate the secrets that were visible in a screenshot (item 2).
+3. Server (~2 min): set `INDEXNOW_KEY` (see "Values").
+4. Google Search Console + Bing Webmaster Tools, submit the sitemap
    (see "Values"). Worth doing now: verification takes days to settle.
-6. When convenient: `sudo systemctl restart docker` (item 3), Sentry (4),
+5. When convenient: `sudo systemctl restart docker` (item 3), Sentry (4),
    accountant (5), legal texts (6), Phase T decisions, social profiles,
    analytics.
 
 ## ✅ Done
 
+- **Sanity project `o85214ma`** (2026-10-29): owned by Stefan, content
+  seeded and rebranded, Studio at https://sljakam.sanity.studio, publish
+  webhook verified (an edit is live on sljakam.com in ~2 s).
 - **Seed passwords rotated** on production (2026-10-28) and the five
   accounts' sessions revoked; verified: no account uses the seed password,
   the old admin password is rejected on the live site. New passwords are in
