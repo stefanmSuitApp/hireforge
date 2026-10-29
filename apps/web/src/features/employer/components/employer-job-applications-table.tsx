@@ -54,6 +54,24 @@ export function EmployerJobApplicationsTable({ items }: Props) {
         cell: (row) => row.resumeOriginalFilename ?? '—',
       },
       {
+        id: 'coverLetter',
+        header: t('colCoverLetter'),
+        // Up to 1500 characters: collapsed so the table stays scannable.
+        cell: (row) =>
+          row.coverLetterText ? (
+            <details className="max-w-md">
+              <summary className="cursor-pointer text-primary underline-offset-2 hover:underline">
+                {t('readCoverLetter')}
+              </summary>
+              <p className="mt-2 whitespace-pre-line text-foreground">
+                {row.coverLetterText}
+              </p>
+            </details>
+          ) : (
+            '—'
+          ),
+      },
+      {
         id: 'applied',
         header: t('colApplied'),
         accessorKey: 'createdAt',

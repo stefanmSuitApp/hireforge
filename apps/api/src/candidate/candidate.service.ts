@@ -129,8 +129,21 @@ function getUploadRoot(): string {
   return path.join(process.cwd(), 'var', 'candidate-uploads');
 }
 
+/**
+ * multer (busboy) decodes multipart file names as latin1, so a UTF-8 name
+ * like "Petrović" arrives as mojibake; decode it back unless it wasn't UTF-8.
+ */
+export function utf8FileName(name: string): string {
+  const decoded = Buffer.from(name, 'latin1').toString('utf8');
+  return decoded.includes('\uFFFD') ? name : decoded;
+}
+
+/** Letters of any script (Serbian č ć š ž đ, Cyrillic) stay; the rest → `_`. */
 function safeBasename(original: string): string {
-  const base = path.basename(original).replace(/[^\w.\-\s()]/g, '_');
+  const base = path
+    .basename(original)
+    .normalize('NFC')
+    .replace(/[^\p{L}\p{N}_.\-\s()]/gu, '_');
   return base.slice(0, 180) || 'resume';
 }
 

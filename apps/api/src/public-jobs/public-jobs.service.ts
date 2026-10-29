@@ -150,12 +150,13 @@ function mapJoinRowToPublicListItem(
 }
 
 /**
- * Full-text match on title + description, Serbian-folded (migration 0033).
- * The vector expression must stay identical to `jobs_fts_published_idx` so
+ * Full-text match on title + description, Serbian-folded (migration 0033),
+ * with word forms: query words are stemmed and prefix-matched (0036). The
+ * vector expression must stay identical to `jobs_fts_published_idx` so
  * Postgres can use the index.
  */
 function jobSearchMatches(query: string): SQL {
-  return sql`to_tsvector('simple', sr_search_fold(coalesce(${jobs.title}, '') || ' ' || coalesce(${jobs.descriptionPlain}, ${jobs.description}, ''))) @@ websearch_to_tsquery('simple', sr_search_fold(${query}))`;
+  return sql`to_tsvector('simple', sr_search_fold(coalesce(${jobs.title}, '') || ' ' || coalesce(${jobs.descriptionPlain}, ${jobs.description}, ''))) @@ sr_search_query(${query})`;
 }
 
 @Injectable()

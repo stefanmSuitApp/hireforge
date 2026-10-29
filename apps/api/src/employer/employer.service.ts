@@ -1587,6 +1587,7 @@ export class EmployerService {
         email: users.email,
         // Snapshot taken at submission (applications are immutable).
         resumeOriginalFilename: applications.resumeFilename,
+        coverLetterText: applications.coverLetterText,
       })
       .from(applications)
       .innerJoin(candidates, eq(applications.candidateId, candidates.id))
@@ -1606,6 +1607,7 @@ export class EmployerService {
       candidateEmail: r.email,
       createdAt: r.createdAt.toISOString(),
       resumeOriginalFilename: r.resumeOriginalFilename ?? null,
+      coverLetterText: r.coverLetterText ?? null,
     }));
   }
 

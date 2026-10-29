@@ -379,8 +379,11 @@ export function CandidateCvBuildWizard({
               <Card key={i} className="space-y-3 border-border/70 p-4">
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label>{t('employer')}</Label>
+                    <Label htmlFor={`cv-ex-company-${i}`}>
+                      {t('employer')}
+                    </Label>
                     <Input
+                      id={`cv-ex-company-${i}`}
                       value={ex.company}
                       onChange={(e) =>
                         setExperience(i, { company: e.target.value })
@@ -388,8 +391,9 @@ export function CandidateCvBuildWizard({
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>{t('jobTitle')}</Label>
+                    <Label htmlFor={`cv-ex-title-${i}`}>{t('jobTitle')}</Label>
                     <Input
+                      id={`cv-ex-title-${i}`}
                       value={ex.title}
                       onChange={(e) =>
                         setExperience(i, { title: e.target.value })
@@ -422,8 +426,9 @@ export function CandidateCvBuildWizard({
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>{t('summary')}</Label>
+                  <Label htmlFor={`cv-ex-summary-${i}`}>{t('summary')}</Label>
                   <Textarea
+                    id={`cv-ex-summary-${i}`}
                     value={ex.summary ?? ''}
                     onChange={(e) =>
                       setExperience(i, { summary: e.target.value })
@@ -470,8 +475,11 @@ export function CandidateCvBuildWizard({
               <Card key={i} className="space-y-3 border-border/70 p-4">
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="space-y-2 sm:col-span-2">
-                    <Label>{t('institution')}</Label>
+                    <Label htmlFor={`cv-ed-institution-${i}`}>
+                      {t('institution')}
+                    </Label>
                     <Input
+                      id={`cv-ed-institution-${i}`}
                       value={ed.institution}
                       onChange={(e) =>
                         setEducation(i, { institution: e.target.value })
@@ -479,8 +487,9 @@ export function CandidateCvBuildWizard({
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>{t('degree')}</Label>
+                    <Label htmlFor={`cv-ed-degree-${i}`}>{t('degree')}</Label>
                     <Input
+                      id={`cv-ed-degree-${i}`}
                       value={ed.degree ?? ''}
                       onChange={(e) =>
                         setEducation(i, { degree: e.target.value })
@@ -488,8 +497,9 @@ export function CandidateCvBuildWizard({
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>{t('field')}</Label>
+                    <Label htmlFor={`cv-ed-field-${i}`}>{t('field')}</Label>
                     <Input
+                      id={`cv-ed-field-${i}`}
                       value={ed.field ?? ''}
                       onChange={(e) =>
                         setEducation(i, { field: e.target.value })
@@ -559,8 +569,9 @@ export function CandidateCvBuildWizard({
             {cvProfile.skills.map((s, i) => (
               <div key={i} className="flex flex-wrap items-end gap-2">
                 <div className="min-w-[200px] flex-1 space-y-2">
-                  <Label>{t('skillName')}</Label>
+                  <Label htmlFor={`cv-skill-${i}`}>{t('skillName')}</Label>
                   <Input
+                    id={`cv-skill-${i}`}
                     value={s.name}
                     onChange={(e) => setSkill(i, e.target.value)}
                   />

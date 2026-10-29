@@ -493,6 +493,8 @@
       "colEmail": "E-pošta kandidata",
       "colStatus": "Status",
       "colResume": "CV",
+      "colCoverLetter": "Propratno pismo",
+      "readCoverLetter": "Pročitaj",
       "colApplied": "Datum prijave",
       "backToList": "Nazad na listu"
     },
