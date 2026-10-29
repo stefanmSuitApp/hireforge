@@ -1,7 +1,7 @@
 // T5.2 search quality: a golden list of queries → the jobs they must (and
 // must not) find, through the real public API and Postgres full-text search.
-// Folding (sr_search_fold, migration 0033) is checked here; word forms are
-// still a known gap (`it.fails`).
+// Folding (sr_search_fold, migration 0033) and word forms (sr_search_query,
+// migration 0036) are checked here.
 import type { INestApplication } from '@nestjs/common';
 import { insertCompany, insertEmployer, insertJob } from 'testing/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -109,7 +109,17 @@ describe('folding', () => {
     expect(await search('возач')).toEqual(['driverB', 'driverC']);
   });
 
-  it.fails('word forms: "kuvari" (plural) finds the cook', async () => {
+  it('word forms: "kuvari" (plural) finds the cook', async () => {
     expect(await search('kuvari')).toEqual(['cook']);
+  });
+
+  it('word forms: "kuvarima", "vozači", "pekara" find their jobs', async () => {
+    expect(await search('kuvarima')).toEqual(['cook']);
+    expect(await search('vozači')).toEqual(['driverB', 'driverC']);
+    expect(await search('pekara')).toEqual(['baker']);
+  });
+
+  it('short words stay exact: "pek" is not a prefix of "pekar"', async () => {
+    expect(await search('pek')).toEqual([]);
   });
 });

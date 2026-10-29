@@ -99,7 +99,7 @@ describe('public job search', () => {
     await testDb().pool.query('analyze jobs');
     const statement = await sqlOf(
       () => http(app).get('/api/public/jobs?q=kuvar'),
-      /websearch_to_tsquery/,
+      /sr_search_query/,
     );
     const plan = await planWithoutSeqScan(statement);
     expect(usesIndex(plan, 'jobs_fts_published_idx')).toBe(true);

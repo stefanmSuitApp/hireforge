@@ -18,6 +18,7 @@ describe('EmployerJobApplicationsTable', () => {
             // 00:30 on the 29th in Belgrade.
             createdAt: '2026-10-28T23:30:00.000Z',
             resumeOriginalFilename: null,
+            coverLetterText: null,
           },
         ]}
       />,
