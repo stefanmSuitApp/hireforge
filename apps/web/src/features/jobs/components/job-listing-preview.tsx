@@ -9,6 +9,7 @@ import type {
   PublicJobDetailResponse,
 } from 'contracts';
 
+import { CompanyInitials } from '@/components/company-initials';
 import { Button } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/cn';
@@ -108,9 +109,8 @@ function ExternalApplyCta({
 /** Roughly a screen of text: past this the top apply button is out of view. */
 const LONG_DESCRIPTION_CHARS = 1200;
 
-const chipClass = cn(
-  'rounded-md bg-muted px-2 py-1 text-xs font-semibold text-foreground',
-);
+const chipClass =
+  'rounded-full bg-muted px-3 py-1 text-[0.8125rem] font-medium text-muted-foreground';
 
 const descriptionHtmlClass = cn(
   'job-listing-description-html text-foreground leading-relaxed',
@@ -144,6 +144,8 @@ export type JobListingPreviewProps = {
   stickyApply?: boolean;
   /** No session: "Konkuriši" opens the sign-up sheet over the job. */
   guest?: boolean;
+  /** Inside the list's preview pane: one card, sections split by lines. */
+  embedded?: boolean;
   className?: string;
 };
 
@@ -153,6 +155,7 @@ export function JobListingPreview({
   titleAs: Title = 'h1',
   stickyApply = false,
   guest = false,
+  embedded = false,
   className,
 }: JobListingPreviewProps) {
   const t = useTranslations('JobDetail');
@@ -189,7 +192,6 @@ export function JobListingPreview({
   // A second button at the end only helps when the first one has scrolled
   // away; on a short ad it sat on the same screen as the first.
   const longDescription = job.description.length > LONG_DESCRIPTION_CHARS;
-  const endCtaClass = stickyApply ? 'hidden md:inline-flex' : undefined;
 
   /** The page's one action: under the title (and at the end of a long ad). */
   function applyCta(ctaClass?: string) {
@@ -209,184 +211,234 @@ export function JobListingPreview({
     );
   }
 
+  // Wide (the job page): an apply box sticks beside the text, so the
+  // button under the title goes; narrow (pane, phones): the reverse.
+  const asideCtaClass = cn(
+    'w-full',
+    !longDescription && 'hidden @4xl:inline-flex',
+    longDescription && stickyApply && 'hidden md:inline-flex',
+  );
+  const card = embedded
+    ? 'border-t border-border p-6'
+    : 'rounded-[24px] border border-border bg-card p-6 @2xl:p-7';
+  const featuredLive = listingState === 'live' && job.featured;
+
   return (
-    <article
-      className={cn(
-        'rounded-[0.85rem] border border-border bg-card p-5',
-        listingState === 'live' &&
-          job.featured &&
-          'border-featured shadow-md ring-1 ring-featured/40',
-        className,
-      )}
-    >
-      {listingState === 'expired' ? (
-        <p
-          className="m-0 mb-4 rounded-lg border border-border bg-muted px-3 py-2 text-sm font-medium text-foreground"
-          role="status"
-        >
-          {t('expiredBanner')}
-        </p>
-      ) : null}
-      {listingState === 'live' && job.featured ? (
-        <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg bg-featured px-3 py-2 text-sm font-semibold text-featured-foreground">
-          <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
-          <span>{t('featuredBadge')}</span>
-          <span className="hidden text-xs font-normal text-featured-foreground sm:inline">
-            {t('featuredSpotlightHint')}
-          </span>
-        </div>
-      ) : null}
-      <Title className="m-0 mb-2 text-h1 text-foreground">{job.title}</Title>
-      <p className="m-0 text-[0.9375rem] leading-normal text-muted-foreground">
-        <Link
-          href={`/companies/${job.company.slug}`}
-          className="font-semibold text-primary underline-offset-2 hover:underline"
-        >
-          {job.company.name}
-        </Link>
-        {cityLine ? ` · ${cityLine}` : ''}
-        {categoryLine ? ` · ${categoryLine}` : ''}
-      </p>
-      <p className="m-0 text-[0.9375rem] leading-normal text-muted-foreground">
-        {listingState === 'preview' && !job.publishedAt
-          ? t('previewNotPublished')
-          : `${t('publishedLabel')} ${publishedMedium(job.publishedAt)}`}
-        {listingState === 'live' && job.expiresAt
-          ? ` · ${t('expiresLabel')} ${publishedMedium(job.expiresAt)}`
-          : null}
-      </p>
-
-      <div className="mt-3 flex flex-wrap gap-1.5">
-        {listingState === 'preview' && job.featured ? (
-          <span
-            className={cn(chipClass, 'bg-featured text-featured-foreground')}
-            title={t('featuredBadge')}
-          >
-            {t('featuredBadge')}
-          </span>
-        ) : null}
-        {job.crossborderVisible ? (
-          <span
-            className={cn(chipClass, 'bg-info-soft text-info')}
-            title={t('crossborderBadge')}
-          >
-            {t('crossborderBadge')}
-          </span>
-        ) : null}
-        <span className={chipClass}>
-          {jobEnumLabel(tEnum, 'workModel', job.workModel)}
-        </span>
-        <span className={chipClass}>
-          {jobEnumLabel(tEnum, 'employmentType', job.employmentType)}
-        </span>
-        <span className={chipClass}>
-          {jobEnumLabel(tEnum, 'seniority', job.seniority)}
-        </span>
-      </div>
-
-      {listingState === 'live' ? (
-        <div className="mt-5">{applyCta('w-full sm:w-auto')}</div>
-      ) : null}
-
-      {job.pngCreativeUrl ? (
-        <div className="mt-4">
-          <img
-            src={job.pngCreativeUrl}
-            alt={t('pngCreativeAlt')}
-            className="max-h-48 max-w-full rounded-md border border-border object-contain"
-          />
-        </div>
-      ) : null}
-
-      <section className="mt-5">
-        <h2 className="m-0 mb-1.5 text-h3 text-foreground">
-          {t('descriptionTitle')}
-        </h2>
-        {showHtml ? (
-          <div
-            className={descriptionHtmlClass}
-            dangerouslySetInnerHTML={{ __html: html ?? '' }}
-          />
-        ) : (
-          <p className="m-0 whitespace-pre-wrap leading-relaxed text-foreground">
-            {job.description}
-          </p>
+    <article className={cn('@container', className)}>
+      <section
+        className={cn(
+          'overflow-hidden bg-card',
+          !embedded && 'rounded-[28px] border',
+          !embedded && (featuredLive ? 'border-featured/60' : 'border-border'),
         )}
-      </section>
-
-      <section className="mt-5 border-t border-border pt-5">
-        <h2 className="m-0 mb-1 text-h3 text-foreground">{t('applyTitle')}</h2>
-        {listingState === 'preview' ? (
-          <p className="mb-0 mt-0 text-sm text-muted-foreground">
-            {t('applyPreviewNote')}
-          </p>
-        ) : listingState === 'expired' ? (
-          <p className="mb-0 mt-0 text-sm text-muted-foreground">
-            {t('applyClosed')}{' '}
-            <Link
-              href="/jobs"
-              className="font-medium text-primary underline-offset-2 hover:underline"
+      >
+        {/* Cover band until companies have cover photos (plan step 6). */}
+        <div
+          aria-hidden
+          className={cn(
+            'bg-gradient-to-br from-placeholder to-featured-soft',
+            embedded ? 'h-24' : 'h-28 @2xl:h-44',
+          )}
+        />
+        <div className="px-6 pb-6 @2xl:px-8 @2xl:pb-8">
+          <CompanyInitials
+            name={job.company.name}
+            className="-mt-10 size-20 rounded-[22px] border border-border bg-card text-lg shadow-[0_12px_30px_-18px_oklch(0.34_0.06_182_/_0.6)]"
+          />
+          {listingState === 'expired' ? (
+            <p
+              className="m-0 mt-4 rounded-xl border border-border bg-muted px-3 py-2 text-sm font-medium text-foreground"
+              role="status"
             >
-              {t('expiredBrowseLive')}
-            </Link>
-          </p>
-        ) : job.applyMode === 'external' ? (
-          <>
-            <p className="mb-3.5 mt-0 text-muted-foreground">
-              {t('applyHintExternal')}
+              {t('expiredBanner')}
             </p>
-            {longDescription ? applyCta(endCtaClass) : null}
-          </>
-        ) : (
-          <>
-            <p className="mb-3.5 mt-0 text-muted-foreground">
-              {t('applyHint')}
-            </p>
-            {longDescription ? applyCta(endCtaClass) : null}
-            {guest ? (
-              <p className="mb-0 mt-3 text-sm text-muted-foreground">
-                {t('applyHaveAccount')}{' '}
-                <Link
-                  href={`/candidate/login?returnTo=${encodeURIComponent(applyPath)}`}
-                  className="font-medium text-primary underline-offset-2 hover:underline"
-                >
-                  {t('applySignIn')}
-                </Link>
-              </p>
+          ) : null}
+          <div className="mt-4 flex flex-wrap gap-2">
+            {job.featured && listingState !== 'expired' ? (
+              <span
+                className="inline-flex items-center gap-1 rounded-full bg-featured-soft px-3 py-1 text-[0.8125rem] font-bold text-featured-soft-foreground"
+                title={
+                  listingState === 'live'
+                    ? t('featuredSpotlightHint')
+                    : undefined
+                }
+              >
+                <Sparkles className="size-3.5" aria-hidden />
+                {t('featuredBadge')}
+              </span>
             ) : null}
-          </>
-        )}
+            {job.crossborderVisible ? (
+              <span
+                className={cn(chipClass, 'bg-info-soft text-info')}
+                title={t('crossborderBadge')}
+              >
+                {t('crossborderBadge')}
+              </span>
+            ) : null}
+            <span className={chipClass}>
+              {jobEnumLabel(tEnum, 'workModel', job.workModel)}
+            </span>
+            <span className={chipClass}>
+              {jobEnumLabel(tEnum, 'employmentType', job.employmentType)}
+            </span>
+            <span className={chipClass}>
+              {jobEnumLabel(tEnum, 'seniority', job.seniority)}
+            </span>
+          </div>
+          <Title className="m-0 mt-3.5 text-[1.75rem] font-extrabold leading-[1.08] tracking-tight text-foreground @2xl:text-[2.5rem] @4xl:text-5xl">
+            {job.title}
+          </Title>
+          <p className="m-0 mt-2 text-base leading-normal text-muted-foreground @2xl:text-[1.0625rem]">
+            <Link
+              href={`/companies/${job.company.slug}`}
+              className="font-bold text-primary underline-offset-2 hover:underline"
+            >
+              {job.company.name}
+            </Link>
+            {cityLine ? ` · ${cityLine}` : ''}
+            {categoryLine ? ` · ${categoryLine}` : ''}
+          </p>
+          <p className="m-0 mt-2.5 text-sm leading-normal text-muted-foreground">
+            {listingState === 'preview' && !job.publishedAt
+              ? t('previewNotPublished')
+              : `${t('publishedLabel')} ${publishedMedium(job.publishedAt)}`}
+            {listingState === 'live' && job.expiresAt
+              ? ` · ${t('expiresLabel')} ${publishedMedium(job.expiresAt)}`
+              : null}
+          </p>
+          {listingState === 'live' ? (
+            <div className="mt-5 @4xl:hidden">
+              {applyCta('hf-press w-full rounded-2xl sm:w-auto')}
+            </div>
+          ) : null}
+        </div>
       </section>
 
-      <section className="mt-5 border-t border-border pt-5">
-        <h2 className="m-0 mb-2 text-base font-semibold text-foreground">
-          {t('companySnapshotTitle')}
-        </h2>
-        <p className="m-0 text-sm text-foreground">
-          <Link
-            href={`/companies/${job.company.slug}`}
-            className="font-semibold text-primary underline-offset-2 hover:underline"
+      <div
+        className={cn(
+          'grid @4xl:grid-cols-[minmax(0,1fr)_340px] @4xl:items-start',
+          !embedded && 'mt-6 gap-6',
+        )}
+      >
+        <section className={cn(card, '@4xl:col-start-1')}>
+          <h2 className="m-0 mb-3 text-[1.375rem] font-extrabold tracking-tight text-foreground">
+            {t('descriptionTitle')}
+          </h2>
+          {showHtml ? (
+            <div
+              className={descriptionHtmlClass}
+              dangerouslySetInnerHTML={{ __html: html ?? '' }}
+            />
+          ) : (
+            <p className="m-0 whitespace-pre-wrap leading-relaxed text-foreground">
+              {job.description}
+            </p>
+          )}
+          {job.pngCreativeUrl ? (
+            <img
+              src={job.pngCreativeUrl}
+              alt={t('pngCreativeAlt')}
+              className="mt-5 max-h-80 max-w-full rounded-[18px] border border-border object-contain"
+            />
+          ) : null}
+        </section>
+
+        <aside
+          aria-label={t('applyTitle')}
+          className={cn(
+            card,
+            '@4xl:col-start-2 @4xl:row-span-2 @4xl:row-start-1',
+            !embedded &&
+              '@4xl:sticky @4xl:top-24 @4xl:shadow-[0_24px_60px_-40px_oklch(0.34_0.06_182_/_0.6)]',
+          )}
+        >
+          <h2 className="m-0 mb-2 text-xl font-extrabold tracking-tight text-foreground">
+            {t('applyTitle')}
+          </h2>
+          {listingState === 'preview' ? (
+            <p className="m-0 text-sm text-muted-foreground">
+              {t('applyPreviewNote')}
+            </p>
+          ) : listingState === 'expired' ? (
+            <p className="m-0 text-sm text-muted-foreground">
+              {t('applyClosed')}{' '}
+              <Link
+                href="/jobs"
+                className="font-medium text-primary underline-offset-2 hover:underline"
+              >
+                {t('expiredBrowseLive')}
+              </Link>
+            </p>
+          ) : (
+            <>
+              <p className="m-0 mb-4 leading-relaxed text-muted-foreground">
+                {job.applyMode === 'external'
+                  ? t('applyHintExternal')
+                  : t('applyHint')}
+              </p>
+              {applyCta(cn('hf-press min-h-14 rounded-[18px]', asideCtaClass))}
+              {guest && job.applyMode !== 'external' ? (
+                <p className="m-0 mt-3.5 text-center text-sm text-muted-foreground">
+                  {t('applyHaveAccount')}{' '}
+                  <Link
+                    href={`/candidate/login?returnTo=${encodeURIComponent(applyPath)}`}
+                    className="font-bold text-primary underline-offset-2 hover:underline"
+                  >
+                    {t('applySignIn')}
+                  </Link>
+                </p>
+              ) : null}
+            </>
+          )}
+        </aside>
+
+        <section
+          className={cn(
+            card,
+            'flex flex-wrap items-center gap-4 @4xl:col-start-1',
+          )}
+        >
+          <CompanyInitials
+            name={job.company.name}
+            className="size-16 rounded-[18px]"
+          />
+          <div className="min-w-0 flex-[1_1_220px]">
+            <h2 className="m-0 text-lg font-extrabold text-foreground">
+              {t('companySnapshotTitle')}
+            </h2>
+            <p className="m-0 mt-1 text-sm text-muted-foreground">
+              <Link
+                href={`/companies/${job.company.slug}`}
+                className="font-semibold text-primary underline-offset-2 hover:underline"
+              >
+                {job.company.name}
+              </Link>
+              {cityLine ? ` · ${cityLine}` : ''}
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            className="hf-press min-h-11 rounded-full px-5 font-semibold"
+            asChild
           >
-            {job.company.name}
-          </Link>
-          {cityLine ? ` · ${cityLine}` : ''}
-        </p>
-        <p className="mt-2 mb-0">
-          <Button variant="outline" size="sm" asChild>
             <Link href={`/companies/${job.company.slug}`}>
               {t('companySnapshotCta')}
             </Link>
           </Button>
-        </p>
-      </section>
+        </section>
+      </div>
 
       {listingState !== 'preview' ? (
-        <SimilarJobsSection jobId={job.id} listLocale={locale} />
+        <SimilarJobsSection
+          jobId={job.id}
+          listLocale={locale}
+          className={embedded ? 'border-t border-border p-6' : 'mt-14'}
+        />
       ) : null}
 
       {stickyApply && listingState === 'live' ? (
-        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur md:hidden">
-          {applyCta('w-full')}
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur md:hidden">
+          {applyCta('w-full min-h-[52px] rounded-2xl font-extrabold')}
         </div>
       ) : null}
 

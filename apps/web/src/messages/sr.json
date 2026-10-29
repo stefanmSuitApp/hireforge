@@ -234,7 +234,10 @@
     "guestFiltersTitle": "Prijavi se da koristiš ove filtere",
     "guestSignIn": "Prijavi se",
     "guestRegister": "Napravi nalog",
-    "similarMoreSignIn": "Prijavi se za još sličnih oglasa"
+    "similarMoreSignIn": "Prijavi se za još sličnih oglasa",
+    "guestMoreFiltersHint": "Rad od kuće, tip angažmana, datum objave i brzo konkurisanje — posle prijave.",
+    "chipApplyRow": "Konkurisanje",
+    "openPositions": "{count, plural, one {# otvorena pozicija} few {# otvorene pozicije} other {# otvorenih pozicija}}"
   },
   "Launch": {
     "title": "Šljakam tek počinje",

@@ -31,6 +31,25 @@ test('a short job ad has one apply button, its end date and no postal code', asy
   await expect(page.getByRole('main')).not.toContainText('(11000)');
 });
 
+// Redesign A step 3: on a wide screen the apply box sits beside the
+// description and stays on screen while the ad scrolls.
+test('on a wide screen the apply box sits beside the description', async ({
+  page,
+}) => {
+  const job = await createPublishedJob({});
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(`/sr/jobs/${job.slug}`);
+
+  const description = page.getByRole('heading', { name: 'Opis pozicije' });
+  const apply = page
+    .getByRole('complementary', { name: 'Konkurisanje' })
+    .getByRole('link', { name: 'Konkuriši za ovaj posao' });
+  await expect(apply).toBeVisible();
+  const [d, a] = [await description.boundingBox(), await apply.boundingBox()];
+  expect(a!.x).toBeGreaterThan(d!.x + 400);
+  expect(Math.abs(a!.y - d!.y)).toBeLessThan(200);
+});
+
 test('the candidate overview shows my applications, saved jobs and what my profile lacks', async ({
   page,
 }) => {

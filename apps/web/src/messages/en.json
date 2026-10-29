@@ -234,7 +234,10 @@
     "guestFiltersTitle": "Sign in to use these filters",
     "guestSignIn": "Sign in",
     "guestRegister": "Create account",
-    "similarMoreSignIn": "Sign in for more similar jobs"
+    "similarMoreSignIn": "Sign in for more similar jobs",
+    "guestMoreFiltersHint": "Remote work, employment type, posting date and quick apply — after you sign in.",
+    "chipApplyRow": "Applying",
+    "openPositions": "{count, plural, one {# open position} other {# open positions}}"
   },
   "Launch": {
     "title": "Šljakam is just getting started",

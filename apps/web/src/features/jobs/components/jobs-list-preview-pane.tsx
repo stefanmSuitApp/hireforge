@@ -54,6 +54,8 @@ export function JobsListPreviewPane({
     shouldFetch && !query.data && (query.isPending || query.isFetching);
 
   let body: ReactNode;
+  // The preview card draws its own padding (cover band to the edges).
+  let bare = false;
   if (!trimmed) {
     body = (
       <p className="text-sm text-muted-foreground">{t('previewPlaceholder')}</p>
@@ -79,12 +81,14 @@ export function JobsListPreviewPane({
       </p>
     );
   } else if (query.data) {
+    bare = true;
     body = (
       <JobListingPreview
         job={query.data}
         listingState="live"
         titleAs="h2"
         guest={guest}
+        embedded
       />
     );
   } else {
@@ -94,11 +98,11 @@ export function JobsListPreviewPane({
   }
 
   return (
-    <div className="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto rounded-2xl border border-border/60 bg-card p-5">
-      <p className="m-0 mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-        {t('previewHeading')}
-      </p>
-      {body}
-    </div>
+    <section
+      aria-label={t('previewHeading')}
+      className="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto rounded-[24px] border border-border bg-card"
+    >
+      {bare ? body : <div className="p-6">{body}</div>}
+    </section>
   );
 }

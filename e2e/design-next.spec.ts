@@ -12,15 +12,18 @@ test.beforeEach(async () => {
   await resetRateLimits();
 });
 
-test('the apply button sits above the job description', async ({ page }) => {
+// Redesign A: above the description, or beside it in the apply box on a
+// wide screen; either way not below the text.
+test('the apply button is not below the job description', async ({ page }) => {
   const job = await createPublishedJob();
   await page.goto(`/sr/jobs/${job.slug}`);
   const apply = page
     .getByRole('link', { name: 'Konkuriši za ovaj posao' })
+    .filter({ visible: true })
     .first();
   const description = page.getByRole('heading', { name: 'Opis pozicije' });
   const [a, d] = [await apply.boundingBox(), await description.boundingBox()];
-  expect(a && d && a.y < d.y).toBe(true);
+  expect(a && d && a.y < d.y + 120).toBe(true);
 });
 
 test('a missing page is a branded 404 inside the site', async ({

@@ -52,11 +52,11 @@ export function JobDetailScreen(props: JobDetailScreenProps) {
   const { job, viewedSegment, guest, moreFromCompany = [] } = props;
 
   return (
-    <PublicSurfaceMain narrow>
+    <PublicSurfaceMain className="pt-6 md:pt-8">
       <TrackRecentlyViewedJob segment={viewedSegment} />
       <Button
         variant="link"
-        className="mb-4 h-auto px-0 text-muted-foreground"
+        className="mb-4 h-auto px-0 font-semibold text-primary"
         asChild
       >
         <Link href="/jobs">{t('backToJobs')}</Link>
@@ -72,8 +72,8 @@ export function JobDetailScreen(props: JobDetailScreenProps) {
       />
 
       {moreFromCompany.length > 0 ? (
-        <section className="mt-6 rounded-xl border border-border bg-card p-5">
-          <h2 className="m-0 mb-3 text-base font-semibold text-foreground">
+        <section className="mt-10 rounded-[24px] border border-border bg-card p-6">
+          <h2 className="m-0 mb-3 text-lg font-extrabold text-foreground">
             {t('moreFromCompany', { company: job.company.name })}
           </h2>
           <ul className="m-0 flex list-none flex-col gap-2 p-0">

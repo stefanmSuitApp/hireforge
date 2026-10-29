@@ -598,6 +598,24 @@ shared components, CSS-only motion within the Lighthouse budgets.
   - Tests: `promo-banner.test.ts` (campaign only), `seo.spec.ts` (home
     title words), `empty-site.spec.ts` (empty result spans the width); each
     failed before.
+- **Step 3, Poslovi + Oglas** (branch `feat/redesign-jobs`):
+  - Shared `SearchCard` / `SearchField` (`components/search-card.tsx`) for
+    the home hero and `/jobs` (and the city/category landings, which use the
+    same screen).
+  - `/jobs`: big title with "N otvorenih pozicija"; guests get "Više
+    filtera" plus a line saying what signing in unlocks; signed-in users
+    get the chips as labelled rows in one card (same filters, same URLs).
+    List cards with company initials, the selected card ringed; the guest
+    "see all" banner in teal.
+  - Job page (and the list preview, same component): cover band, initials
+    tile, chips, big title; description and "O poslodavcu" cards; on wide
+    screens a sticky "Konkurisanje" box beside the text replaces the button
+    under the title (phones keep the bottom bar). Similar jobs as cards.
+    The page is now full width (was `max-w-3xl`).
+  - Tests: `jobs-list-layout.spec.ts` (count in the header; signed-in chip
+    rows) and `dashboards-and-job-page.spec.ts` (apply box beside the
+    description), each failed before; `design-next` now checks the apply
+    button is not below the description (beside it on wide screens).
 
 ## Sign-up draft, job search layout, employers pitch (branch `fix/signup-draft-and-job-list`, 2026-10-29)
 
