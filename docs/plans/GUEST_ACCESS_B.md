@@ -9,18 +9,19 @@ rest teased" rule shipped in #20.
 **Guests can read every job ad in full. Browsing more than the first page
 of results needs an account.**
 
-| Surface | Guest (not signed in) | Signed in (any role) |
-|---|---|---|
-| Job page `/jobs/[slug]` | Full ad, indexed, JobPosting JSON-LD | Same |
-| Apply, save job, alerts | Need an account (inline sign-up, see §5) | Allowed |
-| Jobs list `/jobs` and landing pages (city, category, city × category) | Page 1 only (20 jobs); a "see all N jobs" prompt below | Every page, infinite scroll |
-| Keyword and city search | Allowed, page 1 of the results (decision D1) | Allowed |
-| Advanced filters (work model, employment type, posted within, quick apply) | Visible, but using one opens the sign-in prompt (D1) | Allowed |
-| Similar jobs on a job page | First 3, plus a "see more like this" prompt (D3) | All 6 |
-| Company page `/companies/[slug]` | Company and its first 20 jobs | All jobs |
-| Employers directory, home page strips | Unchanged (public) | Unchanged |
+| Surface                                                                    | Guest (not signed in)                                  | Signed in (any role)        |
+| -------------------------------------------------------------------------- | ------------------------------------------------------ | --------------------------- |
+| Job page `/jobs/[slug]`                                                    | Full ad, indexed, JobPosting JSON-LD                   | Same                        |
+| Apply, save job, alerts                                                    | Need an account (inline sign-up, see §5)               | Allowed                     |
+| Jobs list `/jobs` and landing pages (city, category, city × category)      | Page 1 only (20 jobs); a "see all N jobs" prompt below | Every page, infinite scroll |
+| Keyword and city search                                                    | Allowed, page 1 of the results (decision D1)           | Allowed                     |
+| Advanced filters (work model, employment type, posted within, quick apply) | Visible, but using one opens the sign-in prompt (D1)   | Allowed                     |
+| Similar jobs on a job page                                                 | First 3, plus a "see more like this" prompt (D3)       | All 6                       |
+| Company page `/companies/[slug]`                                           | Company and its first 20 jobs                          | All jobs                    |
+| Employers directory, home page strips                                      | Unchanged (public)                                     | Unchanged                   |
 
 **Why this shape:**
+
 - **Google.** Google for Jobs only lists an ad that the visitor can read on the page it links to. Every job page stays fully open, and the gating applies to browsing (lists, filters, page 2+), never to the ad itself.
 - **Same for everyone.** Googlebot and people get the same page, so there's no cloaking risk.
 - **Search engines still find every job.** The sitemap lists every live job (§4), so page 2+ being closed doesn't hide anything from them.
@@ -32,13 +33,13 @@ of results needs an account.**
 
 D1 and D3 confirmed by Stefan on 2026-10-29. The others are defaults until he says otherwise.
 
-| # | Question | Default |
-|---|---|---|
-| D1 | May guests search by keyword and city? | **Yes, page 1 of the results.** The hero search is the main way in, and the landing pages are already city/category filters that must stay public for SEO. Only the advanced filter chips and page 2+ need an account. |
-| D2 | How many jobs does a guest see per list? | **20** (`JOBS_LIST_PAGE_SIZE`). |
-| D3 | Similar jobs for guests? | **First 3, plus a prompt.** They are links between public pages, which also helps SEO. |
-| D4 | A guest opens `?page=2` directly (old link, crawler) | **200 with page 1's jobs, the "see all" prompt and `noindex`.** Not a redirect: crawlers shouldn't hit redirect chains. Page 2+ is reached through the sitemap, not through the list. |
-| D5 | The `PUBLIC_JOBS=false` full wall | **Keep it** as the emergency switch (unchanged behaviour). |
+| #   | Question                                             | Default                                                                                                                                                                                                                |
+| --- | ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D1  | May guests search by keyword and city?               | **Yes, page 1 of the results.** The hero search is the main way in, and the landing pages are already city/category filters that must stay public for SEO. Only the advanced filter chips and page 2+ need an account. |
+| D2  | How many jobs does a guest see per list?             | **20** (`JOBS_LIST_PAGE_SIZE`).                                                                                                                                                                                        |
+| D3  | Similar jobs for guests?                             | **First 3, plus a prompt.** They are links between public pages, which also helps SEO.                                                                                                                                 |
+| D4  | A guest opens `?page=2` directly (old link, crawler) | **200 with page 1's jobs, the "see all" prompt and `noindex`.** Not a redirect: crawlers shouldn't hit redirect chains. Page 2+ is reached through the sitemap, not through the list.                                  |
+| D5  | The `PUBLIC_JOBS=false` full wall                    | **Keep it** as the emergency switch (unchanged behaviour).                                                                                                                                                             |
 
 ## 3. Server rules (API, the single source of truth)
 
@@ -82,17 +83,17 @@ The viewer comes from the access token the web already forwards (#20: `lib/viewe
 
 ## 6. What changes from #20 (refactor map)
 
-| #20 piece | Option B |
-|---|---|
-| `isLockedFor` / `PublicViewer` in `public-jobs.service.ts` | Keep `PublicViewer`, delete `isLockedFor`. Add `guestPageCap()` and the filter check. |
-| `locked`, `lockedTotal`, `lockedJobCount` in contracts | Replace with `guestLimited`, `moreAvailable`, `totalJobs`. |
-| Detail 401 + web 307 to sign-in | Remove both (detail always 200). |
-| `featuredJobs` in the sitemap feed, landing/company indexing | Back to `liveJobs`. |
-| Worker: non-featured → URL_DELETED | Remove. |
-| `LockedJobsCta`, locked card variant, `publicJobCardHref` | `GuestBrowseCta`; normal cards. |
-| `viewer-access-token.ts`, BFF token forwarding, no-store for signed-in reads | **Keep** (B needs the viewer too). |
-| e2e `guest-job-visibility.spec.ts`, int tests "guests see featured…" | Rewrite for the B rules. |
-| `createPublishedJob({ featured })`, `insertJob({ featured })` | Keep; tests no longer need featured to see a job. |
+| #20 piece                                                                    | Option B                                                                              |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `isLockedFor` / `PublicViewer` in `public-jobs.service.ts`                   | Keep `PublicViewer`, delete `isLockedFor`. Add `guestPageCap()` and the filter check. |
+| `locked`, `lockedTotal`, `lockedJobCount` in contracts                       | Replace with `guestLimited`, `moreAvailable`, `totalJobs`.                            |
+| Detail 401 + web 307 to sign-in                                              | Remove both (detail always 200).                                                      |
+| `featuredJobs` in the sitemap feed, landing/company indexing                 | Back to `liveJobs`.                                                                   |
+| Worker: non-featured → URL_DELETED                                           | Remove.                                                                               |
+| `LockedJobsCta`, locked card variant, `publicJobCardHref`                    | `GuestBrowseCta`; normal cards.                                                       |
+| `viewer-access-token.ts`, BFF token forwarding, no-store for signed-in reads | **Keep** (B needs the viewer too).                                                    |
+| e2e `guest-job-visibility.spec.ts`, int tests "guests see featured…"         | Rewrite for the B rules.                                                              |
+| `createPublishedJob({ featured })`, `insertJob({ featured })`                | Keep; tests no longer need featured to see a job.                                     |
 
 ## 7. Phases (each ships on its own: full check, CI, merge, deploy, verify)
 
