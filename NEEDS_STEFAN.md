@@ -64,7 +64,9 @@ each on the VM (`nano deploy/.env.production`), never in chat:
   the line empty.
 - `RESEND_API_KEY`: resend.com → API Keys → create (sending, sljakam.com),
   replace, delete the old key.
-- `SANITY_API_READ_TOKEN`: new Viewer token, replace, delete the old one.
+- `SANITY_API_READ_TOKEN` of the new project `o85214ma` (also shown in chat
+  by mistake, 2026-10-29): new Viewer token in that project, replace,
+  delete the old one. Staging copies it on its next deploy.
 - `SANITY_WEBHOOK_SECRET`: `openssl rand -hex 32`; also edit the Sanity
   webhook URL (`…/api/revalidate/sanity?secret=<new>`).
 - `CMS_SYNC_SECRET`: `openssl rand -hex 32` (nothing else to update).
