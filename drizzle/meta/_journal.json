@@ -253,6 +253,13 @@
       "when": 1778400000000,
       "tag": "0035_users_terms_acceptance",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1778500000000,
+      "tag": "0036_jobs_search_word_forms",
+      "breakpoints": true
     }
   ]
 }
