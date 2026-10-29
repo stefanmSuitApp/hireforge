@@ -13,6 +13,7 @@ import {
   PublicApiUnavailableError,
 } from '@/lib/public-jobs';
 import { breadcrumbJsonLd } from '@/lib/seo/json-ld';
+import { fetchCmsHomeJobsDiscovery } from '@/lib/cms-content';
 import { absoluteSiteOrigin } from '@/lib/site-origin';
 
 import {
@@ -23,6 +24,19 @@ import {
 import type { JobsSearchParams } from '../lib/jobs-list-query';
 
 import { JobsListRoute } from './jobs-list-route';
+
+/** The city's (else the category's) photo from the homepage tiles in CMS. */
+async function landingImage(
+  locale: string,
+  key: LandingKey,
+): Promise<string | null> {
+  const cms = await fetchCmsHomeJobsDiscovery(locale);
+  if (!cms) return null;
+  const row = key.city
+    ? cms.citySpotlights.find((r) => r.slug === key.city)
+    : cms.categorySpotlights.find((r) => r.slug === key.category);
+  return row?.imageUrl ?? null;
+}
 
 /**
  * City, category and city × category landing pages (`/jobs/city/{city}`,
@@ -127,7 +141,7 @@ export async function JobsLandingRoute({
       params={params}
       searchParams={searchParams}
       fixed={key}
-      heading={{ title, intro }}
+      heading={{ title, intro, imageUrl: await landingImage(locale, key) }}
       before={
         <>
           <JsonLd
@@ -165,10 +179,10 @@ export async function JobsLandingRoute({
       }
       after={
         related.length ? (
-          <section className="mt-12 grid gap-8 border-t border-border/60 pt-8 sm:grid-cols-2">
+          <section className="mt-12 grid gap-8 sm:grid-cols-2">
             {related.map((r) => (
               <div key={r.heading}>
-                <h2 className="m-0 mb-3 text-base font-semibold text-foreground">
+                <h2 className="m-0 mb-3.5 text-[1.375rem] font-extrabold text-foreground">
                   {r.heading}
                 </h2>
                 <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
@@ -176,7 +190,7 @@ export async function JobsLandingRoute({
                     <li key={l.href}>
                       <Link
                         href={l.href}
-                        className="inline-flex rounded-full border border-border bg-card px-3 py-1 text-sm text-foreground no-underline hover:border-primary/50"
+                        className="hf-press inline-flex min-h-10 items-center rounded-full border border-border bg-card px-3.5 text-sm font-medium text-foreground no-underline hover:border-primary/50"
                       >
                         {l.label}
                         <span className="ml-1.5 text-muted-foreground">

@@ -40,6 +40,13 @@ test('an admin starts a free week; the home banner shows it; pausing removes it'
         .getByRole('region', { name: 'Promocija' })
         .getByRole('link', { name: /Besplatno objavljivanje oglasa do/ }),
     ).toBeVisible();
+    // Redesign A step 4: the employers page pitch says so too.
+    await page.goto('/sr/employers');
+    await expect(
+      page
+        .getByRole('region', { name: 'Zapošljavaš?' })
+        .getByText(/Besplatno objavljivanje oglasa do/),
+    ).toBeVisible();
   } finally {
     await page.goto('/sr/admin/campaigns');
     await page
