@@ -70,6 +70,18 @@ export const employerWorkspaceModeratorSchema = z.object({
   phone: z.string().nullable(),
 });
 
+/** The company's jobs by status: drives the dashboard's first-job checklist. */
+export const employerJobCountsSchema = z.object({
+  draft: z.number().int().min(0),
+  submitted: z.number().int().min(0),
+  published: z.number().int().min(0),
+  rejected: z.number().int().min(0),
+  /** `archived` + `expired`: jobs that were live once. */
+  ended: z.number().int().min(0),
+});
+
+export type EmployerJobCounts = z.infer<typeof employerJobCountsSchema>;
+
 export const employerWorkspaceResponseSchema = z.object({
   user: employerWorkspaceUserSchema,
   company: employerWorkspaceCompanySchema,
@@ -83,6 +95,13 @@ export const employerWorkspaceResponseSchema = z.object({
    * Drives per-package “Add listing” and entitlement-scoped composer config.
    */
   jobPostingSlots: z.array(employerJobPostingSlotSchema).optional().default([]),
+  jobCounts: employerJobCountsSchema.optional().default({
+    draft: 0,
+    submitted: 0,
+    published: 0,
+    rejected: 0,
+    ended: 0,
+  }),
 });
 
 export type EmployerWorkspaceResponse = z.infer<

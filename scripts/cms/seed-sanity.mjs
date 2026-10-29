@@ -119,23 +119,15 @@ async function main() {
     ],
   });
 
+  // No seeded slots: a placeholder "free listings week" went live once and
+  // promised a campaign that didn't exist. Promo campaigns come from public
+  // promo codes (docs/plans/EMPTY_SITE_AND_CAMPAIGNS.md).
   tx.createOrReplace({
     _id: 'campaign-calendar',
     _type: 'campaignCalendar',
     internalName: 'Default',
-    notes: 'Homepage promo slots (Step 14 — Nedelja besplatnih oglasa).',
-    slots: [
-      {
-        _key: 'slot-home-default',
-        promoCode: 'NEDELJA-FREE',
-        categorySlug: '',
-        bannerSr: 'Nedelja besplatnih oglasa — pogledajte aktuelne ponude.',
-        bannerEn: 'Free listings week — explore open roles.',
-        linkPath: '/jobs',
-        startsAt: '2026-01-01T00:00:00.000Z',
-        endsAt: '2030-12-31T23:59:59.999Z',
-      },
-    ],
+    notes: 'Homepage announcement slots, each with its own start and end.',
+    slots: [],
   });
 
   tx.createOrReplace({
@@ -518,14 +510,6 @@ async function main() {
       sr: 'Stub teksta — zameni pravnim sadržajem pre produkcije.',
       en: 'Stub copy — replace with legal content before launch.',
     },
-  });
-
-  tx.createOrReplace({
-    _id: 'campaignCalendar',
-    _type: 'campaignCalendar',
-    internalName: 'Nedelja besplatnih oglasa (stub)',
-    notes:
-      'Start / end dates and verticals land here once ops defines the calendar.',
   });
 
   tx.createOrReplace({

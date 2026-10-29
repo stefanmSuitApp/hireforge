@@ -4,10 +4,11 @@ import type { ReactNode } from 'react';
 import type { PublicJobTaxonomyResponse } from 'contracts';
 
 import { resolveNestPublicOrigin } from '@/lib/nest-api-url';
-import { hasAnyAuthSession } from '@/lib/unified-auth';
+import { detectAuthRole, hasAnyAuthSession } from '@/lib/unified-auth';
 import {
   fetchPublicJobTaxonomy,
   fetchPublicJobsList,
+  fetchPublicSitemap,
   isPublicApiOutage,
   PublicApiUnavailableError,
 } from '@/lib/public-jobs';
@@ -90,7 +91,16 @@ export async function JobsListRoute({
     } else {
       const { items } = result.data;
       if (items.length === 0) {
-        body = { kind: 'empty' };
+        // Filters only explain an empty page when the site has jobs at all.
+        const [live, viewer] = await Promise.all([
+          fetchPublicSitemap(base),
+          detectAuthRole(),
+        ]);
+        body = {
+          kind: 'empty',
+          siteEmpty: live.ok && live.data.jobs.length === 0,
+          viewer,
+        };
       } else {
         body = {
           kind: 'list',
