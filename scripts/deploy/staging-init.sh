@@ -8,7 +8,7 @@
 #    An existing file is kept (its passwords initialised the staging volumes).
 # 2. Every run: the keys staging shares with production are copied over again
 #    (so a rotation on production reaches staging on its next deploy): the
-#    Sanity read token, the bucket keys (dumps under backups/postgres/staging/)
+#    Sanity project, dataset and read token, the bucket keys (dumps under backups/postgres/staging/)
 #    and the Resend key, the latter only with EMAIL_REDIRECT_TO set: every
 #    staging email goes to that one inbox.
 # 3. Unless --env-only: once STAGING_HOST resolves to this server (same address
@@ -29,7 +29,13 @@ PROD_ENV=$PROD_ROOT/deploy/.env.production
 STAGING_ENV=deploy/.env.staging
 SITE=$PROD_ROOT/deploy/caddy-sites/staging.caddy
 STAGING_HOST=${STAGING_HOST:-staging.sljakam.com}
-SHARED_KEYS=(SANITY_API_READ_TOKEN RESEND_API_KEY AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY
+# The Sanity token only works with its project: they move together (the move
+# to project o85214ma on 2026-10-29 left staging with the new token and the
+# old project).
+SHARED_KEYS=(SANITY_API_READ_TOKEN SANITY_PROJECT_ID SANITY_DATASET
+  NEXT_PUBLIC_SANITY_PROJECT_ID NEXT_PUBLIC_SANITY_DATASET
+  SANITY_STUDIO_PROJECT_ID SANITY_STUDIO_DATASET
+  RESEND_API_KEY AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY
   S3_ENDPOINT S3_REGION S3_FORCE_PATH_STYLE S3_BACKUP_BUCKET)
 secret() { openssl rand -hex 32; }
 get() { grep -E "^$1=" "$2" | tail -1 | cut -d= -f2- || true; }
