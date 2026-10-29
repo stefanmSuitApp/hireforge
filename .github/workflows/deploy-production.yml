@@ -18,14 +18,42 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Before the approval: actions/checkout takes only a branch, a tag or a full
+  # SHA, so a short SHA is resolved here, and a commit not on main fails
+  # without asking anyone to approve it.
+  resolve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      sha: ${{ steps.sha.outputs.full }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Full SHA of a commit on main
+        id: sha
+        env:
+          INPUT: ${{ github.event.inputs.sha }}
+        run: |
+          [[ $INPUT =~ ^[0-9a-f]{7,40}$ ]] || { echo "not a commit SHA: '$INPUT'" >&2; exit 1; }
+          full=$(git rev-parse --verify --quiet "$INPUT^{commit}") \
+            || { echo "no single commit matches $INPUT" >&2; exit 1; }
+          git merge-base --is-ancestor "$full" origin/main \
+            || { echo "$full is not on main" >&2; exit 1; }
+          echo "full=$full" >> "$GITHUB_OUTPUT"
+          echo "deploying $full"
+
   deploy:
+    needs: resolve
     runs-on: ubuntu-latest
     environment: production
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.sha }}
+          ref: ${{ needs.resolve.outputs.sha }}
           fetch-depth: 0
 
       - uses: ./.github/actions/ssh-setup
