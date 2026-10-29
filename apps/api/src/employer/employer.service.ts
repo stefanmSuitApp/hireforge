@@ -909,6 +909,14 @@ export class EmployerService {
     }
     const ctx = await this.requireCompanyContext(userId);
 
+    // Same rule as the applicants list: withdrawn applications don't count.
+    const appCounts = database.db
+      .select({ jobId: applications.jobId, n: count().as('n') })
+      .from(applications)
+      .where(ne(applications.status, 'withdrawn'))
+      .groupBy(applications.jobId)
+      .as('app_counts');
+
     const rows = await database.db
       .select({
         id: jobs.id,
@@ -918,8 +926,11 @@ export class EmployerService {
         updatedAt: jobs.updatedAt,
         submittedAt: jobs.submittedAt,
         publishedAt: jobs.publishedAt,
+        expiresAt: jobs.expiresAt,
+        applicationCount: appCounts.n,
       })
       .from(jobs)
+      .leftJoin(appCounts, eq(appCounts.jobId, jobs.id))
       .where(eq(jobs.companyId, ctx.companyId))
       .orderBy(desc(jobs.updatedAt));
 
@@ -931,6 +942,8 @@ export class EmployerService {
       updatedAt: r.updatedAt.toISOString(),
       submittedAt: r.submittedAt ? r.submittedAt.toISOString() : null,
       publishedAt: r.publishedAt ? r.publishedAt.toISOString() : null,
+      expiresAt: r.expiresAt ? r.expiresAt.toISOString() : null,
+      applicationCount: Number(r.applicationCount ?? 0),
     }));
   }
 

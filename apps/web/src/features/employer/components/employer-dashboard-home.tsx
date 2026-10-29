@@ -7,6 +7,7 @@ import { Link } from '@/i18n/navigation';
 
 import { firstJobSteps } from '../lib/first-job-steps';
 import { EmployerFirstJobChecklist } from './employer-first-job-checklist';
+import { EmployerOverviewStats } from './employer-overview-stats';
 
 type Props = { workspace: EmployerWorkspacePayload };
 
@@ -28,9 +29,6 @@ export async function EmployerDashboardHome({ workspace }: Props) {
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
           {t('dashboardBody')}
         </p>
-        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-          {t('dashboardPackagesHint')}
-        </p>
         <div className="mt-5 flex flex-wrap gap-3">
           <Button asChild className="h-auto justify-center py-3">
             <Link href={addListingHref} locale={locale}>
@@ -49,30 +47,10 @@ export async function EmployerDashboardHome({ workspace }: Props) {
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-3">
-        <article className="rounded-xl border border-border/70 bg-card p-4">
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">
-            {th('cardListingsLabel')}
-          </p>
-          <p className="mt-2 text-sm text-foreground">
-            {th('cardListingsBody')}
-          </p>
-        </article>
-        <article className="rounded-xl border border-border/70 bg-card p-4">
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">
-            {th('cardPackagesLabel')}
-          </p>
-          <p className="mt-2 text-sm text-foreground">
-            {th('cardPackagesBody')}
-          </p>
-        </article>
-        <article className="rounded-xl border border-border/70 bg-card p-4">
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">
-            {th('cardPublicLabel')}
-          </p>
-          <p className="mt-2 text-sm text-foreground">{th('cardPublicBody')}</p>
-        </article>
-      </section>
+      <EmployerOverviewStats
+        slots={workspace.jobPostingSlots ?? []}
+        postingKind={workspace.jobPosting.kind}
+      />
 
       <section className="rounded-2xl border border-border/70 bg-card p-6 shadow-sm">
         <h3 className="text-base font-semibold text-foreground">

@@ -15,17 +15,13 @@ export function pickLocalizedBilingual(
   return nameSr;
 }
 
+/** City name for cards and job pages; the postal code is noise there. */
 export function localizedCityLine(
   locale: string,
-  city: {
-    nameSr: string;
-    nameEn: string | null;
-    postalCode: string | null;
-  } | null,
+  city: { nameSr: string; nameEn: string | null } | null,
 ): string | null {
   if (!city) return null;
-  const name = pickLocalizedBilingual(locale, city.nameSr, city.nameEn);
-  return city.postalCode ? `${name} (${city.postalCode})` : name;
+  return pickLocalizedBilingual(locale, city.nameSr, city.nameEn);
 }
 
 export function localizedCategoryLine(
@@ -36,7 +32,7 @@ export function localizedCategoryLine(
   return pickLocalizedBilingual(locale, category.nameSr, category.nameEn);
 }
 
-/** City / category row from taxonomy API (optional postal). */
+/** City / category option in pickers: the postal code tells same-name places apart. */
 export function localizedTaxonomyItemLine(
   locale: string,
   item: PublicJobTaxonomyItem,

@@ -258,6 +258,7 @@
     "fallbackTitle": "Detalji posla",
     "backToJobs": "Nazad na poslove",
     "publishedLabel": "Objavljeno:",
+    "expiresLabel": "Ističe:",
     "previewNotPublished": "Još uvek nije objavljeno — datumi će se pojaviti kada oglas bude aktivan.",
     "featuredBadge": "Istaknuto",
     "featuredSpotlightHint": "Podržano od strane poslodavca",
@@ -352,17 +353,23 @@
     "logout": "Odjavi se",
     "dashboardTitle": "Zdravo!",
     "dashboardBody": "Upravljaj oglasima, šalji nacrte na moderaciju i pregledaj kandidate za svoje oglase.",
-    "dashboardPackagesHint": "Paket i naplatu menjaš bilo kada — u delu Paketi vidiš svoje pretplate, profakture i aktuelne cene.",
     "home": {
       "ctaListings": "Moji oglasi",
       "ctaPackages": "Paketi",
       "ctaPublicPage": "Javna stranica kompanije",
-      "cardListingsLabel": "Oglasi",
-      "cardListingsBody": "Pravi nacrte, šalji ih na moderaciju i upravljaj objavljenim pozicijama.",
-      "cardPackagesLabel": "Paketi i naplata",
-      "cardPackagesBody": "Prati pretplate, profakture i preostale slotove za oglase.",
-      "cardPublicLabel": "Javni profil",
-      "cardPublicBody": "Uredi kako kandidati vide tvoju kompaniju na Šljakam."
+      "statLive": "Aktivni oglasi",
+      "statInReview": "Na pregledu",
+      "statApplicants": "Kandidati",
+      "statSlots": "Slobodna mesta u paketu",
+      "slotsValue": "{free} od {max}",
+      "slotsNone": "Nema paketa",
+      "slotsPendingPayment": "Čeka uplatu",
+      "applicantsTitle": "Oglasi sa kandidatima",
+      "applicantsCount": "{count, plural, one {# kandidat} few {# kandidata} other {# kandidata}}",
+      "applicantsEmpty": "Još nema kandidata na tvojim oglasima.",
+      "expiringTitle": "Ističu u narednih 7 dana",
+      "expiringEmpty": "Nijedan oglas ne ističe ove nedelje.",
+      "loadError": "Pregled trenutno ne može da se učita. Osveži stranicu."
     },
     "createJobDraft": "Novi oglas (nacrt)",
     "manageJobListings": "Lista oglasa",
@@ -412,7 +419,7 @@
         "slotsFullBanner": "Svi aktivni paketi su na maksimumu za oglase na pregledu ili objavljene. I dalje možeš da čuvaš nacrte; „Pošalji na pregled” se otključava kada se na tom paketu oslobodi mesto."
       },
       "promoLabel": "Promo kod",
-      "promoPlaceholder": "OPTIONAL-PROMO",
+      "promoPlaceholder": "Unesi kod",
       "promoHint": "Ako imaš kod kampanje, unesi ga pre kupovine. Ograničenja kategorije važe kada pošalješ oglas na pregled.",
       "subscribe": "Pretplati se",
       "subscribing": "Pretplata…",
@@ -457,7 +464,9 @@
           "hintLocked": "Nadogradi za aktivne linkove ili više linkova u okviru kvote paketa."
         }
       },
-      "compareFeatures": "Uporedi sve pakete ispod na ovoj stranici.",
+      "includedTitle": "Uključeno",
+      "notIncludedTitle": "Nije uključeno",
+      "availableIn": "dostupno u paketu {packages}",
       "codes": {
         "tezga": {
           "title": "Tezga",
@@ -1254,15 +1263,21 @@
     "signInLink": "Prijavi se",
     "home": {
       "heading": "Zdravo!",
-      "body": "Pregledaj otvorene pozicije, konkuriši sa CV-jem i prati prijave iz menija iznad.",
-      "ctaApplications": "Idi na prijave",
+      "headingNamed": "Zdravo, {name}!",
+      "ctaBrowseJobs": "Pogledaj poslove",
       "ctaBuildCv": "Napravi CV",
-      "cardApplicationsLabel": "Tok prijava",
-      "cardApplicationsBody": "Prati svaku prijavu i promene statusa na jednom mestu.",
-      "cardProfileLabel": "Kvalitet profila",
-      "cardProfileBody": "Ažuriraj lične podatke i otpremljene biografije.",
-      "cardCvLabel": "Generisanje CV-ja",
-      "cardCvBody": "Koristi vodič korak po korak za brz i profesionalan PDF CV."
+      "profileTitle": "Dovrši profil da bi poslodavci znali ko konkuriše:",
+      "profileName": "Dodaj ime i prezime",
+      "profileCv": "Otpremi CV",
+      "statApplications": "Prijave",
+      "statInProgress": "U toku",
+      "statSaved": "Sačuvani oglasi",
+      "recentTitle": "Poslednje prijave",
+      "seeAll": "Sve prijave",
+      "recentEmpty": "Još nemaš prijava. Kad konkurišeš, ovde pratiš status.",
+      "savedTitle": "Sačuvani oglasi",
+      "savedEmpty": "Sačuvaj oglas ikonicom na kartici oglasa i naći ćeš ga ovde.",
+      "loadError": "Prijave trenutno ne mogu da se učitaju."
     },
     "applications": {
       "heading": "Moje prijave",
