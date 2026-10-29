@@ -44,6 +44,11 @@ in chat), and say so; the copy step then gets wired into
 
 3.8 GB RAM, no swap. On 2026-10-28 a deploy that built images on the VM
 starved it and sljakam.com was unreachable for ~18 minutes (03:16–03:34).
+On 2026-10-29 "used" memory was still ~2.8 GB with the app using ~450 MB:
+the Docker daemon itself held ~1.8 GB after loading the old 4.5 GB images
+many times. Images are now small and pruned (`ship.sh`); a `sudo systemctl
+restart docker` (≈30 s downtime, containers come back) would free that
+memory, and swap remains the real safety net.
 Deploys now build images off the VM and ship them, so this is a safety net,
 not a blocker.
 

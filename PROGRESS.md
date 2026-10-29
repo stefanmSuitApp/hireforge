@@ -13,9 +13,14 @@ Stefan: [`NEEDS_STEFAN.md`](./NEEDS_STEFAN.md).
 - **Prod:** `sljakam.com` on one Hetzner VM (Docker Compose + Caddy, see
   [`docs/deployment/hetzner.md`](./docs/deployment/hetzner.md)). No real
   users yet. **Never build images on the VM** (3.8 GB, no swap — it took
-  the site down for ~18 min on 2026-10-28); build linux/amd64 images
-  locally, `docker save | ssh … docker load`, then
-  `docker compose up -d --no-build`.
+  the site down for ~18 min on 2026-10-28). Deploy with
+  `./scripts/deploy/ship.sh` from a clean checkout of `origin/main`:
+  off-VM build, backup, migrate, health gates with automatic rollback,
+  images of the last 3 releases kept (`backups/releases.log`); rollback
+  `scripts/deploy/release.sh <sha>` on the server. Since 2026-10-29 the
+  images are ~0.7–0.9 GB on the VM (were ~4.5 GB; the disk had reached 90%,
+  now ~23%). First ship.sh deploy: `main@d2d1d76` (#23 + #24), attempt 1,
+  all gates green, seo:audit and Lighthouse clean.
 - **Checks:** `pnpm lint && pnpm format && pnpm typecheck && pnpm test &&
 pnpm build` (+ `pnpm check:i18n`); CI runs it on PRs. Husky: pre-commit
   lint-staged, pre-push lint/typecheck/test/i18n (blocking) + design and
