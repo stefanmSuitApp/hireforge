@@ -1,47 +1,44 @@
 #!/usr/bin/env node
-import { spawnSync } from 'node:child_process';
+/**
+ * Applies `drizzle/*.sql` in journal order (same `drizzle.__drizzle_migrations`
+ * bookkeeping as `drizzle-kit migrate`). Uses drizzle-orm's migrator rather
+ * than drizzle-kit so the production image needs only runtime packages, and
+ * dev, CI, e2e and production all run this same code.
+ */
 import { config } from 'dotenv';
-import { existsSync } from 'node:fs';
+import { drizzle } from 'drizzle-orm/node-postgres';
+import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import pg from 'pg';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
-config({ path: join(root, '.env') });
+config({ path: join(root, '.env'), quiet: true });
 
-if (!process.env.DATABASE_URL?.trim()) {
+const url = process.env.DATABASE_URL?.trim();
+if (!url) {
   console.error(
     '[hireforge] DATABASE_URL is not set. Copy .env.example to .env and point it at Postgres (e.g. after `pnpm docker:up`).',
   );
   process.exit(1);
 }
 
-const drizzleKitBin = join(root, 'node_modules', 'drizzle-kit', 'bin.cjs');
-if (!existsSync(drizzleKitBin)) {
+const client = new pg.Client({ connectionString: url });
+try {
+  await client.connect();
+  await migrate(drizzle(client), {
+    migrationsFolder: join(root, 'drizzle'),
+  });
+  console.log('[hireforge] migrations applied');
+} catch (e) {
   console.error(
-    `[hireforge] drizzle-kit not found at ${drizzleKitBin}. Run pnpm install from the repo root.`,
+    '[hireforge] migration failed:',
+    e instanceof Error ? e.message : e,
   );
-  process.exit(1);
-}
-
-const result = spawnSync(process.execPath, [drizzleKitBin, 'migrate'], {
-  cwd: root,
-  encoding: 'utf8',
-  env: process.env,
-});
-
-if (result.stdout) process.stdout.write(result.stdout);
-if (result.stderr) process.stderr.write(result.stderr);
-if (result.error) {
-  console.error('[hireforge] Failed to start drizzle-kit:', result.error);
-  process.exit(1);
-}
-
-if ((result.status ?? 1) !== 0) {
   console.error(
-    '\n[hireforge] drizzle-kit migrate exited with code',
-    result.status ?? 1,
-    '\nCommon causes: Postgres not running, wrong DATABASE_URL, or schema already partially applied (e.g. `db:push` then conflicting migration SQL).',
+    'Common causes: Postgres not running, wrong DATABASE_URL, or a migration that conflicts with the current schema.',
   );
+  process.exitCode = 1;
+} finally {
+  await client.end().catch(() => undefined);
 }
-
-process.exit(result.status ?? 1);
