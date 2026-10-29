@@ -32,15 +32,9 @@ function fakeFetch(statuses: number[] = []) {
   return { fn: fn as unknown as typeof fetch, calls };
 }
 
-/** Every job is featured except `plain`; `gone` was deleted. */
 const lookup = async (ids: string[]) =>
   new Map(
-    ids
-      .filter((id) => id !== 'gone')
-      .map((id) => [
-        id,
-        { segment: `${id}-slug-ab12`, featured: id !== 'plain' },
-      ]),
+    ids.filter((id) => id !== 'gone').map((id) => [id, `${id}-slug-ab12`]),
   );
 const noSleep = async () => undefined;
 
@@ -167,8 +161,6 @@ describe('createSearchIndexingNotifier', () => {
     );
     n.enqueue('job_published', { jobId: 'a' });
     n.enqueue('job_unpublished', { jobId: 'b' });
-    // Not featured: guests get sign-in there, so it must leave the index.
-    n.enqueue('job_published', { jobId: 'plain' });
     await n.flush();
 
     const token = f.calls.find((c) => c.url.includes('oauth2'));
@@ -182,7 +174,6 @@ describe('createSearchIndexingNotifier', () => {
     expect(pings.map((p) => JSON.parse(p.body))).toEqual([
       { url: `${ORIGIN}/sr/jobs/a-slug-ab12`, type: 'URL_UPDATED' },
       { url: `${ORIGIN}/sr/jobs/b-slug-ab12`, type: 'URL_DELETED' },
-      { url: `${ORIGIN}/sr/jobs/plain-slug-ab12`, type: 'URL_DELETED' },
     ]);
     expect(pings.every((p) => p.auth === 'Bearer tok')).toBe(true);
     // One token for the whole batch.

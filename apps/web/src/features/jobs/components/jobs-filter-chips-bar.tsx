@@ -1,11 +1,18 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { Lock } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
 import * as React from 'react';
 import { toast } from 'sonner';
 
-import { Button } from '@/components/ui/button';
-import { usePathname, useRouter } from '@/i18n/navigation';
+import { Button, buttonVariants } from '@/components/ui/button';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetTitle,
+} from '@/components/ui/sheet';
+import { Link, usePathname, useRouter } from '@/i18n/navigation';
 import { useSearchParams } from 'next/navigation';
 
 import { jobEnumLabel } from '../lib/job-enum-label';
@@ -24,17 +31,41 @@ const EMP_TYPES = [
 ] as const;
 const POSTED = ['1d', '7d', '30d'] as const;
 
-export function JobsFilterChipsBar() {
+type Props = {
+  /** Not signed in: these filters ask for an account (option B). */
+  guest?: boolean;
+};
+
+export function JobsFilterChipsBar({ guest = false }: Props) {
   const t = useTranslations('Jobs');
   const tEnum = useTranslations('Enums');
+  const tNav = useTranslations('Nav');
+  const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  /** The filter a guest picked; signing in comes back with it applied. */
+  const [pendingFilter, setPendingFilter] = React.useState<Record<
+    string,
+    string | undefined
+  > | null>(null);
 
   function push(patch: Record<string, string | undefined>) {
     const n = mergeJobsSearchParams(searchParams, patch);
     router.replace(`${pathname}?${n.toString()}`, { scroll: false });
   }
+
+  function choose(patch: Record<string, string | undefined>) {
+    if (guest) setPendingFilter(patch);
+    else push(patch);
+  }
+
+  const pendingReturnTo = pendingFilter
+    ? encodeURIComponent(
+        `/${locale}${pathname}?${mergeJobsSearchParams(searchParams, pendingFilter).toString()}`,
+      )
+    : '';
+  const lockIcon = guest ? <Lock className="size-3" aria-hidden /> : null;
 
   const wm = searchParams.get('workModel') ?? '';
   const et = searchParams.get('employmentType') ?? '';
@@ -84,6 +115,33 @@ export function JobsFilterChipsBar() {
 
   return (
     <div className="mb-4 space-y-3 border-b border-border pb-4">
+      <Sheet
+        open={pendingFilter !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingFilter(null);
+        }}
+      >
+        <SheetContent side="bottom" closeLabel={tNav('closeMenu')}>
+          <SheetTitle className="pr-12">{t('guestFiltersTitle')}</SheetTitle>
+          <SheetDescription className="m-0 text-sm text-muted-foreground">
+            {t('guestBrowseBody')}
+          </SheetDescription>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Link
+              href={`/sign-in?returnTo=${pendingReturnTo}`}
+              className={buttonVariants({ size: 'lg' })}
+            >
+              {t('guestSignIn')}
+            </Link>
+            <Link
+              href={`/candidate/register?returnTo=${pendingReturnTo}`}
+              className={buttonVariants({ size: 'lg', variant: 'outline' })}
+            >
+              {t('guestRegister')}
+            </Link>
+          </div>
+        </SheetContent>
+      </Sheet>
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           {t('filtersChipBarLabel')}
@@ -123,8 +181,9 @@ export function JobsFilterChipsBar() {
               variant={wm === v ? 'default' : 'outline'}
               aria-pressed={wm === v}
               className="min-h-11 rounded-full px-3 text-sm md:h-8 md:min-h-0 md:px-2.5 md:text-xs"
-              onClick={() => push({ workModel: wm === v ? undefined : v })}
+              onClick={() => choose({ workModel: wm === v ? undefined : v })}
             >
+              {lockIcon}
               {jobEnumLabel(tEnum, 'workModel', v)}
             </Button>
           ))}
@@ -142,8 +201,11 @@ export function JobsFilterChipsBar() {
               variant={et === v ? 'default' : 'outline'}
               aria-pressed={et === v}
               className="min-h-11 rounded-full px-3 text-sm md:h-8 md:min-h-0 md:px-2.5 md:text-xs"
-              onClick={() => push({ employmentType: et === v ? undefined : v })}
+              onClick={() =>
+                choose({ employmentType: et === v ? undefined : v })
+              }
             >
+              {lockIcon}
               {jobEnumLabel(tEnum, 'employmentType', v)}
             </Button>
           ))}
@@ -161,8 +223,9 @@ export function JobsFilterChipsBar() {
               variant={pw === v ? 'default' : 'outline'}
               aria-pressed={pw === v}
               className="min-h-11 rounded-full px-3 text-sm md:h-8 md:min-h-0 md:px-2.5 md:text-xs"
-              onClick={() => push({ postedWithin: pw === v ? undefined : v })}
+              onClick={() => choose({ postedWithin: pw === v ? undefined : v })}
             >
+              {lockIcon}
               {v === '1d'
                 ? t('posted1d')
                 : v === '7d'
@@ -178,8 +241,9 @@ export function JobsFilterChipsBar() {
           variant={ez ? 'default' : 'outline'}
           aria-pressed={ez}
           className="min-h-11 rounded-full px-3 text-sm md:h-8 md:min-h-0 md:px-2.5 md:text-xs"
-          onClick={() => push({ easyApply: ez ? undefined : '1' })}
+          onClick={() => choose({ easyApply: ez ? undefined : '1' })}
         >
+          {lockIcon}
           {t('chipEasyApply')}
         </Button>
       </div>

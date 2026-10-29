@@ -14,8 +14,8 @@ export const apiErrorCodes = [
   'COMPANY_JOIN_REQUEST_FORBIDDEN',
   'COMPANY_JOIN_REQUEST_NOT_PENDING',
   'JOB_NOT_FOUND',
-  /** A non-featured job opened without signing in. */
-  'JOB_SIGN_IN_REQUIRED',
+  /** A guest asked for page 2+ style browsing or an advanced filter. */
+  'JOBS_SIGN_IN_REQUIRED',
   'JOB_FORBIDDEN_COMPANY',
   'JOB_NOT_DRAFT',
   'JOB_CREATE_FAILED',

@@ -23,7 +23,7 @@ import { z } from 'zod';
 import { PublicJobsService, type PublicViewer } from './public-jobs.service';
 import { forwardedClientIp } from '../auth/auth-rate-limit';
 
-/** Any valid access token (candidate, employer or staff) unlocks every job. */
+/** Any valid access token (candidate, employer or staff) counts as signed in. */
 function viewerOf(req: Request): PublicViewer {
   return { signedIn: req.hireforgeUser != null };
 }
@@ -46,14 +46,14 @@ export class PublicJobsController {
 
   /** Compact list rows for home strips (`refs` = comma-separated UUID or slug segments, max 8). */
   @Get('previews')
-  previews(@Query('refs') refs: string | undefined, @Req() req: Request) {
+  previews(@Query('refs') refs: string | undefined) {
     const parts =
       refs
         ?.split(',')
         .map((s) => s.trim())
         .filter(Boolean)
         .slice(0, 8) ?? [];
-    return this.publicJobs.batchPreviews(parts, viewerOf(req));
+    return this.publicJobs.batchPreviews(parts);
   }
 
   @Get()
@@ -91,17 +91,14 @@ export class PublicJobsController {
   }
 
   @Get('by-slug/:slug')
-  detailBySlug(
-    @Param() raw: Record<string, string | undefined>,
-    @Req() req: Request,
-  ) {
+  detailBySlug(@Param() raw: Record<string, string | undefined>) {
     const parsed = publicJobBySlugParamSchema.safeParse({
       slug: raw.slug,
     });
     if (!parsed.success) {
       throw new BadRequestException(z.flattenError(parsed.error));
     }
-    return this.publicJobs.getBySlug(parsed.data.slug, viewerOf(req));
+    return this.publicJobs.getBySlug(parsed.data.slug);
   }
 
   /** External apply click telemetry (rate-limited + idempotent per session key when Redis is configured). */
@@ -132,16 +129,13 @@ export class PublicJobsController {
   }
 
   @Get(':id')
-  detail(
-    @Param() raw: Record<string, string | undefined>,
-    @Req() req: Request,
-  ) {
+  detail(@Param() raw: Record<string, string | undefined>) {
     const parsed = publicJobDetailParamSchema.safeParse({
       id: raw.id,
     });
     if (!parsed.success) {
       throw new BadRequestException(z.flattenError(parsed.error));
     }
-    return this.publicJobs.getById(parsed.data.id, viewerOf(req));
+    return this.publicJobs.getById(parsed.data.id);
   }
 }

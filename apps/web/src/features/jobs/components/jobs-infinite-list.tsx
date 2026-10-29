@@ -244,6 +244,7 @@ export function JobsInfiniteList({
   }
   const prevPage = initialPage.page > 1 ? initialPage.page - 1 : null;
   const nextPage =
+    !initialPage.guestLimited &&
     initialPage.page * initialPage.pageSize < initialPage.total
       ? initialPage.page + 1
       : null;
@@ -290,7 +291,7 @@ export function JobsInfiniteList({
           <p className="m-0 text-xs text-muted-foreground">
             {t('scrollForMore')}
           </p>
-        ) : loaded > 0 ? (
+        ) : loaded > 0 && !initialPage.guestLimited ? (
           <p className="m-0 text-xs text-muted-foreground">{t('endOfList')}</p>
         ) : null}
         {prevPage || nextPage ? (

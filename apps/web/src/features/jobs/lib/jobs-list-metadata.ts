@@ -83,6 +83,8 @@ export async function buildJobsListMetadata(
     canonicalPath,
     title,
     description: t('listDescription'),
-    noindex: noindex || empty,
+    // Guests (and crawlers) see page 1 only, so page 2+ would repeat it; the
+    // jobs themselves are all in the sitemap.
+    noindex: noindex || empty || page > 1,
   });
 }

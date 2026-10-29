@@ -2,12 +2,12 @@
 
 import type { PublicJobListItem } from 'contracts';
 
-import { ArrowUpRight, Lock, MapPin, Tag } from 'lucide-react';
+import { ArrowUpRight, MapPin, Tag } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/cn';
-import { publicJobCardHref } from '@/lib/job-public-segment';
+import { publicJobUrlSegment } from '@/lib/job-public-segment';
 
 import {
   localizedCategoryLine,
@@ -30,7 +30,6 @@ export function PublicJobTeaserCard({
   featuredRibbonLabel,
   isAuthenticated = true,
 }: Props) {
-  const t = useTranslations('Jobs');
   const tEnum = useTranslations('Enums');
   const city = localizedCityLine(locale, job.city);
   const cat = localizedCategoryLine(locale, job.category);
@@ -39,10 +38,11 @@ export function PublicJobTeaserCard({
     featuredRibbonLabel?.trim() && (spotlight || job.featured),
   );
 
-  const href = publicJobCardHref(
-    { ...job, locked: job.locked || !isAuthenticated },
-    locale,
-  );
+  // `isAuthenticated` is false only under the full wall (`PUBLIC_JOBS=false`).
+  const jobPath = `/jobs/${publicJobUrlSegment(job)}`;
+  const href = isAuthenticated
+    ? jobPath
+    : `/sign-in?returnTo=${encodeURIComponent(`/${locale}${jobPath}`)}`;
 
   return (
     <Link
@@ -67,16 +67,9 @@ export function PublicJobTeaserCard({
 
       <div className="flex flex-1 flex-col p-5">
         <div className="mb-2 flex items-center justify-between gap-2">
-          {job.company ? (
-            <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              {job.company.name}
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground">
-              <Lock className="size-3" aria-hidden />
-              {t('lockedCompany')}
-            </span>
-          )}
+          <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            {job.company.name}
+          </span>
           {isFeatured && featuredRibbonLabel && (
             <span className="shrink-0 rounded-full bg-featured px-2.5 py-0.5 text-xs font-semibold text-featured-foreground">
               {featuredRibbonLabel}

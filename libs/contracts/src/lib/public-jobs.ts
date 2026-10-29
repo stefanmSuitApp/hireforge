@@ -99,11 +99,6 @@ export type PublicJobListItem = {
   /** Whether this row should be pinned in search (ŠEF/GAZDA perk). */
   featured: boolean;
   /**
-   * Shown to a guest as a teaser only: featured jobs are public, the rest
-   * need sign-in. A locked row has no excerpt and no company.
-   */
-  locked: boolean;
-  /**
    * Plain-text excerpt (≤ 200 chars) used for Glassdoor-style cards. The full
    * description doc is NOT shipped with list responses (perf budget per SSOT
    * §11.1).
@@ -114,8 +109,7 @@ export type PublicJobListItem = {
   workModel: string;
   employmentType: string;
   seniority: string;
-  /** Null when `locked`. */
-  company: { slug: string; name: string } | null;
+  company: { slug: string; name: string };
   city: {
     slug: string;
     nameSr: string;
@@ -134,8 +128,11 @@ export type PublicJobListResponse = {
   page: number;
   pageSize: number;
   total: number;
-  /** Matching jobs a guest sees only as teasers (0 when signed in). */
-  lockedTotal: number;
+  /**
+   * A guest sees page 1 only (20 jobs): true when more match than they see.
+   * Always false when signed in.
+   */
+  guestLimited: boolean;
 };
 
 export type PublicJobDetailResponse = {
@@ -211,10 +208,10 @@ export type PublicCompanyDetailResponse = {
     slug: string;
     name: string;
   };
-  /** For a guest: only the featured jobs (the rest need sign-in). */
+  /** For a guest: the first 20 (signing in shows all). */
   jobs: PublicCompanyJobItem[];
-  /** Live jobs a guest can't see here (0 when signed in). */
-  lockedJobCount: number;
+  /** All live jobs of the company. */
+  totalJobs: number;
 };
 
 /** Companies with at least one published job (public directory). */
@@ -240,6 +237,8 @@ export type PublicEmployerDirectoryResponse = {
 /** `GET /api/public/jobs/:id/similar` — short list for job detail pane. */
 export type PublicSimilarJobsResponse = {
   items: PublicJobListItem[];
+  /** A guest sees 3: true when there are more for signed-in users. */
+  moreAvailable: boolean;
 };
 
 /** `GET /api/public/jobs/previews` — compact cards for home strips (≤ 8 refs). */
@@ -249,13 +248,12 @@ export type PublicJobPreviewsResponse = {
 
 /** `GET /api/public/jobs/sitemap` — what is live, for sitemaps and landing pages. */
 export type PublicSitemapResponse = {
-  /** Live featured jobs: the only job pages guests (and crawlers) can open. */
+  /** Every live job (each one is a public page). */
   jobs: Array<{ id: string; slug: string | null; lastmod: string }>;
   /** Companies with at least one live job. */
   companies: Array<{
     slug: string;
     liveJobs: number;
-    featuredJobs: number;
     lastmod: string | null;
   }>;
   /** Live job counts per (city, category) pair; null = job has none. */
@@ -263,7 +261,6 @@ export type PublicSitemapResponse = {
     city: string | null;
     category: string | null;
     liveJobs: number;
-    featuredJobs: number;
     lastmod: string | null;
   }>;
 };

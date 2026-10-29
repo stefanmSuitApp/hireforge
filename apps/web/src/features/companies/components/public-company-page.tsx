@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 
 import { JsonLd } from '@/components/json-ld';
-import { LockedJobsCta } from '@/features/jobs/components/locked-jobs-cta';
+import { GuestBrowseCta } from '@/features/jobs/components/guest-browse-cta';
 import { jobEnumLabel } from '@/features/jobs/lib/job-enum-label';
 import { Link } from '@/i18n/navigation';
 import { breadcrumbJsonLd, companyJsonLd } from '@/lib/seo/json-ld';
@@ -74,7 +74,7 @@ export async function PublicCompanyPage({
     );
   }
 
-  const { company, jobs, lockedJobCount } = result.data;
+  const { company, jobs, totalJobs } = result.data;
   const branding = await fetchCmsEmployerBranding(company.slug, locale);
 
   const origin = absoluteSiteOrigin();
@@ -115,7 +115,7 @@ export async function PublicCompanyPage({
           </p>
         ) : null}
         <p className="mt-2 text-sm text-muted-foreground">
-          {t('openJobsCount', { count: jobs.length + lockedJobCount })}
+          {t('openJobsCount', { count: totalJobs })}
         </p>
       </header>
 
@@ -165,7 +165,7 @@ export async function PublicCompanyPage({
         </section>
       ) : null}
 
-      {jobs.length === 0 && lockedJobCount > 0 ? null : jobs.length === 0 ? (
+      {jobs.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border bg-muted/50 px-6 py-10 text-center">
           <h2 className="m-0 mb-2 text-lg font-semibold text-foreground">
             {t('emptyTitle')}
@@ -248,12 +248,15 @@ export async function PublicCompanyPage({
           </ul>
         </section>
       )}
-      <LockedJobsCta
-        count={lockedJobCount}
-        locale={locale}
-        returnToPath={`/companies/${company.slug}`}
-        className="mt-6"
-      />
+      {/* Guests see the first 20 jobs of a company. */}
+      {jobs.length < totalJobs ? (
+        <GuestBrowseCta
+          total={totalJobs}
+          locale={locale}
+          returnToPath={`/companies/${company.slug}`}
+          className="mt-6"
+        />
+      ) : null}
     </main>
   );
 }
