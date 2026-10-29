@@ -214,6 +214,14 @@
 /* Native controls and scrollbars follow the theme. */
 :root {
   color-scheme: light;
+  /* Reserve the scrollbar's space on short pages too, so centred content
+     (the header nav) doesn't shift between short and long pages. */
+  scrollbar-gutter: stable;
+}
+/* Radix menus and dialogs lock scrolling and add the scrollbar's width as a
+   margin; the gutter above already keeps that space, so don't add it twice. */
+html body[data-scroll-locked] {
+  margin-right: 0 !important;
 }
 .dark {
   color-scheme: dark;
