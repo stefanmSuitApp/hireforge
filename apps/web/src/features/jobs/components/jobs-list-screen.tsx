@@ -182,26 +182,8 @@ export function JobsListScreen({
 
       {apiBasePresent ? (
         <>
-          <Button
-            type="button"
-            variant="outline"
-            className="mb-4 min-h-11 w-full justify-center md:hidden"
-            aria-expanded={filtersOpen}
-            aria-controls="jobs-filters"
-            onClick={() => setFiltersOpen((v) => !v)}
-          >
-            <SlidersHorizontal aria-hidden />
-            {t('filtersToggle', { count: activeFilters })}
-          </Button>
-          {/* No Suspense: these pages render per request, so the bar is in
-              the first HTML; a streamed swap pushed the form down (CLS). */}
-          <div
-            id="jobs-filters"
-            className={filtersOpen ? 'block' : 'hidden md:block'}
-          >
-            <JobsFilterChipsBar guest={!signedIn} />
-          </div>
-          <div className={filtersOpen ? 'mb-8' : 'mb-8 hidden md:block'}>
+          {/* Search first and on phones too; only the extra filters fold. */}
+          <div className="mb-4">
             <JobsFilterForm
               action={formAction}
               pageSize={pageSize}
@@ -218,6 +200,33 @@ export function JobsListScreen({
               }}
             />
           </div>
+          {/* No Suspense: these pages render per request, so the bar is in
+              the first HTML; a streamed swap pushed the list down (CLS). */}
+          {signedIn ? (
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                className="mb-4 min-h-11 w-full justify-center md:hidden"
+                aria-expanded={filtersOpen}
+                aria-controls="jobs-filters"
+                onClick={() => setFiltersOpen((v) => !v)}
+              >
+                <SlidersHorizontal aria-hidden />
+                {t('filtersToggle', { count: activeFilters })}
+              </Button>
+              <div
+                id="jobs-filters"
+                className={filtersOpen ? 'mb-6 block' : 'mb-6 hidden md:block'}
+              >
+                <JobsFilterChipsBar />
+              </div>
+            </>
+          ) : (
+            <div className="mb-6">
+              <JobsFilterChipsBar guest />
+            </div>
+          )}
         </>
       ) : null}
 

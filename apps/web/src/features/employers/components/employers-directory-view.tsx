@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import type { PublicEmployerDirectoryItem } from 'contracts';
 
 import { PublicSurfaceMain } from '@/components/public-surface';
+import { buttonVariants } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 
 type Props =
@@ -101,6 +102,38 @@ export async function EmployersDirectoryView(props: Props) {
             </span>
           </div>
         </header>
+      </section>
+
+      {/* For employers: no prices here (Stefan, 2026-10-29), just why and
+          where to start. */}
+      <section
+        aria-labelledby="employers-pitch"
+        className="mt-6 flex flex-col gap-4 rounded-2xl border border-primary/25 bg-primary/5 px-6 py-6 md:flex-row md:items-center md:justify-between md:px-8"
+      >
+        <div className="max-w-2xl">
+          <h2 id="employers-pitch" className="m-0 text-h3 text-foreground">
+            {t('pitchTitle')}
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground md:text-base">
+            {t('pitchBody')}
+          </p>
+        </div>
+        <div className="flex shrink-0 flex-col gap-2 sm:flex-row md:flex-col lg:flex-row">
+          <Link
+            href="/employer/register"
+            locale={locale}
+            className={buttonVariants({ size: 'lg' })}
+          >
+            {t('pitchRegister')}
+          </Link>
+          <Link
+            href="/employer/login"
+            locale={locale}
+            className={buttonVariants({ size: 'lg', variant: 'outline' })}
+          >
+            {t('pitchSignIn')}
+          </Link>
+        </div>
       </section>
 
       {items.length === 0 ? (

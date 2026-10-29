@@ -170,17 +170,26 @@ function buildSignupBody(
   };
 }
 
+/** True while nothing has been typed: such a form is neither saved nor restored. */
+function isBlankDraft(d: DraftFields): boolean {
+  const blank = emptyDraft();
+  return (Object.keys(blank) as Array<keyof DraftFields>).every(
+    (k) => k === 'step' || d[k] === blank[k],
+  );
+}
+
 function readDraft(): DraftFields | null {
   if (typeof window === 'undefined') return null;
   try {
     const raw = localStorage.getItem(DRAFT_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Partial<DraftFields>;
-    return {
+    const draft = {
       ...emptyDraft(),
       ...parsed,
       step: Math.min(Math.max(parsed.step ?? 0, 0), 2),
     };
+    return isBlankDraft(draft) ? null : draft;
   } catch {
     return null;
   }
@@ -199,18 +208,25 @@ export function EmployerRegisterForm() {
   const [clientError, setClientError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
+  // Once per mount (not on every new `tReg`): a re-run used to read back the
+  // empty draft the save effect had just written and announce it as restored.
+  const restoredMessage = useRef(tReg('draftRestored'));
   useEffect(() => {
     const saved = readDraft();
     if (saved) {
       setDraft(saved);
-      setClientError(tReg('draftRestored'));
+      setClientError(restoredMessage.current);
     }
     draftReady.current = true;
-  }, [tReg]);
+  }, []);
 
   useEffect(() => {
     if (!draftReady.current) return;
-    localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    if (isBlankDraft(draft)) {
+      localStorage.removeItem(DRAFT_KEY);
+    } else {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    }
   }, [draft]);
 
   const isDomestic = draft.countryCode === 'RS';
