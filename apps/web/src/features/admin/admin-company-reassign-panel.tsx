@@ -2,7 +2,7 @@
 
 import type { AdminCompanyAssignmentHistoryResponse } from 'contracts';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useState, type SubmitEvent } from 'react';
 
@@ -31,6 +31,7 @@ export function AdminCompanyReassignPanel({
   initialHistory,
 }: Props) {
   const t = useTranslations('Admin.companies');
+  const format = useFormatter();
   const tErrors = useTranslations('Errors');
   const router = useRouter();
   const qc = useQueryClient();
@@ -112,7 +113,10 @@ export function AdminCompanyReassignPanel({
                 {items.map((row) => (
                   <tr key={row.id}>
                     <td className="px-3 py-2 whitespace-nowrap text-muted-foreground">
-                      {new Date(row.createdAt).toLocaleString()}
+                      {format.dateTime(new Date(row.createdAt), {
+                        dateStyle: 'medium',
+                        timeStyle: 'short',
+                      })}
                     </td>
                     <td className="px-3 py-2 font-mono text-xs">
                       {row.fromUserEmail ?? row.fromUserId ?? '—'}

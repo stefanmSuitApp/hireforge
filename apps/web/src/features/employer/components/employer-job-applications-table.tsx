@@ -1,7 +1,7 @@
 'use client';
 
 import type { EmployerJobApplicationItem } from 'contracts';
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import * as React from 'react';
 
 import {
@@ -14,6 +14,7 @@ type Props = { items: EmployerJobApplicationItem[] };
 
 export function EmployerJobApplicationsTable({ items }: Props) {
   const t = useTranslations('Employer.applications');
+  const format = useFormatter();
   const tStatus = useTranslations('Employer.applicationStatus');
 
   const columns = React.useMemo<DataTableColumn<EmployerJobApplicationItem>[]>(
@@ -59,7 +60,10 @@ export function EmployerJobApplicationsTable({ items }: Props) {
         cell: (row) => (
           <span className="text-muted-foreground">
             <time dateTime={row.createdAt}>
-              {new Date(row.createdAt).toLocaleString()}
+              {format.dateTime(new Date(row.createdAt), {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+              })}
             </time>
           </span>
         ),

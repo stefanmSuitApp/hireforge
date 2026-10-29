@@ -22,13 +22,24 @@ function slugToLabel(slug: string): string {
 }
 
 /**
- * Build category spotlight tiles directly from CMS data.
- * Does not require taxonomy from the database.
+ * Editors can pick slugs the database doesn't have, and their landing pages
+ * are 404s. Drop those; an empty list (taxonomy unavailable) keeps all rows.
  */
+function onlyKnown(
+  rows: CmsDiscoverySpotlightRow[],
+  known: ReadonlyArray<{ slug: string }>,
+): CmsDiscoverySpotlightRow[] {
+  if (known.length === 0) return rows;
+  const slugs = new Set(known.map((k) => k.slug));
+  return rows.filter((row) => slugs.has(row.slug));
+}
+
+/** Category spotlight tiles from CMS data, limited to known categories. */
 export function buildCmsCategorySpotlightTiles(
   rows: CmsDiscoverySpotlightRow[],
+  knownCategories: ReadonlyArray<{ slug: string }>,
 ): HomeJobsSpotlightTile[] {
-  return rows.map((row) => {
+  return onlyKnown(rows, knownCategories).map((row) => {
     return {
       slug: row.slug,
       label: row.labelOverride?.trim() || slugToLabel(row.slug),
@@ -38,14 +49,12 @@ export function buildCmsCategorySpotlightTiles(
   });
 }
 
-/**
- * Build city spotlight tiles directly from CMS data.
- * Does not require taxonomy from the database.
- */
+/** City spotlight tiles from CMS data, limited to known cities. */
 export function buildCmsCitySpotlightTiles(
   rows: CmsDiscoverySpotlightRow[],
+  knownCities: ReadonlyArray<{ slug: string }>,
 ): HomeJobsSpotlightTile[] {
-  return rows.map((row) => {
+  return onlyKnown(rows, knownCities).map((row) => {
     return {
       slug: row.slug,
       label: row.labelOverride?.trim() || slugToLabel(row.slug),

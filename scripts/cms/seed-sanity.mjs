@@ -57,8 +57,8 @@ async function main() {
   tx.createOrReplace({
     _id: 'siteSettings',
     _type: 'siteSettings',
-    siteName: { _type: 'localeString', sr: 'Hireforge', en: 'Hireforge' },
-    defaultSeoTitle: 'Hireforge',
+    siteName: { _type: 'localeString', sr: 'Šljakam', en: 'Šljakam' },
+    defaultSeoTitle: 'Šljakam',
     defaultSeoDescription: {
       _type: 'localeText',
       sr: 'Moderno zapošljavanje u Srbiji: transparentni oglasi i provereni poslodavci.',
@@ -130,24 +130,24 @@ async function main() {
     _type: 'editorialPage',
     title: {
       _type: 'localeString',
-      sr: 'O Hireforge-u',
-      en: 'About Hireforge',
+      sr: 'O platformi Šljakam',
+      en: 'About Šljakam',
     },
     slug: { _type: 'slug', current: 'about-hireforge' },
     excerpt: {
       _type: 'localeText',
-      sr: 'Zašto Hireforge postoji i na šta ciljamo.',
-      en: 'Why Hireforge exists and what we optimize for.',
+      sr: 'Zašto Šljakam postoji i na šta ciljamo.',
+      en: 'Why Šljakam exists and what we optimize for.',
     },
     seoTitle: {
       _type: 'localeString',
-      sr: 'O Hireforge-u',
-      en: 'About Hireforge',
+      sr: 'O platformi Šljakam',
+      en: 'About Šljakam',
     },
     seoDescription: {
       _type: 'localeText',
-      sr: 'Kako Hireforge pristupa pouzdanom i transparentnom zapošljavanju.',
-      en: 'Learn how Hireforge approaches trustworthy and transparent hiring.',
+      sr: 'Kako Šljakam pristupa pouzdanom i transparentnom zapošljavanju.',
+      en: 'Learn how Šljakam approaches trustworthy and transparent hiring.',
     },
     body: [
       {
@@ -158,7 +158,8 @@ async function main() {
           {
             _type: 'span',
             marks: [],
-            text: 'Hireforge focuses on clear job listings, faster hiring workflows, and trusted employer profiles.',
+            // One body for both locales (the schema's body isn't localized).
+            text: 'Šljakam se fokusira na jasne oglase za posao, brže zapošljavanje i proverene profile poslodavaca.',
           },
         ],
       },

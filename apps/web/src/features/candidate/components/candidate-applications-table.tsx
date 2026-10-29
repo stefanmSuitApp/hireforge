@@ -3,7 +3,7 @@
 import type { CandidateApplicationListItem } from 'contracts';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { MoreHorizontal, X } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import * as React from 'react';
 
 import { useConfirm } from '@/components/ui/confirm-dialog';
@@ -41,6 +41,7 @@ type ApplicationStatusUiKey =
 
 export function CandidateApplicationsTable({ items }: Props) {
   const t = useTranslations('Candidate.applications');
+  const format = useFormatter();
   const tStatus = useTranslations('Employer.applicationStatus');
   const tErrors = useTranslations('Errors');
   const queryClient = useQueryClient();
@@ -107,7 +108,10 @@ export function CandidateApplicationsTable({ items }: Props) {
         cell: (row) => (
           <span className="text-muted-foreground">
             <time dateTime={row.createdAt}>
-              {new Date(row.createdAt).toLocaleString()}
+              {format.dateTime(new Date(row.createdAt), {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+              })}
             </time>
           </span>
         ),

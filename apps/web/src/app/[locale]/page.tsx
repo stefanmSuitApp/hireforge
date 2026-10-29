@@ -100,11 +100,17 @@ export default async function HomePage({
   }
 
   const categorySpotlightTiles = cmsHomeDiscovery?.categorySpotlights.length
-    ? buildCmsCategorySpotlightTiles(cmsHomeDiscovery.categorySpotlights)
+    ? buildCmsCategorySpotlightTiles(
+        cmsHomeDiscovery.categorySpotlights,
+        taxonomy.categories,
+      )
     : [];
 
   const citySpotlightTiles = cmsHomeDiscovery?.citySpotlights.length
-    ? buildCmsCitySpotlightTiles(cmsHomeDiscovery.citySpotlights)
+    ? buildCmsCitySpotlightTiles(
+        cmsHomeDiscovery.citySpotlights,
+        taxonomy.cities,
+      )
     : [];
 
   const featuredJobs = allItems.filter((j) => j.featured).slice(0, 6);

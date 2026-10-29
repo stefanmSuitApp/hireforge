@@ -1,5 +1,5 @@
 import type { EmployerJobDetailResponse } from 'contracts';
-import { getLocale, getTranslations } from 'next-intl/server';
+import { getFormatter, getLocale, getTranslations } from 'next-intl/server';
 
 import { Button } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
@@ -11,6 +11,7 @@ export async function EmployerJobReadOnly({ job }: Props) {
   const locale = await getLocale();
   const t = await getTranslations('Employer.jobList');
   const tStatus = await getTranslations('Employer.jobStatus');
+  const format = await getFormatter();
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
@@ -30,7 +31,10 @@ export async function EmployerJobReadOnly({ job }: Props) {
           <p>
             <span className="text-muted-foreground">{t('submittedAt')} </span>
             <time dateTime={job.submittedAt}>
-              {new Date(job.submittedAt).toLocaleString()}
+              {format.dateTime(new Date(job.submittedAt), {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+              })}
             </time>
           </p>
         ) : null}
@@ -38,7 +42,10 @@ export async function EmployerJobReadOnly({ job }: Props) {
           <p>
             <span className="text-muted-foreground">{t('publishedAt')} </span>
             <time dateTime={job.publishedAt}>
-              {new Date(job.publishedAt).toLocaleString()}
+              {format.dateTime(new Date(job.publishedAt), {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+              })}
             </time>
           </p>
         ) : null}
