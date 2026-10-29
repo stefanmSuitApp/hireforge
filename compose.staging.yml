@@ -1,0 +1,137 @@
+name: hireforge-staging
+
+# Staging (staging.sljakam.com) on the production VM, like autofind: the same
+# images as production (tag :staging, set by scripts/deploy/release.sh), its own
+# Postgres and Redis, and memory caps so it can never starve production. No
+# ports: production's Caddy reaches `staging-web` over the `edge` network.
+# Env: deploy/.env.staging (scripts/deploy/staging-init.sh). No real email, no
+# CMS writes, no object storage, billing in test mode.
+
+x-logging: &logging
+  logging:
+    driver: json-file
+    options:
+      max-size: 10m
+      max-file: '3'
+
+x-app-env: &app-env
+  env_file:
+    - ./deploy/.env.staging
+  restart: unless-stopped
+  <<: *logging
+
+services:
+  web:
+    <<: *app-env
+    image: hireforge-production-web:staging
+    mem_limit: 320m
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      default:
+      edge:
+        aliases:
+          - staging-web
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  api:
+    <<: *app-env
+    image: hireforge-production-api:staging
+    mem_limit: 320m
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - api_var:/app/var
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:4000/api/health/live').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  worker:
+    <<: *app-env
+    image: hireforge-production-worker:staging
+    mem_limit: 256m
+    stop_grace_period: 30s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  postgres:
+    <<: *logging
+    image: postgres:16-alpine
+    restart: unless-stopped
+    mem_limit: 256m
+    env_file:
+      - ./deploy/.env.staging
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    <<: *logging
+    image: redis:7-alpine
+    restart: unless-stopped
+    mem_limit: 64m
+    env_file:
+      - ./deploy/.env.staging
+    command:
+      - sh
+      - -c
+      - exec redis-server --appendonly yes --requirepass "$$REDIS_PASSWORD"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD-SHELL', 'redis-cli -a "$$REDIS_PASSWORD" ping | grep -q PONG']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    <<: *app-env
+    image: ${HIREFORGE_MIGRATE_IMAGE:-hireforge-production-api:staging}
+    profiles:
+      - tools
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ['node', 'scripts/db/migrate.mjs']
+    restart: 'no'
+
+networks:
+  edge:
+    external: true
+    name: hireforge-edge
+
+volumes:
+  api_var:
+  postgres_data:
+  redis_data:

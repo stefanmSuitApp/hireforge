@@ -21,3 +21,7 @@ sljakam.com {
 
 	reverse_proxy web:3000
 }
+
+# Server-only sites, e.g. staging.sljakam.com behind basic auth
+# (scripts/deploy/staging-init.sh). No file = nothing imported.
+import /etc/caddy/sites/*.caddy
