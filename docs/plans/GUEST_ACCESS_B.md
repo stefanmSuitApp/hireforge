@@ -126,7 +126,7 @@ Estimated effort: B1 ½ day, B2 1 day, B3 1 day, B4 ½ day.
 - **Fewer sign-ups than the teaser model.** Guests can now read every job. B3 (inline sign-up on apply) is where most accounts come from, so don't skip it.
 - **Crawling.** Page 2+ is closed to crawlers too, so the sitemap must be complete and fresh. It already is, from the API, uncached for crawlers.
 - **Duplicate-looking lists:** a guest's page 2 shows page 1's jobs. It's `noindex`, so search engines ignore it.
-- **The packages page promise:** "visible to everyone" from #20 isn't true any more. Reword it (TODO(Stefan)).
+- **The packages page promise:** reworded 2026-10-29 (Stefan chose it): "Oglas stoji na vrhu rezultata pretrage, sa zlatnom oznakom. Vide ga svi posetioci, i oni bez naloga." A CMS message for `featured_listing` still overrides it.
 
 ## 9. Log
 
@@ -142,3 +142,7 @@ Implementing agents add dated entries here: what shipped, PR, what was skipped a
     - Page 2+ of lists and landing pages is `noindex`.
   - **Tests:** e2e axe now waits for `<title>` (the streamed-metadata flake).
   - **Skipped:** B3 (inline sign-up on "Konkuriši", bottom bar) is next.
+- **2026-10-29, B3** (branch `feat/guest-access-b3`).
+  - "Konkuriši" stays a link to the apply page (middle-click and no-JS still work); a plain click by a guest opens the sign-up sheet instead. External-apply jobs are unchanged.
+  - **Copy change from §5:** the bar says "Napravi nalog da konkurišeš i čuvaš oglase." Job alerts aren't live yet and "30 sekundi" is unmeasured, so neither is promised.
+  - The bar counts distinct job pages in the existing recently-viewed list (any time, not per session) and stays off job pages on phones, where the sticky apply bar is.

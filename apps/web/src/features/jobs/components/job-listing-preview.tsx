@@ -21,6 +21,7 @@ import {
 } from '../lib/bilingual-label';
 import { jobEnumLabel } from '../lib/job-enum-label';
 
+import { GuestApplySheet } from './guest-apply-sheet';
 import { SimilarJobsSection } from './similar-jobs-section';
 
 /** Map moderator API payload to the public-detail shape used by the shared preview. */
@@ -138,6 +139,8 @@ export type JobListingPreviewProps = {
   titleAs?: 'h1' | 'h2';
   /** Full job page on a phone: keep the apply button in a bar at the bottom. */
   stickyApply?: boolean;
+  /** No session: "Konkuriši" opens the sign-up sheet over the job. */
+  guest?: boolean;
   className?: string;
 };
 
@@ -146,6 +149,7 @@ export function JobListingPreview({
   listingState,
   titleAs: Title = 'h1',
   stickyApply = false,
+  guest = false,
   className,
 }: JobListingPreviewProps) {
   const t = useTranslations('JobDetail');
@@ -167,6 +171,17 @@ export function JobListingPreview({
   const categoryLine = localizedCategoryLine(locale, job.category);
   const html = job.descriptionHtml?.trim();
   const showHtml = Boolean(html);
+  const applyPath = `/jobs/${jobPath}/apply`;
+  const [signUpOpen, setSignUpOpen] = React.useState(false);
+
+  function openSignUp(e: React.MouseEvent<HTMLAnchorElement>) {
+    // Modified clicks still open the apply link (and its sign-in redirect).
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
+      return;
+    }
+    e.preventDefault();
+    setSignUpOpen(true);
+  }
 
   /** The one action of the page: right under the title and again at the end. */
   function applyCta(ctaClass?: string) {
@@ -179,7 +194,9 @@ export function JobListingPreview({
       />
     ) : (
       <Button variant="default" size="lg" className={ctaClass} asChild>
-        <Link href={`/jobs/${jobPath}/apply`}>{t('applyButton')}</Link>
+        <Link href={applyPath} onClick={guest ? openSignUp : undefined}>
+          {t('applyButton')}
+        </Link>
       </Button>
     );
   }
@@ -315,21 +332,17 @@ export function JobListingPreview({
               {t('applyHint')}
             </p>
             {applyCta()}
-            <p className="mb-0 mt-3 text-sm text-muted-foreground">
-              <Link
-                href={`/candidate/login?returnTo=${encodeURIComponent(`/jobs/${jobPath}/apply`)}`}
-                className="font-medium text-primary underline-offset-2 hover:underline"
-              >
-                {t('applySignIn')}
-              </Link>
-              <span className="text-muted-foreground"> · </span>
-              <Link
-                href={`/candidate/register?returnTo=${encodeURIComponent(`/jobs/${jobPath}/apply`)}`}
-                className="font-medium text-primary underline-offset-2 hover:underline"
-              >
-                {t('applyCreateAccount')}
-              </Link>
-            </p>
+            {guest ? (
+              <p className="mb-0 mt-3 text-sm text-muted-foreground">
+                {t('applyHaveAccount')}{' '}
+                <Link
+                  href={`/candidate/login?returnTo=${encodeURIComponent(applyPath)}`}
+                  className="font-medium text-primary underline-offset-2 hover:underline"
+                >
+                  {t('applySignIn')}
+                </Link>
+              </p>
+            ) : null}
           </>
         )}
       </section>
@@ -364,6 +377,16 @@ export function JobListingPreview({
         <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur md:hidden">
           {applyCta('w-full')}
         </div>
+      ) : null}
+
+      {guest && listingState === 'live' && job.applyMode !== 'external' ? (
+        <GuestApplySheet
+          open={signUpOpen}
+          onOpenChange={setSignUpOpen}
+          jobTitle={job.title}
+          companyName={job.company.name}
+          applyPath={applyPath}
+        />
       ) : null}
     </article>
   );

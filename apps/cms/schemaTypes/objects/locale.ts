@@ -19,3 +19,13 @@ export const localeText = defineType({
     defineField({ name: 'en', title: 'English (en)', type: 'text' }),
   ],
 });
+
+export const localeBlockContent = defineType({
+  name: 'localeBlockContent',
+  title: 'Localized rich text',
+  type: 'object',
+  fields: [
+    defineField({ name: 'sr', title: 'Serbian (sr)', type: 'blockContent' }),
+    defineField({ name: 'en', title: 'English (en)', type: 'blockContent' }),
+  ],
+});

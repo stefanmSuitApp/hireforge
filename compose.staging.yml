@@ -3,7 +3,10 @@ name: hireforge-staging
 # Staging (staging.sljakam.com) on the production VM, like autofind: the same
 # images as production (tag :staging, set by scripts/deploy/release.sh), its own
 # Postgres and Redis, and memory caps so it can never starve production. No
-# ports: production's Caddy reaches `staging-web` over the `edge` network.
+# ports: production's Caddy reaches `staging-web` over the `hireforge-edge`
+# network, which release.sh attaches by hand: Compose would also register the
+# service as `web` there, and production's Caddy proxies to `web` (on
+# 2026-10-29 sljakam.com served staging that way for ~40 minutes).
 # Env: deploy/.env.staging (scripts/deploy/staging-init.sh). No real email, no
 # CMS writes, no object storage, billing in test mode.
 
@@ -28,11 +31,6 @@ services:
     depends_on:
       api:
         condition: service_healthy
-    networks:
-      default:
-      edge:
-        aliases:
-          - staging-web
     healthcheck:
       test:
         [
@@ -125,11 +123,6 @@ services:
         condition: service_healthy
     command: ['node', 'scripts/db/migrate.mjs']
     restart: 'no'
-
-networks:
-  edge:
-    external: true
-    name: hireforge-edge
 
 volumes:
   api_var:

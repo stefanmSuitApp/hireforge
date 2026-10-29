@@ -35,10 +35,10 @@ Compose + Caddy on one Hetzner VM.
 
 ## Checks run locally, not on PRs
 
-GitHub Actions minutes are limited, so pull requests run no workflows. CI,
-Integration and the quality report still run on pushes to `main` (and by
-hand: Actions → Run workflow). Before pushing a branch, run locally what CI
-would have run:
+GitHub Actions minutes are limited, so pull requests run no workflows. On
+`main`, `deploy-staging` runs CI and Integration before it deploys, and the
+quality report runs on push (any of them by hand: Actions → Run workflow).
+Before pushing a branch, run locally what CI would have run:
 
 - always: `pnpm verify` (the pre-push hook blocks the push if it fails);
 - any change to apps or libs: `E2E_WEB=start pnpm e2e` (what CI runs);
@@ -77,13 +77,14 @@ merging, watch the `main` runs: two PRs green on their own can still break
 
 ## Deploy
 
-**Never build images on the VM** (3.8 GB RAM, no swap: it took the site down
-on 2026-10-28). Deploy from a clean checkout of a commit on `origin/main`
-with `./scripts/deploy/ship.sh`: it builds off the VM, ships, backs up,
-migrates, gates on health with automatic rollback and keeps the images of
-the last 3 releases. Rollback: `scripts/deploy/release.sh <sha>` on the
-server. Staging (same VM, same images): `ship.sh staging` first, then
-`ship.sh`. Details: `docs/deployment/hetzner.md` §9–10.
+**Never build images on the VM** (3.8 GB RAM: it took the site down on
+2026-10-28). A merge to `main` deploys to **staging** by itself
+(`deploy-staging` workflow: CI + integration, images built once on the
+runner, backup, migrate, health gates, automatic rollback). **Production** is
+the manual `deploy-production` workflow (Stefan approves) for a commit
+staging ran: same images. `./scripts/deploy/ship.sh [staging]` is the same
+path from a Mac. Rollback: `scripts/deploy/release.sh <sha> [staging]` on
+the server. Details: `docs/deployment/hetzner.md` §9–10.
 
 ## Never
 

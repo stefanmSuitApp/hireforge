@@ -1,5 +1,7 @@
 const STORAGE_KEY = 'hf:recentJobRefs:v1';
 const MAX_ITEMS = 8;
+/** Fired on `window` after a job view is recorded. */
+export const RECENT_JOBS_EVENT = 'hf:recent-jobs';
 
 export function pushRecentJobRef(segment: string): void {
   const key = segment.trim();
@@ -11,6 +13,7 @@ export function pushRecentJobRef(segment: string): void {
     const prev = raw ? (JSON.parse(raw) as string[]) : [];
     const next = [key, ...prev.filter((x) => x !== key)].slice(0, MAX_ITEMS);
     globalThis.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    globalThis.dispatchEvent?.(new Event(RECENT_JOBS_EVENT));
   } catch {
     /* ignore quota / private mode */
   }

@@ -22,6 +22,8 @@ export function emailFromHeader(env: Env = process.env): string {
 /**
  * Sends through Resend. Returns `skipped` when `RESEND_API_KEY` is unset (dev,
  * e2e); throws on any non-2xx so callers decide whether to retry or surface it.
+ * `EMAIL_REDIRECT_TO` (staging) sends every message to that inbox instead, so
+ * a copy of real data can never email real people.
  */
 export async function sendEmail(
   message: EmailMessage,
@@ -34,6 +36,11 @@ export async function sendEmail(
   }
   // Overridable for tests (e2e points it at a local fake).
   const base = env['RESEND_API_URL']?.trim() || 'https://api.resend.com';
+  const redirect = env['EMAIL_REDIRECT_TO']?.trim();
+  const to = redirect || message.to;
+  const subject = redirect
+    ? `[→ ${message.to}] ${message.subject}`
+    : message.subject;
   const res = await fetchImpl(`${base.replace(/\/+$/, '')}/emails`, {
     method: 'POST',
     headers: {
@@ -45,8 +52,8 @@ export async function sendEmail(
     },
     body: JSON.stringify({
       from: emailFromHeader(env),
-      to: [message.to],
-      subject: message.subject,
+      to: [to],
+      subject,
       text: message.text,
       html: message.html,
     }),

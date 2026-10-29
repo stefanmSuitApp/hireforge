@@ -1,0 +1,89 @@
+name: deploy-production
+
+# Manual, with the production environment's approval. Promotes a commit that
+# staging ran: its images are already on the server (the last 3 staging
+# releases are kept), so production runs exactly what staging ran.
+on:
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: Commit that staging ran (full or 12-character SHA)
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  # Before the approval: actions/checkout takes only a branch, a tag or a full
+  # SHA, so a short SHA is resolved here, and a commit not on main fails
+  # without asking anyone to approve it.
+  resolve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      sha: ${{ steps.sha.outputs.full }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Full SHA of a commit on main
+        id: sha
+        env:
+          INPUT: ${{ github.event.inputs.sha }}
+        run: |
+          [[ $INPUT =~ ^[0-9a-f]{7,40}$ ]] || { echo "not a commit SHA: '$INPUT'" >&2; exit 1; }
+          full=$(git rev-parse --verify --quiet "$INPUT^{commit}") \
+            || { echo "no single commit matches $INPUT" >&2; exit 1; }
+          git merge-base --is-ancestor "$full" origin/main \
+            || { echo "$full is not on main" >&2; exit 1; }
+          echo "full=$full" >> "$GITHUB_OUTPUT"
+          echo "deploying $full"
+
+  deploy:
+    needs: resolve
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.resolve.outputs.sha }}
+          fetch-depth: 0
+
+      - uses: ./.github/actions/ssh-setup
+        with:
+          host: ${{ vars.DEPLOY_HOST }}
+          user: ${{ vars.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          host-key: ${{ vars.DEPLOY_HOST_KEY }}
+
+      - name: Staging ran this commit and its images are on the server
+        run: |
+          SHA=$(git rev-parse --short=12 HEAD)
+          # shellcheck disable=SC2029
+          ssh hireforge "grep -qx $SHA /opt/hireforge/backups/releases-staging.log" \
+            || { echo "$SHA never ran on staging: merge it to main and let deploy-staging finish first" >&2; exit 1; }
+          for svc in api worker web; do
+            # shellcheck disable=SC2029
+            ssh hireforge "docker image inspect hireforge-production-$svc:$SHA >/dev/null" \
+              || { echo "no $svc image for $SHA on the server (pruned?): redeploy it to staging first" >&2; exit 1; }
+          done
+
+      - name: Release (backup, migrate, gates, rolls back by itself)
+        env:
+          HIREFORGE_SSH: hireforge
+          HIREFORGE_SSH_KEY: /home/runner/.ssh/deploy_key
+        run: ./scripts/deploy/ship.sh production
+
+      - name: Live site
+        run: |
+          for path in /sr /en /sitemap.xml /robots.txt; do
+            curl -fsS -o /dev/null --retry 5 --retry-delay 3 --retry-all-errors "https://sljakam.com$path"
+            echo "ok $path"
+          done

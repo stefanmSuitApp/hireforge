@@ -12,31 +12,41 @@ Stefan: [`NEEDS_STEFAN.md`](./NEEDS_STEFAN.md).
 
 - **Prod:** `sljakam.com` on one Hetzner VM (Docker Compose + Caddy, see
   [`docs/deployment/hetzner.md`](./docs/deployment/hetzner.md)). No real
-  users yet. **Never build images on the VM** (3.8 GB, no swap — it took
-  the site down for ~18 min on 2026-10-28). Deploy with
-  `./scripts/deploy/ship.sh` from a clean checkout of `origin/main`:
-  off-VM build, backup, migrate, health gates with automatic rollback,
-  images of the last 3 releases kept (`backups/releases.log`); rollback
-  `scripts/deploy/release.sh <sha>` on the server. Since 2026-10-29 the
+  users yet. **Never build images on the VM** (3.8 GB — it took the site
+  down for ~18 min on 2026-10-28; 4 GB swap since 2026-10-29). **Deploys
+  (autofind-style, 2026-10-29):** a merge to `main` → `deploy-staging`
+  workflow (CI + integration, images built once on the runner) →
+  staging; production = manual `deploy-production` workflow with Stefan's
+  approval, same images. Both run `scripts/deploy/ship.sh` (also usable
+  from a Mac): backup, migrate, health gates with automatic rollback,
+  images of each environment's last 3 releases kept
+  (`/opt/hireforge/backups/releases*.log`), one release at a time (lock);
+  rollback `scripts/deploy/release.sh <sha> [staging]` on the server. The
+  workflows wait on the CI deploy key (NEEDS_STEFAN item 1). Since 2026-10-29 the
   images are ~0.7–0.9 GB on the VM (were ~4.5 GB; the disk had reached 90%,
   now ~13%). First ship.sh deploy: `main@d2d1d76` (#23 + #24), attempt 1,
   all gates green, seo:audit and Lighthouse clean. `main@d1a49c1` (#27) was
   rolled back automatically by a gate bug (unchanged worker image; fixed in
   #29); `main@ee02722` (#27–#29) live 2026-10-29 01:24 UTC.
-- **Backups:** nightly + per deploy on the VM; off-server upload ready
-  (`S3_BACKUP_BUCKET`, waits on the bucket); restore drill passed on prod.
-- **Staging:** `staging.sljakam.com` on the same VM (`compose.staging.yml`,
-  `ship.sh staging`); env generated, not started: needs DNS and memory
-  (NEEDS_STEFAN items 1b, 2).
+- **Backups:** nightly + per deploy, on the VM and in the bucket
+  `hireforge` (DEVLEGION, nbg1; `backups/postgres/{production,staging}/`,
+  30 days); restore from the bucket checked on prod 2026-10-29.
+- **Staging:** https://staging.sljakam.com (open, `noindex`) on the same VM,
+  own checkout `/opt/hireforge-staging`, `compose.staging.yml`, memory caps
+  (~310 MB in use). Seed accounts = production's, with production's
+  password hashes; shares the Sanity read token, the bucket and the Resend
+  key, the latter only with `EMAIL_REDIRECT_TO` (every staging email to
+  Stefan's inbox). `docs/deployment/hetzner.md` §10.
 - **Checks:** `pnpm lint && pnpm format && pnpm typecheck && pnpm test &&
-pnpm build` (+ `pnpm check:i18n`); CI runs it on PRs. Husky: pre-commit
-  lint-staged, pre-push lint/typecheck/test/i18n (blocking) + design and
+pnpm build` (+ `pnpm check:i18n`) = `pnpm verify`; PRs run it locally, CI on
+  `main`. Husky: pre-commit lint-staged, pre-push `pnpm verify` (blocking) + design and
   contrast reports (warn-only). `pnpm test` covers api and worker and the
   merged-migration guard, plus a 90 % coverage gate on dense logic.
 - **Integration:** `pnpm test:integration` (Docker; real Postgres + Redis
   through Testcontainers, ~75 s): route registry + role matrix, company
   isolation, flows, races, query plans, schema drift, the built worker.
-  CI runs it on push to `main` (`integration.yml`), not on PRs. How to
+  On `main` it gates the staging deploy (`deploy-staging` calls
+  `integration.yml`), not on PRs. How to
   test: [`docs/TESTING.md`](./docs/TESTING.md).
 - **Warn-only reports:** `pnpm check:design`, `pnpm check:contrast`,
   `pnpm e2e:visual`, `pnpm lighthouse <url>`, `pnpm seo:audit <url>`;
@@ -71,7 +81,8 @@ pnpm build` (+ `pnpm check:i18n`); CI runs it on PRs. Husky: pre-commit
 - **No GitHub Actions on PRs (2026-10-29):** the Actions budget is nearly
   used up. PRs are checked locally (`pnpm verify`, `pnpm e2e`, plus
   `pnpm test:integration` for API/DB changes; see AGENTS.md "Checks run
-  locally"); CI, Integration and the quality report still run on `main`.
+  locally"); on `main`, `deploy-staging` runs CI + Integration before it
+  deploys, and the quality report runs on push.
 - Copy voice: **ti everywhere**; apply = "Konkuriši", "Prijava/Prijavi se"
   only means sign-in; enum labels in Serbian unless Serbians use the English
   word (Junior/Medior/Senior).
@@ -375,6 +386,13 @@ Found with a scripted sweep of the live public pages at 375 and 1440 px
   English body on the Serbian page). Seed now says Šljakam with a Serbian
   body; the live CMS document is patched separately. Internal names (repo,
   CMS doc id/slug `about-hireforge`, log prefixes) stay.
+- **New Sanity project `o85214ma`** (branch `feat/cms-sljakam-project`,
+  2026-10-29): nobody could find the login that owns `845zdl9k`, so Stefan
+  made `o85214ma` under his account. Every old document came from one seed
+  run (2026-05-08, no hand edits), so `pnpm cms:seed` recreated it, rebranded.
+  Editorial bodies are now bilingual (`localeBlockContent`); the web still
+  accepts the old single array (rollback, staging on the old env). Studio
+  hosted at https://sljakam.sanity.studio. Setup: `docs/deployment/hetzner.md` §6.
 - Tests: `e2e/header-stability.spec.ts` (runs with real scrollbars),
   `home-jobs-discovery.test.ts`, `employer-job-applications-table.test.tsx`,
   `i18n/request.test.ts`; each shown failing without its fix.
@@ -387,7 +405,79 @@ Found with a scripted sweep of the live public pages at 375 and 1440 px
   - The advanced filters and page 2+ need an account.
   - Similar jobs show 3 plus a prompt.
   - Replaces the #20 teaser model.
-- **Next: B3**, the inline sign-up on "Konkuriši" and the bottom bar.
+- **B3** (branch `feat/guest-access-b3`):
+  - A guest's "Konkuriši" opens a sign-up sheet over the job. Signing up
+    continues to the apply form, which asks to confirm the email first.
+  - Signed-in visitors go straight to the apply form; the old "Prijavi se da
+    konkurišeš · Napravi nalog" line no longer shows to them.
+  - From the 3rd distinct job page a guest opens, a dismissible bar offers an
+    account. Hidden on auth/apply pages and on job pages on phones (the
+    sticky apply bar is there); retired for good once dismissed or signed in.
+- **B4 (2026-10-29):** prod database wiped on Stefan's request (backup
+  `hireforge-postgres-20261029T085158Z.sql.gz`, also offsite). Kept cities,
+  districts, job categories, packages, prices and entitlements; removed all
+  users, companies, jobs and the dev seed. One admin account
+  (Stefan's gmail, password set by reset email). Packages page: the featured
+  hint now says the ad is on top of search and seen by guests too.
+  The one orphaned CV file left in the `api_var` volume was deleted, so
+  `candidate-uploads` is empty.
+- **Search Console (2026-10-29):** sljakam.com is verified as a Domain
+  property in Stefan's Google account by a `google-site-verification` TXT
+  record in GoDaddy DNS. Keep that record. `https://sljakam.com/sitemap.xml`
+  is submitted (status Success).
+- **Sitemap without empty `/jobs`** (branch `fix/sitemap-empty-jobs`):
+  `/sr/jobs` and `/en/jobs` are noindex while no job is live, so
+  `pages.xml` now lists them only when at least one job is live. Search
+  Console would otherwise flag them as "Submitted URL marked noindex".
+
+## Staging pipeline (branch `feat/staging-pipeline`, 2026-10-29)
+
+- **Decided (Stefan):** autofind-style pipeline; staging shares the safe
+  production keys with every email redirected; same seed accounts with
+  production's passwords, no copy of real data.
+- **Done:**
+  - `deploy-staging` / `deploy-production` workflows; `ci.yml` and
+    `integration.yml` run on `main` only through `deploy-staging`. No image
+    registry: the runner ships images over SSH like `ship.sh`, and
+    production promotes the images staging left on the server.
+  - `EMAIL_REDIRECT_TO` in `sendEmail` (unit test failed before the change).
+  - Staging in its own worktree `/opt/hireforge-staging`, so a staging
+    deploy never touches production's compose or Caddy files.
+  - `release.sh`: lock; staging backups; shared keys synced from production
+    (`staging-init.sh --env-only`); refuses staging with Resend and no
+    redirect.
+  - `restore-check.sh` deletes the dump it downloads; it used to stay on the
+    VM, owned by root and readable by every user.
+- **Verified on the server** (by hand, before merge):
+  - A staging release ran from the new folder: lock, key sync, backup
+    uploaded to `staging/`, migrate, all gates green.
+  - The new restore check passed on prod and left no file behind.
+- **Live:** Stefan added the CI deploy key and the `production` environment
+  (creating server access for CI was his call). The first full
+  `deploy-staging` run (#37) was green end to end. `EMAIL_REDIRECT_TO` is
+  set on staging, and a test reset email reached Stefan's inbox.
+- **Staging login removed** (Stefan, 2026-10-29): open, `noindex` header;
+  optional via `STAGING_BASIC_AUTH_PASSWORD`.
+
+### Incident 2026-10-29: sljakam.com served staging (~08:13–08:55 UTC)
+
+- **Cause:** `compose.staging.yml` put staging's web on `hireforge-edge`.
+  Compose also registers every service under its own name, so production's
+  Caddy (`reverse_proxy web:3000`, on the same network) reached staging's
+  web. Visitors saw staging without basic auth; sign-ups and password
+  resets in that window went to the staging database (no email: staging had
+  no Resend key).
+- **Missed by my checks:** they tested staging through Caddy and that
+  sljakam.com answered 200, never which backend answered. Found by the
+  other session (a request logged by staging's api).
+- **Fix** (branch `fix/staging-edge-alias`):
+  - `release.sh` attaches staging's web as `staging-web` only.
+  - New gate in every release: `web` in production's Caddy must be
+    production's web container; otherwise staging is taken off the edge
+    network and the release fails.
+  - Reproduced locally first: the old setup fails the gate, the new one
+    passes. Verified on the server: Caddy reaches staging as `staging-web`,
+    and sljakam.com is production's.
 
 ## Known issues not yet scheduled
 

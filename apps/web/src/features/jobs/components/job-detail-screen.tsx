@@ -20,6 +20,8 @@ export type JobDetailScreenProps =
       kind: 'ok';
       job: PublicJobDetailResponse;
       viewedSegment: string;
+      /** No session: apply opens the sign-up sheet. */
+      guest: boolean;
       /** Other live jobs of the same company (internal links). */
       moreFromCompany?: Array<{ title: string; href: string }>;
     };
@@ -47,7 +49,7 @@ export function JobDetailScreen(props: JobDetailScreenProps) {
     );
   }
 
-  const { job, viewedSegment, moreFromCompany = [] } = props;
+  const { job, viewedSegment, guest, moreFromCompany = [] } = props;
 
   return (
     <PublicSurfaceMain narrow>
@@ -64,6 +66,7 @@ export function JobDetailScreen(props: JobDetailScreenProps) {
         job={job}
         listingState={job.live ? 'live' : 'expired'}
         stickyApply
+        guest={guest}
         // Room for the sticky apply bar on phones.
         className={job.live ? 'mb-20 md:mb-0' : undefined}
       />

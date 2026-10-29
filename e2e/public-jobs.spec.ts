@@ -24,15 +24,20 @@ test('a logged-out visitor browses jobs, opens one and signs in to apply', async
   ).toBeVisible();
   await expectNoA11yViolations(page);
 
+  // "Konkuriši" opens the sign-up sheet; it links on to sign-in.
   await waitHydrated(page, 'main a[href$="/apply"]');
   await page
     .getByRole('link', { name: 'Konkuriši za ovaj posao' })
     .first()
     .click();
+  await page
+    .getByRole('dialog')
+    .getByRole('link', { name: 'Prijavi se' })
+    .click();
   await page.waitForURL(
     (url) =>
       url.pathname === '/sr/candidate/login' &&
-      url.searchParams.get('returnTo') === `/sr/jobs/${job.slug}/apply`,
+      url.searchParams.get('returnTo') === `/jobs/${job.slug}/apply`,
   );
 
   await waitHydrated(page, '#candidate-email');

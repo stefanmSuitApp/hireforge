@@ -2,6 +2,26 @@ export const JOBS_LIST_PAGE_SIZE = 12;
 /** What a guest sees of any list (option B; the API enforces the same cap). */
 export const GUEST_LIST_SIZE = 20;
 
+/**
+ * Page size of a list request. The page and its metadata must build the same
+ * query: Next then makes one API call for both, and the metadata is ready in
+ * time for <head> (a second, slower call streams the canonical into <body>).
+ */
+export function resolveListPageSize(
+  sp: { pageSize?: string },
+  signedIn: boolean,
+): number {
+  if (!signedIn) return GUEST_LIST_SIZE;
+  return Math.min(
+    50,
+    Math.max(
+      1,
+      parseInt(sp.pageSize ?? String(JOBS_LIST_PAGE_SIZE), 10) ||
+        JOBS_LIST_PAGE_SIZE,
+    ),
+  );
+}
+
 export type JobsSearchParams = {
   page?: string;
   pageSize?: string;

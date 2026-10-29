@@ -1,15 +1,16 @@
 name: CI
 
-# Not on pull requests: the Actions budget is limited, so PRs are checked
-# locally (`pnpm verify` + `pnpm e2e`, see AGENTS.md). Main still runs it.
+# Not on pull requests (the Actions budget is limited; PRs are checked
+# locally, see AGENTS.md). On main it runs through deploy-staging, which
+# deploys only when this passes; by hand via Run workflow.
 on:
-  push:
-    branches: [main]
+  workflow_call:
   workflow_dispatch:
 
+# Never cancel a run a staging deploy waits on.
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   checks:
@@ -24,9 +25,9 @@ jobs:
       NEXT_PUBLIC_API_URL: http://api:4000
       NEXT_PUBLIC_DEFAULT_LOCALE: sr
       NEXT_PUBLIC_SUPPORTED_LOCALES: sr,en
-      NEXT_PUBLIC_SANITY_PROJECT_ID: 845zdl9k
+      NEXT_PUBLIC_SANITY_PROJECT_ID: o85214ma
       NEXT_PUBLIC_SANITY_DATASET: production
-      SANITY_STUDIO_PROJECT_ID: 845zdl9k
+      SANITY_STUDIO_PROJECT_ID: o85214ma
       SANITY_STUDIO_DATASET: production
     steps:
       - uses: actions/checkout@v4

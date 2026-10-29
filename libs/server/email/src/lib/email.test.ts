@@ -67,6 +67,24 @@ describe('sendEmail', () => {
     });
   });
 
+  it('sends every message to EMAIL_REDIRECT_TO and names the real recipient', async () => {
+    const fetchImpl = vi.fn(
+      async () => new Response(JSON.stringify({ id: 'em_2' }), { status: 200 }),
+    );
+    await sendEmail(
+      { to: 'employer@firma.rs', subject: 'Profaktura', text: 't', html: 'h' },
+      { RESEND_API_KEY: 're_x', EMAIL_REDIRECT_TO: ' stefan@inbox.test ' },
+      fetchImpl as unknown as typeof fetch,
+    );
+    const [, init] = fetchImpl.mock.calls[0] as unknown as [
+      string,
+      RequestInit,
+    ];
+    const body = JSON.parse(init.body as string);
+    expect(body.to).toEqual(['stefan@inbox.test']);
+    expect(body.subject).toBe('[→ employer@firma.rs] Profaktura');
+  });
+
   it('throws on a Resend error so callers can retry', async () => {
     const fetchImpl = vi.fn(async () => new Response('bad', { status: 422 }));
     await expect(
