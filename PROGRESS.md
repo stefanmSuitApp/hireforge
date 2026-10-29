@@ -19,8 +19,15 @@ Stefan: [`NEEDS_STEFAN.md`](./NEEDS_STEFAN.md).
   images of the last 3 releases kept (`backups/releases.log`); rollback
   `scripts/deploy/release.sh <sha>` on the server. Since 2026-10-29 the
   images are ~0.7–0.9 GB on the VM (were ~4.5 GB; the disk had reached 90%,
-  now ~23%). First ship.sh deploy: `main@d2d1d76` (#23 + #24), attempt 1,
-  all gates green, seo:audit and Lighthouse clean.
+  now ~13%). First ship.sh deploy: `main@d2d1d76` (#23 + #24), attempt 1,
+  all gates green, seo:audit and Lighthouse clean. `main@d1a49c1` (#27) was
+  rolled back automatically by a gate bug (unchanged worker image; fixed in
+  #29); `main@ee02722` (#27–#29) live 2026-10-29 01:24 UTC.
+- **Backups:** nightly + per deploy on the VM; off-server upload ready
+  (`S3_BACKUP_BUCKET`, waits on the bucket); restore drill passed on prod.
+- **Staging:** `staging.sljakam.com` on the same VM (`compose.staging.yml`,
+  `ship.sh staging`); env generated, not started: needs DNS and memory
+  (NEEDS_STEFAN items 1b, 2).
 - **Checks:** `pnpm lint && pnpm format && pnpm typecheck && pnpm test &&
 pnpm build` (+ `pnpm check:i18n`); CI runs it on PRs. Husky: pre-commit
   lint-staged, pre-push lint/typecheck/test/i18n (blocking) + design and
