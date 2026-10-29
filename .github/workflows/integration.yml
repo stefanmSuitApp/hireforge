@@ -3,14 +3,14 @@ name: Integration
 # Real Postgres + Redis through Testcontainers (pnpm test:integration).
 # Decision 2 (Stefan, 2026-10-28): heavy suites run on main and by hand, not
 # on pull requests; locally, run it before pushing api/database/worker changes.
+# On main it gates the staging deploy (deploy-staging calls it).
 on:
-  push:
-    branches: [main]
+  workflow_call:
   workflow_dispatch:
 
 concurrency:
   group: integration-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'workflow_dispatch' }}
 
 jobs:
   integration:

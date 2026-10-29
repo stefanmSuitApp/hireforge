@@ -5,12 +5,18 @@
 #
 #   ./scripts/deploy/release.sh <sha> [production|staging]
 #
+# Production runs from /opt/hireforge, staging from its own checkout
+# /opt/hireforge-staging (so a staging deploy never changes production's
+# compose or Caddy files). The release logs and the lock live in production's
+# backups/: one release at a time on this server, whichever environment.
+#
 # 1. The images hireforge-production-{api,worker,web}:<sha> must be loaded
-#    (scripts/deploy/ship.sh does that from the build machine). Staging runs
-#    the same images as production.
-# 2. Production: Postgres backup first. Then migrations with the new api
-#    image, in one transaction; if they fail, nothing has been restarted.
-#    Staging: an empty database also gets the RS and dev seed.
+#    (scripts/deploy/ship.sh or the deploy-staging workflow does that).
+#    Staging runs the same images as production.
+# 2. Postgres backup first (off-server too when the env has a bucket). Then
+#    migrations with the new api image, in one transaction; if they fail,
+#    nothing has been restarted. Staging: an empty database also gets the RS
+#    and dev seed.
 # 3. <sha> becomes :latest (production) / :staging, `compose up --wait`, then
 #    gates: every container healthy, the worker logged `worker_started`, the
 #    site answers. Any failure puts the previous images back and exits
@@ -26,35 +32,52 @@ ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 cd "$ROOT"
 KEEP_RELEASES=${KEEP_RELEASES:-3}
 SERVICES=(api worker web)
-PROD_RELEASES=$ROOT/backups/releases.log
-STAGING_RELEASES=$ROOT/backups/releases-staging.log
 
 case $TARGET in
   production)
+    PROD_ROOT=$ROOT
     COMPOSE_FILE=compose.prod.yml
     ENV_FILE=${HIREFORGE_ENV_FILE:-$ROOT/deploy/.env.production}
     PROJECT=hireforge-production
     LIVE_TAG=latest
-    RELEASES=$PROD_RELEASES
     ;;
   staging)
+    PROD_ROOT=${HIREFORGE_PROD_ROOT:-/opt/hireforge}
     COMPOSE_FILE=compose.staging.yml
     ENV_FILE=$ROOT/deploy/.env.staging
     PROJECT=hireforge-staging
     LIVE_TAG=staging
-    RELEASES=$STAGING_RELEASES
-    [[ -f $ENV_FILE ]] || { echo "no $ENV_FILE: run scripts/deploy/staging-init.sh once" >&2; exit 1; }
     ;;
   *)
     echo "unknown target '$TARGET' (production|staging)" >&2
     exit 1
     ;;
 esac
+PROD_RELEASES=$PROD_ROOT/backups/releases.log
+STAGING_RELEASES=$PROD_ROOT/backups/releases-staging.log
+RELEASES=$PROD_RELEASES
+[[ $TARGET == production ]] || RELEASES=$STAGING_RELEASES
+
+# One release at a time on this server: a staging deploy from CI waits for a
+# production deploy started by hand, and the other way round.
+mkdir -p "$PROD_ROOT/backups"
+exec 9>"$PROD_ROOT/backups/.release.lock"
+flock -w 1800 9 || { echo "another release still holds the lock after 30 min" >&2; exit 1; }
+
+# Staging takes the keys it shares with production fresh from production's env.
+if [[ $TARGET == staging ]]; then ./scripts/deploy/staging-init.sh --env-only; fi
 
 set -a
 # shellcheck disable=SC1090
 . "$ENV_FILE"
 set +a
+
+# Staging may share production's Resend key only with every email redirected
+# (libs/server/email: EMAIL_REDIRECT_TO); it has copies of real accounts.
+if [[ $TARGET == staging && -n ${RESEND_API_KEY:-} && -z ${EMAIL_REDIRECT_TO:-} ]]; then
+  echo "staging has RESEND_API_KEY but no EMAIL_REDIRECT_TO: refusing to start" >&2
+  exit 1
+fi
 
 compose() { docker compose -f "$COMPOSE_FILE" "$@"; }
 img() { echo "hireforge-production-$1:$2"; }
@@ -68,11 +91,10 @@ done
 # Production's Caddy reaches staging over this network; both stacks need it.
 docker network inspect hireforge-edge >/dev/null 2>&1 || docker network create hireforge-edge >/dev/null
 # Created here, not by Docker's bind mount (that would make it root-owned).
-mkdir -p "$ROOT/deploy/caddy-sites"
+mkdir -p "$PROD_ROOT/deploy/caddy-sites"
 
 # What runs now (by image id): the rollback target. Before production's first
 # recorded release it is kept as release "legacy" so pruning can't drop it.
-mkdir -p "$ROOT/backups"
 declare -A PREV
 for s in "${SERVICES[@]}"; do
   PREV[$s]=$(docker inspect --format '{{.Image}}' "$PROJECT-$s-1" 2>/dev/null || true)
@@ -88,9 +110,11 @@ fi
 export HIREFORGE_MIGRATE_IMAGE
 HIREFORGE_MIGRATE_IMAGE=$(img api "$SHA")
 
-if [[ $TARGET == production ]]; then
+# Staging's first release has no database yet: nothing to back up.
+running=$(compose ps --status running --services 2>/dev/null || true)
+if [[ $TARGET == production || $'\n'$running$'\n' == *$'\n'postgres$'\n'* ]]; then
   log "backup"
-  ./scripts/deploy/backup-postgres.sh || {
+  ./scripts/deploy/backup-postgres.sh "$TARGET" || {
     rc=$?
     [[ $rc == 3 ]] || exit "$rc"
     echo "warning: the off-server copy failed; the local dump exists, carrying on" >&2

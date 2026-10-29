@@ -12,22 +12,31 @@ Stefan: [`NEEDS_STEFAN.md`](./NEEDS_STEFAN.md).
 
 - **Prod:** `sljakam.com` on one Hetzner VM (Docker Compose + Caddy, see
   [`docs/deployment/hetzner.md`](./docs/deployment/hetzner.md)). No real
-  users yet. **Never build images on the VM** (3.8 GB, no swap — it took
-  the site down for ~18 min on 2026-10-28). Deploy with
-  `./scripts/deploy/ship.sh` from a clean checkout of `origin/main`:
-  off-VM build, backup, migrate, health gates with automatic rollback,
-  images of the last 3 releases kept (`backups/releases.log`); rollback
-  `scripts/deploy/release.sh <sha>` on the server. Since 2026-10-29 the
+  users yet. **Never build images on the VM** (3.8 GB — it took the site
+  down for ~18 min on 2026-10-28; 4 GB swap since 2026-10-29). **Deploys
+  (autofind-style, 2026-10-29):** a merge to `main` → `deploy-staging`
+  workflow (CI + integration, images built once on the runner) →
+  staging; production = manual `deploy-production` workflow with Stefan's
+  approval, same images. Both run `scripts/deploy/ship.sh` (also usable
+  from a Mac): backup, migrate, health gates with automatic rollback,
+  images of each environment's last 3 releases kept
+  (`/opt/hireforge/backups/releases*.log`), one release at a time (lock);
+  rollback `scripts/deploy/release.sh <sha> [staging]` on the server. The
+  workflows wait on the CI deploy key (NEEDS_STEFAN item 1). Since 2026-10-29 the
   images are ~0.7–0.9 GB on the VM (were ~4.5 GB; the disk had reached 90%,
   now ~13%). First ship.sh deploy: `main@d2d1d76` (#23 + #24), attempt 1,
   all gates green, seo:audit and Lighthouse clean. `main@d1a49c1` (#27) was
   rolled back automatically by a gate bug (unchanged worker image; fixed in
   #29); `main@ee02722` (#27–#29) live 2026-10-29 01:24 UTC.
-- **Backups:** nightly + per deploy on the VM; off-server upload ready
-  (`S3_BACKUP_BUCKET`, waits on the bucket); restore drill passed on prod.
-- **Staging:** `staging.sljakam.com` on the same VM (`compose.staging.yml`,
-  `ship.sh staging`); env generated, not started: needs DNS and memory
-  (NEEDS_STEFAN items 1b, 2).
+- **Backups:** nightly + per deploy, on the VM and in the bucket
+  `hireforge` (DEVLEGION, nbg1; `backups/postgres/{production,staging}/`,
+  30 days); restore from the bucket checked on prod 2026-10-29.
+- **Staging:** https://staging.sljakam.com (basic auth) on the same VM,
+  own checkout `/opt/hireforge-staging`, `compose.staging.yml`, memory caps
+  (~310 MB in use). Seed accounts = production's, with production's
+  password hashes; shares the Sanity read token, the bucket and the Resend
+  key, the latter only with `EMAIL_REDIRECT_TO` (every staging email to
+  Stefan's inbox). `docs/deployment/hetzner.md` §10.
 - **Checks:** `pnpm lint && pnpm format && pnpm typecheck && pnpm test &&
 pnpm build` (+ `pnpm check:i18n`); CI runs it on PRs. Husky: pre-commit
   lint-staged, pre-push lint/typecheck/test/i18n (blocking) + design and
@@ -36,7 +45,8 @@ pnpm build` (+ `pnpm check:i18n`); CI runs it on PRs. Husky: pre-commit
 - **Integration:** `pnpm test:integration` (Docker; real Postgres + Redis
   through Testcontainers, ~75 s): route registry + role matrix, company
   isolation, flows, races, query plans, schema drift, the built worker.
-  CI runs it on push to `main` (`integration.yml`), not on PRs. How to
+  On `main` it gates the staging deploy (`deploy-staging` calls
+  `integration.yml`), not on PRs. How to
   test: [`docs/TESTING.md`](./docs/TESTING.md).
 - **Warn-only reports:** `pnpm check:design`, `pnpm check:contrast`,
   `pnpm e2e:visual`, `pnpm lighthouse <url>`, `pnpm seo:audit <url>`;
@@ -393,6 +403,34 @@ Found with a scripted sweep of the live public pages at 375 and 1440 px
     sticky apply bar is there); retired for good once dismissed or signed in.
 - **Next: B4** — archive the seed job and resubmit the sitemap in Search
   Console (Stefan), reword the packages page (`TODO(Stefan)`).
+
+## Staging pipeline (branch `feat/staging-pipeline`, 2026-10-29)
+
+- **Decided (Stefan):** autofind-style pipeline; staging shares the safe
+  production keys with every email redirected; same seed accounts with
+  production's passwords, no copy of real data.
+- **Done:**
+  - `deploy-staging` / `deploy-production` workflows; `ci.yml` and
+    `integration.yml` run on `main` only through `deploy-staging`. No image
+    registry: the runner ships images over SSH like `ship.sh`, and
+    production promotes the images staging left on the server.
+  - `EMAIL_REDIRECT_TO` in `sendEmail` (unit test failed before the change).
+  - Staging in its own worktree `/opt/hireforge-staging`, so a staging
+    deploy never touches production's compose or Caddy files.
+  - `release.sh`: lock; staging backups; shared keys synced from production
+    (`staging-init.sh --env-only`); refuses staging with Resend and no
+    redirect.
+  - `restore-check.sh` deletes the dump it downloads; it used to stay on the
+    VM, owned by root and readable by every user.
+- **Verified on the server** (by hand, before merge):
+  - A staging release ran from the new folder: lock, key sync, backup
+    uploaded to `staging/`, migrate, all gates green.
+  - The new restore check passed on prod and left no file behind.
+- **Not set up yet:** the CI deploy key and the `production` approval were
+  blocked for Claude (server access for CI is Stefan's call): NEEDS_STEFAN
+  item 1. Then run `deploy-staging` once, and after it set
+  `EMAIL_REDIRECT_TO` (staging-init `STAGING_EMAIL_TO=…`) once the redirect
+  code is live on staging.
 
 ## Known issues not yet scheduled
 

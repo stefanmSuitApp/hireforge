@@ -1,15 +1,28 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Usage: backup-postgres.sh [production|staging] (default production).
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-ENV_FILE="${HIREFORGE_ENV_FILE:-$ROOT_DIR/deploy/.env.production}"
-COMPOSE_FILE="$ROOT_DIR/compose.prod.yml"
+case "${1:-production}" in
+  production)
+    ENV_FILE="${HIREFORGE_ENV_FILE:-$ROOT_DIR/deploy/.env.production}"
+    COMPOSE_FILE="$ROOT_DIR/compose.prod.yml"
+    ;;
+  staging)
+    ENV_FILE="$ROOT_DIR/deploy/.env.staging"
+    COMPOSE_FILE="$ROOT_DIR/compose.staging.yml"
+    ;;
+  *)
+    echo "usage: backup-postgres.sh [production|staging]" >&2
+    exit 1
+    ;;
+esac
 BACKUP_DIR="${HIREFORGE_BACKUP_DIR:-$ROOT_DIR/backups/postgres}"
 STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 OUT_FILE="$BACKUP_DIR/hireforge-postgres-$STAMP.sql.gz"
 
 if [[ ! -f "$ENV_FILE" ]]; then
-  echo "Missing production env file: $ENV_FILE" >&2
+  echo "Missing env file: $ENV_FILE" >&2
   exit 1
 fi
 

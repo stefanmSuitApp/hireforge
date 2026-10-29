@@ -201,7 +201,18 @@ to `./backups/postgres` (override with `HIREFORGE_BACKUP_DIR`, retention with
 `S3_BACKUP_KEEP_DAYS` (30) days. The upload runs with the api image
 (`scripts/db/backup-offsite.mjs`). If it fails the local dump stays, the
 script exits 3 and the cron log (`backups/backup-cron.log`) says
-`OFF-SERVER UPLOAD FAILED`; a deploy warns and carries on.
+`OFF-SERVER UPLOAD FAILED`; a deploy warns and carries on. The bucket is
+`hireforge` (DEVLEGION project, nbg1, private): production's dumps under
+`backups/postgres/production/`, staging's (one per staging release) under
+`backups/postgres/staging/`.
+
+**Rotating the bucket keys** (Hetzner keys reach every bucket in the
+DEVLEGION project): Hetzner Console → Object Storage → Manage credentials →
+Generate; on the server replace `AWS_ACCESS_KEY_ID` and
+`AWS_SECRET_ACCESS_KEY` in `deploy/.env.production`; run
+`./scripts/deploy/backup-postgres.sh` (must print `uploaded s3://…`); delete
+the old credentials in Hetzner. Staging picks the new keys up on its next
+release (`staging-init.sh --env-only`). No restart needed.
 
 **Restore check** (safe on production; restores into a throwaway database,
 compares it with the live one, drops it):
@@ -226,31 +237,62 @@ Also back up Docker volumes:
 
 ## 9. Updating Production
 
-**Do not build images on the VM.** It has 3.8 GB RAM and no swap; building
-web/api/worker there starved the machine and took sljakam.com offline for
-~18 minutes on 2026-10-28. Images are built on a Mac (OrbStack/Docker
-Desktop) and shipped. From a clean checkout of a commit that is on
-`origin/main`:
+**Do not build images on the VM** (3.8 GB RAM: building there took
+sljakam.com offline for ~18 minutes on 2026-10-28). Images are built on a
+GitHub runner (or a Mac) and shipped to the server, like autofind:
+
+1. **Merge to `main`** → the `deploy-staging` workflow runs CI (checks +
+   e2e) and the integration tests, builds
+   `hireforge-production-{api,worker,web}:<sha12>` once, and ships them to
+   **staging** (§10). Docs-only merges don't deploy.
+2. **Check https://staging.sljakam.com.**
+3. **Promote**: GitHub → Actions → `deploy-production` → Run workflow →
+   the commit staging ran → approve (the `production` environment needs
+   Stefan's approval). It refuses a commit staging never ran; the images
+   are already on the server, so production runs exactly what staging ran.
+
+How this differs from autofind (same flow, smaller server):
+
+- **No image registry.** The runner builds the images once and sends them
+  to the server over SSH, like `ship.sh`: no registry storage bill, no
+  registry login on the server.
+- **Promotion.** Production uses the images staging already left on the
+  server (each environment's last 3 releases are kept), so it runs exactly
+  what staging ran. `deploy-production` refuses a commit staging never ran.
+- **Lock.** Only one release runs on the server at a time
+  (`/opt/hireforge/backups/.release.lock`): a staging deploy from CI waits
+  for a production deploy, and the other way round.
+
+Both workflows run `scripts/deploy/ship.sh` on the runner; from a Mac it is
+the same path by hand (clean checkout of a commit on `origin/main`):
 
 ```bash
-./scripts/deploy/ship.sh
+./scripts/deploy/ship.sh staging     # then check staging
+./scripts/deploy/ship.sh             # production
 ```
 
-`ship.sh` (build machine) builds `hireforge-production-{api,worker,web}:<sha>`
-for `linux/amd64`, sends the server only the images it lacks, fast-forwards
-`/opt/hireforge` to that commit and runs `scripts/deploy/release.sh <sha>`
-there, which:
+`ship.sh` builds only images neither the server nor the build machine has,
+sends the server the ones it lacks, moves the environment's checkout to that
+commit (production: `/opt/hireforge`; staging: `/opt/hireforge-staging`, a
+worktree of the same repository) and runs `scripts/deploy/release.sh <sha>
+[staging]` there, which:
 
-1. backs up Postgres (`backups/postgres/`);
-2. runs the migrations with the new api image (one transaction; on failure
+1. takes the release lock (`backups/.release.lock` in `/opt/hireforge`): one
+   release at a time, whichever environment;
+2. backs up Postgres (and uploads it, §8);
+3. runs the migrations with the new api image (one transaction; on failure
    nothing has been restarted);
-3. retags `<sha>` → `:latest`, `docker compose up --wait`, then gates: all
-   containers healthy, the worker logged `worker_started`, `/sr` answers
-   through Caddy. **Any failure restores the previous images** and exits
-   non-zero;
-4. records the release in `backups/releases.log` and removes images of all
-   but the **last 3 releases** (so the disk doesn't fill up again: before
-   this, every deploy left ~14 GB of images behind).
+4. retags `<sha>` → `:latest` / `:staging`, `docker compose up --wait`, then
+   gates: all containers healthy, the worker logged `worker_started`, `/sr`
+   answers. **Any failure restores the previous images** and exits non-zero;
+5. records the release in `/opt/hireforge/backups/releases.log` (staging:
+   `releases-staging.log`) and removes images that are in neither
+   environment's **last 3 releases**.
+
+The workflows log in with the `DEPLOY_SSH_KEY` secret (a key only for CI,
+`hireforge-github-actions-deploy` in the deploy user's `authorized_keys`)
+and the `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_HOST_KEY` variables (the host
+key is pinned).
 
 Images are small: the web image is Next's `standalone` output, the api and
 worker images install only the packages their build requires
@@ -270,7 +312,7 @@ cd /opt/hireforge && cat backups/releases.log   # last line is live
 Migrations are forward-only: an older release runs against the newer
 schema; restore a dump if a schema change must be undone.
 
-After every deploy, from the build machine (report only, never blocks):
+After every production deploy (report only, never blocks):
 
 ```bash
 pnpm seo:audit https://sljakam.com   # robots, sitemaps, canonical/hreflang, JSON-LD, www → apex
@@ -280,39 +322,51 @@ pnpm lighthouse https://sljakam.com  # scores vs scripts/perf-budgets.json; HTML
 or re-run the "quality report" GitHub workflow by hand.
 
 `./scripts/deploy/deploy-hetzner.sh` still builds on the VM (sequentially);
-use it only after adding swap or resizing the server, and prefer `ship.sh`.
+don't use it.
 
 ## 10. Staging (staging.sljakam.com)
 
-Staging runs on the same VM as production, like autofind:
-`compose.staging.yml` (project `hireforge-staging`) runs **the same images**
-as production with its own Postgres and Redis, memory caps (~1.2 GB in all)
-so it can't starve production, and no ports: production's Caddy proxies
-`staging.sljakam.com` to it over the `hireforge-edge` network, behind basic
-auth, with `X-Robots-Tag: noindex` (robots.txt already disallows every host
-but sljakam.com). The web app takes its origin from `SITE_ORIGIN` at runtime.
+Staging runs on the same VM as production, like autofind: from its own
+checkout `/opt/hireforge-staging`, `compose.staging.yml` (project
+`hireforge-staging`) runs **the same images** as production with its own
+Postgres and Redis, memory caps (~1.2 GB in all) so it can't starve
+production, and no ports: production's Caddy proxies `staging.sljakam.com`
+to it over the `hireforge-edge` network, behind basic auth, with
+`X-Robots-Tag: noindex`. The web app takes its origin from `SITE_ORIGIN` at
+runtime.
 
-Staging never reaches the outside world: no email (`RESEND_API_KEY` empty),
-no CMS writes (read token only), no object storage, no search-engine pings,
-billing in test mode. An empty staging database gets the RS locations and
-the dev seed (staging only; the seed users' password is the dev one).
+**What staging shares with production** (copied from
+`/opt/hireforge/deploy/.env.production` before every staging release, so a
+key rotated on production reaches staging by itself): the Sanity read token
+(same CMS content), the bucket keys (dumps under `backups/postgres/staging/`)
+and the Resend key, the latter **only with `EMAIL_REDIRECT_TO` set**: every
+staging email then goes to that inbox, its subject naming the real
+recipient (`[→ someone@firma.rs] …`); `release.sh` refuses to start staging
+with a Resend key and no redirect.
 
-Once:
+**Never shared**: the login signing secret (a staging login must not work on
+production), CMS sync and webhook secrets, database and Redis passwords, the
+Sanity write token (empty), search-engine keys; billing runs in test mode.
+
+**Data**: an empty staging database gets the RS locations and the dev seed.
+The seed accounts are the same as production's (admin, moderator, employer,
+candidate); their password hashes were copied from production on 2026-10-29,
+so production logins work on staging. No real users' data is on staging.
+
+Once (done 2026-10-29):
 
 1. DNS: an `A` record `staging.sljakam.com` → the VM's address.
-2. On the server: `./scripts/deploy/staging-init.sh` writes
-   `deploy/.env.staging` (new secrets; never commit) and, once DNS resolves,
-   the Caddy site `deploy/caddy-sites/staging.caddy`. Re-run it after adding
-   DNS. Login: `grep STAGING_BASIC_AUTH deploy/.env.staging`.
+2. `/opt/hireforge-staging` (created through Docker: `/opt` is root's) and
+   the first `ship.sh staging`, which adds the worktree.
+3. In `/opt/hireforge-staging`:
+   `STAGING_EMAIL_TO=<inbox> ./scripts/deploy/staging-init.sh` writes
+   `deploy/.env.staging` (new secrets; never commit), the shared keys, and,
+   once DNS resolves, the Caddy site
+   `/opt/hireforge/deploy/caddy-sites/staging.caddy`. Login:
+   `grep STAGING_BASIC_AUTH deploy/.env.staging`.
 
-Then, for every change (images are built once and reused):
-
-```bash
-./scripts/deploy/ship.sh staging     # check it on https://staging.sljakam.com
-./scripts/deploy/ship.sh             # same images to production
-```
-
-Rollback: `./scripts/deploy/release.sh <sha> staging` (see
-`backups/releases-staging.log`). Image pruning keeps the last 3 releases of
-both environments. Reset staging data: `docker compose -f
-compose.staging.yml down -v`, then ship again (fresh database and seed).
+Rollback: `./scripts/deploy/release.sh <sha> staging` from
+`/opt/hireforge-staging` (see `/opt/hireforge/backups/releases-staging.log`).
+Reset staging data: `docker compose -f compose.staging.yml down -v` in
+`/opt/hireforge-staging`, then run the `deploy-staging` workflow again
+(fresh database and seed).
