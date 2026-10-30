@@ -664,6 +664,11 @@ shared components, CSS-only motion within the Lighthouse budgets.
   Tests: `about.spec.ts` line test and `scroll-motion.spec.ts` (every
   scroll animation on the main public pages follows the page scroll); both
   failed before.
+- **Demo jobs for design work** (branch `feat/demo-jobs-seed`, 2026-10-30):
+  `pnpm db:seed:demo-jobs` fills a local DB with 300 live and ~12 ended
+  jobs from 40 `demo-` companies, eight extra local categories and a
+  big-city-weighted spread; deterministic, so before/after screenshots match.
+  `-- --count N` for more, `-- --remove` to clear. Refuses non-local hosts.
 
 ## Sign-up draft, job search layout, employers pitch (branch `fix/signup-draft-and-job-list`, 2026-10-29)
 
