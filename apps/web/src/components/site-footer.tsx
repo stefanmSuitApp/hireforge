@@ -17,6 +17,7 @@ import { fetchPublicJobTaxonomy, fetchPublicSitemap } from '@/lib/public-jobs';
 import { Link } from '@/i18n/navigation';
 import { absoluteSiteOrigin } from '@/lib/site-origin';
 
+import { AnalyticsConsentSettingsButton } from './analytics-consent';
 import { BrandWordmark } from './brand-wordmark';
 
 const emptyTaxonomy = { cities: [], categories: [] };
@@ -38,9 +39,12 @@ async function footerLandingLinks(locale: string) {
 
 export async function SiteFooter({
   legal,
+  analyticsConsent,
 }: {
   /** Published legal pages, in display order. */
   legal: readonly LegalPageKind[];
+  /** Clarity is configured: offer a way to change the choice. */
+  analyticsConsent: boolean;
 }) {
   const locale = await getLocale();
   const t = await getTranslations('Footer');
@@ -245,7 +249,7 @@ export async function SiteFooter({
               </Link>
             </Button>
           ) : null}
-          {legal.length ? (
+          {legal.length || analyticsConsent ? (
             <nav aria-label={t('legalNav')}>
               <ul className="m-0 flex list-none flex-wrap gap-x-5 gap-y-2 p-0 text-xs">
                 {legal.map((kind) => (
@@ -259,6 +263,11 @@ export async function SiteFooter({
                     </Link>
                   </li>
                 ))}
+                {analyticsConsent ? (
+                  <li>
+                    <AnalyticsConsentSettingsButton className="cursor-pointer text-footer-foreground/85 underline-offset-2 hover:text-footer-foreground hover:underline" />
+                  </li>
+                ) : null}
               </ul>
             </nav>
           ) : null}

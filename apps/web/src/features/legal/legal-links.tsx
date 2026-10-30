@@ -24,6 +24,10 @@ export function LegalLinksProvider({
   );
 }
 
+export function usePublishedLegalPages(): readonly LegalPageKind[] {
+  return React.useContext(PublishedLegalPages);
+}
+
 const linkClass = 'font-medium text-primary underline-offset-2 hover:underline';
 
 /** Refund policy and terms next to the package purchase. */

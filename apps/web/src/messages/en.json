@@ -1474,5 +1474,14 @@
   },
   "Common": {
     "cancel": "Cancel"
+  },
+  "Consent": {
+    "label": "Analytics cookies",
+    "title": "May we record how you use the site?",
+    "text": "With your permission we use Microsoft Clarity: it records clicks and scrolling on public pages, so we can see what is unclear and fix it. What you type into fields is never recorded, nor are your account pages or job applications.",
+    "privacyLink": "More in the privacy policy.",
+    "accept": "Accept",
+    "decline": "Decline",
+    "settings": "Cookie settings"
   }
 }

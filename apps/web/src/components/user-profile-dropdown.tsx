@@ -152,8 +152,10 @@ export function UserProfileDropdown({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
+        {/* Name and email stay out of Clarity recordings on public pages. */}
         <button
           type="button"
+          data-clarity-mask="true"
           className="flex items-center gap-2 rounded-full border border-border/40 bg-card/50 py-1 pl-1 pr-3 transition-all hover:border-primary/40 hover:bg-primary/5"
         >
           <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-xs font-bold text-primary-foreground">
@@ -165,6 +167,7 @@ export function UserProfileDropdown({
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
+        data-clarity-mask="true"
         align="end"
         className="w-56 rounded-xl border-border/60 p-2"
       >

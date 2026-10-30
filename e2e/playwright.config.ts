@@ -15,6 +15,16 @@ const apiOrigin = `http://127.0.0.1:${API_PORT}`;
  */
 const webMode = process.env['E2E_WEB'] === 'start' ? 'start' : 'dev';
 
+/**
+ * A second `next start` of the same build with a Clarity project id, for
+ * e2e/analytics-consent.spec.ts; the main server has none, so no other spec
+ * sees the consent banner. `next dev` cannot run twice in one checkout.
+ */
+export const CLARITY_WEB_PORT = Number(
+  process.env['E2E_CLARITY_WEB_PORT'] ?? WEB_PORT + 1,
+);
+export const E2E_CLARITY_PROJECT_ID = 'e2eclarity1';
+
 const databaseUrl = process.env['E2E_DATABASE_URL'] ?? '';
 const redisUrl = process.env['E2E_REDIS_URL'] ?? '';
 
@@ -104,5 +114,22 @@ export default defineConfig({
         GOOGLE_SITE_VERIFICATION: 'e2e-google-verification',
       },
     },
+    ...(webMode === 'start'
+      ? [
+          {
+            command: `node ../../node_modules/next/dist/bin/next start --port ${CLARITY_WEB_PORT} --hostname 127.0.0.1`,
+            cwd: '../apps/web',
+            url: `http://127.0.0.1:${CLARITY_WEB_PORT}/sr/employer/login`,
+            reuseExistingServer: false,
+            timeout: 60_000,
+            env: {
+              NEXT_PUBLIC_API_URL: apiOrigin,
+              NEST_API_URL: apiOrigin,
+              NEXT_PUBLIC_APP_URL: `http://127.0.0.1:${WEB_PORT}`,
+              CLARITY_PROJECT_ID: E2E_CLARITY_PROJECT_ID,
+            },
+          },
+        ]
+      : []),
   ],
 });

@@ -8,7 +8,7 @@
  * Never overwrites: a kind that already has a draft or a published document
  * is skipped, so edits made in Studio are safe.
  *
- * Usage: pnpm cms:seed:legal [--dry-run] [--publish] [--replace]
+ * Usage: pnpm cms:seed:legal [--dry-run] [--publish] [--replace] [--only <kind>]
  * Needs SANITY_PROJECT_ID, SANITY_DATASET and SANITY_API_WRITE_TOKEN (.env);
  * --dry-run only converts and prints, without a token.
  */
@@ -22,9 +22,21 @@ import { config } from 'dotenv';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 config({ path: join(root, '.env') });
 
-const KINDS = ['privacy', 'terms', 'refunds'];
-/** The texts' version; change it in Studio whenever the text changes. */
-const EFFECTIVE_FROM = '2026-10-29';
+const ALL_KINDS = ['privacy', 'terms', 'refunds'];
+const onlyArg = process.argv.indexOf('--only');
+const KINDS = onlyArg >= 0 ? [process.argv[onlyArg + 1]] : ALL_KINDS;
+if (!KINDS.every((k) => ALL_KINDS.includes(k))) {
+  throw new Error(`[hireforge] --only takes one of: ${ALL_KINDS.join(', ')}`);
+}
+/**
+ * Each text's version: bump it with the text. The terms' date is recorded as
+ * the accepted version at sign-up, so change it only when the terms change.
+ */
+const EFFECTIVE_FROM = {
+  privacy: '2026-10-31',
+  terms: '2026-10-29',
+  refunds: '2026-10-29',
+};
 const PUBLISH = process.argv.includes('--publish');
 // Overwrites Studio edits: only for correcting a seed nobody has edited yet.
 const REPLACE = process.argv.includes('--replace');
@@ -112,7 +124,7 @@ function legalDoc(kind) {
     _id: PUBLISH ? `legal-${kind}` : `drafts.legal-${kind}`,
     _type: 'legalPage',
     title: { _type: 'localeString', sr: sr.title, en: en.title },
-    effectiveFrom: EFFECTIVE_FROM,
+    effectiveFrom: EFFECTIVE_FROM[kind],
     ...(kind === 'refunds'
       ? { summary: { _type: 'localeText', ...REFUND_SUMMARY } }
       : {}),

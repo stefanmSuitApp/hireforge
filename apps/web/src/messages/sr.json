@@ -1474,5 +1474,14 @@
   },
   "Common": {
     "cancel": "Otkaži"
+  },
+  "Consent": {
+    "label": "Kolačići za analitiku",
+    "title": "Smemo li da beležimo kako koristiš sajt?",
+    "text": "Uz tvoju dozvolu koristimo Microsoft Clarity: beleži klikove i skrolovanje na javnim stranicama, da bismo videli šta je nejasno i popravili to. Ono što upišeš u polja se ne snima, kao ni stranice tvog naloga i prijave na oglase.",
+    "privacyLink": "Više u politici privatnosti.",
+    "accept": "Prihvatam",
+    "decline": "Odbijam",
+    "settings": "Podešavanja kolačića"
   }
 }
