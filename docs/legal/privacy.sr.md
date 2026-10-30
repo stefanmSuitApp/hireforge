@@ -22,12 +22,15 @@ Za sva pitanja o podacima o ličnosti piši na [maticstefan1996@gmail.com](mailt
 
 **Poslodavci:** podaci o kompaniji (naziv, PIB, matični broj, adresa, bankovni račun), kontakt za fakturisanje (ime, e-adresa, telefon), odgovorno lice i njegova funkcija, oglasi i istorija paketa, predračuna, računa i uplata.
 
-**Tehnički podaci:** radi zaštite od zloupotrebe (na primer pokušaja pogađanja lozinke) privremeno beležimo IP adresu uz broj pokušaja prijave, registracije i sličnih radnji. Ti zapisi se sami brišu posle najviše jednog sata (pri kliku na link za prijavu na spoljnom sajtu, posle najviše sedam dana i bez IP adrese). Ne koristimo alate za analitiku ni oglašavanje.
+**Tehnički podaci:** radi zaštite od zloupotrebe (na primer pokušaja pogađanja lozinke) privremeno beležimo IP adresu uz broj pokušaja prijave, registracije i sličnih radnji. Ti zapisi se sami brišu posle najviše jednog sata (pri kliku na link za prijavu na spoljnom sajtu, posle najviše sedam dana i bez IP adrese).
+
+**Analitika, samo uz tvoj pristanak:** ako na traci o kolačićima izabereš „Prihvatam", Microsoft Clarity na javnim stranicama sajta (početna, oglasi, stranice kompanija, registracija) beleži kako koristiš stranicu: klikove, skrolovanje, pokrete miša, veličinu ekrana, vrstu uređaja i pregledača i približnu lokaciju po IP adresi. Ono što upisuješ u polja se ne beleži, a stranice naloga, kontrolne table i prijave na oglase se nikad ne snimaju. Ne koristimo alate za oglašavanje.
 
 ## Zašto ih koristimo i na kom osnovu
 
 - **Izvršenje ugovora** (član 12. stav 1. tačka 2) Zakona o zaštiti podataka o ličnosti): otvaranje i vođenje naloga, prijave na oglase i njihovo prosleđivanje poslodavcu, objava oglasa, paketi i plaćanje, slanje poruka vezanih za nalog (potvrda e-adrese, reset lozinke, obaveštenja o prijavama i oglasima, predračuni i računi).
 - **Zakonska obaveza** (tačka 3): čuvanje računovodstvenih isprava (predračuni, računi, knjižna odobrenja) i podataka potrebnih za njih.
+- **Pristanak** (tačka 1): analitika korišćenja sajta (Microsoft Clarity). Pristanak možeš povući u svakom trenutku preko linka „Podešavanja kolačića" u dnu stranice; povlačenje ne utiče na zakonitost obrade pre toga.
 - **Legitimni interes** (tačka 6): bezbednost sajta i zaštita od zloupotrebe, rezervne kopije baze, rešavanje sporova.
 
 Ne prodajemo podatke i ne koristimo ih za oglašavanje. Ne donosimo automatizovane odluke o tebi.
@@ -38,7 +41,8 @@ Ne prodajemo podatke i ne koristimo ih za oglašavanje. Ne donosimo automatizova
 - **Osoblje Šljakama** (moderatori i administratori) pristupa podacima samo koliko je potrebno za podršku, proveru oglasa i naplatu.
 - **Obrađivači** koji za nas pružaju tehničke usluge, po ugovoru i samo po našem nalogu:
   - Hetzner Online GmbH, Nemačka: serveri, baza podataka, fajlovi i rezervne kopije (centar podataka u Nirnbergu);
-  - Resend, Inc., SAD: slanje e-pošte (tvoja e-adresa i sadržaj poruke).
+  - Resend, Inc., SAD: slanje e-pošte (tvoja e-adresa i sadržaj poruke);
+  - Microsoft Corporation, SAD: analitika korišćenja sajta (Microsoft Clarity), samo ako si dao pristanak.
 - **Državni organi**, kada to zakon nalaže.
 
 Sadržaj sajta (tekstovi, oglasne kampanje) uređujemo u Sanity CMS-u; tamo se ne nalaze podaci o korisnicima.
@@ -52,6 +56,7 @@ Sadržaj sajta (tekstovi, oglasne kampanje) uređujemo u Sanity CMS-u; tamo se n
 - **Predračuni, računi, uplate i podaci o kompaniji:** 10 godina (zakonski rok).
 - **Evidencija radnji osoblja:** trajno.
 - **Rezervne kopije baze:** do 30 dana.
+- **Analitika (Microsoft Clarity):** snimci sesija do 30 dana, zbirni podaci (na primer mape klikova) do 13 meseci.
 
 ## Tvoja prava
 
@@ -63,13 +68,17 @@ Ako smatraš da obrada nije u skladu sa zakonom, možeš podneti pritužbu Pover
 
 ## Kolačići i lokalno skladište
 
-Koristimo samo ono što je neophodno da sajt radi; za to nije potreban pristanak.
+Kolačiće i skladište neophodne za rad sajta koristimo bez pitanja; analitičke kolačiće samo ako ih prihvatiš.
 
 - **Kolačići za prijavu na nalog** (`hf_candidate_access`, `hf_candidate_refresh`, `hf_access`, `hf_refresh`, `hf_staff_access`, `hf_staff_refresh`): drže te prijavljenim; kratki traju 14 minuta, dugi 14 dana.
 - **`NEXT_LOCALE`**: pamti izabrani jezik.
 - **Lokalno skladište pregledača:** tema (svetla/tamna), poslednji pregledani oglasi, da li si zatvorio traku za registraciju i nedovršena registracija poslodavca (da se ne izgubi ako osvežiš stranicu; briše se kada registracija uspe).
 
-Ne koristimo kolačiće za analitiku ni oglašavanje. Ako ih ikad uvedemo, tražićemo tvoj pristanak.
+- **`hf_analytics_consent`**: pamti tvoj izbor o analitici, 6 meseci; posle toga te ponovo pitamo.
+
+**Analitički kolačići, samo uz pristanak:** `_clck` (prepoznaje isti pregledač, do godinu dana) i `_clsk` (spaja preglede stranica u jednu posetu, jedan dan), koje postavlja Microsoft Clarity na sljakam.com; Microsoft može postaviti i svoje kolačiće na domenu clarity.ms (na primer `CLID`, `MUID`, do 13 meseci). Ako odbiješ ili kasnije povučeš pristanak, Clarity se ne učitava, a kolačiće `_clck` i `_clsk` brišemo.
+
+Ne koristimo kolačiće za oglašavanje.
 
 ## Bezbednost
 

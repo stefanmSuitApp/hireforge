@@ -35,6 +35,11 @@ starting draft and the copy for the lawyer.
   - the minimum age for a candidate account (15);
   - "not an employment agency" against the Law on Employment;
   - the liability cap and the court in Niš.
+  - Microsoft Clarity (added 2026-10-31, consent only): whether Microsoft
+    acts as our processor or as an independent controller under the
+    Clarity terms, and the basis for the transfer to the USA;
+  - the Clarity retention periods stated (recordings 30 days, aggregates
+    13 months) against the current Clarity settings.
 - Account deletion is by email request until C2 ships; then the privacy
   policy and terms should mention the settings page (a Sanity edit with a
   new "Effective from").
@@ -55,13 +60,19 @@ starting draft and the copy for the lawyer.
 - **Shared with employers:** only data from applications to their own jobs.
   There is no searchable candidate database.
 - **IP addresses:** only in Redis rate-limit counters, which expire within
-  1 hour. No access logs, no analytics, no advertising, no third-party
-  scripts.
+  1 hour. No access logs, no advertising.
+- **Analytics (from 2026-10-31):** Microsoft Clarity, loaded only after the
+  visitor accepts the cookie bar, and only on public pages and the two
+  sign-up pages (`apps/web/src/lib/analytics-consent.ts`). Inputs are masked
+  by Clarity; other pages are masked and never load it. The choice is kept
+  in `hf_analytics_consent` for 180 days.
 - **Processors:**
   - Hetzner Online GmbH: server and backups, Nuremberg, Germany;
   - Resend, Inc. (USA): transactional email;
+  - Microsoft Corporation (USA): Clarity analytics, consent only;
   - Sanity: CMS content only, no user data.
-- **Cookies:** sign-in cookies (14 min / 14 days) and `NEXT_LOCALE` only;
+- **Cookies:** sign-in cookies (14 min / 14 days), `NEXT_LOCALE`,
+  `hf_analytics_consent`, and with consent Clarity's `_clck` / `_clsk`;
   localStorage holds the theme, recently viewed jobs, sign-up bar state and
   an unfinished employer sign-up.
 - **Backups:** database dumps are kept 14 days on the server and 30 days in

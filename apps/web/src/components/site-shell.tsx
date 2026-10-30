@@ -1,22 +1,31 @@
 import { getLocale, getTranslations } from 'next-intl/server';
+import { cookies } from 'next/headers';
 
+import {
+  ANALYTICS_CONSENT_COOKIE,
+  clarityProjectId,
+  parseAnalyticsConsent,
+} from '@/lib/analytics-consent';
 import { LegalLinksProvider } from '@/features/legal/legal-links';
 import { fetchCmsPublishedLegalPages } from '@/lib/cms-content';
 import { resolvePromoBanner } from '@/lib/promo-banner';
 import { getUnifiedAuthSession, hasAnyAuthSession } from '@/lib/unified-auth';
 
+import { AnalyticsConsentBanner } from './analytics-consent';
 import { GuestSignUpBar } from './guest-sign-up-bar';
 import { PromoBar } from './promo-bar';
 import { SiteFooter } from './site-footer';
 import { SiteHeader } from './site-header';
 
 export async function SiteShell({ children }: { children: React.ReactNode }) {
-  const [t, locale, session, anySession] = await Promise.all([
+  const [t, locale, session, anySession, cookieStore] = await Promise.all([
     getTranslations('Nav'),
     getLocale(),
     getUnifiedAuthSession(),
     hasAnyAuthSession(),
+    cookies(),
   ]);
+  const clarity = clarityProjectId();
   const guest = !anySession;
   const [legalPages, promo] = await Promise.all([
     fetchCmsPublishedLegalPages(),
@@ -42,8 +51,16 @@ export async function SiteShell({ children }: { children: React.ReactNode }) {
         >
           {children}
         </div>
-        <SiteFooter legal={legal} />
+        <SiteFooter legal={legal} analyticsConsent={clarity !== null} />
         <GuestSignUpBar guest={guest} />
+        {clarity ? (
+          <AnalyticsConsentBanner
+            projectId={clarity}
+            initialChoice={parseAnalyticsConsent(
+              cookieStore.get(ANALYTICS_CONSENT_COOKIE)?.value,
+            )}
+          />
+        ) : null}
       </div>
     </LegalLinksProvider>
   );

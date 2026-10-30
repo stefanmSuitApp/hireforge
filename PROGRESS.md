@@ -705,6 +705,35 @@ shared components, CSS-only motion within the Lighthouse budgets.
   big-city-weighted spread; deterministic, so before/after screenshots match.
   `-- --count N` for more, `-- --remove` to clear. Refuses non-local hosts.
 
+## Analytics: Microsoft Clarity behind consent (branch `feat/clarity-consent`, 2026-10-31)
+
+Stefan's choices: Clarity loads **only after "Prihvatam"**, records **only
+public pages and the two sign-up pages**, no cookieless counter for now.
+
+- `lib/analytics-consent.ts`: an allow-list of recorded paths (new private
+  pages are never recorded by default; `/jobs/*/apply` is not), the
+  `hf_analytics_consent` cookie (180 days) and `CLARITY_PROJECT_ID`
+  (runtime env, validated; unset = no banner, no script, so staging, dev
+  and e2e never record).
+- `components/analytics-consent.tsx`: bottom banner with equal-weight
+  Odbijam / Prihvatam and a privacy link; Microsoft's tag inserted only
+  after acceptance with `consentv2` (ads denied); a private page reached by
+  client navigation gets `data-clarity-mask` on `<body>` in a layout effect
+  (before Clarity sees it) plus `clarity('pause')` (undocumented, best
+  effort); withdrawal deletes `_clck` / `_clsk` and reloads without it.
+  Footer "Podešavanja kolačića" reopens the banner. The profile menu is
+  masked on public pages.
+- Tests: `analytics-consent.test.ts` (paths, id), `analytics-consent.test.tsx`
+  (clicks; the two "no load before consent" tests fail when the loader
+  ignores the choice); `e2e/analytics-consent.spec.ts` against a second
+  `next start` with a Clarity id (production build only) and the tag
+  stubbed.
+- Privacy policy drafts (`docs/legal/privacy.*.md`, version 2026-10-31):
+  consent basis, Microsoft as processor, cookies, retention; lawyer items
+  in `docs/legal/README.md`. `cms:seed:legal` gained `--only <kind>` and
+  per-page dates. **Not live:** waits for Stefan to read the text and send
+  the project id (NEEDS_STEFAN).
+
 ## Sign-up draft, job search layout, employers pitch (branch `fix/signup-draft-and-job-list`, 2026-10-29)
 
 - **Employer sign-up:** a first visit no longer shows "Vraćen je sačuvan

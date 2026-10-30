@@ -288,11 +288,13 @@ izdavaoca` in **test mode only**. Production refuses to issue
   lawyer.
 - **D5 — Credit notes:** full amount only. Partial ones only if a real
   case needs them.
-- **D6 — No cookie banner yet:**
-  - The site only sets strictly necessary cookies (session, locale, guest
-    sign-up bar in localStorage), which need no consent.
-  - The banner comes with analytics, if GA4 is chosen. A cookieless tool
-    needs none.
+- **D6 — Cookie banner only with analytics:**
+  - Without analytics the site only sets strictly necessary cookies
+    (session, locale, guest sign-up bar in localStorage), which need no
+    consent.
+  - 2026-10-31, Stefan: Microsoft Clarity, loaded only after the visitor
+    accepts, only on public pages and sign-up; no cookieless counter for
+    now. The banner exists only while `CLARITY_PROJECT_ID` is set.
   - The privacy policy lists the cookies.
 - **D7 — Billing emails** keep going to the employer user for now. The
   Phase T question about `billing_email` stays open.
