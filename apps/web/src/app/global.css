@@ -354,10 +354,15 @@ html body[data-scroll-locked] {
       animation-timeline: view();
       animation-range: entry 0% cover 28%;
     }
+    /* The line follows its whole section (.hf-draw-scope), so it is done by
+       the time the section is on screen, not halfway up it. */
+    .hf-draw-scope {
+      view-timeline-name: --hf-draw;
+    }
     .hf-draw {
       animation: hf-draw linear both;
-      animation-timeline: view();
-      animation-range: entry 10% cover 45%;
+      animation-timeline: --hf-draw;
+      animation-range: entry 20% entry 100%;
     }
   }
   .hf-gradient-text {

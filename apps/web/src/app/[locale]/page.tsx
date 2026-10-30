@@ -162,7 +162,7 @@ export default async function HomePage({
       {/* Hero (redesign A): search on the left, real featured jobs floating
           on the right (large screens) until a hero photo is chosen. The title
           and search don't animate: they are the LCP. */}
-      <section className="relative overflow-hidden pb-14 pt-10 md:pb-24 md:pt-16">
+      <section className="relative overflow-clip pb-14 pt-10 md:pb-24 md:pt-16">
         <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
           <div>
             <span className="inline-flex items-center gap-2 rounded-full bg-featured-soft px-3.5 py-2 text-sm font-semibold text-featured-soft-foreground">
