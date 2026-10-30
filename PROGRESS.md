@@ -454,6 +454,13 @@ Found with a scripted sweep of the live public pages at 375 and 1440 px
   paragraphs (sr/en); navigation without "Početna"; no campaign slots.
 - Publishing `homeJobsDiscovery` now refreshes the home tiles at once
   (webhook route revalidates `cms:homeJobsDiscovery`).
+- **Webhooks** (2026-10-31, `fix/cms-fresh-reads`): production and staging
+  webhooks both answer 200, yet a publish took ~5 minutes to show: the web
+  client read Sanity through the API CDN, so the webhook's immediate
+  refetch cached the not-yet-updated copy. The web client now reads with
+  `useCdn: false` (reads are already cached 5 minutes by Next), and
+  publishing the About editorial page also refreshes `/sr/about` and
+  `/en/about`.
 - Order: deploy the migration to production **before** running the seed
   (staging and production share the Sanity dataset; the home page hides
   tiles whose slug the database doesn't have yet).

@@ -150,10 +150,18 @@ projection {_type, slug, companySlug}
 header x-sanity-webhook-secret: <SANITY_WEBHOOK_SECRET>
 ```
 
+Staging has its own webhook, `staging.sljakam.com revalidate`: the same
+settings with `https://staging.sljakam.com/api/revalidate/sanity` and
+staging's secret (`deploy/.env.staging` in `/opt/hireforge-staging`).
+
 Use the header, not Sanity's "Secret" field: that one sends a signature the
 route doesn't check. Rotating `SANITY_WEBHOOK_SECRET` means editing this
 header too, or the site answers 401 and edits wait for the 5-minute cache.
-Test: change a field, the page shows it within seconds; revert it.
+The web app reads Sanity with `useCdn: false`: the API CDN can lag a
+publish, and the webhook's refetch would cache that stale copy.
+Test: change a field, the page shows it within seconds; revert it. Each
+webhook's Attempts log (or `sanity hook logs "<name>"` from `apps/cms`)
+shows the status codes.
 
 For billing PDFs on Hetzner Object Storage, set:
 

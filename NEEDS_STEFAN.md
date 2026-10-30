@@ -5,13 +5,7 @@ priority. Remove an item when it is done. **No secrets in this file.**
 
 ## ▶ Next, in order (updated 2026-10-29)
 
-1. Sanity webhook (~1 min): the webhook secret was rotated at 11:41 UTC, so
-   the webhook still sends the old one and the site answers 401 (CMS edits
-   then take up to 5 minutes). Sanity → project `o85214ma` → API → Webhooks
-   → `sljakam.com revalidate` → Edit → HTTP header
-   `x-sanity-webhook-secret` = the new `SANITY_WEBHOOK_SECRET` from the
-   server (`grep ^SANITY_WEBHOOK_SECRET= deploy/.env.production | cut -d= -f2-`).
-2. Redesign A (2026-10-29, #60–#64): staging has every step; production
+1. Redesign A (2026-10-29, #60–#64): staging has every step; production
    is the manual `deploy-production` run when you are happy with staging.
    After it: deploy the Studio so editors see the new **Logo** field on
    Employer branding (`cd apps/cms && SANITY_STUDIO_PROJECT_ID=o85214ma
@@ -20,11 +14,17 @@ SANITY_STUDIO_DATASET=production pnpm exec sanity deploy`), then upload
    has #59's home tiles, About and navigation (seeded 2026-10-30), so
    sljakam.com shows **no category tiles until this deploy** (its database
    still has the old categories).
-3. When convenient: `sudo systemctl restart docker` (item 2), Sentry (3),
+2. When convenient: `sudo systemctl restart docker` (item 2), Sentry (3),
    accountant (4), legal texts (5), Phase T decisions, social profiles,
    analytics, Google Indexing API.
 
 ## ✅ Done
+
+- **Sanity webhooks** (2026-10-31): `sljakam.com revalidate` had the right
+  secret already; Stefan added `staging.sljakam.com revalidate` (staging's
+  own secret). Both answer 200 on every publish (Sanity → webhook →
+  Attempts log). Edits show within seconds once `fix/cms-fresh-reads` is
+  deployed (the site read Sanity through its CDN and re-cached stale data).
 
 - **City photos** (2026-10-30): Beograd, Novi Sad and Niš from Pixabay
   (Stefan's picks), Kragujevac (CC0) and Subotica (public domain) from

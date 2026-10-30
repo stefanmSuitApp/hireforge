@@ -5,6 +5,9 @@ import { LEGAL_PAGE_KINDS } from '@/lib/cms-content';
 
 export const dynamic = 'force-dynamic';
 
+/** Slugs `app/[locale]/about/page.tsx` reads (primary, then fallback). */
+const ABOUT_PAGE_SLUGS = ['about-hireforge', 'about'];
+
 type SanityWebhookPayload = {
   _type?: string;
   slug?: { current?: string } | string;
@@ -73,6 +76,11 @@ export async function POST(req: NextRequest) {
     revalidateTag(`cms:editorialPage:${changedSlug}`, 'max');
     revalidatePath(`/sr/p/${changedSlug}`);
     revalidatePath(`/en/p/${changedSlug}`);
+    // /about renders these editorial pages under its own path.
+    if (ABOUT_PAGE_SLUGS.includes(changedSlug)) {
+      revalidatePath('/sr/about');
+      revalidatePath('/en/about');
+    }
   }
 
   // Few and cheap: refresh every legal page (and the footer / sign-up links).
