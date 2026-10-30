@@ -305,7 +305,7 @@ async function insertPublishedJob(
        FROM companies c
        JOIN users u ON u.email = 'employer@hireforge.local'
        JOIN cities ci ON ci.slug = 'beograd' AND ci.country_code = 'RS'
-       JOIN job_categories jc ON jc.slug = 'it'
+       JOIN job_categories jc ON jc.slug = 'informacione-tehnologije'
        WHERE c.slug = 'devlegion'
        RETURNING id`,
       [

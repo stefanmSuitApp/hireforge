@@ -63,7 +63,9 @@ test('the sitemap index lists live jobs, companies and landing pages, no sign-in
 
   const landing = await (await request.get('/sitemaps/landing-0.xml')).text();
   expect(landing).toContain(`<loc>${origin()}/sr/jobs/city/beograd</loc>`);
-  expect(landing).toContain(`<loc>${origin()}/sr/jobs/category/it</loc>`);
+  expect(landing).toContain(
+    `<loc>${origin()}/sr/jobs/category/informacione-tehnologije</loc>`,
+  );
   expect(landing).not.toContain('novi-sad');
 
   for (const url of [...jobs.matchAll(/<loc>([^<]+)<\/loc>/g)].slice(0, 4)) {
