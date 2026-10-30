@@ -654,6 +654,16 @@ shared components, CSS-only motion within the Lighthouse budgets.
     employers list and company page.
   - Needs the Studio deployed to show the field (NEEDS_STEFAN).
   - Test: `company-initials.test.tsx` (the logo case failed before).
+- **Fix, scroll motion** (branch `fix/about-timeline-line`, 2026-10-30):
+  Stefan saw the "Kako rastemo" line half drawn on staging. `overflow-hidden`
+  on the About `<main>` (and the home hero section) made a scroll container
+  that never scrolls, so every scroll-linked reveal inside froze at a fixed
+  point and the sticky pillar cards did not stick. Now `overflow-clip`
+  (same clipping, no scroll container). The line follows its whole section
+  (`hf-draw-scope`) and is fully drawn once the section is on screen.
+  Tests: `about.spec.ts` line test and `scroll-motion.spec.ts` (every
+  scroll animation on the main public pages follows the page scroll); both
+  failed before.
 
 ## Sign-up draft, job search layout, employers pitch (branch `fix/signup-draft-and-job-list`, 2026-10-29)
 

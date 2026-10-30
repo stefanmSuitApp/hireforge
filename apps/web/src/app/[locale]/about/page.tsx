@@ -104,7 +104,7 @@ export default async function AboutPage({
     .slice(0, COLLAGE.length);
 
   return (
-    <main className="overflow-hidden">
+    <main className="overflow-clip">
       <section className="mx-auto grid max-w-6xl items-center gap-10 px-4 pb-20 pt-10 md:grid-cols-2 md:pt-14">
         <div>
           <span className="inline-flex rounded-full bg-featured-soft px-3.5 py-2 text-sm font-bold text-featured-soft-foreground">
@@ -236,13 +236,14 @@ export default async function AboutPage({
         </section>
       ) : null}
 
-      <section className="mx-auto max-w-6xl px-4 pb-24 pt-16">
+      <section className="hf-draw-scope mx-auto max-w-6xl px-4 pb-24 pt-16">
         <h2 className="hf-reveal m-0 text-[clamp(2.125rem,5vw,3.5rem)] font-black tracking-[-0.04em] text-foreground">
           {t('aboutJourneyTitle')}
         </h2>
         <div className="relative mt-10">
           <div
             aria-hidden
+            data-testid="about-timeline-line"
             className="hf-draw absolute inset-x-0 top-[22px] hidden h-1 rounded bg-featured md:block"
           />
           <ol className="relative m-0 grid list-none gap-7 p-0 md:grid-cols-3">
