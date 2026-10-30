@@ -445,7 +445,8 @@ Found with a scripted sweep of the live public pages at 375 and 1440 px
   label, the declined button text (`exploreLabel`: "Istraži Suboticu") and a
   landing intro (`intro`). Category images are generated in the Design A
   palette (`scripts/cms/home-images/generate-category-images.mjs`, 1200×660);
-  city photos wait for Stefan (credit-free only; NEEDS_STEFAN). Web builds
+  city photos are credit-free (Pixabay, CC0, public domain; sources in
+  `scripts/cms/home-images/cities/SOURCES.md`). Web builds
   tile images at Design A sizes (categories 436×240, cities 1104×880) and
   `fetchCmsLandingSpotlight` gives the redesign's landing pages intro + hero.
   The design session (seo-31) renders them; this branch doesn't touch the rail.
@@ -456,6 +457,14 @@ Found with a scripted sweep of the live public pages at 375 and 1440 px
 - Order: deploy the migration to production **before** running the seed
   (staging and production share the Sanity dataset; the home page hides
   tiles whose slug the database doesn't have yet).
+- **Seeded 2026-10-30 (Stefan's call, before the production deploy):** the
+  shared `production` dataset has the new home tiles (with all city and
+  category images), About and navigation; staging shows them. Until
+  production is deployed, sljakam.com shows no category tiles (its database
+  still has only `it` / `marketing`). Only those three documents were
+  written: the full `pnpm cms:seed` also resets `campaign-calendar` to no
+  slots and would wipe the live "Nedelja besplatnih oglasa" slot, so don't
+  run it against `production` as is.
 
 ### Design review 02 (`design/review-02.md`, 2026-10-29)
 
