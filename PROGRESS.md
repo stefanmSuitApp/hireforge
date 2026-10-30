@@ -56,6 +56,15 @@ pnpm build` (+ `pnpm check:i18n`) = `pnpm verify`; PRs run it locally, CI on
   (`e2e/support/fake-resend.mjs`) and the worker, and serves web with
   `next dev` (local) or a production build with `E2E_WEB=start` (CI).
   Tests that need email read it from the fake (`e2e/support/mail.ts`).
+- **Sanity Studio** (2026-10-31, `fix/cms-studio-env`): the hosted Studio
+  crashed with "Missing Sanity Studio project id". `apps/cms/env.ts` read
+  the variables with a computed `process.env[key]`, which the Studio build
+  turns into `{}[key]`; it now reads `SANITY_STUDIO_PROJECT_ID` /
+  `SANITY_STUDIO_DATASET` by name (no `NEXT_PUBLIC_*` fallback: the browser
+  bundle never gets those). A stray `apps/cms/node_modules` (a
+  `pnpm install` run inside `apps/cms` on 2026-10-29, second React) made the
+  build crash too; it was moved aside on this Mac. Deploy command:
+  `docs/deployment/hetzner.md` §6. Redeploy needs Stefan's OK.
 
 ### Plan steps, verified against code
 

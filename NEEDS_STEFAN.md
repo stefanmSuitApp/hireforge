@@ -14,9 +14,10 @@ priority. Remove an item when it is done. **No secrets in this file.**
 2. Redesign A (2026-10-29, #60–#64): staging has every step; production
    is the manual `deploy-production` run when you are happy with staging.
    After it: deploy the Studio so editors see the new **Logo** field on
-   Employer branding (`cd apps/cms && SANITY_STUDIO_PROJECT_ID=o85214ma
-SANITY_STUDIO_DATASET=production pnpm exec sanity deploy`), then upload
-   logos; cards show initials until then. The shared Sanity data already
+   Employer branding (command in `docs/deployment/hetzner.md` §6; the old
+   one could not find the CLI, and the live Studio crashes on "Missing
+   Sanity Studio project id" until a build with `fix/cms-studio-env` is
+   deployed), then upload logos; cards show initials until then. The shared Sanity data already
    has #59's home tiles, About and navigation (seeded 2026-10-30), so
    sljakam.com shows **no category tiles until this deploy** (its database
    still has the old categories).
