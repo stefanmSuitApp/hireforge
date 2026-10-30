@@ -49,6 +49,10 @@ export async function POST(req: NextRequest) {
   const changedSlug = slugFromPayload(payload);
   const changedCompanySlug = payload.companySlug?.trim() || changedSlug;
 
+  if (changedType === 'homeJobsDiscovery') {
+    revalidateTag('cms:homeJobsDiscovery', 'max');
+  }
+
   if (changedType === 'campaignCalendar') {
     revalidateTag('cms:campaignCalendar', 'max');
   }

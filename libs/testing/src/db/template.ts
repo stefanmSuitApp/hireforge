@@ -83,6 +83,15 @@ export function taxonomySeedStatements(): string[] {
 }
 
 /**
+ * Test-only categories the fixtures use by slug. Migration 0038 removed them
+ * from real databases, so the dev seed no longer adds them.
+ */
+const FIXTURE_CATEGORIES = `insert into job_categories (slug, name_sr, name_en) values
+  ('it', 'IT', 'IT'),
+  ('marketing', 'Marketing', 'Marketing')
+on conflict (slug) do nothing`;
+
+/**
  * The template every test file copies: migrated by the real migrate, then the
  * RS districts and cities (`pnpm db:seed:rs`) and the taxonomy above.
  */
@@ -98,6 +107,7 @@ export async function prepareTemplate(databaseUrl: string): Promise<void> {
     for (const statement of taxonomySeedStatements()) {
       await client.query(statement);
     }
+    await client.query(FIXTURE_CATEGORIES);
   } finally {
     await client.end();
   }

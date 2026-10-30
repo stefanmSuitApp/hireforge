@@ -258,8 +258,8 @@ export type SeededJob = {
 };
 
 /**
- * A published job of the seed DEVLEGION company in Beograd / IT, with a slug
- * like the publish flow builds (`<stem>-<shortId>`). `expiresAt` in the past
+ * A published job of the seed DEVLEGION company in Beograd / Informacione
+ * tehnologije, with a slug like the publish flow builds (`<stem>-<shortId>`). `expiresAt` in the past
  * makes it an ended ad. Featured (public to guests) unless `featured: false`,
  * which makes it a teaser that needs sign-in.
  */
@@ -305,7 +305,7 @@ async function insertPublishedJob(
        FROM companies c
        JOIN users u ON u.email = 'employer@hireforge.local'
        JOIN cities ci ON ci.slug = 'beograd' AND ci.country_code = 'RS'
-       JOIN job_categories jc ON jc.slug = 'it'
+       JOIN job_categories jc ON jc.slug = 'informacione-tehnologije'
        WHERE c.slug = 'devlegion'
        RETURNING id`,
       [

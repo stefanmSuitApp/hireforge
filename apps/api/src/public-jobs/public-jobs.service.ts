@@ -556,7 +556,7 @@ export class PublicJobsService {
           nameEn: jobCategories.nameEn,
         })
         .from(jobCategories)
-        .orderBy(asc(jobCategories.nameSr));
+        .orderBy(asc(jobCategories.sortOrder), asc(jobCategories.nameSr));
 
       return {
         cities: flat.sort((a, b) => a.nameSr.localeCompare(b.nameSr, 'sr')),

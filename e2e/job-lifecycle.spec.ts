@@ -72,7 +72,7 @@ function jobDraft(title: string) {
     title,
     description: 'Tražimo iskusnog programera za rad u timu u Beogradu.',
     citySlug: 'beograd',
-    categorySlug: 'it',
+    categorySlug: 'informacione-tehnologije',
     workModel: 'onsite',
     employmentType: 'full_time',
     seniority: 'mid',

@@ -90,7 +90,6 @@ describe('the template seed', () => {
     );
     expect([...tables].sort()).toEqual([
       'cities',
-      'job_categories',
       'package_entitlements',
       'package_prices',
       'packages',

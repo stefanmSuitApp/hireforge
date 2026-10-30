@@ -95,10 +95,8 @@ INSERT INTO cities (slug, country_code, name_sr, name_en, postal_code) VALUES
   ('novi-sad', 'RS', 'Novi Sad', 'Novi Sad', '21000')
 ON CONFLICT (slug, country_code) DO NOTHING;
 
-INSERT INTO job_categories (slug, name_sr, name_en) VALUES
-  ('it', 'IT', 'IT'),
-  ('marketing', 'Marketing', 'Marketing')
-ON CONFLICT (slug) DO NOTHING;
+-- Categories come from migration 0038 (the launch set); adding any here would
+-- bring back ones that migration removed.
 
 -- Sample published job (list/browse UI); idempotent on primary key.
 -- Featured, so guests see one full public ad in dev and e2e.
@@ -128,7 +126,7 @@ SELECT
 FROM companies c
 JOIN users u ON u.email = 'employer@hireforge.local'
 JOIN cities ci ON ci.slug = 'beograd' AND ci.country_code = 'RS'
-JOIN job_categories jc ON jc.slug = 'it'
+JOIN job_categories jc ON jc.slug = 'informacione-tehnologije'
 WHERE c.slug = 'devlegion'
 ON CONFLICT (id) DO NOTHING;
 

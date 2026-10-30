@@ -482,6 +482,15 @@ export async function fetchCvTemplates(
   return fetchCvTemplatesCached(locale);
 }
 
+/**
+ * Home tile images at 2× Design A's sizes: category tiles ~218×120, the open
+ * city tab ~552×440 (closed strips and phone tabs are crops of it).
+ */
+const SPOTLIGHT_IMAGE = {
+  category: { w: 436, h: 240 },
+  city: { w: 1104, h: 880 },
+} as const;
+
 export type CmsHomeJobsDiscoveryFetched = {
   categorySpotlights: CmsDiscoverySpotlightRow[];
   citySpotlights: CmsDiscoverySpotlightRow[];
@@ -501,23 +510,27 @@ export async function fetchCmsHomeJobsDiscovery(
             slug: string;
             image: Record<string, unknown> | null;
             labelOverride?: string | null;
+            exploreLabel?: string | null;
           }> | null;
           citySpotlights?: Array<{
             slug: string;
             image: Record<string, unknown> | null;
             labelOverride?: string | null;
+            exploreLabel?: string | null;
           }> | null;
         } | null>(
           `*[_type == "homeJobsDiscovery" && _id in ["homeJobsDiscovery", "drafts.homeJobsDiscovery"]][0]{
           "categorySpotlights": categorySpotlights[]{
             "slug": categorySlug,
             image,
-            "labelOverride": coalesce(label[$locale], label.sr, label.en)
+            "labelOverride": coalesce(label[$locale], label.sr, label.en),
+            "exploreLabel": coalesce(exploreLabel[$locale], exploreLabel.sr, exploreLabel.en)
           },
           "citySpotlights": citySpotlights[]{
             "slug": citySlug,
             image,
-            "labelOverride": coalesce(label[$locale], label.sr, label.en)
+            "labelOverride": coalesce(label[$locale], label.sr, label.en),
+            "exploreLabel": coalesce(exploreLabel[$locale], exploreLabel.sr, exploreLabel.en)
           }
         }`,
           { locale },
@@ -528,21 +541,26 @@ export async function fetchCmsHomeJobsDiscovery(
           return null;
         }
 
-        function rowToSpotlight(entry: {
-          slug: string;
-          image: Record<string, unknown> | null;
-          labelOverride?: string | null;
-        }): CmsDiscoverySpotlightRow {
+        function rowToSpotlight(
+          entry: {
+            slug: string;
+            image: Record<string, unknown> | null;
+            labelOverride?: string | null;
+            exploreLabel?: string | null;
+          },
+          size: { w: number; h: number },
+        ): CmsDiscoverySpotlightRow {
           const slug = entry.slug?.trim() || '';
           return {
             slug,
             labelOverride: entry.labelOverride?.trim() || null,
+            exploreLabel: entry.exploreLabel?.trim() || null,
             imageUrl:
               builder && entry.image && slug
                 ? builder
                     .image(entry.image as never)
-                    .width(640)
-                    .height(480)
+                    .width(size.w)
+                    .height(size.h)
                     .fit('crop')
                     .auto('format')
                     .url()
@@ -552,10 +570,10 @@ export async function fetchCmsHomeJobsDiscovery(
 
         return {
           categorySpotlights: (raw.categorySpotlights ?? [])
-            .map(rowToSpotlight)
+            .map((r) => rowToSpotlight(r, SPOTLIGHT_IMAGE.category))
             .filter((r) => r.slug.length > 0),
           citySpotlights: (raw.citySpotlights ?? [])
-            .map(rowToSpotlight)
+            .map((r) => rowToSpotlight(r, SPOTLIGHT_IMAGE.city))
             .filter((r) => r.slug.length > 0),
         };
       } catch {
@@ -563,6 +581,59 @@ export async function fetchCmsHomeJobsDiscovery(
       }
     },
     ['cms-home-jobs-discovery-v1', locale],
+    { revalidate: 300, tags: ['cms:homeJobsDiscovery'] },
+  )();
+}
+
+export type CmsLandingSpotlight = {
+  intro: string | null;
+  /** Landing hero (~1152×300 in Design A), served at 2×. */
+  imageUrl: string | null;
+};
+
+/** Intro and hero image for a city or category landing page, if the home tiles have one. */
+export async function fetchCmsLandingSpotlight(
+  kind: 'city' | 'category',
+  slug: string,
+  locale: string,
+): Promise<CmsLandingSpotlight | null> {
+  return unstable_cache(
+    async (): Promise<CmsLandingSpotlight | null> => {
+      const client = getCmsClient();
+      if (!client) return null;
+      const builder = getSanityImageBuilder();
+      const field = kind === 'city' ? 'citySpotlights' : 'categorySpotlights';
+      const slugField = kind === 'city' ? 'citySlug' : 'categorySlug';
+      try {
+        const row = await client.fetch<{
+          intro: string | null;
+          image: Record<string, unknown> | null;
+        } | null>(
+          `*[_type == "homeJobsDiscovery" && _id in ["homeJobsDiscovery", "drafts.homeJobsDiscovery"]][0].${field}[${slugField} == $slug][0]{
+            "intro": coalesce(intro[$locale], intro.sr, intro.en),
+            image
+          }`,
+          { slug, locale },
+        );
+        if (!row) return null;
+        return {
+          intro: row.intro?.trim() || null,
+          imageUrl:
+            builder && row.image
+              ? builder
+                  .image(row.image as never)
+                  .width(2304)
+                  .height(600)
+                  .fit('crop')
+                  .auto('format')
+                  .url()
+              : null,
+        };
+      } catch {
+        return null;
+      }
+    },
+    ['cms-landing-spotlight-v1', kind, slug, locale],
     { revalidate: 300, tags: ['cms:homeJobsDiscovery'] },
   )();
 }

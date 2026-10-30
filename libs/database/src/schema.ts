@@ -563,6 +563,8 @@ export const jobCategories = pgTable(
     slug: text('slug').notNull(),
     nameSr: text('name_sr').notNull(),
     nameEn: text('name_en'),
+    /** Display order everywhere categories are listed (0038). */
+    sortOrder: integer('sort_order').notNull().default(1000),
     createdAt: timestamp('created_at', { withTimezone: true })
       .notNull()
       .defaultNow(),

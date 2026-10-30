@@ -302,6 +302,25 @@ describe('filters and search', () => {
     expect(JSON.stringify(res.body)).toContain('beograd');
     expect(JSON.stringify(res.body)).toContain('marketing');
   });
+
+  it('the launch categories come first, in the order Stefan set', async () => {
+    const res = await http(app).get('/api/public/jobs/filters').expect(200);
+    const slugs = (res.body.categories as { slug: string }[]).map(
+      (c) => c.slug,
+    );
+    expect(slugs.slice(0, 10)).toEqual([
+      'trgovina-i-prodaja',
+      'proizvodnja',
+      'usluge-i-zanati',
+      'ugostiteljstvo-i-turizam',
+      'gradjevinarstvo-i-arhitektura',
+      'transport-i-logistika',
+      'informacione-tehnologije',
+      'administracija',
+      'zdravstvo-i-socijalna-zastita',
+      'finansije-i-racunovodstvo',
+    ]);
+  });
 });
 
 describe('external apply clicks', () => {

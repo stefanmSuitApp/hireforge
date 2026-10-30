@@ -178,7 +178,7 @@ export class AdminService {
         createdAt: jobCategories.createdAt,
       })
       .from(jobCategories)
-      .orderBy(jobCategories.nameSr);
+      .orderBy(jobCategories.sortOrder, jobCategories.nameSr);
 
     const items: AdminJobCategoryItem[] = rows.map((r) => ({
       id: r.id,
