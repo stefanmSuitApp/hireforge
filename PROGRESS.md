@@ -454,8 +454,11 @@ Found with a scripted sweep of the live public pages at 375 and 1440 px
   label, the declined button text (`exploreLabel`: "Istraži Suboticu") and a
   landing intro (`intro`). Category images are generated in the Design A
   palette (`scripts/cms/home-images/generate-category-images.mjs`, 1200×660);
-  city photos are credit-free (Pixabay, CC0, public domain; sources in
-  `scripts/cms/home-images/cities/SOURCES.md`). Web builds
+  city photos are credit-free (Pixabay, Pexels, CC0, public domain; sources
+  in `scripts/cms/home-images/cities/SOURCES.md`). Niš was swapped on
+  2026-10-30 for the University of Niš (Pexels, Stefan's pick; free CC0/PD
+  shots of the fortress are poor, the good ones are CC BY-SA and need a
+  credit); only that row was patched in `development` and `production`. Web builds
   tile images at Design A sizes (categories 436×240, cities 1104×880) and
   `fetchCmsLandingSpotlight` gives the redesign's landing pages intro + hero.
   The design session (seo-31) renders them; this branch doesn't touch the rail.

@@ -27,11 +27,14 @@ priority. Remove an item when it is done. **No secrets in this file.**
 
 ## ✅ Done
 
-- **City photos** (2026-10-30): Beograd, Novi Sad and Niš from Pixabay
-  (Stefan's picks), Kragujevac (CC0) and Subotica (public domain) from
-  Wikimedia Commons; sources in `scripts/cms/home-images/cities/SOURCES.md`.
-  Seeded to the `development` and `production` datasets. The Pixabay ones are
-  1280 px (API limit); originals from the linked pages would be sharper.
+- **City photos** (2026-10-30): Beograd and Novi Sad from Pixabay, Niš
+  (University of Niš) from Pexels (Stefan's picks), Kragujevac (CC0) and
+  Subotica (public domain) from Wikimedia Commons; sources in
+  `scripts/cms/home-images/cities/SOURCES.md`. Seeded to the `development`
+  and `production` datasets. The Pixabay ones are 1280 px (API limit);
+  originals from the linked pages would be sharper. `PIXABAY_API_KEY` is no
+  longer in `.env` (lost in an env swap during checks); re-add it if you
+  want more Pixabay searches.
 - **Launch setup** (2026-10-29): production admin password set from the
   reset email; the secrets seen in a screenshot rotated; `INDEXNOW_KEY` set
   (public by design, served at `/<key>.txt`; the worker announces every
