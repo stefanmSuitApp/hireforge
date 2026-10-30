@@ -136,7 +136,9 @@ Sanity project `o85214ma` ("sljakam", dataset `production`, public), owned
 by Stefan's account; it replaced `845zdl9k` on 2026-10-29 (owner login
 lost). Content comes from `pnpm cms:seed`. Studio:
 https://sljakam.sanity.studio (`cd apps/cms && SANITY_STUDIO_PROJECT_ID=o85214ma
-SANITY_STUDIO_DATASET=production pnpm exec sanity deploy`); local Studio
+SANITY_STUDIO_DATASET=production ../../node_modules/.bin/sanity deploy`; the
+CLI is only installed at the root, and `pnpm install` inside `apps/cms`
+creates a second React that crashes the Studio); local Studio
 origin `http://localhost:4200` is in the project's CORS list. The site reads
 Sanity only on the server, so sljakam.com needs no CORS entry.
 
@@ -150,10 +152,18 @@ projection {_type, slug, companySlug}
 header x-sanity-webhook-secret: <SANITY_WEBHOOK_SECRET>
 ```
 
+Staging has its own webhook, `staging.sljakam.com revalidate`: the same
+settings with `https://staging.sljakam.com/api/revalidate/sanity` and
+staging's secret (`deploy/.env.staging` in `/opt/hireforge-staging`).
+
 Use the header, not Sanity's "Secret" field: that one sends a signature the
 route doesn't check. Rotating `SANITY_WEBHOOK_SECRET` means editing this
 header too, or the site answers 401 and edits wait for the 5-minute cache.
-Test: change a field, the page shows it within seconds; revert it.
+The web app reads Sanity with `useCdn: false`: the API CDN can lag a
+publish, and the webhook's refetch would cache that stale copy.
+Test: change a field, the page shows it within seconds; revert it. Each
+webhook's Attempts log (or `sanity hook logs "<name>"` from `apps/cms`)
+shows the status codes.
 
 For billing PDFs on Hetzner Object Storage, set:
 

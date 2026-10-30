@@ -1,37 +1,27 @@
-const PROJECT_ID_ENV_KEYS = [
-  'SANITY_STUDIO_PROJECT_ID',
-  'NEXT_PUBLIC_SANITY_PROJECT_ID',
-] as const;
+// The Studio build only inlines `process.env.SANITY_STUDIO_*` written out in
+// full: a computed `process.env[key]` compiles to `{}[key]` in the browser
+// bundle, and other prefixes (NEXT_PUBLIC_*) never reach it.
 
-const DATASET_ENV_KEYS = [
-  'SANITY_STUDIO_DATASET',
-  'NEXT_PUBLIC_SANITY_DATASET',
-] as const;
-
-function readFirstEnv(keys: readonly string[]): string {
-  for (const key of keys) {
-    const value = process.env[key]?.trim();
-    if (value) {
-      return value;
-    }
+function required(label: string, name: string, value: string | undefined) {
+  const trimmed = value?.trim();
+  if (trimmed) {
+    return trimmed;
   }
-  return '';
-}
-
-function requiredEnv(label: string, keys: readonly string[]): string {
-  const value = readFirstEnv(keys);
-  if (value) {
-    return value;
-  }
-  throw new Error(
-    `Missing ${label}. Set one of: ${keys.map((key) => `"${key}"`).join(', ')}`,
-  );
+  throw new Error(`Missing ${label}. Set "${name}".`);
 }
 
 export function getSanityStudioProjectId(): string {
-  return requiredEnv('Sanity Studio project id', PROJECT_ID_ENV_KEYS);
+  return required(
+    'Sanity Studio project id',
+    'SANITY_STUDIO_PROJECT_ID',
+    process.env.SANITY_STUDIO_PROJECT_ID,
+  );
 }
 
 export function getSanityStudioDataset(): string {
-  return requiredEnv('Sanity Studio dataset', DATASET_ENV_KEYS);
+  return required(
+    'Sanity Studio dataset',
+    'SANITY_STUDIO_DATASET',
+    process.env.SANITY_STUDIO_DATASET,
+  );
 }

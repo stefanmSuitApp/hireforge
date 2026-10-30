@@ -2,14 +2,18 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { fetchCmsEditorialPage, fetchCmsLandingSpotlight } from './cms-content';
 
-const { fetchMock } = vi.hoisted(() => ({ fetchMock: vi.fn() }));
+const { fetchMock, createSanityReadClient } = vi.hoisted(() => {
+  const fetchMock = vi.fn();
+  return {
+    fetchMock,
+    createSanityReadClient: vi.fn(() => ({ fetch: fetchMock })),
+  };
+});
 
 vi.mock('next/cache', () => ({
   unstable_cache: (fn: (...args: unknown[]) => unknown) => fn,
 }));
-vi.mock('shared', () => ({
-  createSanityReadClient: () => ({ fetch: fetchMock }),
-}));
+vi.mock('shared', () => ({ createSanityReadClient }));
 
 const block = (text: string) => [
   { _type: 'block', children: [{ _type: 'span', text }] },
@@ -34,6 +38,16 @@ describe('fetchCmsEditorialPage', () => {
     const page = await fetchCmsEditorialPage('about-hireforge', 'en');
 
     expect(page?.body).toEqual(block('Šljakam focuses on clear job listings.'));
+  });
+
+  it('reads Sanity directly, not through its CDN', async () => {
+    fetchMock.mockResolvedValue(null);
+
+    await fetchCmsEditorialPage('about-hireforge', 'en');
+
+    expect(createSanityReadClient).toHaveBeenCalledWith(
+      expect.objectContaining({ useCdn: false }),
+    );
   });
 });
 
