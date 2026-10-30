@@ -31,11 +31,16 @@ test("a city landing page lists that city's live jobs with its own title", async
   await page
     .getByRole('heading', { level: 2, name: 'Druge oblasti' })
     .locator('xpath=..')
-    .getByRole('link', { name: /^IT/ })
+    .getByRole('link', { name: /^Informacione tehnologije/ })
     .click();
-  await expect(page).toHaveURL(/\/sr\/jobs\/category\/it\/city\/beograd$/);
+  await expect(page).toHaveURL(
+    /\/sr\/jobs\/category\/informacione-tehnologije\/city\/beograd$/,
+  );
   await expect(
-    page.getByRole('heading', { level: 1, name: 'IT poslovi — Beograd' }),
+    page.getByRole('heading', {
+      level: 1,
+      name: 'Informacione tehnologije poslovi — Beograd',
+    }),
   ).toBeVisible();
   await expect(page.getByText(live.title)).toBeVisible();
 });

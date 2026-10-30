@@ -436,8 +436,10 @@ Found with a scripted sweep of the live public pages at 375 and 1440 px
 - **Categories** (`drizzle/0038`): `job_categories.sort_order`; `it` and
   `marketing` deleted on staging and production, replaced by Stefan's ten in
   his order (Trgovina i prodaja … Finansije i računovodstvo); search filter,
-  footer and admin list in that order. Dev/test seeds still add `it` /
-  `marketing` as fixtures (sorted after the ten).
+  footer and admin list in that order. The dev/e2e seed no longer adds `it` /
+  `marketing` (it ran after the migration and brought them back); its sample
+  job is in Informacione tehnologije. The integration template adds `it` /
+  `marketing` itself, as test-only fixtures (`libs/testing/src/db/template.ts`).
 - **Home tiles in Sanity** (`scripts/cms/home-discovery.mjs`, loaded by
   `pnpm cms:seed`): the ten categories and five cities in order, each with
   label, the declined button text (`exploreLabel`: "Istraži Suboticu") and a
