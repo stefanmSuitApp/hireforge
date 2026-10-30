@@ -55,6 +55,9 @@ function getCmsClient() {
     projectId,
     dataset,
     token: process.env['SANITY_API_READ_TOKEN']?.trim() || undefined,
+    // The publish webhook refetches at once; the API CDN can still hold the
+    // old document then, and that copy would be cached for 5 minutes.
+    useCdn: false,
   });
 }
 
