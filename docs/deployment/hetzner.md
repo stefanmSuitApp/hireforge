@@ -136,7 +136,9 @@ Sanity project `o85214ma` ("sljakam", dataset `production`, public), owned
 by Stefan's account; it replaced `845zdl9k` on 2026-10-29 (owner login
 lost). Content comes from `pnpm cms:seed`. Studio:
 https://sljakam.sanity.studio (`cd apps/cms && SANITY_STUDIO_PROJECT_ID=o85214ma
-SANITY_STUDIO_DATASET=production pnpm exec sanity deploy`); local Studio
+SANITY_STUDIO_DATASET=production ../../node_modules/.bin/sanity deploy`; the
+CLI is only installed at the root, and `pnpm install` inside `apps/cms`
+creates a second React that crashes the Studio); local Studio
 origin `http://localhost:4200` is in the project's CORS list. The site reads
 Sanity only on the server, so sljakam.com needs no CORS entry.
 
