@@ -47,6 +47,7 @@
     "db:seed:all": "pnpm run db:seed:rs && pnpm run db:seed:domain",
     "db:seed:rs": "node scripts/db/seed-rs-locations.mjs",
     "db:seed:domain": "node scripts/db/seed-domain-baseline.mjs",
+    "db:seed:demo-jobs": "node scripts/db/seed-demo-jobs.mjs",
     "cms:seed": "node scripts/cms/seed-sanity.mjs",
     "cms:seed:legal": "node scripts/cms/seed-legal.mjs",
     "docker:up": "docker compose up -d",
