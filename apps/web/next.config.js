@@ -52,6 +52,12 @@ const nextConfig = {
       'next-intl/config': nextIntlRequestPath,
     },
   },
+  experimental: {
+    // Next 16 persists the dev cache by default. A failed compaction leaves
+    // it unreadable and the dev server hangs with no response. Memory cache
+    // is enough for local design work.
+    turbopackFileSystemCacheForDev: false,
+  },
   /**
    * IndexNow key file at `/<INDEXNOW_KEY>.txt`. The key is runtime env, so any
    * key-shaped `.txt` goes to the handler, which 404s unless it matches.
