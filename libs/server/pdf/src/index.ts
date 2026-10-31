@@ -1,5 +1,7 @@
 export * from './lib/billing-form-document';
 export {
+  PDF_BODY_FONT,
+  PDF_SERIF_FONT,
   localePdfBoldStyle,
   localePdfBodyFontFamily,
   registerLocalePdfFonts,

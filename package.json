@@ -54,7 +54,8 @@
     "docker:down": "docker compose down",
     "docker:logs": "docker compose logs -f",
     "integration:check": "node scripts/integration/check.mjs",
-    "prepare": "husky"
+    "prepare": "husky",
+    "cv:previews": "tsx --tsconfig libs/server/cv-templates/tsconfig.lib.json scripts/cv/previews.tsx"
   },
   "keywords": [],
   "author": "Šljakam",

@@ -1,61 +1,90 @@
-import { Document, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
-import type { ReactElement } from 'react';
+import { Document, Page, Text, View } from '@react-pdf/renderer';
+import type { ReactElement, ReactNode } from 'react';
 
 import type { CvPdfLayoutInput } from 'contracts';
 
-import { localePdfBoldStyle } from 'server-pdf/locale-fonts';
-
-import { CV_LABELS } from '../labels';
+import { CV_LABELS, formatCvLanguage } from '../labels';
 import {
-  BodySections,
-  contactLine,
-  ExtraSections,
-  pdfBody,
+  contactParts,
+  EducationSection,
+  ExperienceSection,
+  formatCertificate,
   SummarySection,
+  type CvTheme,
 } from '../sections';
+import { CV_ACCENT, CV_INK, CV_MUTED, SANS, tint } from '../theme';
 
-const styles = StyleSheet.create({
-  page: { fontFamily: pdfBody, fontSize: 10, flexDirection: 'row' },
-  sidebar: {
-    width: '28%',
-    backgroundColor: '#1a365d',
-    color: '#ffffff',
-    padding: 20,
-  },
-  main: { width: '72%', padding: 28 },
-});
+// Coloured sidebar (contact, skills, languages, licence) beside the story.
+// Two columns: for a person to read, not the safest for CV scanners.
+const SIDEBAR = 0.34 * 595;
+const BASE = {
+  fontFamily: SANS,
+  fontSize: 9.5,
+  color: CV_INK,
+  lineHeight: 1.4,
+};
+const ON_ACCENT = '#FFFFFF';
+const SIDE_TEXT = {
+  fontFamily: SANS,
+  fontSize: 9,
+  color: ON_ACCENT,
+  lineHeight: 1.45,
+};
 
-function SidebarHeader({ layout }: { layout: CvPdfLayoutInput }): ReactElement {
-  const contact = contactLine(layout);
-  return (
-    <View>
-      <Text style={localePdfBoldStyle({ fontSize: 14, color: '#ffffff' })}>
-        {layout.fullName ?? 'CV'}
+function makeTheme(accent: string): CvTheme {
+  return {
+    Title: ({ children }) => (
+      <Text
+        style={{
+          fontFamily: SANS,
+          fontWeight: 700,
+          fontSize: 10,
+          textTransform: 'uppercase',
+          letterSpacing: 0.7,
+          color: accent,
+          marginBottom: 6,
+        }}
+      >
+        {children}
       </Text>
-      {layout.headline ? (
-        <Text
-          style={{
-            fontFamily: pdfBody,
-            fontSize: 9,
-            marginTop: 4,
-            color: '#e2e8f0',
-          }}
-        >
-          {layout.headline}
-        </Text>
-      ) : null}
-      {contact ? (
-        <Text
-          style={{
-            fontFamily: pdfBody,
-            fontSize: 8,
-            marginTop: 6,
-            color: '#cbd5e0',
-          }}
-        >
-          {contact}
-        </Text>
-      ) : null}
+    ),
+    body: BASE,
+    bold: { ...BASE, fontWeight: 700, fontSize: 10 },
+    muted: { ...BASE, fontSize: 8.8, color: CV_MUTED },
+    sub: { ...BASE, color: CV_MUTED },
+    entry: 'stacked',
+    gap: 16,
+  };
+}
+
+function SideGroup({
+  title,
+  accent,
+  children,
+}: {
+  title: string;
+  accent: string;
+  children: ReactNode;
+}): ReactElement {
+  return (
+    <View style={{ marginTop: 18 }}>
+      <Text
+        style={{
+          fontFamily: SANS,
+          fontWeight: 700,
+          fontSize: 8,
+          textTransform: 'uppercase',
+          letterSpacing: 0.6,
+          color: ON_ACCENT,
+          paddingBottom: 3,
+          marginBottom: 5,
+          borderBottomWidth: 0.7,
+          borderBottomColor: tint(accent, 0.6),
+        }}
+      >
+        {title}
+      </Text>
+      {children}
     </View>
   );
 }
@@ -65,37 +94,147 @@ export function ModeranDoc({
 }: {
   layout: CvPdfLayoutInput;
 }): ReactElement {
-  const { skills } = layout.profile;
+  const accent = CV_ACCENT;
+  const theme = makeTheme(accent);
+  const labels = CV_LABELS[layout.locale];
+  const p = layout.profile;
+  const contact = contactParts(layout);
   return (
     <Document>
-      <Page size="A4" style={styles.page}>
-        <View style={styles.sidebar}>
-          <SidebarHeader layout={layout} />
-          {skills.length ? (
-            <View style={{ marginTop: 16 }}>
-              <Text
-                style={localePdfBoldStyle({ fontSize: 10, color: '#ffffff' })}
-              >
-                {CV_LABELS[layout.locale].skills}
-              </Text>
-              <Text
-                style={{
-                  fontFamily: pdfBody,
-                  fontSize: 9,
-                  marginTop: 6,
-                  color: '#ffffff',
-                }}
-              >
-                {skills.map((s) => `• ${s.name}`).join('\n')}
-              </Text>
-            </View>
+      <Page
+        size="A4"
+        style={{
+          ...BASE,
+          paddingTop: 38,
+          paddingBottom: 38,
+          paddingLeft: SIDEBAR + 30,
+          paddingRight: 34,
+        }}
+      >
+        {/* The colour runs down every page; its content sits on page 1. */}
+        <View
+          fixed
+          style={{
+            position: 'absolute',
+            top: 0,
+            bottom: 0,
+            left: 0,
+            width: SIDEBAR,
+            backgroundColor: accent,
+          }}
+        />
+        <View
+          style={{
+            position: 'absolute',
+            top: 20,
+            left: 24,
+            width: SIDEBAR - 48,
+          }}
+        >
+          {contact.length || p.links.length ? (
+            <SideGroup title={labels.contact} accent={accent}>
+              {contact.map((c) => (
+                <Text key={c} style={SIDE_TEXT}>
+                  {c}
+                </Text>
+              ))}
+              {p.links.map((l) => (
+                <Text key={l.url} style={SIDE_TEXT}>
+                  {l.label}: {l.url}
+                </Text>
+              ))}
+            </SideGroup>
+          ) : null}
+          {p.skills.length ? (
+            <SideGroup title={labels.skills} accent={accent}>
+              {p.skills.length <= 12 ? (
+                p.skills.map((s) => (
+                  <Text key={s.name} style={SIDE_TEXT}>
+                    {s.name}
+                  </Text>
+                ))
+              ) : (
+                <Text style={SIDE_TEXT}>
+                  {p.skills.map((s) => s.name).join(' · ')}
+                </Text>
+              )}
+            </SideGroup>
+          ) : null}
+          {p.digitalSkills ? (
+            <SideGroup title={labels.digitalSkills} accent={accent}>
+              <Text style={SIDE_TEXT}>{p.digitalSkills}</Text>
+            </SideGroup>
+          ) : null}
+          {p.languages.length ? (
+            <SideGroup title={labels.languages} accent={accent}>
+              {p.languages.map((l) => (
+                <Text key={l.name} style={SIDE_TEXT}>
+                  {formatCvLanguage(l.name, l.level, layout.locale)}
+                </Text>
+              ))}
+            </SideGroup>
+          ) : null}
+          {p.drivingLicences.length ? (
+            <SideGroup title={labels.drivingLicence} accent={accent}>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                {p.drivingLicences.map((c) => (
+                  <Text
+                    key={c}
+                    style={{
+                      ...SIDE_TEXT,
+                      fontWeight: 700,
+                      borderWidth: 1,
+                      borderColor: ON_ACCENT,
+                      borderRadius: 3,
+                      paddingHorizontal: 5,
+                      marginRight: 4,
+                      marginBottom: 4,
+                    }}
+                  >
+                    {c}
+                  </Text>
+                ))}
+              </View>
+            </SideGroup>
           ) : null}
         </View>
-        <View style={styles.main}>
-          <SummarySection layout={layout} />
-          <BodySections layout={layout} />
-          <ExtraSections layout={layout} />
-        </View>
+
+        <Text
+          style={{
+            fontFamily: SANS,
+            fontWeight: 700,
+            fontSize: 27,
+            lineHeight: 1.1,
+          }}
+        >
+          {layout.fullName ?? 'CV'}
+        </Text>
+        {layout.headline ? (
+          <Text
+            style={{
+              fontFamily: SANS,
+              fontWeight: 700,
+              fontSize: 11,
+              color: accent,
+              marginTop: 3,
+            }}
+          >
+            {layout.headline}
+          </Text>
+        ) : null}
+        <SummarySection layout={layout} theme={theme} />
+        <ExperienceSection layout={layout} theme={theme} />
+        <EducationSection layout={layout} theme={theme} />
+        {p.certificates.length ? (
+          <View style={{ marginTop: theme.gap }}>
+            <theme.Title>{labels.certificates}</theme.Title>
+            {p.certificates.map((c, i) => (
+              <Text key={i} style={BASE}>
+                {formatCertificate(c)}
+              </Text>
+            ))}
+          </View>
+        ) : null}
       </Page>
     </Document>
   );
