@@ -837,8 +837,8 @@
       "vatId": "PDV broj (EU VAT ID)",
       "taxId": "Poreski broj (van EU)",
       "registrationNumber": "Registarski broj",
-      "identifierHint": "Unesi PIB ili MB. Po njima prepoznajemo kompaniju kada se neko iz nje sam registruje, pa ne nastaje duplikat.",
-      "identifierHintForeign": "Unesi PDV broj, poreski ili registarski broj, da bismo kompaniju prepoznali kada se neko iz nje sam registruje.",
+      "identifierHint": "Opciono. Ako znaš PIB ili MB, unesi ga: tada kompaniju prepoznajemo i kad se registruje pod malo drugačijim imenom. Ako ga ne uneseš, poklapamo po nazivu, a PIB, MB i adresu kompanija popunjava pri registraciji.",
+      "identifierHintForeign": "Opciono. PDV broj, poreski ili registarski broj pomažu da kompaniju prepoznamo; bez njih poklapamo po nazivu, a podatke kompanija popunjava pri registraciji.",
       "accounts": {
         "heading": "Nalozi poslodavaca",
         "none": "Još nema naloga. Kompanija može da postoji i bez njega, a nalog možeš da dodaš kad god.",
@@ -953,7 +953,9 @@
       "lead": "Ovi korisnici su se registrovali sa PIB-om ili matičnim brojem kompanije koja već postoji. Odobri samo kada je potvrđeno da rade u toj kompaniji.",
       "wantsToJoin": "želi pristup kompaniji {company}",
       "approve": "Odobri",
-      "reject": "Odbij"
+      "reject": "Odbij",
+      "submitted": "Pri registraciji uneo: {details}",
+      "fillNote": "Odobravanjem se prazna polja kompanije (PIB, MB, adresa, kontakt za račune) popunjavaju iz registracije; ono što je već uneto ostaje."
     }
   },
   "Admin": {
@@ -1252,7 +1254,6 @@
     "apiNotConfigured": "Usluga trenutno nije dostupna. Pokušaj ponovo za nekoliko minuta.",
     "CAMPAIGN_NOT_FOUND": "Ta kampanja nije pronađena.",
     "CAMPAIGN_OVERLAP": "U tom periodu već postoji aktivna kampanja. Pauziraj je ili izaberi druge datume.",
-    "COMPANY_IDENTIFIER_REQUIRED": "Unesi PIB ili MB (za stranu kompaniju: PDV broj, poreski ili registarski broj).",
     "STAFF_ACCOUNT_EMAIL_TAKEN": "Ova e-pošta već ima nalog. Ako se ta osoba sama registrovala, odobri njen zahtev za pristup.",
     "ACCOUNT_ALREADY_ACTIVE": "Nalog je već aktiviran; nova pozivnica nije potrebna."
   },

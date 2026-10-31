@@ -33,10 +33,10 @@ Plan, 2026-10-31. Owner: Claude session `hireforge-tests-b3`.
 
 ### Behaviour
 
-1. **Create company** (moderator form) asks for an identifier: PIB or MB
-   for a Serbian company, VAT ID, tax ID or registration number for a
-   foreign one. Without one, the self-signup matcher can't find our
-   company and the company would end up with two rows.
+1. **Create company** (moderator form) offers PIB / MB (or the foreign
+   identifiers) as optional fields. Update 2026-10-31 (Stefan): they are
+   not required; matching falls back to the name, and approving the join
+   request fills the company's empty fields from the sign-up.
 2. **Add account** on the moderator company page: email + email language
    (sr/en).
    - Creates the user (role `employer`, no password), links them to the

@@ -199,17 +199,16 @@ describe('staff resend an invite', () => {
   });
 });
 
-describe('staff-created companies need an identifier', () => {
-  it('refuses a Serbian company without PIB or MB', async () => {
+describe('staff-created companies', () => {
+  it('need no PIB or MB: the company fills them in when it signs up', async () => {
     const res = await http(app)
       .post('/api/moderator/companies')
       .set(moderator.headers)
       .send({ slug: 'bez-pib-a', legalName: 'Bez PIB-a d.o.o.' });
-    expect(res.status).toBe(400);
-    expect(res.body.error.code).toBe('COMPANY_IDENTIFIER_REQUIRED');
+    expect(res.status, JSON.stringify(res.body)).toBe(201);
   });
 
-  it('accepts a foreign company with a VAT ID', async () => {
+  it('accept a foreign company with a VAT ID', async () => {
     const res = await http(app)
       .post('/api/moderator/companies')
       .set(moderator.headers)

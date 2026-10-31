@@ -352,8 +352,12 @@ match against existing `companies` rows, in this priority order:
   any moderator for the lead pool, or an admin) approves or rejects. The
   existing company row is never written by the signup.
 - The existing `assigned_moderator_id` and `sales_status` are preserved.
-- Staff-created companies need an identifier (PIB or MB; VAT ID, tax ID or
-  registration number abroad) so this match can find them.
+- Staff may create a company with its name only (PIB, MB and the foreign
+  identifiers are optional); the match then goes by name. Approving the
+  join request fills the company's **empty** columns (identifiers, address,
+  bank, billing contact) from what the sign-up entered, never overwriting
+  what staff entered; an identifier another company took meanwhile is
+  skipped.
 - Staff can also create the employer account themselves (§5.4.1).
 - If no match, a new `companies` row is created with `source = self_signup`
   and `sales_status = unassigned`.

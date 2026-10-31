@@ -413,6 +413,8 @@ export const companyJoinRequests = pgTable(
       .references(() => companies.id, { onDelete: 'cascade' }),
     /** `pending | approved | rejected` (`text + CHECK`, like `vat_treatment`). */
     status: text('status').notNull().default('pending'),
+    /** The company details the sign-up entered; approval fills empty columns from it. */
+    companyInput: jsonb('company_input').$type<Record<string, unknown>>(),
     decidedByUserId: uuid('decided_by_user_id').references(() => users.id, {
       onDelete: 'set null',
     }),

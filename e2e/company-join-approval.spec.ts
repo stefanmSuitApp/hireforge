@@ -4,11 +4,13 @@ import { expect, test } from '@playwright/test';
 
 import {
   companyBillingEmail,
+  companyIdentifiers,
   createOwnedCompany,
   employerCompanyIdsForEmail,
 } from './support/db';
 import { loginModerator, registerEmployerClaiming } from './support/auth-ui';
 import { expectEmail } from './support/mail';
+import { gotoHydrated } from './support/ui';
 import { resetRateLimits } from './support/redis';
 
 test.beforeEach(async () => {
@@ -110,4 +112,54 @@ test.describe('employer signup matching an existing company', () => {
     ).toBeVisible();
     expect(await employerCompanyIdsForEmail(email)).toEqual([]);
   });
+});
+
+test('a company staff added by name gets the PIB and MB from its sign-up once approved', async ({
+  browser,
+}) => {
+  const suffix = randomInt(1e6, 9e6);
+  const modCtx = await browser.newContext();
+  const moderator = await modCtx.newPage();
+  await loginModerator(moderator);
+
+  // Staff don't know the PIB or MB: name only.
+  await gotoHydrated(moderator, '/sr/moderator/companies/new', '#new-legal');
+  await moderator.locator('#new-legal').fill(`Pekara ${suffix} d.o.o.`);
+  await moderator.locator('#new-slug').fill(`pekara-${suffix}`);
+  await moderator.getByRole('button', { name: 'Kreiraj kompaniju' }).click();
+  await expect(moderator).toHaveURL(
+    /\/sr\/moderator\/companies\/[0-9a-f-]{36}$/,
+  );
+  const companyId = moderator.url().split('/').pop() as string;
+  expect(await companyIdentifiers(companyId)).toEqual({ pib: null, mb: null });
+
+  // The company signs up under the same name, written its own way.
+  const email = `pekara-${suffix}@example.com`;
+  const pib = String(randomInt(100000000, 999999999));
+  const mb = String(randomInt(10000000, 99999999));
+  const employerCtx = await browser.newContext();
+  const employer = await employerCtx.newPage();
+  await registerEmployerClaiming(
+    employer,
+    email,
+    { id: '', legalName: '', pib, mb },
+    { legalName: `PEKARA ${suffix} DOO` },
+  );
+  await expect(employer).toHaveURL(/\/sr\/employer\/pending/);
+
+  // The moderator sees what they entered, approves, and the company has it.
+  await moderator.goto('/sr/moderator/companies');
+  const row = moderator
+    .getByTestId('join-request-row')
+    .filter({ hasText: email });
+  await expect(row).toContainText(`PIB ${pib}`);
+  await expect(row).toContainText(`MB ${mb}`);
+  await row.getByRole('button', { name: 'Odobri' }).click();
+  await expect(row).toHaveCount(0);
+  expect(await companyIdentifiers(companyId)).toEqual({ pib, mb });
+
+  await employer.goto('/sr/employer');
+  await expect(employer).toHaveURL(/\/sr\/employer$/);
+  await employerCtx.close();
+  await modCtx.close();
 });
