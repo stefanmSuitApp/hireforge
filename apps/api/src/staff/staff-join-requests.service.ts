@@ -1,14 +1,23 @@
 import { Injectable } from '@nestjs/common';
-import type { StaffCompanyJoinRequestListResponse, UserRole } from 'contracts';
-import { and, asc, eq, inArray, or } from 'drizzle-orm';
+import {
+  selfSignupCompanyInputSchema,
+  type StaffCompanyJoinRequestListResponse,
+  type UserRole,
+} from 'contracts';
+import { and, asc, eq, inArray, ne, or } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import {
   companies,
   companyJoinRequests,
+  type DrizzleTransaction,
   employers,
   outboxEvents,
   users,
 } from 'database';
+import {
+  mergeCompanyRowFromSelfSignup,
+  type SelfSignupCompanyInput,
+} from 'server-employers';
 
 import {
   codedConflict,
@@ -22,6 +31,14 @@ import { StaffAuditService } from './staff-audit.service';
 import { staffCanAccessCompany } from './staff-company-access';
 
 type Actor = { actorUserId: string; actorRole: UserRole };
+
+/** Unique per company: a value another company took since the sign-up is skipped. */
+const UNIQUE_IDENTIFIERS = ['pib', 'mb', 'vatId'] as const;
+
+function parseCompanyInput(raw: unknown): SelfSignupCompanyInput | null {
+  const parsed = selfSignupCompanyInputSchema.safeParse(raw);
+  return parsed.success ? parsed.data : null;
+}
 
 @Injectable()
 export class StaffJoinRequestsService {
@@ -63,6 +80,7 @@ export class StaffJoinRequestsService {
         companyPib: companies.pib,
         assignedModeratorEmail: moderator.email,
         createdAt: companyJoinRequests.createdAt,
+        companyInput: companyJoinRequests.companyInput,
       })
       .from(companyJoinRequests)
       .innerJoin(requester, eq(companyJoinRequests.userId, requester.id))
@@ -73,12 +91,24 @@ export class StaffJoinRequestsService {
       .limit(200);
 
     return {
-      items: rows.map((r) => ({
-        ...r,
-        companyPib: r.companyPib ?? null,
-        assignedModeratorEmail: r.assignedModeratorEmail ?? null,
-        createdAt: r.createdAt.toISOString(),
-      })),
+      items: rows.map(({ companyInput, ...r }) => {
+        const input = parseCompanyInput(companyInput);
+        return {
+          ...r,
+          companyPib: r.companyPib ?? null,
+          assignedModeratorEmail: r.assignedModeratorEmail ?? null,
+          createdAt: r.createdAt.toISOString(),
+          submitted: input
+            ? {
+                legalName: input.legalName,
+                pib: input.pib ?? null,
+                mb: input.mb ?? null,
+                vatId: input.vatId ?? null,
+                taxId: input.taxId ?? null,
+              }
+            : null,
+        };
+      }),
     };
   }
 
@@ -97,6 +127,7 @@ export class StaffJoinRequestsService {
           userId: companyJoinRequests.userId,
           companyId: companyJoinRequests.companyId,
           status: companyJoinRequests.status,
+          companyInput: companyJoinRequests.companyInput,
         })
         .from(companyJoinRequests)
         .where(eq(companyJoinRequests.id, requestId))
@@ -139,11 +170,17 @@ export class StaffJoinRequestsService {
         })
         .where(eq(companyJoinRequests.id, request.id));
 
+      let filled: string[] = [];
       if (decision === 'approved') {
         await tx
           .insert(employers)
           .values({ userId: request.userId, companyId: request.companyId })
           .onConflictDoNothing();
+        filled = await this.fillEmptyCompanyFields(
+          tx,
+          request.companyId,
+          request.companyInput,
+        );
       }
       // Worker emails the requester (notification-email job).
       await tx.insert(outboxEvents).values({
@@ -155,7 +192,7 @@ export class StaffJoinRequestsService {
           decision,
         },
       });
-      return request;
+      return { ...request, filled };
     });
 
     await this.audit.log({
@@ -166,9 +203,59 @@ export class StaffJoinRequestsService {
           : 'company_join_request.reject',
       entityType: 'company',
       entityId: decided.companyId,
-      metadata: { joinRequestId: decided.id, userId: decided.userId },
+      metadata: {
+        joinRequestId: decided.id,
+        userId: decided.userId,
+        ...(decided.filled.length ? { filledFields: decided.filled } : {}),
+      },
     });
 
     return { id: decided.id, status: decision };
+  }
+
+  /**
+   * Staff may have added the company by name only; the person who signed up
+   * entered its PIB, MB, address and billing contact. Fill only what is
+   * still empty: never overwrite what staff entered.
+   */
+  private async fillEmptyCompanyFields(
+    tx: DrizzleTransaction,
+    companyId: string,
+    rawInput: unknown,
+  ): Promise<string[]> {
+    const input = parseCompanyInput(rawInput);
+    if (!input) {
+      return [];
+    }
+    const [existing] = await tx
+      .select()
+      .from(companies)
+      .where(eq(companies.id, companyId))
+      .for('update')
+      .limit(1);
+    if (!existing) {
+      return [];
+    }
+    const patch = mergeCompanyRowFromSelfSignup(existing, input);
+    for (const key of UNIQUE_IDENTIFIERS) {
+      const value = patch[key];
+      if (!value) continue;
+      const [taken] = await tx
+        .select({ id: companies.id })
+        .from(companies)
+        .where(and(eq(companies[key], value), ne(companies.id, companyId)))
+        .limit(1);
+      if (taken) {
+        delete patch[key];
+      }
+    }
+    const filled = Object.keys(patch);
+    if (filled.length) {
+      await tx
+        .update(companies)
+        .set({ ...patch, updatedAt: new Date() })
+        .where(eq(companies.id, companyId));
+    }
+    return filled;
   }
 }

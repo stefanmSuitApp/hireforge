@@ -2,7 +2,11 @@ import { randomInt } from 'node:crypto';
 
 import { expect, test } from '@playwright/test';
 
-import { employerCompanyIdsForEmail, emailVerifiedAt } from './support/db';
+import {
+  companyIdentifiers,
+  employerCompanyIdsForEmail,
+  emailVerifiedAt,
+} from './support/db';
 import { loginModerator } from './support/auth-ui';
 import { expectEmail, linkFrom } from './support/mail';
 import { resetRateLimits } from './support/redis';
@@ -135,4 +139,29 @@ test('a moderator can resend an invite; only the newest link works', async ({
 
   await employerCtx.close();
   await modCtx.close();
+});
+
+test('a moderator adds the PIB and MB later, in the company details', async ({
+  page,
+}) => {
+  const suffix = randomInt(1e6, 9e6);
+  await loginModerator(page);
+  await gotoHydrated(page, '/sr/moderator/companies/new', '#new-legal');
+  await page.locator('#new-legal').fill(`Kasnije ${suffix} d.o.o.`);
+  await page.locator('#new-slug').fill(`kasnije-${suffix}`);
+  await page.getByRole('button', { name: 'Kreiraj kompaniju' }).click();
+  await expect(page).toHaveURL(/\/sr\/moderator\/companies\/[0-9a-f-]{36}$/);
+  const companyId = page.url().split('/').pop() as string;
+
+  const pib = String(randomInt(100000000, 999999999));
+  const mb = String(randomInt(10000000, 99999999));
+  await page.getByLabel('PIB').fill(pib);
+  await page.getByLabel('MB', { exact: true }).fill(mb);
+  await page.getByRole('button', { name: 'Sačuvaj izmene' }).click();
+  await expect(page.getByText('Sačuvano.')).toBeVisible();
+  expect(await companyIdentifiers(companyId)).toEqual({ pib, mb });
+
+  await page.reload();
+  await expect(page.getByLabel('PIB')).toHaveValue(pib);
+  await expect(page.getByLabel('MB', { exact: true })).toHaveValue(mb);
 });

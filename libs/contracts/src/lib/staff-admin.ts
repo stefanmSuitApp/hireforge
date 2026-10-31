@@ -159,23 +159,6 @@ export type StaffCompanyCreateBody = z.infer<
   typeof staffCompanyCreateBodySchema
 >;
 
-/**
- * Staff-created companies need an identifier the self-signup matcher can find
- * (PIB / MB at home, VAT ID / tax ID / registration number abroad); a name
- * alone rarely matches, and the company would end up with two rows.
- */
-export function companyHasIdentifier(
-  body: Pick<
-    StaffCompanyCreateBody,
-    'isForeign' | 'pib' | 'mb' | 'vatId' | 'taxId' | 'registrationNumber'
-  >,
-): boolean {
-  const ids = body.isForeign
-    ? [body.vatId, body.taxId, body.registrationNumber]
-    : [body.pib, body.mb];
-  return ids.some((v) => Boolean(v?.trim()));
-}
-
 /** Staff add an employer account to a company; the person gets an invite. */
 export const staffCompanyAccountCreateBodySchema = z.object({
   email: z.email().max(320),

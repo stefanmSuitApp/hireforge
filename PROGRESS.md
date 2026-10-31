@@ -819,9 +819,15 @@ Plan and the follow-ups: `docs/plans/STAFF_ACCOUNTS_AND_UPLOADS.md`
   Audited as `employer_account.invite` / `invite_resend`.
 - `/{locale}/accept-invite` sets the password, verifies the email, records
   the terms version (BFF, as on sign-up) and signs out other sessions.
-- Staff-created companies need PIB or MB (foreign: VAT ID, tax ID or
-  registration number), so a later self-signup matches instead of making a
-  duplicate company.
+- ~~Staff-created companies need PIB or MB~~ — reversed the same day
+  (Stefan): identifiers are optional; matching falls back to the name, and
+  approving the join request fills the company's empty fields (PIB, MB,
+  address, billing contact) from the sign-up (branch
+  `feat/optional-company-ids`, migration 0040 `company_input` on join
+  requests; the moderator sees the submitted PIB/MB before approving).
+  Staff can add or change PIB / MB (or the foreign identifiers) later in
+  the company "Detalji" form (branch `feat/company-details-ids`), e.g. for
+  a company whose account they created by invite.
 - Migration `0039_auth_tokens_account_invite` (token purpose). Found on
   the way: CVs live on the VM in `api_var`, which no backup covers (PR 2).
 - Tests: e2e (create company → add account → email → activate → sign in;
