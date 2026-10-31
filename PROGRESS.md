@@ -796,6 +796,13 @@ Plan and the follow-ups: `docs/plans/STAFF_ACCOUNTS_AND_UPLOADS.md`
 - Tests: e2e (create company → add account → email → activate → sign in;
   resend voids the old link), shown failing before the change;
   integration `staff-accounts.int.test.ts` (9); contracts and email units.
+- **Admins can do everything moderators can** (Stefan, 2026-10-31). The
+  API already allowed it; the UI had two "Kompanije" tabs for admins, and
+  the admin one had no create button or accounts. Now there is one: the
+  moderator Kompanije screens, where admins also get "Premesti moderatora"
+  and the assignment history. `/admin/companies[/:id]` redirect there
+  (branch `fix/admin-company-create`, e2e `admin-companies.spec.ts`, shown
+  failing first).
 
 ## Analytics: Google Analytics 4 under the same banner (branch `feat/ga4-consent`, 2026-10-31)
 

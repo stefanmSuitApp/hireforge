@@ -966,7 +966,6 @@
     "navTaxonomy": "Job categories",
     "navPromoCodes": "Promo codes",
     "navCampaigns": "Campaigns",
-    "navCompanies": "Companies",
     "navBillingEnterprise": "Enterprise billing",
     "navAudit": "Audit log",
     "navModerator": "Moderation",
@@ -975,26 +974,14 @@
       "lead": "Manage users, taxonomy, and review staff actions. Moderation tools remain under the staff portal.",
       "linkUsers": "User roles",
       "linkTaxonomy": "Job categories",
-      "linkCompanies": "Companies & reassignment",
+      "linkCompanies": "Companies",
       "linkBillingEnterprise": "GAZDA — pending activation",
       "linkAudit": "Audit log",
       "cardTaxonomyBody": "Maintain categories that power filters and listing classification.",
-      "cardCompaniesBody": "Review company ownership and reassign moderator responsibility.",
+      "cardCompaniesBody": "Create companies and employer accounts, follow sales and reassign the moderator.",
       "cardBillingBody": "Activate enterprise subscriptions after contractual payment is confirmed."
     },
     "companies": {
-      "listHeading": "Companies",
-      "listHint": "Open a company to view assignment history and reassign the owning moderator.",
-      "listEmpty": "No companies found.",
-      "salesStatus": {
-        "unassigned": "Unassigned",
-        "pipeline": "In pipeline",
-        "closed_won": "Closed won",
-        "closed_lost": "Closed lost"
-      },
-      "detailHeading": "Company",
-      "detailSalesOwner": "Sales owner (moderator)",
-      "detailSalesOwnerNone": "None assigned",
       "historyHeading": "Assignment history",
       "historyEmpty": "No admin reassignments recorded yet.",
       "colWhen": "When",
@@ -1007,8 +994,7 @@
       "reassignReason": "Reason (required)",
       "reassignReasonPlaceholder": "Explain the reassignment for the audit log",
       "reassignSubmit": "Reassign",
-      "reassignPending": "Saving…",
-      "backToList": "← All companies"
+      "reassignPending": "Saving…"
     },
     "users": {
       "heading": "Users",

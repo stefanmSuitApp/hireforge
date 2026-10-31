@@ -3,12 +3,16 @@ import { redirect } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import { StaffNestFetchError } from '@/components/staff-nest-fetch-error';
+import { AdminCompanyReassignPanel } from '@/features/admin';
 import {
   ModeratorCompanyAccounts,
   ModeratorCompanyDetailForm,
   ModeratorCompanySalesActions,
 } from '@/features/moderator';
-import { fetchStaffCompanyDetail } from '@/lib/fetch-staff';
+import {
+  fetchAdminCompanyAssignmentHistory,
+  fetchStaffCompanyDetail,
+} from '@/lib/fetch-staff';
 import { Link } from '@/i18n/navigation';
 import { loadModeratorSessionOrRedirect } from '@/lib/moderator-workspace-load';
 import { redirectToModeratorLoginIfUnauthorized } from '@/lib/staff-server-fetch-guard';
@@ -23,7 +27,13 @@ export default async function ModeratorCompanyDetailPage({
   const t = await getTranslations('Moderator.companies');
 
   const session = await loadModeratorSessionOrRedirect();
-  const detail = await fetchStaffCompanyDetail(session.accessToken, companyId);
+  const isAdmin = session.me.user.role === 'admin';
+  const [detail, history] = await Promise.all([
+    fetchStaffCompanyDetail(session.accessToken, companyId),
+    isAdmin
+      ? fetchAdminCompanyAssignmentHistory(session.accessToken, companyId)
+      : null,
+  ]);
   if (!detail.ok) {
     if (detail.status === 404) {
       redirect(`/${locale}/moderator/companies`);
@@ -59,6 +69,15 @@ export default async function ModeratorCompanyDetailPage({
         company={detail.data}
         currentUserId={session.me.user.id}
       />
+
+      {history?.ok ? (
+        <section className="rounded-2xl border border-border/70 bg-card p-5 shadow-sm">
+          <AdminCompanyReassignPanel
+            companyId={companyId}
+            initialHistory={history.data}
+          />
+        </section>
+      ) : null}
 
       <ModeratorCompanyAccounts
         companyId={companyId}
