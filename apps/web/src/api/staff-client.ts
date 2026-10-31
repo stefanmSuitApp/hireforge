@@ -15,6 +15,8 @@ import type {
   PromoCodeCreateBody,
   PromoCodePatchBody,
   PromoCodeResponse,
+  StaffAccountInviteResponse,
+  StaffCompanyAccountCreateBody,
   StaffCompanyCreateBody,
   StaffCompanyJoinRequestListResponse,
   StaffCompanyListResponse,
@@ -80,6 +82,29 @@ export async function postStaffCompany(
   const { data } = await webHttp.post<{ id: string }>(
     '/api/moderator/companies',
     body,
+  );
+  return data;
+}
+
+export async function postStaffCompanyAccount(
+  companyId: string,
+  body: StaffCompanyAccountCreateBody,
+): Promise<StaffAccountInviteResponse> {
+  const { data } = await webHttp.post<StaffAccountInviteResponse>(
+    `/api/moderator/companies/${encodeURIComponent(companyId)}/accounts`,
+    body,
+  );
+  return data;
+}
+
+export async function postStaffResendInvite(
+  companyId: string,
+  userId: string,
+  locale: 'sr' | 'en',
+): Promise<StaffAccountInviteResponse> {
+  const { data } = await webHttp.post<StaffAccountInviteResponse>(
+    `/api/moderator/companies/${encodeURIComponent(companyId)}/accounts/${encodeURIComponent(userId)}/invite`,
+    { locale },
   );
   return data;
 }

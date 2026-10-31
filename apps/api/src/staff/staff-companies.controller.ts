@@ -11,6 +11,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  staffAccountInviteResendBodySchema,
+  staffCompanyAccountCreateBodySchema,
   staffCompanyCloseLostBodySchema,
   staffCompanyCreateBodySchema,
   staffCompanyListQuerySchema,
@@ -24,13 +26,17 @@ import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 import { codedBadRequest } from '../http/coded-http';
 import { firstQueryString } from '../http/query-string';
+import { StaffAccountsService } from './staff-accounts.service';
 import { StaffCompaniesService } from './staff-companies.service';
 
 @Controller('moderator/companies')
 @UseGuards(AuthenticatedGuard, RolesGuard)
 @Roles('moderator', 'admin')
 export class StaffCompaniesController {
-  constructor(private readonly companies: StaffCompaniesService) {}
+  constructor(
+    private readonly companies: StaffCompaniesService,
+    private readonly accounts: StaffAccountsService,
+  ) {}
 
   private userId(req: Request): string {
     const id = req.hireforgeUser?.id;
@@ -92,6 +98,50 @@ export class StaffCompaniesController {
       );
     }
     return this.companies.create(this.userId(req), parsed.data);
+  }
+
+  @Post(':id/accounts')
+  createAccount(
+    @Req() req: Request,
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() body: unknown,
+  ) {
+    const parsed = staffCompanyAccountCreateBodySchema.safeParse(body);
+    if (!parsed.success) {
+      throw codedBadRequest(
+        'VALIDATION_FAILED',
+        'Invalid request body',
+        z.flattenError(parsed.error),
+      );
+    }
+    return this.accounts.create(
+      { actorUserId: this.userId(req), actorRole: this.role(req) },
+      id,
+      parsed.data,
+    );
+  }
+
+  @Post(':id/accounts/:userId/invite')
+  resendInvite(
+    @Req() req: Request,
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param('userId', new ParseUUIDPipe()) userId: string,
+    @Body() body: unknown,
+  ) {
+    const parsed = staffAccountInviteResendBodySchema.safeParse(body ?? {});
+    if (!parsed.success) {
+      throw codedBadRequest(
+        'VALIDATION_FAILED',
+        'Invalid request body',
+        z.flattenError(parsed.error),
+      );
+    }
+    return this.accounts.resendInvite(
+      { actorUserId: this.userId(req), actorRole: this.role(req) },
+      id,
+      userId,
+      parsed.data.locale,
+    );
   }
 
   @Post(':id/pickup')

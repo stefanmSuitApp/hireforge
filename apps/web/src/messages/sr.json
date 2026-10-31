@@ -791,7 +791,7 @@
       "no": "Ne",
       "open": "Otvori",
       "createHeading": "Registracija kompanije",
-      "createLead": "Kreira prazan zapis. Naloge poslodavaca poveži na ekranu Poslodavci.",
+      "createLead": "Kompanija može da postoji i bez naloga. Nalog poslodavca dodaješ na ekranu kompanije, posle kreiranja.",
       "legalName": "Pravno ime",
       "slug": "URL slug",
       "verified": "Verifikovan poslodavac",
@@ -800,8 +800,6 @@
       "saved": "Sačuvano.",
       "create": "Kreiraj kompaniju",
       "creating": "Kreiranje…",
-      "membersHeading": "Nalozi poslodavaca",
-      "noMembers": "Još nema povezanih naloga za ovu kompaniju.",
       "editHeading": "Detalji kompanije",
       "viewMy": "Moje kompanije",
       "viewPool": "Lead pool",
@@ -831,7 +829,37 @@
       "closeLostNotePlaceholder": "Razlog ili kontekst",
       "confirmCloseLost": "Označiti kao zatvoreno – izgubljeno i osloboditi?",
       "confirmCloseLostSubmit": "Potvrdi zatvaranje",
-      "createListing": "Novi oglas (osoblje)"
+      "createListing": "Novi oglas (osoblje)",
+      "foreign": "Strana kompanija",
+      "pib": "PIB",
+      "mb": "MB",
+      "countryCode": "Država (ISO kod, npr. DE)",
+      "vatId": "PDV broj (EU VAT ID)",
+      "taxId": "Poreski broj (van EU)",
+      "registrationNumber": "Registarski broj",
+      "identifierHint": "Unesi PIB ili MB. Po njima prepoznajemo kompaniju kada se neko iz nje sam registruje, pa ne nastaje duplikat.",
+      "identifierHintForeign": "Unesi PDV broj, poreski ili registarski broj, da bismo kompaniju prepoznali kada se neko iz nje sam registruje.",
+      "accounts": {
+        "heading": "Nalozi poslodavaca",
+        "none": "Još nema naloga. Kompanija može da postoji i bez njega, a nalog možeš da dodaš kad god.",
+        "active": "Aktivan",
+        "waiting": "Čeka aktivaciju",
+        "resend": "Pošalji ponovo",
+        "sending": "Slanje…",
+        "sent": "Pozivnica je poslata na {email}.",
+        "notSent": "Nalog za {email} je napravljen, ali e-poruka nije poslata. Pošalji link ispod drugim putem.",
+        "linkLabel": "Link za aktivaciju",
+        "copy": "Kopiraj link",
+        "copied": "Kopirano",
+        "linkHint": "Link važi 7 dana i radi jednom. Ko ga ima može da postavi lozinku, zato ga šalji samo osobi iz kompanije.",
+        "addHeading": "Dodaj nalog",
+        "email": "E-pošta za nalog",
+        "language": "Jezik pozivnice",
+        "languageSr": "Srpski",
+        "languageEn": "Engleski",
+        "addHint": "Osoba dobija e-poruku sa linkom da postavi lozinku. Nalog je odmah povezan sa ovom kompanijom.",
+        "send": "Pošalji pozivnicu"
+      }
     },
     "jobsNew": {
       "noSubscriptionsTitle": "Nema aktivnog paketa",
@@ -1237,7 +1265,10 @@
     "tableRenderFailed": "Tabelu trenutno nije moguće prikazati.",
     "apiNotConfigured": "Usluga trenutno nije dostupna. Pokušaj ponovo za nekoliko minuta.",
     "CAMPAIGN_NOT_FOUND": "Ta kampanja nije pronađena.",
-    "CAMPAIGN_OVERLAP": "U tom periodu već postoji aktivna kampanja. Pauziraj je ili izaberi druge datume."
+    "CAMPAIGN_OVERLAP": "U tom periodu već postoji aktivna kampanja. Pauziraj je ili izaberi druge datume.",
+    "COMPANY_IDENTIFIER_REQUIRED": "Unesi PIB ili MB (za stranu kompaniju: PDV broj, poreski ili registarski broj).",
+    "STAFF_ACCOUNT_EMAIL_TAKEN": "Ova e-pošta već ima nalog. Ako se ta osoba sama registrovala, odobri njen zahtev za pristup.",
+    "ACCOUNT_ALREADY_ACTIVE": "Nalog je već aktiviran; nova pozivnica nije potrebna."
   },
   "Candidate": {
     "workspaceLabel": "Kandidatski nalog",
@@ -1425,7 +1456,12 @@
     "resendVerificationSent": "Poslato. Proveri inbox i folder za neželjenu poštu.",
     "forgotPasswordLink": "Zaboravljena lozinka?",
     "passwordShow": "Prikaži lozinku",
-    "passwordHide": "Sakrij lozinku"
+    "passwordHide": "Sakrij lozinku",
+    "inviteTitle": "Aktiviraj nalog",
+    "inviteSubtitle": "Tim Šljakam je otvorio nalog za tvoju kompaniju. Postavi lozinku i prijavi se.",
+    "inviteSubmit": "Aktiviraj nalog",
+    "inviteDone": "Nalog je aktiviran. Sada se prijavi e-poštom i novom lozinkom.",
+    "inviteLinkMissing": "Link nije potpun. Otvori ga ponovo iz e-poruke ili zamoli svoj kontakt u Šljakamu za novi."
   },
   "Landing": {
     "cityTitle": "Poslovi — {city}",

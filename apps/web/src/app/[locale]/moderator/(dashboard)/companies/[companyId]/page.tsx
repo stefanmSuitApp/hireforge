@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { StaffNestFetchError } from '@/components/staff-nest-fetch-error';
 import {
+  ModeratorCompanyAccounts,
   ModeratorCompanyDetailForm,
   ModeratorCompanySalesActions,
 } from '@/features/moderator';
@@ -59,22 +60,10 @@ export default async function ModeratorCompanyDetailPage({
         currentUserId={session.me.user.id}
       />
 
-      <section className="rounded-2xl border border-border/70 bg-card p-5 shadow-sm">
-        <h3 className="text-base font-semibold text-foreground">
-          {t('membersHeading')}
-        </h3>
-        {detail.data.employers.length === 0 ? (
-          <p className="mt-3 text-sm text-muted-foreground">{t('noMembers')}</p>
-        ) : (
-          <ul className="mt-4 divide-y divide-border rounded-xl border border-border/70">
-            {detail.data.employers.map((m) => (
-              <li key={m.employerId} className="px-3 py-2 text-sm">
-                <span className="font-mono">{m.email}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <ModeratorCompanyAccounts
+        companyId={companyId}
+        members={detail.data.employers}
+      />
 
       <section className="rounded-2xl border border-border/70 bg-card p-5 shadow-sm">
         <h3 className="text-base font-semibold text-foreground">

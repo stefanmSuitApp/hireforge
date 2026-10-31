@@ -9,6 +9,7 @@ import {
 import {
   candidateRegisterBodySchema,
   employerSelfSignupBodySchema,
+  termsVersionSchema,
 } from 'contracts';
 import type { Request } from 'express';
 import { z } from 'zod';
@@ -49,6 +50,11 @@ const resetRequestSchema = z.object({
 const resetConfirmSchema = z.object({
   token: z.string().min(16).max(256),
   password: z.string().min(8).max(128),
+});
+
+/** `acceptedTermsVersion` is set by the BFF from the published terms. */
+const inviteAcceptSchema = resetConfirmSchema.extend({
+  acceptedTermsVersion: termsVersionSchema.optional(),
 });
 
 function parseOrThrow<T extends z.ZodType>(
@@ -195,5 +201,15 @@ export class AuthController {
     await assertEmailLinkRateLimit(req);
     const { token, password } = parseOrThrow(resetConfirmSchema, body);
     return this.authEmail.resetPassword(token, password);
+  }
+
+  @Post('invite/accept')
+  async acceptInvite(@Body() body: unknown, @Req() req: Request) {
+    await assertEmailLinkRateLimit(req);
+    const { token, password, acceptedTermsVersion } = parseOrThrow(
+      inviteAcceptSchema,
+      body,
+    );
+    return this.authEmail.acceptInvite(token, password, acceptedTermsVersion);
   }
 }
