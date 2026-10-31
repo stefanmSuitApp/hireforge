@@ -1,6 +1,7 @@
 // CV templates (docs/plans/CV_TEMPLATES.md): a candidate builds a CV in the
 // app, and the PDF a scanner reads has what they entered, in Serbian.
 import { expect, test, type Page } from '@playwright/test';
+import sharp from 'sharp';
 import { extractText, getDocumentProxy, getResolvedPDFJS } from 'unpdf';
 
 import { readyCandidate } from './support/candidate';
@@ -299,4 +300,49 @@ test('the colour picked in the builder is the colour on the CV', async ({
   );
   expect(fills).toContain('#5b2a55');
   expect(fills).not.toContain('#0b6e65');
+});
+
+// PR 5b: a photo added in the builder is on the Moderan CV, and can be removed.
+test('a candidate adds a photo, sees it on the CV, then removes it', async ({
+  page,
+}) => {
+  const cand = await signIn(page);
+  await gotoHydrated(page, '/sr/candidate/cv/build', '#cv-fullName');
+  await page.getByLabel('Ime i prezime').fill('Ana Fotić');
+  const photo = await sharp({
+    create: { width: 800, height: 1000, channels: 3, background: '#557788' },
+  })
+    .jpeg()
+    .toBuffer();
+  await page.locator('#cv-photo').setInputFiles({
+    name: 'ja.jpg',
+    mimeType: 'image/jpeg',
+    buffer: photo,
+  });
+  await expect(
+    page.getByRole('img', { name: 'Tvoja fotografija' }),
+  ).toBeVisible();
+  await expect(page.getByLabel('Prikaži fotografiju na CV-u')).toBeChecked();
+
+  const next = page.getByRole('button', { name: 'Dalje' });
+  for (let i = 0; i < 5; i++) await next.click();
+  await page.getByRole('button', { name: /Moderan/ }).click();
+  await next.click(); // generate
+  await page
+    .getByRole('button', { name: 'Sačuvaj profil i generiši CV' })
+    .click();
+  await expect(page.getByText('Generisan (Moderan)')).toBeVisible();
+  const pdf = await newestGeneratedCv(cand);
+  const { OPS } = await getResolvedPDFJS();
+  const ops = await (await pdf.getPage(1)).getOperatorList();
+  expect(ops.fnArray.filter((fn) => fn === OPS.paintImageXObject)).toHaveLength(
+    1,
+  );
+
+  await gotoHydrated(page, '/sr/candidate/cv/build', '#cv-fullName');
+  await page.getByRole('button', { name: 'Ukloni fotografiju' }).click();
+  await expect(
+    page.getByRole('img', { name: 'Tvoja fotografija' }),
+  ).toHaveCount(0);
+  expect((await cand.api.get('candidate/photo')).status()).toBe(404);
 });

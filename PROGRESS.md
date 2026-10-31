@@ -118,9 +118,17 @@ pnpm build` (+ `pnpm check:i18n`) = `pnpm verify`; PRs run it locally, CI on
     navy, plum, burgundy, graphite; `cvAccentColors` in contracts, each
     ≥ 4.5:1 with white) picked in the template step; stored in
     `cv_profile.accent` (no migration), so the next CV keeps it. Klasičan
-    stays black and white (swatches disabled, note shown). **PR 5b
-    (candidate photo) waits** for the uploads bucket
-    (`STAFF_ACCOUNTS_AND_UPLOADS.md` PR 2, needs Stefan's bucket).
+    stays black and white (swatches disabled, note shown).
+  - **PR 5b done** (`feat/cv-photo`): candidate CV photo. `POST/GET/DELETE
+/api/candidate/photo` (BFF forwards the client IP); any JPEG/PNG/WebP
+    ≤ 5 MB, ≥ 200×200 is stored as a 600×600 JPEG (sharp: EXIF rotate,
+    centre crop, metadata dropped) in the uploads `photo` area
+    (`CANDIDATE_PHOTO_DIR` on disk, the bucket when configured; the copy
+    script moves it too); `candidates.photo_storage_key` (migration 0043);
+    replacing removes the old file. Builder: upload in the basics step
+    with a preview, "Prikaži fotografiju na CV-u" (`cv_profile.showPhoto`,
+    on after an upload). Moderan (round, sidebar) and Evropski (square,
+    header) print it; picker badge "Može sa fotografijom".
 
 ### Plan steps, verified against code
 

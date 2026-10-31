@@ -53,6 +53,8 @@ const s3 = new S3Client({
 
 const CONTENT_TYPES = {
   '.pdf': 'application/pdf',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
   '.doc': 'application/msword',
   '.docx':
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -62,6 +64,10 @@ const areas = [
   {
     area: 'cv',
     dir: resolve(env('CANDIDATE_UPLOAD_DIR') || 'var/candidate-uploads'),
+  },
+  {
+    area: 'photo',
+    dir: resolve(env('CANDIDATE_PHOTO_DIR') || 'var/candidate-photos'),
   },
 ];
 

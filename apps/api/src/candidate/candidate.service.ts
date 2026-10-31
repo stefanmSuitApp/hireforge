@@ -20,6 +20,7 @@ import * as path from 'node:path';
 import { and, count, desc, eq, ne, sql } from 'drizzle-orm';
 import { isWithinReapplicationCooldown } from 'server-applications';
 import { renderCvPdfBuffer } from 'server-cv-templates';
+import sharp from 'sharp';
 import {
   applications,
   candidates,
@@ -49,6 +50,9 @@ import { isUniqueViolation } from '../database-errors';
 import { consumeRateLimit } from '../http/rate-limit';
 
 const MAX_RESUME_BYTES = 5 * 1024 * 1024;
+/** CV photos are stored square at this size; smaller uploads are refused. */
+const PHOTO_SIDE = 600;
+const MIN_PHOTO_SIDE = 200;
 
 const LIST_EXCERPT_MAX = 200;
 
@@ -241,12 +245,14 @@ export class CandidateService {
         cityId: candidates.cityId,
         cvProfile: candidates.cvProfile,
         cityLabel: cities.nameSr,
+        photoStorageKey: candidates.photoStorageKey,
       })
       .from(candidates)
       .leftJoin(cities, eq(candidates.cityId, cities.id))
       .where(eq(candidates.id, base.candidateId))
       .limit(1);
     const row = c ?? {
+      photoStorageKey: null as string | null,
       fullName: base.fullName,
       phone: null as string | null,
       headline: null as string | null,
@@ -269,6 +275,7 @@ export class CandidateService {
         cityId: row.cityId ?? null,
         cityLabel: row.cityLabel ?? null,
         cvProfile: parseCvProfile(row.cvProfile),
+        hasPhoto: row.photoStorageKey != null,
       },
     };
   }
@@ -762,6 +769,113 @@ export class CandidateService {
     });
   }
 
+  /**
+   * CV photo: any JPEG/PNG/WebP up to 5 MB, at least 200×200, stored as a
+   * 600×600 JPEG (centre crop, rotated by EXIF, metadata dropped).
+   */
+  async savePhoto(userId: string, buffer: Buffer): Promise<{ ok: true }> {
+    const database = getDb();
+    if (!database) {
+      throw codedServiceUnavailable(
+        'DATABASE_UNAVAILABLE',
+        'Database is not configured (DATABASE_URL)',
+      );
+    }
+    const base = await this.requireCandidate(userId);
+    const limit = await consumeRateLimit(
+      `cvphoto:1h:${base.candidateId}`,
+      20,
+      60 * 60,
+    );
+    if (!limit.allowed) {
+      throw codedTooManyRequests(
+        'CV_PHOTO_RATE_LIMITED',
+        'Too many photo uploads in the last hour',
+      );
+    }
+    let jpeg: Buffer;
+    try {
+      const image = sharp(buffer, { failOn: 'error' }).rotate();
+      const meta = await image.metadata();
+      if (
+        !['jpeg', 'png', 'webp'].includes(meta.format ?? '') ||
+        (meta.width ?? 0) < MIN_PHOTO_SIDE ||
+        (meta.height ?? 0) < MIN_PHOTO_SIDE
+      ) {
+        throw new Error('unsupported');
+      }
+      jpeg = await image
+        .resize(PHOTO_SIDE, PHOTO_SIDE, { fit: 'cover', position: 'attention' })
+        .jpeg({ quality: 85, mozjpeg: true })
+        .toBuffer();
+    } catch {
+      throw codedBadRequest(
+        'CANDIDATE_PHOTO_INVALID',
+        'Photo must be a JPEG, PNG or WebP of at least 200×200 pixels',
+      );
+    }
+    const key = `${base.candidateId}/${randomUUID()}.jpg`;
+    await this.storage.put('photo', key, jpeg, 'image/jpeg');
+    const [old] = await database.db
+      .select({ key: candidates.photoStorageKey })
+      .from(candidates)
+      .where(eq(candidates.id, base.candidateId))
+      .limit(1);
+    await database.db
+      .update(candidates)
+      .set({ photoStorageKey: key })
+      .where(eq(candidates.id, base.candidateId));
+    if (old?.key) {
+      await this.storage.remove('photo', old.key).catch((e: unknown) => {
+        this.logger.warn(`Old CV photo not removed: ${String(e)}`);
+      });
+    }
+    return { ok: true };
+  }
+
+  async getPhoto(userId: string): Promise<Buffer> {
+    const database = getDb();
+    if (!database) {
+      throw codedServiceUnavailable(
+        'DATABASE_UNAVAILABLE',
+        'Database is not configured (DATABASE_URL)',
+      );
+    }
+    const base = await this.requireCandidate(userId);
+    const [row] = await database.db
+      .select({ key: candidates.photoStorageKey })
+      .from(candidates)
+      .where(eq(candidates.id, base.candidateId))
+      .limit(1);
+    const photo = row?.key ? await this.storage.get('photo', row.key) : null;
+    if (!photo) {
+      throw codedNotFound('CANDIDATE_PHOTO_NOT_FOUND', 'No CV photo');
+    }
+    return photo;
+  }
+
+  async deletePhoto(userId: string): Promise<{ ok: true }> {
+    const database = getDb();
+    if (!database) {
+      throw codedServiceUnavailable(
+        'DATABASE_UNAVAILABLE',
+        'Database is not configured (DATABASE_URL)',
+      );
+    }
+    const base = await this.requireCandidate(userId);
+    const [row] = await database.db
+      .select({ key: candidates.photoStorageKey })
+      .from(candidates)
+      .where(eq(candidates.id, base.candidateId))
+      .limit(1);
+    await database.db
+      .update(candidates)
+      .set({ photoStorageKey: null })
+      .where(eq(candidates.id, base.candidateId));
+    if (row?.key) await this.storage.remove('photo', row.key);
+    return { ok: true };
+  }
+
   async generateResumeFromTemplate(
     userId: string,
     body: CandidateGenerateResumeBody,
@@ -794,6 +908,7 @@ export class CandidateService {
         headline: candidates.headline,
         cvProfile: candidates.cvProfile,
         cityLabel: cities.nameSr,
+        photoStorageKey: candidates.photoStorageKey,
       })
       .from(candidates)
       .innerJoin(users, eq(candidates.userId, users.id))
@@ -807,6 +922,10 @@ export class CandidateService {
       );
     }
     const profile = parseCvProfile(row.cvProfile);
+    const photo =
+      profile.showPhoto && row.photoStorageKey
+        ? await this.storage.get('photo', row.photoStorageKey)
+        : null;
     const layout = {
       locale: body.locale,
       fullName: row.fullName,
@@ -815,6 +934,7 @@ export class CandidateService {
       headline: row.headline ?? null,
       cityLine: row.cityLabel ?? null,
       profile,
+      photo: photo ? { data: photo, format: 'jpg' as const } : null,
     };
     const buffer = await renderCvPdfBuffer(body.templateCode, layout);
     if (buffer.length > MAX_RESUME_BYTES) {

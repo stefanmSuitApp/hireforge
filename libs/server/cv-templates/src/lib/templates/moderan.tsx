@@ -6,6 +6,7 @@ import type { CvPdfLayoutInput } from 'contracts';
 import { CV_LABELS, formatCvLanguage } from '../labels';
 import {
   contactParts,
+  CvPhoto,
   EducationSection,
   ExperienceSection,
   formatCertificate,
@@ -132,6 +133,14 @@ export function ModeranDoc({
             width: SIDEBAR - 48,
           }}
         >
+          <View style={{ alignItems: 'center', marginTop: 18 }}>
+            <CvPhoto
+              layout={layout}
+              size={112}
+              round
+              ring={tint(accent, 0.75)}
+            />
+          </View>
           {contact.length || p.links.length ? (
             <SideGroup title={labels.contact} accent={accent}>
               {contact.map((c) => (

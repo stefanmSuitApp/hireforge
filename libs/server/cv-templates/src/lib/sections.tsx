@@ -1,4 +1,4 @@
-import { Text, View } from '@react-pdf/renderer';
+import { Image, Text, View } from '@react-pdf/renderer';
 import { Children, type ReactElement, type ReactNode } from 'react';
 
 import type { CvPdfLayoutInput } from 'contracts';
@@ -25,6 +25,34 @@ export type CvTheme = {
   /** Titles in a left column this wide (pt) instead of above the content. */
   titleWidth?: number;
 };
+
+/** The candidate's photo, when they have one and switched it on. */
+export function CvPhoto({
+  layout,
+  size,
+  round,
+  ring,
+}: {
+  layout: CvPdfLayoutInput;
+  size: number;
+  round: boolean;
+  ring?: string;
+}): ReactElement | null {
+  if (!layout.photo || !layout.profile.showPhoto) return null;
+  return (
+    <Image
+      // Bytes on the server, a same-origin URL in the browser preview.
+      src={layout.photo as never}
+      style={{
+        width: size,
+        height: size,
+        objectFit: 'cover',
+        borderRadius: round ? size / 2 : 6,
+        ...(ring ? { borderWidth: 3, borderColor: ring } : {}),
+      }}
+    />
+  );
+}
 
 /** Phone, email (unless hidden) and city, whichever the candidate has. */
 export function contactParts(layout: CvPdfLayoutInput): string[] {

@@ -95,6 +95,8 @@ export type CandidateMeResponse = {
     /** `cities.name_sr` when `city_id` set — for CV builder display. */
     cityLabel: string | null;
     cvProfile: CvProfile;
+    /** A CV photo is uploaded (`GET /api/candidate/photo`). */
+    hasPhoto: boolean;
   };
 };
 

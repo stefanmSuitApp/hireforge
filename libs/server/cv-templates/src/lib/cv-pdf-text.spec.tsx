@@ -9,6 +9,7 @@ import {
   cvTemplateCodes,
   type CvPdfLayoutInput,
 } from 'contracts';
+import sharp from 'sharp';
 import { pdfText } from 'testing/pdf';
 import { renderCvPdfBuffer } from './render-cv-pdf-buffer';
 import { CV_LABELS } from './labels';
@@ -371,6 +372,39 @@ describe.each(cvTemplateCodes)('CV template %s', (template) => {
       const teal = cvAccentColors.teal.toLowerCase();
       expect(fills.has(plum)).toBe(template !== 'klasican');
       expect(fills.has(teal)).toBe(false);
+    },
+  );
+
+  // PR 5b: the photo is printed by the templates that have a place for it,
+  // and only when the candidate switched it on.
+  it(
+    cvTemplates[template].supportsPhoto
+      ? 'prints the photo when it is switched on'
+      : 'never prints a photo',
+    async () => {
+      const jpeg = await sharp({
+        create: { width: 600, height: 600, channels: 3, background: '#8899aa' },
+      })
+        .jpeg()
+        .toBuffer();
+      const images = async (showPhoto: boolean) => {
+        const pdf = await getDocumentProxy(
+          new Uint8Array(
+            await renderCvPdfBuffer(template, {
+              ...LAYOUT,
+              photo: { data: jpeg, format: 'jpg' },
+              profile: { ...LAYOUT.profile, showPhoto },
+            }),
+          ),
+        );
+        const { OPS } = await getResolvedPDFJS();
+        const ops = await (await pdf.getPage(1)).getOperatorList();
+        return ops.fnArray.filter((fn) => fn === OPS.paintImageXObject).length;
+      };
+      expect(await images(true)).toBe(
+        cvTemplates[template].supportsPhoto ? 1 : 0,
+      );
+      expect(await images(false)).toBe(0);
     },
   );
 
