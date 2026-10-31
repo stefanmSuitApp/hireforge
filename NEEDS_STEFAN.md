@@ -7,9 +7,8 @@ priority. Remove an item when it is done. **No secrets in this file.**
 
 1. Redesign A (2026-10-29, #60–#64): staging has every step; production
    is the manual `deploy-production` run when you are happy with staging.
-   The Studio with the **Logo** field on Employer branding is already
-   live (redeployed 2026-10-31 with the env fix, #70); after the production
-   deploy, upload logos; cards show initials until then. The shared Sanity data already
+   Logos are now uploaded on the moderator company page (PR 2b), not in the
+   Studio; cards show initials until a logo is uploaded. The shared Sanity data already
    has #59's home tiles, About and navigation (seeded 2026-10-30), so
    sljakam.com shows **no category tiles until this deploy** (its database
    still has the old categories).
@@ -19,8 +18,9 @@ priority. Remove an item when it is done. **No secrets in this file.**
    it; no new secrets). Then switch staging first, production later:
    `docs/deployment/hetzner.md` §6 "Uploaded files" (two env lines, a copy
    script, a restart; I can walk you through it or do it on your OK).
-   Until then CVs stay on the VM disk, which no backup covers. Also: hold
-   off on uploading logos in Sanity; they move to the bucket in PR 2b.
+   Until then CVs and logos stay on the VM disk, which no backup covers.
+   Logos: upload them on the moderator company page ("Logo"), not in
+   Sanity; Sanity's logo is only a fallback now.
 3. When convenient: `sudo systemctl restart docker` (item 2), Sentry (3),
    accountant (4), legal texts (5), Phase T decisions, social profiles,
    analytics, Google Indexing API.

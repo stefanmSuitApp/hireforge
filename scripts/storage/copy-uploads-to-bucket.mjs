@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * One-off: copies uploaded files (CVs) from the server's disk into the
+ * One-off: copies uploaded files (CVs, company logos) from the server's disk into the
  * uploads bucket, under the same keys the API uses
- * (`<S3_UPLOADS_PREFIX>cv/<storage_key>`). Runs inside the api image:
+ * (`<S3_UPLOADS_PREFIX><area>/<storage_key>`). Runs inside the api image:
  *
  *   docker compose -f compose.prod.yml run --rm api \
  *     node scripts/storage/copy-uploads-to-bucket.mjs [--dry-run]
@@ -11,7 +11,7 @@
  * deletes the disk copies (remove them by hand once the site reads from the
  * bucket). Env: S3_UPLOADS_BUCKET, S3_UPLOADS_PREFIX, S3_ENDPOINT, S3_REGION,
  * AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, CANDIDATE_UPLOAD_DIR
- * (default `var/candidate-uploads`).
+ * (default `var/candidate-uploads`), COMPANY_LOGO_DIR (`var/company-logos`).
  */
 import {
   HeadObjectCommand,
@@ -58,12 +58,17 @@ const CONTENT_TYPES = {
   '.doc': 'application/msword',
   '.docx':
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  '.webp': 'image/webp',
 };
 
 const areas = [
   {
     area: 'cv',
     dir: resolve(env('CANDIDATE_UPLOAD_DIR') || 'var/candidate-uploads'),
+  },
+  {
+    area: 'logo',
+    dir: resolve(env('COMPANY_LOGO_DIR') || 'var/company-logos'),
   },
   {
     area: 'photo',

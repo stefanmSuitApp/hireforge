@@ -10,6 +10,7 @@ import { jwtAuthMiddleware } from '../auth/jwt-auth.middleware';
 import { correlationMiddleware } from '../observability/correlation.middleware';
 import { CmsModule } from '../cms/cms.module';
 import { CandidateModule } from '../candidate/candidate.module';
+import { CompanyLogosModule } from '../company-logos/company-logos.module';
 import { EmployerModule } from '../employer/employer.module';
 import { ModerationModule } from '../moderation/moderation.module';
 import { StaffModule } from '../staff/staff.module';
@@ -32,6 +33,7 @@ import { AppService } from './app.service';
     AuthModule,
     EmployerModule,
     CandidateModule,
+    CompanyLogosModule,
     ModerationModule,
     StaffModule,
   ],

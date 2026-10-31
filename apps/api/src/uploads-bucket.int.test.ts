@@ -147,12 +147,13 @@ describe('the one-off copy of existing CVs from disk', () => {
     __dirname,
     '../../../scripts/storage/copy-uploads-to-bucket.mjs',
   );
-  const run = (dir: string) =>
+  const run = (dir: string, logoDir: string) =>
     promisify(execFile)(process.execPath, [script], {
       env: {
         ...process.env,
         S3_UPLOADS_PREFIX: 'copytest/',
         CANDIDATE_UPLOAD_DIR: dir,
+        COMPANY_LOGO_DIR: logoDir,
       },
     });
 
@@ -161,15 +162,19 @@ describe('the one-off copy of existing CVs from disk', () => {
     mkdirSync(join(dir, 'cand-1'));
     writeFileSync(join(dir, 'cand-1', 'a.pdf'), PDF);
     writeFileSync(join(dir, 'cand-1', 'b.docx'), 'docx');
+    const logoDir = mkdtempSync(join(tmpdir(), 'hf-copy-logo-'));
+    mkdirSync(join(logoDir, 'comp-1'));
+    writeFileSync(join(logoDir, 'comp-1', 'l.webp'), 'webp');
 
-    const first = await run(dir);
-    expect(first.stdout).toContain('copied 2, already there 0');
+    const first = await run(dir, logoDir);
+    expect(first.stdout).toContain('copied 3, already there 0');
     expect((await keys('copytest/')).sort()).toEqual([
       'copytest/cv/cand-1/a.pdf',
       'copytest/cv/cand-1/b.docx',
+      'copytest/logo/comp-1/l.webp',
     ]);
 
-    const again = await run(dir);
-    expect(again.stdout).toContain('copied 0, already there 2');
+    const again = await run(dir, logoDir);
+    expect(again.stdout).toContain('copied 0, already there 3');
   });
 });

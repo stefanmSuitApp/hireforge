@@ -31,6 +31,8 @@ for (const key of [
   'AUTH_DEV_HEADERS',
   'S3_BILLING_BUCKET',
   'S3_JOB_MEDIA_BUCKET',
+  'S3_UPLOADS_BUCKET',
+  'S3_UPLOADS_PREFIX',
   'S3_ENDPOINT',
   'AWS_ACCESS_KEY_ID',
   'AWS_SECRET_ACCESS_KEY',
@@ -44,6 +46,7 @@ process.env['CANDIDATE_UPLOAD_DIR'] = join(files, 'cv');
 process.env['CANDIDATE_PHOTO_DIR'] = join(files, 'photos');
 process.env['BILLING_PDF_LOCAL_DIR'] = join(files, 'billing');
 process.env['JOB_DESCRIPTION_MEDIA_LOCAL_DIR'] = join(files, 'job-media');
+process.env['COMPANY_LOGO_DIR'] = join(files, 'logos');
 
 afterAll(async () => {
   await dropTestDatabase(ctx.postgres);

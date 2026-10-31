@@ -859,6 +859,15 @@
         "languageEn": "Engleski",
         "addHint": "Osoba dobija e-poruku sa linkom da postavi lozinku. Nalog je odmah povezan sa ovom kompanijom.",
         "send": "Pošalji pozivnicu"
+      },
+      "logo": {
+        "heading": "Logo",
+        "current": "Trenutni logo",
+        "none": "Nema logoa",
+        "upload": "Otpremi logo",
+        "uploading": "Otpremanje…",
+        "remove": "Ukloni logo",
+        "hint": "PNG, JPEG ili WebP do 2 MB. Pretvaramo ga u kvadrat 256×256 (providna pozadina ostaje). Prikazuje se na oglasima i stranici kompanije, umesto logoa iz Sanity-ja."
       }
     },
     "jobsNew": {
@@ -1256,6 +1265,9 @@
     "CAMPAIGN_OVERLAP": "U tom periodu već postoji aktivna kampanja. Pauziraj je ili izaberi druge datume.",
     "STAFF_ACCOUNT_EMAIL_TAKEN": "Ova e-pošta već ima nalog. Ako se ta osoba sama registrovala, odobri njen zahtev za pristup.",
     "ACCOUNT_ALREADY_ACTIVE": "Nalog je već aktiviran; nova pozivnica nije potrebna.",
+    "COMPANY_LOGO_MISSING": "Izaberi sliku logoa.",
+    "COMPANY_LOGO_TYPE_FORBIDDEN": "Logo mora biti PNG, JPEG ili WebP slika.",
+    "COMPANY_LOGO_PROCESS_FAILED": "Sliku nije moguće pročitati. Probaj drugi PNG, JPEG ili WebP fajl.",
     "CANDIDATE_PHOTO_INVALID": "Fotografija mora biti JPEG, PNG ili WebP, najviše 5 MB i najmanje 200×200 piksela.",
     "CANDIDATE_PHOTO_NOT_FOUND": "Fotografija nije pronađena.",
     "CV_PHOTO_RATE_LIMITED": "Previše postavljenih fotografija u poslednjih sat vremena. Pokušaj kasnije."

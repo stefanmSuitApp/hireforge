@@ -2,6 +2,7 @@ export { ModeratorPendingPaymentsPanel } from './components/moderator-pending-pa
 export { ModeratorCompanyCreateForm } from './components/moderator-company-create-form';
 export { ModeratorCompaniesSection } from './components/moderator-companies-section';
 export { ModeratorJoinRequestsPanel } from './components/moderator-join-requests-panel';
+export { ModeratorCompanyLogo } from './components/moderator-company-logo';
 export { ModeratorCompanyAccounts } from './components/moderator-company-accounts';
 export { ModeratorCompanyDetailForm } from './components/moderator-company-detail-form';
 export { ModeratorCompanySalesActions } from './components/moderator-company-sales-actions';

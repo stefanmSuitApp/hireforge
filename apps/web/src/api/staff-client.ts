@@ -18,6 +18,7 @@ import type {
   StaffAccountInviteResponse,
   StaffCompanyAccountCreateBody,
   StaffCompanyCreateBody,
+  StaffCompanyLogoResponse,
   StaffCompanyJoinRequestListResponse,
   StaffCompanyListResponse,
   StaffCompanyPatchBody,
@@ -107,6 +108,25 @@ export async function postStaffResendInvite(
     { locale },
   );
   return data;
+}
+
+export async function postStaffCompanyLogo(
+  companyId: string,
+  file: File,
+): Promise<StaffCompanyLogoResponse> {
+  const form = new FormData();
+  form.append('file', file, file.name);
+  const { data } = await webHttp.post<StaffCompanyLogoResponse>(
+    `/api/moderator/companies/${encodeURIComponent(companyId)}/logo`,
+    form,
+  );
+  return data;
+}
+
+export async function deleteStaffCompanyLogo(companyId: string): Promise<void> {
+  await webHttp.delete(
+    `/api/moderator/companies/${encodeURIComponent(companyId)}/logo`,
+  );
 }
 
 export async function patchStaffEmployer(
