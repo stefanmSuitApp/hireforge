@@ -24,13 +24,13 @@ For any question about personal data, write to [maticstefan1996@gmail.com](mailt
 
 **Technical data:** to protect the site from abuse (for example password guessing) we briefly record IP addresses together with the number of sign-in, sign-up and similar attempts. These records delete themselves after at most one hour (for clicks on an external apply link, after at most seven days and without an IP address).
 
-**Analytics, only with your consent:** if you choose "Accept" on the cookie bar, Microsoft Clarity records how you use the public pages of the site (home, job ads, company pages, sign-up): clicks, scrolling, mouse movement, screen size, device and browser type and an approximate location from your IP address. What you type into fields is not recorded, and account pages, dashboards and job applications are never recorded. We use no advertising tools.
+**Analytics, only with your consent:** if you choose "Accept" on the cookie bar, we use two tools on the public pages of the site (home, job ads, company pages, sign-up). Google Analytics counts visits and shows where they come from (search engines, social networks, direct), which pages are opened and how long they are read. Microsoft Clarity records how you use a page: clicks, scrolling and mouse movement. Both also see screen size, device and browser type and an approximate location from your IP address; Google Analytics does not store the IP address. What you type into fields is not recorded, and account pages, dashboards and job applications are never recorded. We use no advertising tools.
 
 ## Why we use it, and on what basis
 
 - **Performing a contract** (Article 12(1)(2) of the Serbian Law on Personal Data Protection; Article 6(1)(b) GDPR): opening and running your account, applications and passing them to the employer, publishing job ads, packages and payment, and account emails (email confirmation, password reset, notices about applications and job ads, proformas and invoices).
 - **Legal obligation** (point 3; GDPR 6(1)(c)): keeping accounting documents (proformas, invoices, credit notes) and the data they require.
-- **Consent** (point 1; GDPR 6(1)(a)): analytics of how the site is used (Microsoft Clarity). You can withdraw consent at any time with the "Cookie settings" link at the bottom of the page; withdrawing does not affect processing before it.
+- **Consent** (point 1; GDPR 6(1)(a)): analytics of how the site is used (Google Analytics and Microsoft Clarity). You can withdraw consent at any time with the "Cookie settings" link at the bottom of the page; withdrawing does not affect processing before it.
 - **Legitimate interest** (point 6; GDPR 6(1)(f)): security and abuse prevention, database backups, handling disputes.
 
 We do not sell personal data or use it for advertising. We make no automated decisions about you.
@@ -42,6 +42,7 @@ We do not sell personal data or use it for advertising. We make no automated dec
 - **Processors** that provide technical services to us, under contract and only on our instructions:
   - Hetzner Online GmbH, Germany: servers, database, files and backups (data centre in Nuremberg);
   - Resend, Inc., USA: sending email (your email address and the message);
+  - Google LLC, USA: analytics of how the site is used (Google Analytics), only if you have consented;
   - Microsoft Corporation, USA: analytics of how the site is used (Microsoft Clarity), only if you have consented.
 - **Public authorities**, when the law requires it.
 
@@ -56,7 +57,7 @@ The site's content is edited in the Sanity CMS; no user data is stored there.
 - **Proformas, invoices, payments and company details:** 10 years (statutory).
 - **Record of staff actions:** indefinitely.
 - **Database backups:** up to 30 days.
-- **Analytics (Microsoft Clarity):** session recordings up to 30 days, aggregated data (such as click maps) up to 13 months.
+- **Analytics:** Google Analytics up to 14 months; Microsoft Clarity: session recordings up to 30 days, aggregated data (such as click maps) up to 13 months.
 
 ## Your rights
 
@@ -76,7 +77,12 @@ Cookies and storage the site needs to work are used without asking; analytics co
 
 - **`hf_analytics_consent`**: remembers your analytics choice for 6 months; after that we ask again.
 
-**Analytics cookies, only with consent:** `_clck` (recognises the same browser, up to one year) and `_clsk` (joins page views into one visit, one day), set by Microsoft Clarity on sljakam.com; Microsoft may also set its own cookies on the clarity.ms domain (for example `CLID`, `MUID`, up to 13 months). If you decline or later withdraw consent, Clarity is not loaded and we delete the `_clck` and `_clsk` cookies.
+**Analytics cookies, only with consent:**
+
+- `_ga` and `_ga_<id>` (tell visitors and visits apart, up to two years), set by Google Analytics on sljakam.com;
+- `_clck` (recognises the same browser, up to one year) and `_clsk` (joins page views into one visit, one day), set by Microsoft Clarity on sljakam.com; Microsoft may also set its own cookies on the clarity.ms domain (for example `CLID`, `MUID`, up to 13 months).
+
+If you decline or later withdraw consent, neither tool is loaded, and we delete the `_ga`, `_ga_<id>`, `_clck` and `_clsk` cookies.
 
 We use no advertising cookies.
 

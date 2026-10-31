@@ -1,6 +1,7 @@
 /**
- * Microsoft Clarity behind consent: nothing loads until the visitor accepts,
- * and only public pages and sign-up are recorded (decided 2026-10-31).
+ * Microsoft Clarity and Google Analytics behind consent: nothing loads until
+ * the visitor accepts, and only public pages and sign-up are recorded
+ * (decided 2026-10-31).
  */
 
 export const ANALYTICS_CONSENT_COOKIE = 'hf_analytics_consent';
@@ -24,6 +25,12 @@ export function parseAnalyticsConsent(
 export function clarityProjectId(): string | null {
   const id = process.env.CLARITY_PROJECT_ID?.trim();
   return id && /^[a-z0-9]{6,32}$/i.test(id) ? id : null;
+}
+
+/** Google Analytics 4 measurement id (`G-…`); same rules as Clarity's id. */
+export function gaMeasurementId(): string | null {
+  const id = process.env.GA_MEASUREMENT_ID?.trim();
+  return id && /^G-[A-Z0-9]{6,16}$/.test(id) ? id : null;
 }
 
 const RECORDED_PAGES = [

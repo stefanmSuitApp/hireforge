@@ -1478,7 +1478,8 @@
   "Consent": {
     "label": "Kolačići za analitiku",
     "title": "Smemo li da beležimo kako koristiš sajt?",
-    "text": "Uz tvoju dozvolu koristimo Microsoft Clarity: beleži klikove i skrolovanje na javnim stranicama, da bismo videli šta je nejasno i popravili to. Ono što upišeš u polja se ne snima, kao ni stranice tvog naloga i prijave na oglase.",
+    "text": "Uz tvoju dozvolu koristimo {tools}: brojimo posete i beležimo klikove i skrolovanje na javnim stranicama, da bismo videli odakle ljudi dolaze i šta je nejasno, pa to popravili. Ono što upišeš u polja se ne snima, kao ni stranice tvog naloga i prijave na oglase.",
+    "and": " i ",
     "privacyLink": "Više u politici privatnosti.",
     "accept": "Prihvatam",
     "decline": "Odbijam",

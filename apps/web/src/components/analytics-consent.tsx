@@ -20,6 +20,8 @@ type ClarityFn = ((...args: unknown[]) => void) & { q?: unknown[][] };
 declare global {
   interface Window {
     clarity?: ClarityFn;
+    gtag?: (...args: unknown[]) => void;
+    dataLayer?: unknown[];
   }
 }
 
@@ -41,19 +43,62 @@ function loadClarity(projectId: string) {
   });
 }
 
+/**
+ * Google's gtag snippet, inserted only after "Prihvatam". Page views are sent
+ * by us (public pages only), not by gtag or enhanced measurement's history
+ * tracking, which would also count dashboards.
+ */
+function loadGoogleAnalytics(measurementId: string) {
+  if (window.gtag) return;
+  window.dataLayer = window.dataLayer ?? [];
+  window.gtag = function gtag() {
+    // gtag.js reads the `arguments` object itself; an array is ignored.
+    // eslint-disable-next-line prefer-rest-params
+    window.dataLayer?.push(arguments);
+  };
+  window.gtag('consent', 'default', {
+    ad_storage: 'denied',
+    ad_user_data: 'denied',
+    ad_personalization: 'denied',
+    analytics_storage: 'granted',
+  });
+  window.gtag('js', new Date());
+  window.gtag('config', measurementId, {
+    send_page_view: false,
+    allow_google_signals: false,
+    allow_ad_personalization_signals: false,
+  });
+  const script = document.createElement('script');
+  script.async = true;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
+  document.head.appendChild(script);
+}
+
+/** Google's documented switch: while set, gtag sends nothing for that id. */
+function setGoogleAnalyticsDisabled(measurementId: string, off: boolean) {
+  (window as unknown as Record<string, unknown>)[
+    `ga-disable-${measurementId}`
+  ] = off;
+}
+
 function writeChoice(choice: AnalyticsConsent) {
   const secure = location.protocol === 'https:' ? '; Secure' : '';
   document.cookie = `${ANALYTICS_CONSENT_COOKIE}=${choice}; Path=/; Max-Age=${ANALYTICS_CONSENT_MAX_AGE_S}; SameSite=Lax${secure}`;
 }
 
-/** Withdrawal: tell Clarity, drop its first-party cookies, reload without it. */
+/** Withdrawal: tell both tools, drop their cookies, reload without them. */
 function withdraw() {
   window.clarity?.('consentv2', {
     ad_Storage: 'denied',
     analytics_Storage: 'denied',
   });
   window.clarity?.('consent', false);
-  for (const name of ['_clck', '_clsk']) {
+  window.gtag?.('consent', 'update', { analytics_storage: 'denied' });
+  const names = document.cookie
+    .split(';')
+    .map((c) => c.split('=')[0]?.trim() ?? '')
+    .filter((n) => n === '_clck' || n === '_clsk' || n.startsWith('_ga'));
+  for (const name of names) {
     for (const domain of ['', `; Domain=.${location.hostname}`]) {
       document.cookie = `${name}=; Path=/; Max-Age=0${domain}`;
     }
@@ -62,15 +107,17 @@ function withdraw() {
 }
 
 /**
- * Consent banner and Clarity loader. Mounted only when a Clarity project is
- * configured. The banner appears on recorded pages until the visitor
- * chooses; the footer link reopens it anywhere.
+ * Consent banner and the analytics loaders. Mounted only when Clarity or
+ * Google Analytics is configured. The banner appears on recorded pages until
+ * the visitor chooses; the footer link reopens it anywhere.
  */
 export function AnalyticsConsentBanner({
-  projectId,
+  clarityId,
+  gaId,
   initialChoice,
 }: {
-  projectId: string;
+  clarityId: string | null;
+  gaId: string | null;
   initialChoice: AnalyticsConsent | null;
 }) {
   const t = useTranslations('Consent');
@@ -89,7 +136,8 @@ export function AnalyticsConsentBanner({
 
   // A layout effect runs before Clarity's mutation observer sees the new
   // page, so a private page reached by client navigation is masked from its
-  // first frame (the body attribute covers dialogs and menus in portals too).
+  // first frame (the body attribute covers dialogs and menus in portals too),
+  // and before any gtag event (scrolls, clicks) can fire there.
   React.useLayoutEffect(() => {
     if (recorded) {
       document.body.removeAttribute('data-clarity-mask');
@@ -98,16 +146,24 @@ export function AnalyticsConsentBanner({
       document.body.setAttribute('data-clarity-mask', 'true');
       window.clarity?.('pause');
     }
-  }, [recorded]);
+    if (gaId) setGoogleAnalyticsDisabled(gaId, !recorded);
+  }, [recorded, gaId]);
 
   React.useEffect(() => {
-    if (choice === 'granted' && recorded) loadClarity(projectId);
-  }, [choice, recorded, projectId]);
+    if (choice !== 'granted' || !recorded) return;
+    if (clarityId) loadClarity(clarityId);
+    if (gaId) {
+      loadGoogleAnalytics(gaId);
+      window.gtag?.('event', 'page_view', {
+        page_location: location.href,
+      });
+    }
+  }, [choice, recorded, pathname, clarityId, gaId]);
 
   const decide = (next: AnalyticsConsent) => {
     writeChoice(next);
     setReopened(false);
-    if (next === 'denied' && window.clarity) {
+    if (next === 'denied' && (window.clarity || window.gtag)) {
       withdraw();
       return;
     }
@@ -115,6 +171,13 @@ export function AnalyticsConsentBanner({
   };
 
   if (!reopened && (choice !== null || !recorded)) return null;
+
+  const tools = [
+    gaId ? 'Google Analytics' : null,
+    clarityId ? 'Microsoft Clarity' : null,
+  ]
+    .filter(Boolean)
+    .join(t('and'));
 
   return (
     <aside
@@ -125,7 +188,7 @@ export function AnalyticsConsentBanner({
         {t('title')}
       </h2>
       <p className="m-0 text-sm text-muted-foreground">
-        {t('text')}{' '}
+        {t('text', { tools })}{' '}
         {legal.includes('privacy') ? (
           <Link
             href="/privacy"

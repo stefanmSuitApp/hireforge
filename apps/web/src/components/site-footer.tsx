@@ -43,7 +43,7 @@ export async function SiteFooter({
 }: {
   /** Published legal pages, in display order. */
   legal: readonly LegalPageKind[];
-  /** Clarity is configured: offer a way to change the choice. */
+  /** Analytics is configured: offer a way to change the choice. */
   analyticsConsent: boolean;
 }) {
   const locale = await getLocale();

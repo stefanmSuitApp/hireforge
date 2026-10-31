@@ -753,6 +753,25 @@ public pages and the two sign-up pages**, no cookieless counter for now.
   per-page dates. **Not live:** waits for Stefan to read the text and send
   the project id (NEEDS_STEFAN).
 
+## Analytics: Google Analytics 4 under the same banner (branch `feat/ga4-consent`, 2026-10-31)
+
+- Stefan created the GA4 property (`G-6C1CJ9FVC6`, account "Šljakam",
+  data sharing off except technical support). `GA_MEASUREMENT_ID` (runtime
+  env, validated) joins `CLARITY_PROJECT_ID`; either one turns the banner
+  on, and the banner names the configured tools.
+- gtag loads only after "Prihvatam" with Consent Mode defaults (analytics
+  granted, all ad signals denied), no Google signals, `send_page_view:
+false`. We send `page_view` ourselves on public paths only; on a private
+  path Google's `ga-disable-<id>` switch is set in the same layout effect
+  that masks Clarity, so scroll/click events cannot fire there either.
+  Withdrawal also deletes `_ga*`.
+- Tests: component (gtag only after consent, consent defaults, config, one
+  page view per public page, none and disabled on a private page; the test
+  fails without the switch), id validation, e2e with both tags stubbed.
+- Privacy drafts: Google LLC as processor, `_ga` cookies, 14-month
+  retention. GA settings Stefan must keep: data retention 14 months,
+  enhanced measurement's history page views and form interactions off.
+
 ## Sign-up draft, job search layout, employers pitch (branch `fix/signup-draft-and-job-list`, 2026-10-29)
 
 - **Employer sign-up:** a first visit no longer shows "Vraćen je sačuvan
