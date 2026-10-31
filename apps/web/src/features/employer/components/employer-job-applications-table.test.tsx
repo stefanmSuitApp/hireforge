@@ -15,6 +15,7 @@ describe('EmployerJobApplicationsTable', () => {
             id: 'a1',
             status: 'submitted',
             candidateEmail: 'ana@example.com',
+            candidateName: null,
             // 00:30 on the 29th in Belgrade.
             createdAt: '2026-10-28T23:30:00.000Z',
             resumeOriginalFilename: null,
@@ -23,7 +24,8 @@ describe('EmployerJobApplicationsTable', () => {
         ]}
       />,
     );
-    const applied = screen.getByText((_, el) => el?.tagName === 'TIME');
-    expect(applied.textContent).toMatch(/29\..*2026.*00:30/);
+    // Phone cards and the desktop table both carry it.
+    const [applied] = screen.getAllByText((_, el) => el?.tagName === 'TIME');
+    expect(applied?.textContent).toMatch(/29\..*2026.*00:30/);
   });
 });

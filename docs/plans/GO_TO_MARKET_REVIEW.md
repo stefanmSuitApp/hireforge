@@ -503,7 +503,7 @@ sign-up** in WP-B2 is the main way to keep candidates who apply by phone
 (WP-A5 stores nothing about them), so start WP-B2 right after G0 rather
 than late in G1.
 
-#### WP-A1 Employer applications workflow (blocker)
+#### WP-A1 Employer applications workflow (blocker) ✅ 2026-10-31
 
 - **Goal:** the employer can open, download and decide on applications.
 - **Files:** `apps/api/src/employer/employer.controller.ts`,

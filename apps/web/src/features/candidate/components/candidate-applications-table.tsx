@@ -1,6 +1,7 @@
 'use client';
 
 import type { CandidateApplicationListItem } from 'contracts';
+import { candidateWithdrawableStatuses } from 'contracts';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { MoreHorizontal, X } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
@@ -29,6 +30,9 @@ import {
 import { publicJobUrlSegment } from '@/lib/job-public-segment';
 
 type Props = { items: CandidateApplicationListItem[] };
+
+const isWithdrawable = (status: string): boolean =>
+  (candidateWithdrawableStatuses as readonly string[]).includes(status);
 
 type ApplicationStatusUiKey =
   | 'submitted'
@@ -120,7 +124,7 @@ export function CandidateApplicationsTable({ items }: Props) {
         id: 'actions',
         header: t('colActions'),
         cell: (row) =>
-          row.status === 'submitted' ? (
+          isWithdrawable(row.status) ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button

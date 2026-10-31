@@ -2,7 +2,10 @@ import { describe, expect, it } from 'vitest';
 
 import {
   applicationCreateBodySchema,
+  canEmployerMoveApplication,
+  candidateWithdrawableStatuses,
   COVER_LETTER_MAX_CHARS,
+  employerApplicationNextStatuses,
   employerApplicationStatusPatchBodySchema,
 } from './applications';
 import { applicationStatuses, writableApplicationStatuses } from './domain';
@@ -68,5 +71,47 @@ describe('employerApplicationStatusPatchBodySchema', () => {
         employerApplicationStatusPatchBodySchema.safeParse({ status }).success,
       ).toBe(false);
     }
+  });
+});
+
+describe('employer application transitions (SSOT §15.4)', () => {
+  it('an unread or read application can be shortlisted or rejected', () => {
+    for (const from of ['submitted', 'viewed'])
+      expect(employerApplicationNextStatuses(from)).toEqual([
+        'shortlisted',
+        'rejected',
+      ]);
+  });
+
+  it('a shortlisted applicant is hired or rejected', () => {
+    expect(employerApplicationNextStatuses('shortlisted')).toEqual([
+      'hired',
+      'rejected',
+    ]);
+  });
+
+  it('hired, rejected and withdrawn are final for the employer', () => {
+    for (const from of ['hired', 'rejected', 'withdrawn', 'reviewed'])
+      expect(employerApplicationNextStatuses(from)).toEqual([]);
+  });
+
+  it('only a new application turns "viewed"', () => {
+    expect(canEmployerMoveApplication('submitted', 'viewed')).toBe(true);
+    expect(canEmployerMoveApplication('viewed', 'viewed')).toBe(false);
+    expect(canEmployerMoveApplication('shortlisted', 'viewed')).toBe(false);
+  });
+
+  it('hiring skips no step', () => {
+    expect(canEmployerMoveApplication('submitted', 'hired')).toBe(false);
+    expect(canEmployerMoveApplication('viewed', 'hired')).toBe(false);
+    expect(canEmployerMoveApplication('shortlisted', 'hired')).toBe(true);
+  });
+
+  it('the candidate can withdraw until a decision is made', () => {
+    expect([...candidateWithdrawableStatuses]).toEqual([
+      'submitted',
+      'viewed',
+      'shortlisted',
+    ]);
   });
 });

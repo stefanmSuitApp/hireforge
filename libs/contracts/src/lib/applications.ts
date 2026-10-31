@@ -73,6 +73,39 @@ export type EmployerApplicationStatusPatchBody = z.infer<
   typeof employerApplicationStatusPatchBodySchema
 >;
 
+/**
+ * Decisions the employer can take next (SSOT §15.4). An unread application
+ * can be decided on directly: deciding means it was read.
+ */
+export function employerApplicationNextStatuses(
+  from: string,
+): ('shortlisted' | 'rejected' | 'hired')[] {
+  switch (from) {
+    case 'submitted':
+    case 'viewed':
+      return ['shortlisted', 'rejected'];
+    case 'shortlisted':
+      return ['hired', 'rejected'];
+    default:
+      return [];
+  }
+}
+
+export function canEmployerMoveApplication(
+  from: string,
+  to: EmployerApplicationStatusTarget,
+): boolean {
+  if (to === 'viewed') return from === 'submitted';
+  return (employerApplicationNextStatuses(from) as string[]).includes(to);
+}
+
+/** SSOT §15.4: withdraw is possible until the employer hires or rejects. */
+export const candidateWithdrawableStatuses = [
+  'submitted',
+  'viewed',
+  'shortlisted',
+] as const;
+
 // --- Response shape --------------------------------------------------------
 
 export const applicationResponseSchema = z.object({

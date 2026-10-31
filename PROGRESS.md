@@ -5,8 +5,8 @@ Living status file. **Trust this over the `Status:` lines in
 which went stale during the Cursor phase (Steps 4, 5, 14, 15 say "pending"
 but shipped). Update this file in the same PR as the work.
 
-Last updated: 2026-10-31 (uploads go to the backups' bucket; staff-created
-employer accounts; candidate display name refresh). Open items for Stefan:
+Last updated: 2026-10-31 (G0 WP-A1: employers download CVs and decide on
+applications). Open items for Stefan:
 [`NEEDS_STEFAN.md`](./NEEDS_STEFAN.md).
 
 **Next: Phase G0 of the go-to-market review (2026-10-31).**
@@ -300,8 +300,8 @@ agent was editing the main checkout at the same time.
 3. **Found 2026-10-29: candidate CV files are not backed up.** The
    `api_var` volume is in no backup script; only Postgres is dumped.
 4. Observability: Sentry — needs a DSN; offsite backups — needs storage.
-5. Product: salary fields on jobs; GAZDA (enterprise) creation by admin;
-   employer application status workflow (viewed / shortlisted / rejected).
+5. Product: salary fields on jobs; GAZDA (enterprise) creation by admin.
+   (Employer application status workflow: done, G0 WP-A1.)
 
 ## SEO & quality gates ✅ (branch `feat/seo-quality-gates`)
 
@@ -803,6 +803,46 @@ shared components, CSS-only motion within the Lighthouse budgets.
   jobs from 40 `demo-` companies, eight extra local categories and a
   big-city-weighted spread; deterministic, so before/after screenshots match.
   `-- --count N` for more, `-- --remove` to clear. Refuses non-local hosts.
+
+## Go-to-market Phase G0 (plan: `docs/plans/GO_TO_MARKET_REVIEW.md` §7)
+
+Claude works through G0 on its own (Stefan, 2026-10-31: "don't stop after
+every phase, wait for staging, move on"). Decisions taken and left: the
+review's "Status" section.
+
+### WP-A1 Employer applications (branch `feat/employer-applications`)
+
+- Employers download the CV sent with an application
+  (`GET /api/employer/applications/:id/cv`, the snapshot taken at apply
+  time; `Cache-Control: private, no-store` in the BFF). Opening it moves a
+  new application to `viewed`.
+- Decisions: `PATCH /api/employer/applications/:id` `{ status }` per SSOT
+  §15.4: submitted/viewed → shortlisted or rejected, shortlisted → hired or
+  rejected; hired and rejected are final (409
+  `APPLICATION_TRANSITION_FORBIDDEN`). The row is locked in the
+  transaction. Another company's or a withdrawn application: 404
+  `APPLICATION_NOT_FOUND`. Rules live in `contracts` (`applications.ts`) so
+  the UI shows only the allowed buttons.
+- Deviation from the SSOT diagram, on purpose: an unread application can
+  be shortlisted or rejected directly (deciding means it was read).
+- Candidates can withdraw until a decision (submitted, viewed or
+  shortlisted, SSOT §15.4); before, only `submitted`, which would have
+  locked them out as soon as an employer opened the CV.
+- The applicants list shows the candidate's name (when given) and has
+  "Preuzmi CV" plus decision buttons (reject and hire ask first, the
+  candidate sees both). Phones get cards instead of the table (375 px
+  hid the CV and the buttons).
+- No e-mail to the candidate on a decision (they see it in "Moje
+  prijave"); a later WP can add it through the outbox.
+- Found, not fixed (out of scope): a dev-mode hydration error in the root
+  layout on `/sr/employer` (sonner `Toaster` `<section>` vs `<meta
+charset>`).
+- Local `pnpm test:integration` has 3 failures that come from this Mac's
+  `.env`, not the code (CI has no `.env`): the worker billing-email tests
+  pick up `BILLING_EMAIL_DASHBOARD_ORIGIN` (pass with it blanked), and the
+  API boot-guard test's spawned server loads the repo `.env` (placeholder
+  `AUTH_JWT_SECRET`). Fix later: tests should not read the developer's
+  `.env`.
 
 ## Analytics: Microsoft Clarity behind consent (branch `feat/clarity-consent`, 2026-10-31)
 
