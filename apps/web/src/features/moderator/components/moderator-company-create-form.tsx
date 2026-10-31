@@ -1,6 +1,6 @@
 'use client';
 
-import { companyHasIdentifier, type StaffCompanyCreateBody } from 'contracts';
+import type { StaffCompanyCreateBody } from 'contracts';
 import { useLocale, useTranslations } from 'next-intl';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
@@ -50,10 +50,6 @@ export function ModeratorCompanyCreateForm() {
           }
         : { pib: orNull(pib), mb: orNull(mb) }),
     };
-    if (!companyHasIdentifier(body)) {
-      setError(tErrors('COMPANY_IDENTIFIER_REQUIRED'));
-      return;
-    }
     setPending(true);
     setError(null);
     try {

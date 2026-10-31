@@ -527,6 +527,141 @@ describe('company sign-up', () => {
       expect(blocked.status).toBe(403);
       expect(blocked.body.error.code).toBe('EMPLOYER_JOIN_REJECTED');
     });
+
+    describe('a company staff added by name only', () => {
+      // Staff often don't have the PIB / MB; the company's own sign-up does.
+      async function nameOnlyLead(legalName: string) {
+        const company = await insertCompany({
+          company: { legalName },
+          salesStatus: 'pipeline',
+          assignedModeratorId: moderator.id,
+        });
+        await q(
+          `update companies set pib = null, mb = null, address_line_1 = null,
+             address_postal_code = null, address_city = null, billing_email = null,
+             billing_contact_name = null where id = $1`,
+          [company.id],
+        );
+        return company;
+      }
+      async function signUpAndFindRequest(
+        address: string,
+        company: Record<string, unknown>,
+      ) {
+        await http(app)
+          .post('/api/auth/employer/register')
+          .send({
+            email: address,
+            password: 'Lozinka-123',
+            company: COMPANY(company),
+          })
+          .expect(201);
+        const { rows } = await q(
+          `select r.id from company_join_requests r join users u on u.id = r.user_id where u.email = $1`,
+          [address],
+        );
+        return rows[0].id as string;
+      }
+      const companyRow = async (id: string) =>
+        (
+          await q(
+            `select legal_name, pib, mb, address_line_1, address_city, billing_email
+               from companies where id = $1`,
+            [id],
+          )
+        ).rows[0];
+
+      it('gets the PIB, MB and address the sign-up entered once the request is approved', async () => {
+        const company = await nameOnlyLead('Pekara Zlatni Klas d.o.o.');
+        const requestId = await signUpAndFindRequest(email('pekara'), {
+          legalName: 'PEKARA ZLATNI KLAS DOO',
+          pib: '107000040',
+          mb: '21700040',
+        });
+
+        // Staff see what the sign-up entered before deciding.
+        const queue = await http(app)
+          .get('/api/moderator/company-join-requests')
+          .set(moderator.headers)
+          .expect(200);
+        const item = queue.body.items.find(
+          (i: { id: string }) => i.id === requestId,
+        );
+        expect(item.submitted).toMatchObject({
+          legalName: 'PEKARA ZLATNI KLAS DOO',
+          pib: '107000040',
+          mb: '21700040',
+        });
+        // Nothing is written before approval.
+        expect((await companyRow(company.id)).pib).toBeNull();
+
+        await http(app)
+          .post(`/api/moderator/company-join-requests/${requestId}/approve`)
+          .set(moderator.headers)
+          .expect(201);
+        expect(await companyRow(company.id)).toEqual({
+          // Our name stays.
+          legal_name: 'Pekara Zlatni Klas d.o.o.',
+          pib: '107000040',
+          mb: '21700040',
+          address_line_1: 'Bulevar oslobođenja 1',
+          address_city: 'Novi Sad',
+          billing_email: 'racuni@noviklijent.rs',
+        });
+      });
+
+      it('never overwrites what staff entered', async () => {
+        const company = await insertCompany({
+          company: { legalName: 'Mesara Kod Tome d.o.o.', pib: '107000050' },
+          salesStatus: 'pipeline',
+          assignedModeratorId: moderator.id,
+        });
+        const before = await companyRow(company.id);
+        const requestId = await signUpAndFindRequest(email('mesara'), {
+          legalName: 'Mesara Kod Tome',
+          pib: '107000051',
+          mb: '21700051',
+        });
+        await http(app)
+          .post(`/api/moderator/company-join-requests/${requestId}/approve`)
+          .set(moderator.headers)
+          .expect(201);
+        expect(await companyRow(company.id)).toEqual(before);
+      });
+
+      it('rejecting fills nothing', async () => {
+        const company = await nameOnlyLead('Cvecara Ruza d.o.o.');
+        const requestId = await signUpAndFindRequest(email('cvecara'), {
+          legalName: 'Cvecara Ruza',
+          pib: '107000060',
+          mb: '21700060',
+        });
+        await http(app)
+          .post(`/api/moderator/company-join-requests/${requestId}/reject`)
+          .set(moderator.headers)
+          .expect(201);
+        expect((await companyRow(company.id)).pib).toBeNull();
+      });
+
+      it('skips an identifier another company took meanwhile, and fills the rest', async () => {
+        const company = await nameOnlyLead('Stolarija Hrast d.o.o.');
+        const requestId = await signUpAndFindRequest(email('stolarija'), {
+          legalName: 'Stolarija Hrast',
+          pib: '107000070',
+          mb: '21700070',
+        });
+        await insertCompany({ company: { pib: '107000070' } });
+        await http(app)
+          .post(`/api/moderator/company-join-requests/${requestId}/approve`)
+          .set(moderator.headers)
+          .expect(201);
+        expect(await companyRow(company.id)).toMatchObject({
+          pib: null,
+          mb: '21700070',
+          address_city: 'Novi Sad',
+        });
+      });
+    });
   });
 });
 

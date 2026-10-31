@@ -30,6 +30,17 @@ export type StaffCompanyJoinRequestItem = {
   companyPib: string | null;
   assignedModeratorEmail: string | null;
   createdAt: string;
+  /**
+   * What the sign-up entered about the company; approving fills the
+   * company's empty fields from it. Null for older requests.
+   */
+  submitted: {
+    legalName: string;
+    pib: string | null;
+    mb: string | null;
+    vatId: string | null;
+    taxId: string | null;
+  } | null;
 };
 
 export type StaffCompanyJoinRequestListResponse = {

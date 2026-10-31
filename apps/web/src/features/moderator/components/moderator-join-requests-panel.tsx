@@ -54,6 +54,7 @@ export function ModeratorJoinRequestsPanel() {
         {t('heading')}
       </h2>
       <p className="mt-1 text-sm text-muted-foreground">{t('lead')}</p>
+      <p className="mt-1 text-xs text-muted-foreground">{t('fillNote')}</p>
       {error ? (
         <p className="mt-3 text-sm text-destructive" role="alert">
           {error}
@@ -74,6 +75,21 @@ export function ModeratorJoinRequestsPanel() {
                 {t('wantsToJoin', { company: item.companyLegalName })}
                 {item.companyPib ? ` · PIB ${item.companyPib}` : null}
               </p>
+              {item.submitted ? (
+                <p className="m-0 text-xs text-muted-foreground">
+                  {t('submitted', {
+                    details: [
+                      item.submitted.legalName,
+                      item.submitted.pib && `PIB ${item.submitted.pib}`,
+                      item.submitted.mb && `MB ${item.submitted.mb}`,
+                      item.submitted.vatId && `VAT ${item.submitted.vatId}`,
+                      item.submitted.taxId && `Tax ID ${item.submitted.taxId}`,
+                    ]
+                      .filter(Boolean)
+                      .join(' · '),
+                  })}
+                </p>
+              ) : null}
             </div>
             <div className="flex gap-2">
               <Button

@@ -3,11 +3,15 @@ import { expect, type Page } from '@playwright/test';
 import { type ExistingCompany, SEED_MODERATOR, SEED_PASSWORD } from './db';
 import { gotoHydrated } from './ui';
 
-/** Fills the (domestic, 2-step) employer signup with an existing company's PIB + MB. */
+/**
+ * Fills the (domestic, 2-step) employer signup with an existing company's
+ * PIB + MB; `legalName` signs up under that name instead of a unique one.
+ */
 export async function registerEmployerClaiming(
   page: Page,
   email: string,
   company: ExistingCompany,
+  { legalName }: { legalName?: string } = {},
 ): Promise<void> {
   await gotoHydrated(page, '/sr/employer/register', '#reg-email');
 
@@ -17,7 +21,9 @@ export async function registerEmployerClaiming(
   await page.getByRole('button', { name: 'Dalje' }).click();
 
   // Unique per signup: the server also matches companies by legal name.
-  await page.locator('#reg-legal').fill(`Firma ${email.split('@')[0]} d.o.o.`);
+  await page
+    .locator('#reg-legal')
+    .fill(legalName ?? `Firma ${email.split('@')[0]} d.o.o.`);
   await page.locator('#reg-pib').fill(company.pib);
   await page.locator('#reg-mb').fill(company.mb);
   await page.locator('#reg-a1').fill('Bulevar 1');

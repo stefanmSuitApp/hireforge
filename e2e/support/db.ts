@@ -127,6 +127,18 @@ export async function companyBillingEmail(companyId: string): Promise<string> {
   });
 }
 
+export async function companyIdentifiers(
+  companyId: string,
+): Promise<{ pib: string | null; mb: string | null }> {
+  return withDb(async (db) => {
+    const r = await db.query<{ pib: string | null; mb: string | null }>(
+      'SELECT pib, mb FROM companies WHERE id = $1',
+      [companyId],
+    );
+    return r.rows[0] ?? { pib: null, mb: null };
+  });
+}
+
 /** Seeded published job (scripts/db/seed-domain-baseline.sql). */
 export const SEED_JOB_ID = '20000000-0000-4000-8000-000000000001';
 

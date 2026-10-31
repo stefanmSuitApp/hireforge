@@ -173,6 +173,7 @@ export class AuthService {
         await tx.insert(companyJoinRequests).values({
           userId: user.id,
           companyId,
+          companyInput: companyPayload,
         });
       } else {
         await tx.insert(employers).values({

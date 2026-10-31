@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import {
-  companyHasIdentifier,
   isEUCountry,
   type StaffCompanyCloseLostBody,
   type StaffCompanyCreateBody,
@@ -283,15 +282,6 @@ export class StaffCompaniesService {
       throw codedServiceUnavailable(
         'DATABASE_UNAVAILABLE',
         'Database is not configured (DATABASE_URL)',
-      );
-    }
-
-    if (!companyHasIdentifier(body)) {
-      throw codedBadRequest(
-        'COMPANY_IDENTIFIER_REQUIRED',
-        body.isForeign
-          ? 'A VAT ID, tax ID or registration number is required'
-          : 'A PIB or MB is required',
       );
     }
 

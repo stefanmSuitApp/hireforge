@@ -837,8 +837,8 @@
       "vatId": "VAT ID (EU)",
       "taxId": "Tax ID (outside the EU)",
       "registrationNumber": "Registration number",
-      "identifierHint": "Enter the PIB or MB. That is how we recognise the company when someone from it signs up, so no duplicate is created.",
-      "identifierHintForeign": "Enter the VAT ID, tax ID or registration number, so we recognise the company when someone from it signs up.",
+      "identifierHint": "Optional. If you know the PIB or MB, enter it: then we recognise the company even if it signs up under a slightly different name. Without it we match by name, and the company fills in its PIB, MB and address when it signs up.",
+      "identifierHintForeign": "Optional. A VAT ID, tax ID or registration number helps us recognise the company; without one we match by name, and the company fills in its details when it signs up.",
       "accounts": {
         "heading": "Employer accounts",
         "none": "No accounts yet. The company can exist without one, and you can add one at any time.",
@@ -953,7 +953,9 @@
       "lead": "These users signed up with the tax ID or registration number of a company that already exists. Approve only after confirming they work there.",
       "wantsToJoin": "wants access to {company}",
       "approve": "Approve",
-      "reject": "Reject"
+      "reject": "Reject",
+      "submitted": "Entered at sign-up: {details}",
+      "fillNote": "Approving fills the company’s empty fields (PIB, MB, address, billing contact) from the sign-up; what is already there stays."
     }
   },
   "Admin": {
@@ -1252,7 +1254,6 @@
     "apiNotConfigured": "The service is not available right now. Please try again in a few minutes.",
     "CAMPAIGN_NOT_FOUND": "That campaign was not found.",
     "CAMPAIGN_OVERLAP": "Another active campaign already runs in that period. Pause it or pick other dates.",
-    "COMPANY_IDENTIFIER_REQUIRED": "Enter the PIB or MB (for a foreign company: VAT ID, tax ID or registration number).",
     "STAFF_ACCOUNT_EMAIL_TAKEN": "This email already has an account. If that person signed up on their own, approve their join request instead.",
     "ACCOUNT_ALREADY_ACTIVE": "This account is already active; no new invite is needed."
   },

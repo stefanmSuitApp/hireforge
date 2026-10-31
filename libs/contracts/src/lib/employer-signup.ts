@@ -7,6 +7,12 @@ import {
   companyForeignInputSchema,
 } from './companies';
 
+/** The company part of an employer sign-up (also kept on a join request). */
+export const selfSignupCompanyInputSchema = z.discriminatedUnion('isForeign', [
+  companyDomesticInputSchema,
+  companyForeignInputSchema,
+]);
+
 export const employerSelfSignupBodySchema = z
   .object({
     email: z.email().max(320),
@@ -15,10 +21,7 @@ export const employerSelfSignupBodySchema = z
     /** UI locale, used for the verification email language and link. */
     locale: z.enum(['sr', 'en']).optional(),
     acceptedTermsVersion: termsVersionSchema.optional(),
-    company: z.discriminatedUnion('isForeign', [
-      companyDomesticInputSchema,
-      companyForeignInputSchema,
-    ]),
+    company: selfSignupCompanyInputSchema,
   })
   .strict();
 
