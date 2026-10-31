@@ -12,7 +12,7 @@ import {
   SummarySection,
   type CvTheme,
 } from '../sections';
-import { CV_ACCENT, CV_INK, CV_MUTED, SANS } from '../theme';
+import { accentOf, CV_INK, CV_MUTED, SANS } from '../theme';
 
 // Lots of white space: big name, small coloured section titles in a left
 // column, dates on the right. Look: Awesome-CV.
@@ -62,7 +62,7 @@ export function MinimalanDoc({
 }: {
   layout: CvPdfLayoutInput;
 }): ReactElement {
-  const accent = CV_ACCENT;
+  const accent = accentOf(layout);
   const theme = makeTheme(accent);
   const [first, last] = splitName(layout.fullName ?? 'CV');
   const contact = contactParts(layout);

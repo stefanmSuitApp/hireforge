@@ -1447,7 +1447,16 @@
       "availability": "Kada možeš da počneš",
       "availabilityPlaceholder": "npr. odmah, od 1. decembra, rad u smenama",
       "badgeAtsSafe": "Pogodan za online prijave",
-      "badgeTwoColumns": "Najbolji za slanje direktno"
+      "badgeTwoColumns": "Najbolji za slanje direktno",
+      "accentTitle": "Boja",
+      "accentNames": {
+        "teal": "Tirkizna",
+        "navy": "Teget",
+        "plum": "Šljiva",
+        "burgundy": "Bordo",
+        "graphite": "Grafit"
+      },
+      "accentKlasicanNote": "Klasičan je uvek crno-beli."
     }
   },
   "Integration": {
