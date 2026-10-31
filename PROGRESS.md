@@ -65,6 +65,13 @@ pnpm build` (+ `pnpm check:i18n`) = `pnpm verify`; PRs run it locally, CI on
   `pnpm install` run inside `apps/cms` on 2026-10-29, second React) made the
   build crash too; it was moved aside on this Mac. Deploy command:
   `docs/deployment/hetzner.md` §6. Redeploy needs Stefan's OK.
+- **Next: CV templates, three to five** (planned 2026-10-31; Stefan agreed
+  with every recommendation). Plan and decisions:
+  [`docs/plans/CV_TEMPLATES.md`](./docs/plans/CV_TEMPLATES.md), sketches:
+  https://claude.ai/artifact/T5ESPQYedJpRgqxPTyXvtR. Six PRs: foundation
+  (Serbian CV text, email, bundled font) → new profile fields → restyle the
+  three → add Evropski and Praktičan → photo and accent (after the storage
+  work) → picker and Sanity copy.
 
 ### Plan steps, verified against code
 
