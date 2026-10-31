@@ -5,8 +5,8 @@ Living status file. **Trust this over the `Status:` lines in
 which went stale during the Cursor phase (Steps 4, 5, 14, 15 say "pending"
 but shipped). Update this file in the same PR as the work.
 
-Last updated: 2026-10-29 (redesign A step 2: homepage). Open items for
-Stefan: [`NEEDS_STEFAN.md`](./NEEDS_STEFAN.md).
+Last updated: 2026-10-31 (candidate display name refreshes after save).
+Open items for Stefan: [`NEEDS_STEFAN.md`](./NEEDS_STEFAN.md).
 
 ## Current state
 
