@@ -346,3 +346,41 @@ test('a candidate adds a photo, sees it on the CV, then removes it', async ({
   ).toHaveCount(0);
   expect((await cand.api.get('candidate/photo')).status()).toBe(404);
 });
+
+// PR 6: a driver's CV starts on the Practical template.
+test('a candidate with a driving licence finds Praktičan already picked', async ({
+  page,
+}) => {
+  await signIn(page);
+  await gotoHydrated(page, '/sr/candidate/cv/build', '#cv-fullName');
+  const next = page.getByRole('button', { name: 'Dalje' });
+  for (let i = 0; i < 4; i++) await next.click();
+  await page
+    .getByRole('group', { name: 'Vozačka dozvola' })
+    .getByRole('button', { name: 'C', exact: true })
+    .click();
+  await next.click(); // template
+  await expect(page.getByRole('button', { name: /Praktičan/ })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+  await expect(
+    page.getByText('Za vozače, magacin, gradilište, kuhinju i prvi posao.'),
+  ).toBeVisible();
+});
+
+// The live preview belongs beside the form on a desktop, not under all of it
+// (the grid class had a comma, invalid in Tailwind, so it was one column).
+test('on a wide screen the live preview sits beside the builder', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await signIn(page);
+  await gotoHydrated(page, '/sr/candidate/cv/build', '#cv-fullName');
+  const form = await page.locator('#cv-fullName').boundingBox();
+  const preview = await page
+    .getByRole('heading', { name: 'Pregled uživo' })
+    .boundingBox();
+  expect(preview!.x).toBeGreaterThan(form!.x + form!.width);
+  expect(preview!.y).toBeLessThan(form!.y + 400);
+});

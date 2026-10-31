@@ -129,6 +129,14 @@ pnpm build` (+ `pnpm check:i18n`) = `pnpm verify`; PRs run it locally, CI on
     with a preview, "Prikaži fotografiju na CV-u" (`cv_profile.showPhoto`,
     on after an upload). Moderan (round, sidebar) and Evropski (square,
     header) print it; picker badge "Može sa fotografijom".
+  - **PR 6 done** (`feat/cv-picker-content`): the picker preselects
+    Praktičan for a driving licence or certificates without links, else
+    Klasičan (`recommendCvTemplate`); cards have `aria-pressed`, bigger
+    thumbnails and a "who it's for" line (Sanity's description wins, else
+    `templateHints`). Fixed: the builder grid class had a comma
+    (`lg:grid-cols-[1fr,minmax(…)]`), invalid in Tailwind, so the live
+    preview sat under the whole form on desktop; now beside it. Sanity
+    copy and Studio deploy: NEEDS_STEFAN item 3. **All six CV PRs done.**
 
 ### Plan steps, verified against code
 

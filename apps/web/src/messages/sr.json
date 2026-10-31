@@ -1480,7 +1480,14 @@
       "photoUploading": "Otpremanje…",
       "photoAlt": "Tvoja fotografija",
       "showPhoto": "Prikaži fotografiju na CV-u",
-      "badgePhoto": "Može sa fotografijom"
+      "badgePhoto": "Može sa fotografijom",
+      "templateHints": {
+        "klasican": "Za kancelarijske poslove, IT i online prijave.",
+        "moderan": "Za trgovinu, ugostiteljstvo i lepotu, kad CV čita čovek.",
+        "minimalan": "Za mlađe stručnjake, marketing i dizajn.",
+        "evropski": "Za javni sektor, zdravstvo i rad u inostranstvu.",
+        "prakticni": "Za vozače, magacin, gradilište, kuhinju i prvi posao."
+      }
     }
   },
   "Integration": {

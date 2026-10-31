@@ -1480,7 +1480,14 @@
       "photoUploading": "Uploading…",
       "photoAlt": "Your photo",
       "showPhoto": "Show the photo on the CV",
-      "badgePhoto": "Photo optional"
+      "badgePhoto": "Photo optional",
+      "templateHints": {
+        "klasican": "For office jobs, IT and online applications.",
+        "moderan": "For retail, hospitality and beauty, when a person reads the CV.",
+        "minimalan": "For young professionals, marketing and design.",
+        "evropski": "For the public sector, healthcare and work abroad.",
+        "prakticni": "For drivers, warehouses, building sites, kitchens and first jobs."
+      }
     }
   },
   "Integration": {
