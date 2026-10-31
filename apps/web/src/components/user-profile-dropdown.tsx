@@ -89,7 +89,6 @@ const adminNavIcon = {
   navTaxonomy: FileText,
   navPromoCodes: FilePenLine,
   navCampaigns: Megaphone,
-  navCompanies: Building2,
   navBillingEnterprise: Package,
   navAudit: FileText,
 } as const;

@@ -966,7 +966,6 @@
     "navTaxonomy": "Kategorije poslova",
     "navPromoCodes": "Promo kodovi",
     "navCampaigns": "Kampanje",
-    "navCompanies": "Kompanije",
     "navBillingEnterprise": "Enterprise naplata",
     "navAudit": "Zapis aktivnosti",
     "navModerator": "Moderacija",
@@ -975,26 +974,14 @@
       "lead": "Upravljanje korisnicima, taksonomijom i pregledom akcija osoblja. Moderacija je u delu za osoblje.",
       "linkUsers": "Uloge korisnika",
       "linkTaxonomy": "Kategorije poslova",
-      "linkCompanies": "Kompanije i dodela",
+      "linkCompanies": "Kompanije",
       "linkBillingEnterprise": "GAZDA — čeka aktivaciju",
       "linkAudit": "Zapis aktivnosti",
       "cardTaxonomyBody": "Održavaj kategorije koje pokreću filtere i klasifikaciju oglasa.",
-      "cardCompaniesBody": "Pregledaj vlasništvo kompanija i dodelu moderatora.",
+      "cardCompaniesBody": "Kreiraj kompanije i naloge poslodavaca, prati prodaju i premesti moderatora.",
       "cardBillingBody": "Aktiviraj enterprise pretplate nakon potvrđene ugovorene uplate."
     },
     "companies": {
-      "listHeading": "Kompanije",
-      "listHint": "Otvori kompaniju da vidiš istoriju dodele i promeniš moderatora.",
-      "listEmpty": "Nema pronađenih kompanija.",
-      "salesStatus": {
-        "unassigned": "Nedodeljeno",
-        "pipeline": "U pipeline-u",
-        "closed_won": "Zatvoreno – dobijeno",
-        "closed_lost": "Zatvoreno – izgubljeno"
-      },
-      "detailHeading": "Kompanija",
-      "detailSalesOwner": "Moderator u prodaji",
-      "detailSalesOwnerNone": "Nije dodeljen",
       "historyHeading": "Istorija dodele",
       "historyEmpty": "Još nema admin promena dodele.",
       "colWhen": "Kada",
@@ -1007,8 +994,7 @@
       "reassignReason": "Razlog (obavezno)",
       "reassignReasonPlaceholder": "Objasni promenu za zapis",
       "reassignSubmit": "Premesti",
-      "reassignPending": "Čuvanje…",
-      "backToList": "← Sve kompanije"
+      "reassignPending": "Čuvanje…"
     },
     "users": {
       "heading": "Korisnici",
