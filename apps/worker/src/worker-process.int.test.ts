@@ -197,7 +197,9 @@ describe('retries and dead letters with real BullMQ', () => {
       {
         jobId: outboxDispatchBullmqJobId(id),
         attempts: 3,
-        backoff: { type: 'exponential', delay: 100 },
+        // 300 ms → gaps of ~300 and ~600 ms: at 100 ms, CI scheduling noise
+        // (±100 ms) made the second gap look shorter than the first.
+        backoff: { type: 'exponential', delay: 300 },
       },
     );
     const rows = await until(async () => {
