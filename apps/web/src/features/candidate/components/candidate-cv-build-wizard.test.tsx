@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-// T5.4 the CV builder: six steps, and what "save and generate" sends.
+// T5.4 the CV builder: seven steps, and what "save and generate" sends.
 import '@testing-library/jest-dom/vitest';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -42,7 +42,7 @@ function renderWizard() {
 }
 
 const step = (n: number) =>
-  t.stepIndicator.replace('{current}', String(n)).replace('{total}', '6');
+  t.stepIndicator.replace('{current}', String(n)).replace('{total}', '7');
 const next = () =>
   userEvent.click(screen.getByRole('button', { name: t.next }));
 
@@ -54,7 +54,7 @@ describe('building a CV', () => {
     expect(screen.getByRole('button', { name: t.back })).toBeDisabled();
   });
 
-  it('walks the six steps, picks the first template, and saves trimmed data with a skill', async () => {
+  it('walks the seven steps, picks the first template, and saves trimmed data with a skill', async () => {
     renderWizard();
     await next(); // experience
     await next(); // education
@@ -66,8 +66,9 @@ describe('building a CV', () => {
       skillInputs[skillInputs.length - 1] as HTMLElement,
       '  Excel ',
     );
+    await next(); // languages, licences, certificates
     await next(); // template
-    expect(screen.getByText(step(5), { exact: false })).toBeInTheDocument();
+    expect(screen.getByText(step(6), { exact: false })).toBeInTheDocument();
     await next(); // generate
     expect(screen.getByRole('button', { name: t.next })).toBeDisabled();
     await userEvent.click(screen.getByRole('button', { name: t.generateCta }));
@@ -117,5 +118,64 @@ describe('building a CV', () => {
     await next();
     await userEvent.click(screen.getByRole('button', { name: t.back }));
     expect(screen.getByLabelText(t.fullName)).toHaveValue('Marko');
+  });
+
+  // CV templates PR 2: languages, licence and certificates have their own step.
+  it('the languages, licences and certificates step adds what the CV prints', async () => {
+    renderWizard();
+    await userEvent.type(screen.getByLabelText(t.aboutLabel), 'Vozač.');
+    await userEvent.click(
+      screen.getByLabelText(t.showEmail.replace('{email}', 'ana@primer.rs')),
+    );
+    for (let i = 0; i < 4; i++) await next();
+    expect(
+      screen.getByRole('heading', { name: t.stepExtras }),
+    ).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: t.addLanguage }));
+    await userEvent.click(screen.getByRole('button', { name: t.addLanguage }));
+    const names = screen.getAllByLabelText(t.languageName);
+    await userEvent.type(names[0] as HTMLElement, 'Srpski');
+    await userEvent.type(names[1] as HTMLElement, 'Engleski');
+    await userEvent.selectOptions(
+      screen.getAllByLabelText(t.languageLevel)[1] as HTMLElement,
+      'B2',
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'C' }));
+    await userEvent.click(screen.getByRole('button', { name: 'B' }));
+    await userEvent.click(screen.getByRole('button', { name: 'C' }));
+    await userEvent.click(screen.getByRole('button', { name: 'CE' }));
+    expect(screen.getByRole('button', { name: 'B' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    await userEvent.click(
+      screen.getByRole('button', { name: t.addCertificate }),
+    );
+    await userEvent.type(
+      screen.getByLabelText(t.certificateName),
+      'Rukovalac viljuškarom',
+    );
+    await userEvent.type(screen.getByLabelText(t.certificateYear), '2019x');
+    await userEvent.type(screen.getByLabelText(t.availability), 'Odmah');
+
+    await next(); // template
+    await next(); // generate
+    await userEvent.click(screen.getByRole('button', { name: t.generateCta }));
+    expect(mutate.mock.calls[0]?.[0]).toMatchObject({
+      profile: {
+        cvProfile: {
+          summary: 'Vozač.',
+          showEmail: false,
+          languages: [
+            { name: 'Srpski', level: 'native' },
+            { name: 'Engleski', level: 'B2' },
+          ],
+          drivingLicences: ['B', 'CE'],
+          certificates: [{ name: 'Rukovalac viljuškarom', year: 2019 }],
+          availability: 'Odmah',
+        },
+      },
+    });
   });
 });

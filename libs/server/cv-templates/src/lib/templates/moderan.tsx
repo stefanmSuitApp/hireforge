@@ -6,7 +6,13 @@ import type { CvPdfLayoutInput } from 'contracts';
 import { localePdfBoldStyle } from 'server-pdf/locale-fonts';
 
 import { CV_LABELS } from '../labels';
-import { BodySections, contactLine, pdfBody } from '../sections';
+import {
+  BodySections,
+  contactLine,
+  ExtraSections,
+  pdfBody,
+  SummarySection,
+} from '../sections';
 
 const styles = StyleSheet.create({
   page: { fontFamily: pdfBody, fontSize: 10, flexDirection: 'row' },
@@ -86,7 +92,9 @@ export function ModeranDoc({
           ) : null}
         </View>
         <View style={styles.main}>
+          <SummarySection layout={layout} />
           <BodySections layout={layout} />
+          <ExtraSections layout={layout} />
         </View>
       </Page>
     </Document>

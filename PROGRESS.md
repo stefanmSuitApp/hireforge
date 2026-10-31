@@ -83,6 +83,14 @@ pnpm build` (+ `pnpm check:i18n`) = `pnpm verify`; PRs run it locally, CI on
     render now reloads the font (`renderPdfToBuffer`, invoices too).
     Templates split into `templates/*` with a `registry`. First e2e
     through the builder: `e2e/cv-builder.spec.ts`.
+  - **PR 2 done** (`feat/cv-profile-fields`): the profile (jsonb, no
+    migration) gains summary "O meni", languages (CEFR or native), driving
+    licence categories, certificates, https links, digital skills,
+    availability and a "show email" switch; old profiles parse with
+    defaults. The builder has a 7th step "Jezici, dozvole i sertifikati"
+    (`cv-build-extras-step.tsx`); summary, links and the email switch sit
+    in the basics step; description lines starting with "-" print as
+    bullets. The three templates show the new sections when filled.
 
 ### Plan steps, verified against code
 

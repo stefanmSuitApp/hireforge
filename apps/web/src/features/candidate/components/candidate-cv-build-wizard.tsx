@@ -31,6 +31,7 @@ import {
   Input,
   IsoDatePicker,
   Label,
+  Switch,
   Textarea,
 } from '@/components/ui';
 import {
@@ -39,6 +40,8 @@ import {
 } from '@/features/jobs/lib/bilingual-label';
 import { useCandidateCvSaveAndGenerateMutation } from '@/hooks/mutations/use-candidate-cv-save-and-generate';
 import type { CmsCvTemplateRow } from '@/lib/cms-content';
+
+import { CvBuildExtrasStep } from './cv-build-extras-step';
 
 const PdfPreview = dynamic(
   async () => {
@@ -106,6 +109,7 @@ function emptySkill(): CvSkillEntry {
 
 function normalizeProfileForParse(profile: CvProfile): CvProfile {
   return {
+    ...profile,
     experiences: profile.experiences.map((e) => ({
       ...e,
       endDate:
@@ -137,7 +141,7 @@ type Props = {
   cmsTemplates: CmsCvTemplateRow[];
 };
 
-const STEPS = 6;
+const STEPS = 7;
 
 const CITY_NONE = '__hf_cv_city_none__';
 
@@ -160,6 +164,9 @@ export function CandidateCvBuildWizard({
     initial.cityId ?? null,
   );
   const [cvProfile, setCvProfile] = React.useState<CvProfile>(() => ({
+    // Defaults first: a profile saved before a field existed lacks it.
+    ...cvProfileSchema.parse({}),
+    ...initial.cvProfile,
     experiences:
       initial.cvProfile.experiences.length > 0
         ? [...initial.cvProfile.experiences]
@@ -178,7 +185,7 @@ export function CandidateCvBuildWizard({
   const cvSaveGenerate = useCandidateCvSaveAndGenerateMutation();
 
   React.useEffect(() => {
-    if (step === 4 && templateCode == null) {
+    if (step === 5 && templateCode == null) {
       setTemplateCode(cvTemplateCodes[0]);
     }
   }, [step, templateCode]);
@@ -377,6 +384,108 @@ export function CandidateCvBuildWizard({
                 className="w-full"
               />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="cv-about">{t('aboutLabel')}</Label>
+              <Textarea
+                id="cv-about"
+                aria-describedby="cv-about-hint"
+                value={cvProfile.summary ?? ''}
+                maxLength={600}
+                rows={3}
+                onChange={(e) =>
+                  setCvProfile((p) => ({ ...p, summary: e.target.value }))
+                }
+              />
+              <p id="cv-about-hint" className="text-xs text-muted-foreground">
+                {t('aboutHint', {
+                  count: (cvProfile.summary ?? '').length,
+                  max: 600,
+                })}
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Switch
+                id="cv-show-email"
+                checked={cvProfile.showEmail}
+                onCheckedChange={(checked) =>
+                  setCvProfile((p) => ({ ...p, showEmail: checked }))
+                }
+              />
+              <Label htmlFor="cv-show-email">{t('showEmail', { email })}</Label>
+            </div>
+            <div className="space-y-3">
+              <h4 className="text-sm font-medium">{t('linksTitle')}</h4>
+              {cvProfile.links.map((link, i) => (
+                <div
+                  key={i}
+                  className="grid gap-3 sm:grid-cols-[1fr_2fr_auto] sm:items-end"
+                >
+                  <div className="space-y-2">
+                    <Label htmlFor={`cv-link-label-${i}`}>
+                      {t('linkLabel')}
+                    </Label>
+                    <Input
+                      id={`cv-link-label-${i}`}
+                      value={link.label}
+                      maxLength={40}
+                      onChange={(e) =>
+                        setCvProfile((p) => ({
+                          ...p,
+                          links: p.links.map((l, j) =>
+                            j === i ? { ...l, label: e.target.value } : l,
+                          ),
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor={`cv-link-url-${i}`}>{t('linkUrl')}</Label>
+                    <Input
+                      id={`cv-link-url-${i}`}
+                      type="url"
+                      value={link.url}
+                      maxLength={300}
+                      placeholder="https://"
+                      onChange={(e) =>
+                        setCvProfile((p) => ({
+                          ...p,
+                          links: p.links.map((l, j) =>
+                            j === i ? { ...l, url: e.target.value } : l,
+                          ),
+                        }))
+                      }
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() =>
+                      setCvProfile((p) => ({
+                        ...p,
+                        links: p.links.filter((_, j) => j !== i),
+                      }))
+                    }
+                  >
+                    {t('removeRow')}
+                  </Button>
+                </div>
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={cvProfile.links.length >= 3}
+                onClick={() =>
+                  setCvProfile((p) => ({
+                    ...p,
+                    links: [...p.links, { label: '', url: '' }],
+                  }))
+                }
+              >
+                {t('addLink')}
+              </Button>
+            </div>
           </section>
         ) : null}
 
@@ -440,12 +549,19 @@ export function CandidateCvBuildWizard({
                   <Label htmlFor={`cv-ex-summary-${i}`}>{t('summary')}</Label>
                   <Textarea
                     id={`cv-ex-summary-${i}`}
+                    aria-describedby="cv-ex-summary-hint"
                     value={ex.summary ?? ''}
                     onChange={(e) =>
                       setExperience(i, { summary: e.target.value })
                     }
                     rows={3}
                   />
+                  <p
+                    id="cv-ex-summary-hint"
+                    className="text-xs text-muted-foreground"
+                  >
+                    {t('summaryBulletsHint')}
+                  </p>
                 </div>
                 <Button
                   type="button"
@@ -620,6 +736,13 @@ export function CandidateCvBuildWizard({
         ) : null}
 
         {step === 4 ? (
+          <CvBuildExtrasStep
+            value={cvProfile}
+            onChange={(patch) => setCvProfile((p) => ({ ...p, ...patch }))}
+          />
+        ) : null}
+
+        {step === 5 ? (
           <section className="space-y-4">
             <h3 className="text-base font-medium">{t('stepTemplate')}</h3>
             <div className="grid gap-3 sm:grid-cols-2">
@@ -663,7 +786,7 @@ export function CandidateCvBuildWizard({
           </section>
         ) : null}
 
-        {step === 5 ? (
+        {step === 6 ? (
           <section className="space-y-4">
             <h3 className="text-base font-medium">{t('stepGenerate')}</h3>
             <p className="text-sm text-muted-foreground">{t('generateHint')}</p>
@@ -690,7 +813,7 @@ export function CandidateCvBuildWizard({
           <Button
             type="button"
             size="sm"
-            disabled={step >= STEPS - 1 || (step === 4 && templateCode == null)}
+            disabled={step >= STEPS - 1 || (step === 5 && templateCode == null)}
             onClick={() => setStep((s) => Math.min(STEPS - 1, s + 1))}
           >
             {t('next')}

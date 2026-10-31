@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { cvProfileSchema } from 'contracts';
 
 import { renderCvPdfBuffer } from './render-cv-pdf-buffer';
 
@@ -11,7 +12,7 @@ describe('renderCvPdfBuffer', () => {
       phone: '+381 11 123 456',
       headline: 'Engineer',
       cityLine: 'Belgrade',
-      profile: {
+      profile: cvProfileSchema.parse({
         experiences: [
           {
             company: 'Acme',
@@ -31,7 +32,7 @@ describe('renderCvPdfBuffer', () => {
           },
         ],
         skills: [{ name: 'TypeScript' }, { name: 'PostgreSQL' }],
-      },
+      }),
     };
     for (const templateCode of ['klasican', 'moderan', 'minimalan'] as const) {
       const buf = await renderCvPdfBuffer(templateCode, layout);
