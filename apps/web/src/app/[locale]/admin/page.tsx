@@ -48,7 +48,7 @@ export default async function AdminHomePage({
             body: t('cardTaxonomyBody'),
           },
           {
-            href: '/admin/companies',
+            href: '/moderator/companies',
             label: t('linkCompanies'),
             body: t('cardCompaniesBody'),
           },

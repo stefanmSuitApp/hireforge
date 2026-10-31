@@ -4,7 +4,6 @@ export type AdminWorkspaceNavKey =
   | 'taxonomy'
   | 'promoCodes'
   | 'campaigns'
-  | 'companies'
   | 'billing'
   | 'audit';
 
@@ -14,7 +13,6 @@ export type AdminWorkspaceMessageKey =
   | 'navTaxonomy'
   | 'navPromoCodes'
   | 'navCampaigns'
-  | 'navCompanies'
   | 'navBillingEnterprise'
   | 'navAudit';
 
@@ -41,11 +39,6 @@ export const ADMIN_WORKSPACE_LINKS: ReadonlyArray<{
     messageKey: 'navCampaigns',
   },
   {
-    href: '/admin/companies',
-    navKey: 'companies',
-    messageKey: 'navCompanies',
-  },
-  {
     href: '/admin/billing/enterprise-pending',
     navKey: 'billing',
     messageKey: 'navBillingEnterprise',
@@ -53,7 +46,10 @@ export const ADMIN_WORKSPACE_LINKS: ReadonlyArray<{
   { href: '/admin/audit', navKey: 'audit', messageKey: 'navAudit' },
 ];
 
-/** `null` outside `/admin`: admins also see the moderator links. */
+/**
+ * `null` outside `/admin`: admins also see the moderator links, and use the
+ * moderator Kompanije screens (with the admin-only owner change there).
+ */
 export function getAdminWorkspaceNavKey(
   pathname: string,
 ): AdminWorkspaceNavKey | null {
@@ -71,9 +67,6 @@ export function getAdminWorkspaceNavKey(
   }
   if (pathname.startsWith('/admin/campaigns')) {
     return 'campaigns';
-  }
-  if (pathname.startsWith('/admin/companies')) {
-    return 'companies';
   }
   if (pathname.startsWith('/admin/billing/')) {
     return 'billing';
