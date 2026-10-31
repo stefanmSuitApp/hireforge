@@ -126,6 +126,10 @@ a public slug → URL map merged over Sanity's in the layout, a versioned
 image route cached for a year; Sanity's logo field stays as the fallback
 (remove it once every logo is uploaded here).
 
+**Bucket (2026-10-31, Stefan):** no new bucket; the backups' `hireforge`
+bucket under `uploads/production/` and `uploads/staging/`. Each
+environment sets `S3_UPLOADS_BUCKET` itself (staging no longer copies it).
+
 Original outline:
 
 - Stefan creates the private bucket `hireforge-uploads` (nbg1) in the

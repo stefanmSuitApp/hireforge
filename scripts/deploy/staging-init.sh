@@ -8,7 +8,8 @@
 #    An existing file is kept (its passwords initialised the staging volumes).
 # 2. Every run: the keys staging shares with production are copied over again
 #    (so a rotation on production reaches staging on its next deploy): the
-#    Sanity project, dataset and read token, the bucket keys (dumps under backups/postgres/staging/)
+#    Sanity project, dataset and read token, the bucket keys (dumps under
+#    backups/postgres/staging/, uploads under uploads/staging/)
 #    and the Resend key, the latter only with EMAIL_REDIRECT_TO set: every
 #    staging email goes to that one inbox.
 # 3. Unless --env-only: once STAGING_HOST resolves to this server (same address
@@ -36,7 +37,7 @@ SHARED_KEYS=(SANITY_API_READ_TOKEN SANITY_PROJECT_ID SANITY_DATASET
   NEXT_PUBLIC_SANITY_PROJECT_ID NEXT_PUBLIC_SANITY_DATASET
   SANITY_STUDIO_PROJECT_ID SANITY_STUDIO_DATASET
   RESEND_API_KEY AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY
-  S3_ENDPOINT S3_REGION S3_FORCE_PATH_STYLE S3_BACKUP_BUCKET S3_UPLOADS_BUCKET)
+  S3_ENDPOINT S3_REGION S3_FORCE_PATH_STYLE S3_BACKUP_BUCKET)
 secret() { openssl rand -hex 32; }
 get() { grep -E "^$1=" "$2" | tail -1 | cut -d= -f2- || true; }
 [[ -f $PROD_ENV ]] || { echo "no $PROD_ENV (HIREFORGE_PROD_ROOT=$PROD_ROOT)" >&2; exit 1; }
@@ -102,8 +103,10 @@ fi
 shared=()
 for k in "${SHARED_KEYS[@]}"; do shared+=("$k=$(get "$k" "$PROD_ENV")"); done
 shared+=("S3_BACKUP_PREFIX=backups/postgres/staging/")
-# One uploads bucket for both: staging must never use production's folder.
-shared+=("S3_UPLOADS_PREFIX=staging/")
+# S3_UPLOADS_BUCKET is set per environment, not copied: each one switches
+# only after its own files were copied (hetzner.md §6). Same bucket, so
+# staging must never use production's folder.
+shared+=("S3_UPLOADS_PREFIX=uploads/staging/")
 redirect=${STAGING_EMAIL_TO:-$(get EMAIL_REDIRECT_TO "$STAGING_ENV")}
 if [[ -n $redirect ]]; then
   shared+=("EMAIL_REDIRECT_TO=$redirect")
