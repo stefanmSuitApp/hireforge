@@ -15,8 +15,6 @@ import type {
 } from 'contracts';
 import { cvProfileSchema, sanitizeCvProfileForPersist } from 'contracts';
 import { randomUUID } from 'node:crypto';
-import { createReadStream, existsSync } from 'node:fs';
-import { mkdir, unlink, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
 
 import { and, count, desc, eq, ne, sql } from 'drizzle-orm';
@@ -45,6 +43,7 @@ import {
   codedTooManyRequests,
 } from '../http/coded-http';
 import { getDb } from '../database';
+import { UploadStorageService } from '../storage/upload-storage.service';
 import { getCorrelationId } from '../observability/correlation-storage';
 import { isUniqueViolation } from '../database-errors';
 import { consumeRateLimit } from '../http/rate-limit';
@@ -121,14 +120,6 @@ const ALLOWED_RESUME_MIME = new Set([
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 ]);
 
-function getUploadRoot(): string {
-  const raw = process.env.CANDIDATE_UPLOAD_DIR?.trim();
-  if (raw) {
-    return path.resolve(raw);
-  }
-  return path.join(process.cwd(), 'var', 'candidate-uploads');
-}
-
 /**
  * multer (busboy) decodes multipart file names as latin1, so a UTF-8 name
  * like "Petrović" arrives as mojibake; decode it back unless it wasn't UTF-8.
@@ -174,6 +165,8 @@ const MAX_SAVED_SEARCHES = 50;
 @Injectable()
 export class CandidateService {
   private readonly logger = new Logger(CandidateService.name);
+
+  constructor(private readonly storage: UploadStorageService) {}
 
   private mapListApplicationStatus(raw: string): ApplicationStatus {
     return raw === 'reviewed' ? 'viewed' : (raw as ApplicationStatus);
@@ -411,10 +404,7 @@ export class CandidateService {
     const { candidateId } = await this.requireCandidate(params.userId);
     const ext = path.extname(params.originalFilename) || '.bin';
     const storageKey = path.posix.join(candidateId, `${randomUUID()}${ext}`);
-    const root = getUploadRoot();
-    const fullPath = path.join(root, ...storageKey.split('/'));
-    await mkdir(path.dirname(fullPath), { recursive: true });
-    await writeFile(fullPath, params.buffer);
+    await this.storage.put('cv', storageKey, params.buffer, params.mimeType);
 
     try {
       const row = await database.db.transaction(async (tx) => {
@@ -461,20 +451,29 @@ export class CandidateService {
         templateCode: row.templateCode as CandidateResumeItem['templateCode'],
       };
     } catch (e) {
-      try {
-        await unlink(fullPath);
-      } catch {
-        /* ignore */
-      }
+      await this.removeFileQuietly(storageKey);
       throw e;
     }
   }
 
-  async getResumeDownloadStream(
+  /** After the row is gone (or never made): a leftover file is only logged. */
+  private async removeFileQuietly(storageKey: string): Promise<void> {
+    try {
+      await this.storage.remove('cv', storageKey);
+    } catch (error) {
+      this.logger.warn(
+        `could not remove CV file ${storageKey}: ${
+          error instanceof Error ? error.message : 'unknown error'
+        }`,
+      );
+    }
+  }
+
+  async getResumeDownload(
     userId: string,
     resumeId: string,
   ): Promise<{
-    stream: ReturnType<typeof createReadStream>;
+    buffer: Buffer;
     mimeType: string;
     filename: string;
   }> {
@@ -503,12 +502,12 @@ export class CandidateService {
     if (!row) {
       throw codedNotFound('RESUME_NOT_FOUND', 'Resume not found');
     }
-    const fullPath = path.join(getUploadRoot(), ...row.storageKey.split('/'));
-    if (!existsSync(fullPath)) {
+    const buffer = await this.storage.get('cv', row.storageKey);
+    if (!buffer) {
       throw codedNotFound('RESUME_NOT_FOUND', 'Resume file is missing');
     }
     return {
-      stream: createReadStream(fullPath),
+      buffer,
       mimeType: row.mimeType,
       filename: row.originalFilename,
     };
@@ -550,13 +549,8 @@ export class CandidateService {
         'This resume is attached to an application and cannot be deleted',
       );
     }
-    const fullPath = path.join(getUploadRoot(), ...row.storageKey.split('/'));
     await database.db.delete(resumeAssets).where(eq(resumeAssets.id, resumeId));
-    try {
-      await unlink(fullPath);
-    } catch {
-      /* orphan file — ignore */
-    }
+    await this.removeFileQuietly(row.storageKey);
     return { ok: true };
   }
 
@@ -831,10 +825,7 @@ export class CandidateService {
     }
     const filename = safeGeneratedCvFilename(body.templateCode, row.fullName);
     const storageKey = path.posix.join(base.candidateId, `${randomUUID()}.pdf`);
-    const root = getUploadRoot();
-    const fullPath = path.join(root, ...storageKey.split('/'));
-    await mkdir(path.dirname(fullPath), { recursive: true });
-    await writeFile(fullPath, buffer);
+    await this.storage.put('cv', storageKey, buffer, 'application/pdf');
     try {
       const out = await database.db.transaction(async (tx) => {
         await tx
@@ -877,11 +868,7 @@ export class CandidateService {
         templateCode: out.templateCode as CandidateResumeItem['templateCode'],
       };
     } catch (e) {
-      try {
-        await unlink(fullPath);
-      } catch {
-        /* ignore */
-      }
+      await this.removeFileQuietly(storageKey);
       throw e;
     }
   }
