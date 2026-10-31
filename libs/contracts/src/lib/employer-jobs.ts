@@ -5,6 +5,7 @@ import {
   seniorityLevelSchema,
   workModelSchema,
 } from './domain';
+import { applyEmailSchema, serbianPhoneSchema } from './contact-apply';
 import type { EntitlementsBlob } from './packages';
 
 const taxonomySlug = z
@@ -26,10 +27,17 @@ export const jobSlugSchema = z
   .max(120)
   .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
 
-/** Apply mode per SSOT §8.1; matches `jobs.apply_mode` CHECK. */
-export const applyModes = ['internal', 'external'] as const;
+/**
+ * Apply mode per SSOT §8.1, plus phone/Viber and e-mail (go-to-market WP-A5:
+ * hospitality and retail hire by phone). Matches `jobs.apply_mode` CHECK.
+ */
+export const applyModes = ['internal', 'external', 'phone', 'email'] as const;
 export type ApplyMode = (typeof applyModes)[number];
 export const applyModeSchema = z.enum(applyModes);
+
+/** A stored mode outside the contract (never written) reads as internal. */
+export const toApplyMode = (v: string): ApplyMode =>
+  applyModeSchema.safeParse(v).data ?? 'internal';
 
 /** Authoring language; matches `jobs.primary_language` CHECK. */
 export const jobPrimaryLanguages = ['sr', 'en'] as const;
@@ -154,6 +162,10 @@ export const employerJobDraftBodySchema = z
       emptyToUndef,
       externalApplyHttpsUrl.optional(),
     ),
+    /** Required when `applyMode === 'phone'`; stored as `+381…`. */
+    applyPhone: z.preprocess(emptyToUndef, serbianPhoneSchema.optional()),
+    /** Required when `applyMode === 'email'`. */
+    applyEmail: z.preprocess(emptyToUndef, applyEmailSchema.optional()),
     /** Optional employer-supplied SEO slug; service may regenerate. */
     slug: z.preprocess(emptyToUndef, jobSlugSchema.optional()),
     /** Pinned / highlighted listing — requires `featured_listing` on the subscription blob. */
@@ -179,6 +191,20 @@ export const employerJobDraftBodySchema = z
         code: 'custom',
         path: ['externalApplyUrl'],
         message: 'externalApplyUrl is required when applyMode = "external"',
+      });
+    }
+    if (val.applyMode === 'phone' && !val.applyPhone) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['applyPhone'],
+        message: 'applyPhone is required when applyMode = "phone"',
+      });
+    }
+    if (val.applyMode === 'email' && !val.applyEmail) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['applyEmail'],
+        message: 'applyEmail is required when applyMode = "email"',
       });
     }
   });
@@ -208,6 +234,8 @@ export type EmployerJobDetailResponse = {
   shortId: string | null;
   applyMode: ApplyMode;
   externalApplyUrl: string | null;
+  applyPhone: string | null;
+  applyEmail: string | null;
   primaryLanguage: JobPrimaryLanguage;
   featured: boolean;
   crossborderVisible: boolean;

@@ -21,6 +21,14 @@ import type {
   PublicSitemapResponse,
 } from 'contracts';
 import {
+  contactChannelsFor,
+  formatSerbianPhone,
+  toApplyMode,
+  type ContactChannel,
+  type PublicJobContactBody,
+  type PublicJobContactResponse,
+} from 'contracts';
+import {
   and,
   asc,
   count,
@@ -35,7 +43,14 @@ import {
   sql,
   type SQL,
 } from 'drizzle-orm';
-import { cities, companies, districts, jobCategories, jobs } from 'database';
+import {
+  cities,
+  companies,
+  districts,
+  jobCategories,
+  jobDailyStats,
+  jobs,
+} from 'database';
 import {
   effectiveJobDescriptionHtml,
   jobSalaryFromColumns,
@@ -45,6 +60,7 @@ import {
 import { getDb } from '../database';
 import {
   codedBadRequest,
+  codedNotFound,
   codedTooManyRequests,
   codedUnauthorized,
 } from '../http/coded-http';
@@ -132,7 +148,7 @@ function mapJoinRowToPublicListItem(
     featured: r.featured,
     salary: jobSalaryFromColumns(r),
     excerpt: excerptOf(r.descriptionPlain),
-    applyMode: r.applyMode === 'external' ? 'external' : 'internal',
+    applyMode: toApplyMode(r.applyMode),
     publishedAt: r.publishedAt?.toISOString() ?? null,
     workModel: r.workModel,
     employmentType: r.employmentType,
@@ -413,6 +429,7 @@ export class PublicJobsService {
           shortId: jobs.shortId,
           applyMode: jobs.applyMode,
           externalApplyUrl: jobs.externalApplyUrl,
+          applyPhone: jobs.applyPhone,
           primaryLanguage: jobs.primaryLanguage,
           featured: jobs.featured,
           salaryMin: jobs.salaryMin,
@@ -460,8 +477,9 @@ export class PublicJobsService {
         ),
         slug: row.slug ?? null,
         shortId: row.shortId ?? null,
-        applyMode: row.applyMode === 'external' ? 'external' : 'internal',
+        applyMode: toApplyMode(row.applyMode),
         externalApplyUrl: row.externalApplyUrl ?? null,
+        contactChannels: contactChannelsFor(row),
         primaryLanguage: row.primaryLanguage === 'en' ? 'en' : 'sr',
         featured: row.featured,
         salary: jobSalaryFromColumns(row),
@@ -868,6 +886,83 @@ export class PublicJobsService {
   }
 
   /**
+   * A visitor taps "Pozovi", "Viber" or "Pošalji e-poštu" on a live phone or
+   * e-mail job (WP-A5): answers the link, counted once per page view and
+   * channel in today's `job_daily_stats` (Belgrade day).
+   */
+  async revealContact(
+    jobId: string,
+    body: PublicJobContactBody,
+    clientIp: string,
+  ): Promise<PublicJobContactResponse> {
+    const database = getDb();
+    if (!database) {
+      throw new ServiceUnavailableException(
+        'Database is not configured (DATABASE_URL)',
+      );
+    }
+    const { db } = database;
+    const [row] = await db
+      .select({
+        title: jobs.title,
+        applyMode: jobs.applyMode,
+        applyPhone: jobs.applyPhone,
+        applyEmail: jobs.applyEmail,
+      })
+      .from(jobs)
+      .where(and(eq(jobs.id, jobId), liveJob()))
+      .limit(1);
+    if (!row) {
+      throw codedNotFound('JOB_NOT_FOUND', 'Job not found');
+    }
+    if (!contactChannelsFor(row).includes(body.channel)) {
+      throw codedBadRequest(
+        'JOB_CONTACT_NOT_AVAILABLE',
+        'This job takes no applications on that channel',
+      );
+    }
+
+    const redis = getRedis();
+    let count = true;
+    if (redis) {
+      const rlKey = `hf:contact:rl:${clientIp?.trim() || 'unknown'}`;
+      const n = await redis.incr(rlKey);
+      if (n === 1) await redis.expire(rlKey, 3600);
+      if (n > 120) {
+        throw codedTooManyRequests(
+          'JOB_CONTACT_RATE_LIMITED',
+          'Too many requests; try again later',
+        );
+      }
+      const dedupeKey = `hf:contact:${jobId}:${body.channel}:${body.sessionKey}`;
+      count = (await redis.set(dedupeKey, '1', 'EX', 86400, 'NX')) === 'OK';
+    }
+    if (count) {
+      const add = {
+        calls: body.channel === 'call' ? 1 : 0,
+        viber: body.channel === 'viber' ? 1 : 0,
+        emails: body.channel === 'email' ? 1 : 0,
+      };
+      await db
+        .insert(jobDailyStats)
+        .values({
+          jobId,
+          day: sql`(now() at time zone 'Europe/Belgrade')::date`,
+          ...add,
+        })
+        .onConflictDoUpdate({
+          target: [jobDailyStats.jobId, jobDailyStats.day],
+          set: {
+            calls: sql`${jobDailyStats.calls} + ${add.calls}`,
+            viber: sql`${jobDailyStats.viber} + ${add.viber}`,
+            emails: sql`${jobDailyStats.emails} + ${add.emails}`,
+          },
+        });
+    }
+    return contactLink(body.channel, row);
+  }
+
+  /**
    * Anonymous telemetry for external-apply jobs (Step 10.2).
    * Redis-backed per-IP rate limit + per-(job,sessionKey) idempotency when `REDIS_URL` is set.
    */
@@ -940,6 +1035,25 @@ export class PublicJobsService {
       mapPublicJobsDbError(e);
     }
   }
+}
+
+function contactLink(
+  channel: ContactChannel,
+  job: { title: string; applyPhone: string | null; applyEmail: string | null },
+): PublicJobContactResponse {
+  if (channel === 'email') {
+    const email = job.applyEmail ?? '';
+    const subject = encodeURIComponent(`Prijava: ${job.title} (Šljakam)`);
+    return { href: `mailto:${email}?subject=${subject}`, display: email };
+  }
+  const phone = job.applyPhone ?? '';
+  return {
+    href:
+      channel === 'viber'
+        ? `viber://chat?number=${encodeURIComponent(phone)}`
+        : `tel:${phone}`,
+    display: formatSerbianPhone(phone),
+  };
 }
 
 /** Drizzle wraps PG errors in `cause`; see `DrizzleQueryError` in drizzle-orm/errors.js */

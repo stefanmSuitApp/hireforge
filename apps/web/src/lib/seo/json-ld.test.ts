@@ -30,6 +30,7 @@ function job(
     shortId: 'ab12',
     applyMode: 'internal',
     externalApplyUrl: null,
+    contactChannels: [],
     primaryLanguage: 'sr',
     featured: false,
     crossborderVisible: false,

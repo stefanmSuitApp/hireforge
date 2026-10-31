@@ -9,6 +9,7 @@ import type {
   ModeratorMeResponse,
   EmployerJobDetailResponse,
 } from 'contracts';
+import { toApplyMode } from 'contracts';
 import { count, desc, eq } from 'drizzle-orm';
 import {
   effectiveJobDescriptionHtml,
@@ -154,6 +155,8 @@ export class ModerationService {
         seniority: jobs.seniority,
         applyMode: jobs.applyMode,
         externalApplyUrl: jobs.externalApplyUrl,
+        applyPhone: jobs.applyPhone,
+        applyEmail: jobs.applyEmail,
         primaryLanguage: jobs.primaryLanguage,
         featured: jobs.featured,
         crossborderVisible: jobs.crossborderVisible,
@@ -203,8 +206,10 @@ export class ModerationService {
       workModel: row.workModel,
       employmentType: row.employmentType,
       seniority: row.seniority,
-      applyMode: row.applyMode === 'external' ? 'external' : 'internal',
+      applyMode: toApplyMode(row.applyMode),
       externalApplyUrl: row.externalApplyUrl ?? null,
+      applyPhone: row.applyPhone ?? null,
+      applyEmail: row.applyEmail ?? null,
       primaryLanguage: row.primaryLanguage === 'en' ? 'en' : 'sr',
       featured: row.featured === true,
       crossborderVisible: row.crossborderVisible === true,

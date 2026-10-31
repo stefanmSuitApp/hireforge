@@ -14,7 +14,10 @@ import type {
 } from 'contracts';
 import {
   employmentTypes,
+  applyEmailSchema,
+  formatSerbianPhone,
   isValidEmployerJobPngCreativeHttpsUrl,
+  normalizeSerbianPhone,
   plainDescriptionLength,
   salaryBases,
   salaryPeriods,
@@ -192,8 +195,17 @@ export function JobDraftFormPage({
     (initial?.seniority as SeniorityLevel) ?? 'mid',
   );
   const [applyMode, setApplyMode] = React.useState<ApplyMode>(
-    initial?.applyMode === 'external' ? 'external' : 'internal',
+    initial?.applyMode ?? 'internal',
   );
+  const [applyPhone, setApplyPhone] = React.useState(
+    initial?.applyPhone ? formatSerbianPhone(initial.applyPhone) : '',
+  );
+  const [applyEmail, setApplyEmail] = React.useState(initial?.applyEmail ?? '');
+  const applyContactInvalid =
+    (applyMode === 'phone' && !normalizeSerbianPhone(applyPhone)) ||
+    (applyMode === 'email' && !applyEmailSchema.safeParse(applyEmail).success);
+  const applyContactInvalidRef = React.useRef(false);
+  applyContactInvalidRef.current = applyContactInvalid;
   const [externalApplyUrl, setExternalApplyUrl] = React.useState(
     initial?.externalApplyUrl ?? '',
   );
@@ -375,6 +387,12 @@ export function JobDraftFormPage({
       applyMode,
       externalApplyUrl:
         applyMode === 'external' ? externalApplyUrl.trim() : undefined,
+      applyPhone:
+        applyMode === 'phone'
+          ? (normalizeSerbianPhone(applyPhone) ?? undefined)
+          : undefined,
+      applyEmail:
+        applyMode === 'email' ? applyEmail.trim().toLowerCase() : undefined,
       primaryLanguage: initial?.primaryLanguage === 'en' ? 'en' : 'sr',
       salary: salaryParsed.salary,
     };
@@ -426,6 +444,8 @@ export function JobDraftFormPage({
       seniority,
       applyMode,
       externalApplyUrl,
+      applyPhone,
+      applyEmail,
       featured,
       crossborderVisible,
       pngCreativeUrl,
@@ -472,7 +492,8 @@ export function JobDraftFormPage({
           body.pngCreativeUrl.trim() !== '' &&
           !isValidEmployerJobPngCreativeHttpsUrl(body.pngCreativeUrl.trim())) ||
         // A half-typed salary would clear the saved one.
-        salaryInvalidRef.current
+        salaryInvalidRef.current ||
+        applyContactInvalidRef.current
       ) {
         setAutosaveUi('unsaved');
         return;
@@ -517,6 +538,12 @@ export function JobDraftFormPage({
     }
     if (salaryParsed.invalid) {
       setError(t('salaryInvalid'));
+      return;
+    }
+    if (applyContactInvalid) {
+      setError(
+        t(applyMode === 'phone' ? 'applyPhoneInvalid' : 'applyEmailInvalid'),
+      );
       return;
     }
     const body = buildBody();
@@ -981,6 +1008,8 @@ export function JobDraftFormPage({
                 id="job-apply-mode"
                 options={[
                   { value: 'internal', label: t('applyModeInternal') },
+                  { value: 'phone', label: t('applyModePhone') },
+                  { value: 'email', label: t('applyModeEmail') },
                   { value: 'external', label: t('applyModeExternal') },
                 ]}
                 value={applyMode}
@@ -1014,6 +1043,61 @@ export function JobDraftFormPage({
                 />
                 <p className="text-xs text-muted-foreground">
                   {t('externalUrlHint')}
+                </p>
+              </div>
+            ) : null}
+
+            {applyMode === 'phone' ? (
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="job-apply-phone">{t('applyPhoneLabel')}</Label>
+                <Input
+                  id="job-apply-phone"
+                  name="applyPhone"
+                  type="tel"
+                  inputMode="tel"
+                  autoComplete="tel"
+                  placeholder="064 123 4567"
+                  maxLength={40}
+                  value={applyPhone}
+                  onChange={(e) => setApplyPhone(e.target.value)}
+                  readOnly={applyLocked}
+                  disabled={applyLocked}
+                  aria-invalid={applyPhone !== '' && applyContactInvalid}
+                  className="h-10"
+                />
+                <p
+                  className={
+                    applyPhone !== '' && applyContactInvalid
+                      ? 'text-xs text-destructive'
+                      : 'text-xs text-muted-foreground'
+                  }
+                >
+                  {applyPhone !== '' && applyContactInvalid
+                    ? t('applyPhoneInvalid')
+                    : t('applyPhoneHint')}
+                </p>
+              </div>
+            ) : null}
+
+            {applyMode === 'email' ? (
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="job-apply-email">{t('applyEmailLabel')}</Label>
+                <Input
+                  id="job-apply-email"
+                  name="applyEmail"
+                  type="email"
+                  inputMode="email"
+                  autoComplete="email"
+                  maxLength={320}
+                  value={applyEmail}
+                  onChange={(e) => setApplyEmail(e.target.value)}
+                  readOnly={applyLocked}
+                  disabled={applyLocked}
+                  aria-invalid={applyEmail !== '' && applyContactInvalid}
+                  className="h-10"
+                />
+                <p className="text-xs text-muted-foreground">
+                  {t('applyEmailHint')}
                 </p>
               </div>
             ) : null}

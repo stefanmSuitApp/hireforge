@@ -1,4 +1,4 @@
-import type { EmployerJobDraftBody } from 'contracts';
+import type { ApplyMode, EmployerJobDraftBody } from 'contracts';
 import { eq } from 'drizzle-orm';
 import type { DrizzleDbOrTx } from 'database';
 import { jobs, outboxEvents } from 'database';
@@ -14,8 +14,10 @@ export type DemotePublishedJobDraftEditInput = {
   cityId: string | null;
   categoryId: string | null;
   apply: {
-    applyMode: 'internal' | 'external';
+    applyMode: ApplyMode;
     externalApplyUrl: string | null;
+    applyPhone: string | null;
+    applyEmail: string | null;
     primaryLanguage: 'sr' | 'en';
   };
   draft: EmployerJobDraftBody;

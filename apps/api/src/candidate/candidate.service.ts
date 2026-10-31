@@ -17,6 +17,7 @@ import {
   candidateWithdrawableStatuses,
   cvProfileSchema,
   sanitizeCvProfileForPersist,
+  toApplyMode,
 } from 'contracts';
 import { randomUUID } from 'node:crypto';
 import * as path from 'node:path';
@@ -102,7 +103,7 @@ function mapPublishedJoinRowToPublicListItem(r: {
     featured: r.featured,
     salary: jobSalaryFromColumns(r),
     excerpt: jobListExcerpt(r.descriptionPlain),
-    applyMode: r.applyMode === 'external' ? 'external' : 'internal',
+    applyMode: toApplyMode(r.applyMode),
     publishedAt: r.publishedAt?.toISOString() ?? null,
     workModel: r.workModel,
     employmentType: r.employmentType,
@@ -646,10 +647,10 @@ export class CandidateService {
           'This job is not accepting applications',
         );
       }
-      if (jobRow.applyMode === 'external') {
+      if (jobRow.applyMode !== 'internal') {
         throw codedBadRequest(
           'JOB_EXTERNAL_APPLY_ONLY',
-          'This job accepts applications only on the employer website',
+          'This job takes applications outside Šljakam (website, phone or e-mail)',
         );
       }
 

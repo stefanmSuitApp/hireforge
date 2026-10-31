@@ -5,7 +5,7 @@ Living status file. **Trust this over the `Status:` lines in
 which went stale during the Cursor phase (Steps 4, 5, 14, 15 say "pending"
 but shipped). Update this file in the same PR as the work.
 
-Last updated: 2026-10-31 (G0 WP-A4: salary on job ads). Open items for Stefan:
+Last updated: 2026-10-31 (G0 WP-A5: apply by phone, Viber or e-mail). Open items for Stefan:
 [`NEEDS_STEFAN.md`](./NEEDS_STEFAN.md).
 
 **Next: Phase G0 of the go-to-market review (2026-10-31).**
@@ -808,6 +808,25 @@ shared components, CSS-only motion within the Lighthouse budgets.
 Claude works through G0 on its own (Stefan, 2026-10-31: "don't stop after
 every phase, wait for staging, move on"). Decisions taken and left: the
 review's "Status" section.
+
+### WP-A5 Apply by phone, Viber or e-mail (branch `feat/contact-apply`)
+
+- `apply_mode` gains `phone` (`apply_phone`, stored `+381…`) and `email`
+  (`apply_email`); migration `0045` (CHECK: the mode's contact is set) also
+  adds `job_daily_stats` (job, Belgrade day: views, external clicks, calls,
+  viber, emails) for WP-A6. Serbian numbers are read the way people write
+  them (`064/123-4567`, `+381 64…`, `00381…`); service numbers are refused.
+- The job page shows "Pozovi" + "Viber" (mobiles) or "Pošalji e-poštu"; no
+  account needed. The number/address is not in the page: a tap calls
+  `POST /api/public/jobs/:id/contact`, which answers the `tel:` / `viber:` /
+  `mailto:` link (subject "Prijava: <naslov> (Šljakam)") and shows the
+  number for desktops. Taps are counted once per page view and channel
+  (Redis), rate-limited per IP (120/h).
+- Šljakam applications to these jobs are refused (`JOB_EXTERNAL_APPLY_ONLY`);
+  JobPosting `directApply` stays false. Like the external URL, the phone and
+  e-mail can't change after publishing (`JOB_APPLY_MODE_IMMUTABLE`).
+- Job form: "Telefonom ili Viberom" / "E-poštom" with inline validation; an
+  invalid number is not autosaved.
 
 ### WP-A4 Salary on job ads (branch `feat/job-salary`)
 

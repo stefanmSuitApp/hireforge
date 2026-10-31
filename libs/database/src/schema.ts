@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm';
 import {
   boolean,
   check,
+  date,
   index,
   integer,
   jsonb,
@@ -625,10 +626,17 @@ export const jobs = pgTable(
     /** Short non-guessable suffix for collision-free public URLs. */
     shortId: text('short_id'),
     status: jobStatusEnum('status').notNull().default('draft'),
-    /** `internal` (apply via Šljakam) or `external` (redirect to employer URL). */
+    /**
+     * `internal` (apply via Šljakam), `external` (redirect to employer URL),
+     * `phone` (call / Viber `apply_phone`) or `email` (`apply_email`).
+     */
     applyMode: text('apply_mode').notNull().default('internal'),
     /** Redirect target for `external` apply mode. App-level enforces `https://`. */
     externalApplyUrl: text('external_apply_url'),
+    /** E.164 `+381…` for `phone` apply; revealed to visitors on tap only. */
+    applyPhone: text('apply_phone'),
+    /** Address for `email` apply; revealed to visitors on tap only. */
+    applyEmail: text('apply_email'),
     /** Click counter for `external` apply tracking (SSOT §8.3). */
     externalApplyClicks: integer('external_apply_clicks').notNull().default(0),
     cityId: uuid('city_id').references(() => cities.id, {
@@ -685,7 +693,12 @@ export const jobs = pgTable(
       .where(sql`${t.status} = 'published'`),
     check(
       'jobs_apply_mode_check',
-      sql`${t.applyMode} IN ('internal', 'external')`,
+      sql`${t.applyMode} IN ('internal', 'external', 'phone', 'email')`,
+    ),
+    check(
+      'jobs_apply_contact_check',
+      sql`(${t.applyMode} <> 'phone' OR ${t.applyPhone} IS NOT NULL)
+        AND (${t.applyMode} <> 'email' OR ${t.applyEmail} IS NOT NULL)`,
     ),
     check(
       'jobs_primary_language_check',
@@ -702,6 +715,23 @@ export const jobs = pgTable(
           AND ${t.salaryBasis} IS NOT NULL AND ${t.salaryBasis} IN ('net', 'gross'))`,
     ),
   ],
+);
+
+/** Per-job, per-day counters for the employer's stats (Belgrade days). */
+export const jobDailyStats = pgTable(
+  'job_daily_stats',
+  {
+    jobId: uuid('job_id')
+      .notNull()
+      .references(() => jobs.id, { onDelete: 'cascade' }),
+    day: date('day').notNull(),
+    views: integer('views').notNull().default(0),
+    externalClicks: integer('external_clicks').notNull().default(0),
+    calls: integer('calls').notNull().default(0),
+    viber: integer('viber').notNull().default(0),
+    emails: integer('emails').notNull().default(0),
+  },
+  (t) => [primaryKey({ columns: [t.jobId, t.day] })],
 );
 
 /** Inlined job description imagery (TipTap `image` nodes; Step 11.6). */

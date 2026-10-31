@@ -13,6 +13,7 @@ import {
 import {
   publicCompanyParamSchema,
   publicJobBySlugParamSchema,
+  publicJobContactBodySchema,
   publicJobDetailParamSchema,
   publicJobExternalClickBodySchema,
   publicJobListQuerySchema,
@@ -22,6 +23,7 @@ import { z } from 'zod';
 
 import { PublicJobsService, type PublicViewer } from './public-jobs.service';
 import { forwardedClientIp } from '../auth/auth-rate-limit';
+import { codedBadRequest } from '../http/coded-http';
 
 /** Any valid access token (candidate, employer or staff) counts as signed in. */
 function viewerOf(req: Request): PublicViewer {
@@ -99,6 +101,27 @@ export class PublicJobsController {
       throw new BadRequestException(z.flattenError(parsed.error));
     }
     return this.publicJobs.getBySlug(parsed.data.slug);
+  }
+
+  /** Phone/Viber/e-mail apply: the link for one tap, counted (WP-A5). */
+  @Post(':id/contact')
+  @HttpCode(200)
+  contact(
+    @Param('id', new ParseUUIDPipe()) jobId: string,
+    @Body() body: unknown,
+    @Req() req: Request,
+  ) {
+    const parsed = publicJobContactBodySchema.safeParse(body);
+    if (!parsed.success) {
+      throw codedBadRequest(
+        'VALIDATION_FAILED',
+        'Invalid request body',
+        z.flattenError(parsed.error),
+      );
+    }
+    const ip =
+      forwardedClientIp(req) ?? req.ip ?? req.socket.remoteAddress ?? '';
+    return this.publicJobs.revealContact(jobId, parsed.data, ip);
   }
 
   /** External apply click telemetry (rate-limited + idempotent per session key when Redis is configured). */

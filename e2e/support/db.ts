@@ -344,6 +344,35 @@ async function insertPublishedJob(
   return { id, slug, shortId, title };
 }
 
+/** Switches a job to phone apply (WP-A5); the number as stored (`+381…`). */
+export async function setJobApplyPhone(
+  jobId: string,
+  e164: string,
+): Promise<void> {
+  await withDb((db) =>
+    db.query(
+      `UPDATE jobs SET apply_mode = 'phone', apply_phone = $2 WHERE id = $1`,
+      [jobId, e164],
+    ),
+  );
+}
+
+/** Calls, Viber and e-mail taps counted for a job (all days). */
+export async function jobContactTaps(
+  jobId: string,
+): Promise<{ calls: number; viber: number; emails: number }> {
+  return withDb(async (db) => {
+    const r = await db.query<{ calls: number; viber: number; emails: number }>(
+      `SELECT coalesce(sum(calls), 0)::int AS calls,
+              coalesce(sum(viber), 0)::int AS viber,
+              coalesce(sum(emails), 0)::int AS emails
+         FROM job_daily_stats WHERE job_id = $1`,
+      [jobId],
+    );
+    return r.rows[0] ?? { calls: 0, viber: 0, emails: 0 };
+  });
+}
+
 /** What an edit + re-publish does to the URL: new stem, same short id. */
 export async function renameJobSlug(
   job: SeededJob,
