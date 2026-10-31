@@ -80,6 +80,8 @@ function plainToHtml(text: string): string {
     .join('');
 }
 
+const SALARY_UNIT = { month: 'MONTH', day: 'DAY', hour: 'HOUR' } as const;
+
 /**
  * JobPosting for a live job; `null` for an ended ad (Google requires removing
  * the markup once a job is no longer open). `jobUrl` is the canonical page.
@@ -108,6 +110,21 @@ export function jobPostingJsonLd(
     datePosted: job.publishedAt,
     ...(job.expiresAt ? { validThrough: job.expiresAt } : {}),
     ...(employmentType ? { employmentType } : {}),
+    // Google: only a salary the employer stated.
+    ...(job.salary
+      ? {
+          baseSalary: {
+            '@type': 'MonetaryAmount',
+            currency: 'RSD',
+            value: {
+              '@type': 'QuantitativeValue',
+              ...(job.salary.min !== null ? { minValue: job.salary.min } : {}),
+              ...(job.salary.max !== null ? { maxValue: job.salary.max } : {}),
+              unitText: SALARY_UNIT[job.salary.period],
+            },
+          },
+        }
+      : {}),
     url: ctx.jobUrl,
     identifier: {
       '@type': 'PropertyValue',

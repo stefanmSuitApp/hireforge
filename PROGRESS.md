@@ -5,8 +5,7 @@ Living status file. **Trust this over the `Status:` lines in
 which went stale during the Cursor phase (Steps 4, 5, 14, 15 say "pending"
 but shipped). Update this file in the same PR as the work.
 
-Last updated: 2026-10-31 (G0 WP-A1: employers download CVs and decide on
-applications). Open items for Stefan:
+Last updated: 2026-10-31 (G0 WP-A4: salary on job ads). Open items for Stefan:
 [`NEEDS_STEFAN.md`](./NEEDS_STEFAN.md).
 
 **Next: Phase G0 of the go-to-market review (2026-10-31).**
@@ -300,8 +299,8 @@ agent was editing the main checkout at the same time.
 3. **Found 2026-10-29: candidate CV files are not backed up.** The
    `api_var` volume is in no backup script; only Postgres is dumped.
 4. Observability: Sentry — needs a DSN; offsite backups — needs storage.
-5. Product: salary fields on jobs; GAZDA (enterprise) creation by admin.
-   (Employer application status workflow: done, G0 WP-A1.)
+5. Product: GAZDA (enterprise) creation by admin. (Employer application
+   status workflow and salary fields: done, G0 WP-A1 and WP-A4.)
 
 ## SEO & quality gates ✅ (branch `feat/seo-quality-gates`)
 
@@ -809,6 +808,25 @@ shared components, CSS-only motion within the Lighthouse budgets.
 Claude works through G0 on its own (Stefan, 2026-10-31: "don't stop after
 every phase, wait for staging, move on"). Decisions taken and left: the
 review's "Status" section.
+
+### WP-A4 Salary on job ads (branch `feat/job-salary`)
+
+- Migration `0044_job_salary.sql`: `salary_min`, `salary_max` (whole RSD),
+  `salary_period` (`month | day | hour`), `salary_basis` (`net | gross`),
+  all null or a valid set (`jobs_salary_check`; the test that a missing
+  period is refused found `NULL IN (…)` passing a CHECK, fixed with `IS NOT
+NULL`). No currency column: RSD for this segment.
+- Contracts: `jobSalarySchema` (range, floor "od" or ceiling "do"; net per
+  month by default), `salary` on the draft body, employer/moderator/public
+  DTOs; `formatSalaryAmount`. Server: `jobSalaryColumns` /
+  `jobSalaryFromColumns` (`server-jobs`) in every create, edit, demote and
+  read path (employer, staff, public list and detail, saved jobs).
+- Shown as "60.000–80.000 RSD neto mesečno" on list cards, home teasers and
+  the job page; JobPosting `baseSalary` only when the employer gave one
+  (Google's rule). The job form has Od / Do / period / net-gross; a half-typed
+  range is not autosaved (it would clear the saved salary).
+- Not done: a salary filter in search (later), a "Plata istaknuta" badge
+  (the salary line itself is the signal).
 
 ### WP-A1 Employer applications (branch `feat/employer-applications`)
 

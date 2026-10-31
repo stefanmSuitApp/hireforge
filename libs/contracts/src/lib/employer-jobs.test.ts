@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   applyModeSchema,
   employerJobDraftBodySchema,
+  formatSalaryAmount,
   jobPrimaryLanguageSchema,
   jobSlugSchema,
   proseMirrorDocSchema,
@@ -142,5 +143,67 @@ describe('employerJobDraftBodySchema', () => {
       pngCreativeUrl: 'https://',
     });
     expect(result.success).toBe(false);
+  });
+});
+
+describe('salary on a job draft', () => {
+  const parse = (salary: unknown) =>
+    employerJobDraftBodySchema.safeParse({ ...baseValid, salary });
+
+  it('is optional; no salary is null', () => {
+    const r = employerJobDraftBodySchema.parse(baseValid);
+    expect(r.salary ?? null).toBeNull();
+    expect(parse(null).success).toBe(true);
+  });
+
+  it('a range, a floor or a ceiling, net per month by default', () => {
+    expect(parse({ min: 60000, max: 80000 }).data?.salary).toEqual({
+      min: 60000,
+      max: 80000,
+      period: 'month',
+      basis: 'net',
+    });
+    expect(parse({ min: 400, period: 'hour' }).success).toBe(true);
+    expect(parse({ max: 5000, period: 'day', basis: 'gross' }).success).toBe(
+      true,
+    );
+  });
+
+  it('needs at least one amount, and min ≤ max', () => {
+    expect(parse({ period: 'month' }).success).toBe(false);
+    expect(parse({ min: 90000, max: 80000 }).success).toBe(false);
+  });
+
+  it('whole positive dinars only', () => {
+    expect(parse({ min: 0 }).success).toBe(false);
+    expect(parse({ min: 60000.5 }).success).toBe(false);
+    expect(parse({ min: -1 }).success).toBe(false);
+  });
+
+  it('an unknown period or basis is refused', () => {
+    expect(parse({ min: 1, period: 'week' }).success).toBe(false);
+    expect(parse({ min: 1, basis: 'cash' }).success).toBe(false);
+  });
+});
+
+describe('formatSalaryAmount', () => {
+  it('a range, a floor, a ceiling and a fixed amount', () => {
+    const fmt = (n: number) => n.toLocaleString('sr-RS');
+    expect(formatSalaryAmount({ min: 60000, max: 80000 }, fmt)).toEqual({
+      kind: 'range',
+      text: `${fmt(60000)}–${fmt(80000)}`,
+    });
+    expect(formatSalaryAmount({ min: 60000, max: 60000 }, fmt)).toEqual({
+      kind: 'exact',
+      text: fmt(60000),
+    });
+    expect(formatSalaryAmount({ min: 400, max: null }, fmt)).toEqual({
+      kind: 'from',
+      text: fmt(400),
+    });
+    expect(formatSalaryAmount({ min: null, max: 5000 }, fmt)).toEqual({
+      kind: 'upTo',
+      text: fmt(5000),
+    });
   });
 });

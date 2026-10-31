@@ -281,6 +281,8 @@ export async function createPublishedJob(
     expiresAt?: Date | null;
     applyMode?: 'internal' | 'external';
     featured?: boolean;
+    /** Monthly net RSD range. */
+    salary?: { min: number; max: number };
   } = {},
 ): Promise<SeededJob> {
   // Short ids are 4 chars (see shortIdFromJobSlug); specs that create dozens
@@ -309,11 +311,15 @@ async function insertPublishedJob(
       `INSERT INTO jobs (company_id, created_by_user_id, title, description,
          description_plain, status, slug, short_id, city_id, category_id,
          published_at, expires_at, apply_mode, external_apply_url,
-         employment_type, work_model, featured)
+         employment_type, work_model, featured,
+         salary_min, salary_max, salary_period, salary_basis)
        SELECT c.id, u.id, $1, $2, $2, 'published', $3, $4, ci.id, jc.id,
          now() - interval '1 day', $5, $6,
          CASE WHEN $6 = 'external' THEN 'https://example.com/apply' END,
-         'full_time', 'hybrid', $7
+         'full_time', 'hybrid', $7,
+         $8::int, $9::int,
+         CASE WHEN $8::int IS NOT NULL THEN 'month' END,
+         CASE WHEN $8::int IS NOT NULL THEN 'net' END
        FROM companies c
        JOIN users u ON u.email = 'employer@hireforge.local'
        JOIN cities ci ON ci.slug = 'beograd' AND ci.country_code = 'RS'
@@ -328,6 +334,8 @@ async function insertPublishedJob(
         opts.expiresAt ?? null,
         opts.applyMode ?? 'internal',
         opts.featured ?? true,
+        opts.salary?.min ?? null,
+        opts.salary?.max ?? null,
       ],
     ),
   );

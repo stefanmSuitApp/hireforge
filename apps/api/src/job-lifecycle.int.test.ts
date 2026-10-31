@@ -390,3 +390,90 @@ async function companyOf(userId: string): Promise<string> {
   );
   return rows[0].company_id;
 }
+
+describe('salary (go-to-market WP-A4)', () => {
+  const SALARY = { min: 60000, max: 80000, period: 'month', basis: 'net' };
+
+  it('an employer saves a salary; it reaches the public detail and list once published', async () => {
+    const owner = await signInAs(app.getHttpServer(), 'employer');
+    const created = await http(app)
+      .post('/api/employer/jobs')
+      .set(owner.headers)
+      .send({ ...DRAFT, salary: SALARY })
+      .expect(201);
+    const id = created.body.id as string;
+    const mine = await http(app)
+      .get(`/api/employer/jobs/${id}`)
+      .set(owner.headers)
+      .expect(200);
+    expect(mine.body.salary).toEqual(SALARY);
+
+    await http(app)
+      .post(`/api/employer/jobs/${id}/submit`)
+      .set(owner.headers)
+      .expect(201);
+    await http(app)
+      .post(`/api/moderator/jobs/${id}/publish`)
+      .set(moderator.headers)
+      .expect(201);
+    const detail = await http(app).get(`/api/public/jobs/${id}`).expect(200);
+    expect(detail.body.salary).toEqual(SALARY);
+    const list = await http(app)
+      .get('/api/public/jobs?q=Električar&pageSize=50')
+      .set(moderator.headers)
+      .expect(200);
+    const item = (list.body.items as { id: string; salary: unknown }[]).find(
+      (i) => i.id === id,
+    );
+    expect(item?.salary).toEqual(SALARY);
+  });
+
+  it('editing the draft can clear the salary', async () => {
+    const { id, owner } = await draftOf();
+    await http(app)
+      .patch(`/api/employer/jobs/${id}`)
+      .set(owner.headers)
+      .send({ ...DRAFT, salary: { min: 400, period: 'hour' } })
+      .expect(200);
+    expect(
+      (
+        await q(
+          'select salary_min, salary_max, salary_period, salary_basis from jobs where id = $1',
+          [id],
+        )
+      ).rows[0],
+    ).toEqual({
+      salary_min: 400,
+      salary_max: null,
+      salary_period: 'hour',
+      salary_basis: 'net',
+    });
+    await http(app)
+      .patch(`/api/employer/jobs/${id}`)
+      .set(owner.headers)
+      .send({ ...DRAFT, salary: null })
+      .expect(200);
+    const after = await http(app)
+      .get(`/api/employer/jobs/${id}`)
+      .set(owner.headers)
+      .expect(200);
+    expect(after.body.salary).toBeNull();
+  });
+
+  it('a maximum below the minimum is VALIDATION_FAILED and nothing is stored', async () => {
+    const owner = await signInAs(app.getHttpServer(), 'employer');
+    const res = await http(app)
+      .post('/api/employer/jobs')
+      .set(owner.headers)
+      .send({ ...DRAFT, salary: { min: 90000, max: 80000 } });
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe('VALIDATION_FAILED');
+  });
+
+  it('the database refuses a salary without a period, whatever the API does', async () => {
+    const { id } = await draftOf();
+    await expect(
+      q(`update jobs set salary_min = 1000 where id = $1`, [id]),
+    ).rejects.toThrow(/jobs_salary_check/);
+  });
+});

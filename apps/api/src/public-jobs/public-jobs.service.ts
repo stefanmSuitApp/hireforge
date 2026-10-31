@@ -36,7 +36,11 @@ import {
   type SQL,
 } from 'drizzle-orm';
 import { cities, companies, districts, jobCategories, jobs } from 'database';
-import { effectiveJobDescriptionHtml, shortIdFromJobSlug } from 'server-jobs';
+import {
+  effectiveJobDescriptionHtml,
+  jobSalaryFromColumns,
+  shortIdFromJobSlug,
+} from 'server-jobs';
 
 import { getDb } from '../database';
 import {
@@ -84,6 +88,10 @@ type PublicJobListJoinRow = {
   slug: string | null;
   shortId: string | null;
   featured: boolean;
+  salaryMin: number | null;
+  salaryMax: number | null;
+  salaryPeriod: string | null;
+  salaryBasis: string | null;
   descriptionPlain: string | null;
   applyMode: string;
   publishedAt: Date | null;
@@ -122,6 +130,7 @@ function mapJoinRowToPublicListItem(
     slug: r.slug ?? null,
     shortId: r.shortId ?? null,
     featured: r.featured,
+    salary: jobSalaryFromColumns(r),
     excerpt: excerptOf(r.descriptionPlain),
     applyMode: r.applyMode === 'external' ? 'external' : 'internal',
     publishedAt: r.publishedAt?.toISOString() ?? null,
@@ -223,6 +232,10 @@ export class PublicJobsService {
           id: jobs.id,
           title: jobs.title,
           featured: jobs.featured,
+          salaryMin: jobs.salaryMin,
+          salaryMax: jobs.salaryMax,
+          salaryPeriod: jobs.salaryPeriod,
+          salaryBasis: jobs.salaryBasis,
           jobSlug: jobs.slug,
           jobShortId: jobs.shortId,
           publishedAt: jobs.publishedAt,
@@ -402,6 +415,10 @@ export class PublicJobsService {
           externalApplyUrl: jobs.externalApplyUrl,
           primaryLanguage: jobs.primaryLanguage,
           featured: jobs.featured,
+          salaryMin: jobs.salaryMin,
+          salaryMax: jobs.salaryMax,
+          salaryPeriod: jobs.salaryPeriod,
+          salaryBasis: jobs.salaryBasis,
           crossborderVisible: jobs.crossborderVisible,
           pngCreativeUrl: jobs.pngCreativeUrl,
           publishedAt: jobs.publishedAt,
@@ -447,6 +464,7 @@ export class PublicJobsService {
         externalApplyUrl: row.externalApplyUrl ?? null,
         primaryLanguage: row.primaryLanguage === 'en' ? 'en' : 'sr',
         featured: row.featured,
+        salary: jobSalaryFromColumns(row),
         crossborderVisible: row.crossborderVisible === true,
         pngCreativeUrl: row.pngCreativeUrl ?? null,
         publishedAt: row.publishedAt?.toISOString() ?? null,
@@ -653,6 +671,10 @@ export class PublicJobsService {
           slug: jobs.slug,
           shortId: jobs.shortId,
           featured: jobs.featured,
+          salaryMin: jobs.salaryMin,
+          salaryMax: jobs.salaryMax,
+          salaryPeriod: jobs.salaryPeriod,
+          salaryBasis: jobs.salaryBasis,
           applyMode: jobs.applyMode,
           descriptionPlain: jobs.descriptionPlain,
           publishedAt: jobs.publishedAt,
@@ -721,6 +743,10 @@ export class PublicJobsService {
             slug: jobs.slug,
             shortId: jobs.shortId,
             featured: jobs.featured,
+            salaryMin: jobs.salaryMin,
+            salaryMax: jobs.salaryMax,
+            salaryPeriod: jobs.salaryPeriod,
+            salaryBasis: jobs.salaryBasis,
             applyMode: jobs.applyMode,
             descriptionPlain: jobs.descriptionPlain,
             publishedAt: jobs.publishedAt,
@@ -799,6 +825,10 @@ export class PublicJobsService {
           slug: jobs.slug,
           shortId: jobs.shortId,
           featured: jobs.featured,
+          salaryMin: jobs.salaryMin,
+          salaryMax: jobs.salaryMax,
+          salaryPeriod: jobs.salaryPeriod,
+          salaryBasis: jobs.salaryBasis,
           applyMode: jobs.applyMode,
           descriptionPlain: jobs.descriptionPlain,
           publishedAt: jobs.publishedAt,

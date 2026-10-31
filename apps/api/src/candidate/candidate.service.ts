@@ -24,6 +24,7 @@ import * as path from 'node:path';
 import { and, count, desc, eq, inArray, ne, sql } from 'drizzle-orm';
 import { isWithinReapplicationCooldown } from 'server-applications';
 import { renderCvPdfBuffer } from 'server-cv-templates';
+import { jobSalaryFromColumns } from 'server-jobs';
 import sharp from 'sharp';
 import {
   applications,
@@ -73,6 +74,10 @@ function mapPublishedJoinRowToPublicListItem(r: {
   slug: string | null;
   shortId: string | null;
   featured: boolean;
+  salaryMin: number | null;
+  salaryMax: number | null;
+  salaryPeriod: string | null;
+  salaryBasis: string | null;
   descriptionPlain: string | null;
   applyMode: string;
   publishedAt: Date | null;
@@ -95,6 +100,7 @@ function mapPublishedJoinRowToPublicListItem(r: {
     slug: r.slug ?? null,
     shortId: r.shortId ?? null,
     featured: r.featured,
+    salary: jobSalaryFromColumns(r),
     excerpt: jobListExcerpt(r.descriptionPlain),
     applyMode: r.applyMode === 'external' ? 'external' : 'internal',
     publishedAt: r.publishedAt?.toISOString() ?? null,
@@ -1115,6 +1121,10 @@ export class CandidateService {
         slug: jobs.slug,
         shortId: jobs.shortId,
         featured: jobs.featured,
+        salaryMin: jobs.salaryMin,
+        salaryMax: jobs.salaryMax,
+        salaryPeriod: jobs.salaryPeriod,
+        salaryBasis: jobs.salaryBasis,
         applyMode: jobs.applyMode,
         descriptionPlain: jobs.descriptionPlain,
         publishedAt: jobs.publishedAt,

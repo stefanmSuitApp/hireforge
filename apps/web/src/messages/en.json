@@ -595,6 +595,13 @@
       "categoryNone": "Not set",
       "workModelLabel": "Work model",
       "employmentTypeLabel": "Employment type",
+      "salaryLabel": "Salary (RSD, optional)",
+      "salaryMinLabel": "From",
+      "salaryMaxLabel": "To",
+      "salaryPeriodLabel": "Per",
+      "salaryBasisLabel": "Net or gross",
+      "salaryHint": "Enter one or both amounts in dinars. Leave empty to show no salary.",
+      "salaryInvalid": "Salary must be whole dinars, and “To” must not be below “From”.",
       "seniorityLabel": "Seniority",
       "saveDraft": "Save draft",
       "saving": "Saving…",
@@ -1600,5 +1607,23 @@
     "accept": "Accept",
     "decline": "Decline",
     "settings": "Cookie settings"
+  },
+  "Salary": {
+    "line": "{amount} RSD {basis} {period}",
+    "amount": {
+      "range": "{amount}",
+      "exact": "{amount}",
+      "from": "from {amount}",
+      "upTo": "up to {amount}"
+    },
+    "basis": {
+      "net": "net",
+      "gross": "gross"
+    },
+    "period": {
+      "month": "per month",
+      "day": "per day",
+      "hour": "per hour"
+    }
   }
 }

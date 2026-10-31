@@ -595,6 +595,13 @@
       "categoryNone": "Nije izabrano",
       "workModelLabel": "Model rada",
       "employmentTypeLabel": "Tip angažovanja",
+      "salaryLabel": "Plata (RSD, opciono)",
+      "salaryMinLabel": "Od",
+      "salaryMaxLabel": "Do",
+      "salaryPeriodLabel": "Za period",
+      "salaryBasisLabel": "Neto ili bruto",
+      "salaryHint": "Upiši jedan ili oba iznosa u dinarima. Ostavi prazno ako ne želiš da prikažeš platu.",
+      "salaryInvalid": "Iznos plate mora biti ceo broj dinara, a „Do” ne sme biti manji od „Od”.",
       "seniorityLabel": "Nivo iskustva",
       "saveDraft": "Sačuvaj nacrt",
       "saving": "Čuvanje…",
@@ -1600,5 +1607,23 @@
     "accept": "Prihvatam",
     "decline": "Odbijam",
     "settings": "Podešavanja kolačića"
+  },
+  "Salary": {
+    "line": "{amount} RSD {basis} {period}",
+    "amount": {
+      "range": "{amount}",
+      "exact": "{amount}",
+      "from": "od {amount}",
+      "upTo": "do {amount}"
+    },
+    "basis": {
+      "net": "neto",
+      "gross": "bruto"
+    },
+    "period": {
+      "month": "mesečno",
+      "day": "dnevno",
+      "hour": "po satu"
+    }
   }
 }

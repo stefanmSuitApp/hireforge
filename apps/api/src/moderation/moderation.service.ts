@@ -12,6 +12,7 @@ import type {
 import { count, desc, eq } from 'drizzle-orm';
 import {
   effectiveJobDescriptionHtml,
+  jobSalaryFromColumns,
   transitionJobToPublished,
   transliterateToAsciiBasic,
 } from 'server-jobs';
@@ -157,6 +158,10 @@ export class ModerationService {
         featured: jobs.featured,
         crossborderVisible: jobs.crossborderVisible,
         pngCreativeUrl: jobs.pngCreativeUrl,
+        salaryMin: jobs.salaryMin,
+        salaryMax: jobs.salaryMax,
+        salaryPeriod: jobs.salaryPeriod,
+        salaryBasis: jobs.salaryBasis,
         submittedAt: jobs.submittedAt,
         publishedAt: jobs.publishedAt,
         rejectedReason: jobs.rejectedReason,
@@ -204,6 +209,7 @@ export class ModerationService {
       featured: row.featured === true,
       crossborderVisible: row.crossborderVisible === true,
       pngCreativeUrl: row.pngCreativeUrl ?? null,
+      salary: jobSalaryFromColumns(row),
       city:
         row.citySlug != null
           ? {

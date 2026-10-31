@@ -7,3 +7,4 @@ export * from './lib/job-publish';
 export * from './lib/job-trivial-patch';
 export * from './lib/job-slug';
 export * from './lib/job-description-html';
+export * from './lib/job-salary';

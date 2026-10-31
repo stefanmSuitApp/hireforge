@@ -46,6 +46,8 @@ import {
   demotePublishedJobAfterDraftBodyEdit,
   effectiveJobDescriptionHtml,
   jobDescriptionHtmlFromDraftBody,
+  jobSalaryColumns,
+  jobSalaryFromColumns,
   validateExternalApplyUrl,
   validateJobDraftAgainstEntitlements,
 } from 'server-jobs';
@@ -810,6 +812,7 @@ export class EmployerService {
         featured,
         crossborderVisible,
         pngCreativeUrl,
+        ...jobSalaryColumns(input.salary),
       })
       .returning({ id: jobs.id });
 
@@ -890,6 +893,7 @@ export class EmployerService {
         featured,
         crossborderVisible,
         pngCreativeUrl,
+        ...jobSalaryColumns(input.salary),
       })
       .returning({ id: jobs.id });
 
@@ -976,6 +980,10 @@ export class EmployerService {
         featured: jobs.featured,
         crossborderVisible: jobs.crossborderVisible,
         pngCreativeUrl: jobs.pngCreativeUrl,
+        salaryMin: jobs.salaryMin,
+        salaryMax: jobs.salaryMax,
+        salaryPeriod: jobs.salaryPeriod,
+        salaryBasis: jobs.salaryBasis,
         companyId: jobs.companyId,
         workModel: jobs.workModel,
         employmentType: jobs.employmentType,
@@ -1032,6 +1040,7 @@ export class EmployerService {
       featured: row.featured === true,
       crossborderVisible: row.crossborderVisible === true,
       pngCreativeUrl: row.pngCreativeUrl ?? null,
+      salary: jobSalaryFromColumns(row),
       citySlug: row.citySlug ?? null,
       categorySlug: row.categorySlug ?? null,
       workModel: row.workModel,
@@ -1075,6 +1084,10 @@ export class EmployerService {
         featured: jobs.featured,
         crossborderVisible: jobs.crossborderVisible,
         pngCreativeUrl: jobs.pngCreativeUrl,
+        salaryMin: jobs.salaryMin,
+        salaryMax: jobs.salaryMax,
+        salaryPeriod: jobs.salaryPeriod,
+        salaryBasis: jobs.salaryBasis,
         companyId: jobs.companyId,
         workModel: jobs.workModel,
         employmentType: jobs.employmentType,
@@ -1127,6 +1140,7 @@ export class EmployerService {
       featured: row.featured === true,
       crossborderVisible: row.crossborderVisible === true,
       pngCreativeUrl: row.pngCreativeUrl ?? null,
+      salary: jobSalaryFromColumns(row),
       citySlug: row.citySlug ?? null,
       categorySlug: row.categorySlug ?? null,
       workModel: row.workModel,
@@ -1226,6 +1240,7 @@ export class EmployerService {
           featured: resolved.featured ?? false,
           crossborderVisible: resolved.crossborderVisible ?? false,
           pngCreativeUrl: resolved.pngCreativeUrl ?? null,
+          ...jobSalaryColumns(input.salary),
           updatedAt: new Date(),
         })
         .where(eq(jobs.id, jobId));
@@ -1423,6 +1438,7 @@ export class EmployerService {
         featured: resolved.featured ?? false,
         crossborderVisible: resolved.crossborderVisible ?? false,
         pngCreativeUrl: resolved.pngCreativeUrl ?? null,
+        ...jobSalaryColumns(input.salary),
         updatedAt: new Date(),
       })
       .where(eq(jobs.id, jobId));

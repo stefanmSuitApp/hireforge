@@ -16,6 +16,8 @@ import {
   employmentTypes,
   isValidEmployerJobPngCreativeHttpsUrl,
   plainDescriptionLength,
+  salaryBases,
+  salaryPeriods,
   seniorityLevels,
   workModels,
 } from 'contracts';
@@ -33,6 +35,10 @@ import { Button, Checkbox, Input, Label } from '@/components/ui';
 import { SelectField, type SelectFieldOption } from '@/components/ui/select';
 import { pickLocalizedBilingual } from '@/features/jobs/lib/bilingual-label';
 import { JobDescriptionEditorLazy } from '@/features/employer/components/job-description-editor-lazy';
+import {
+  parseSalaryInputs,
+  salaryInputsFrom,
+} from '@/features/employer/lib/salary-inputs';
 import {
   useEmployerJobSubmitMutation,
   useModeratorJobDraftSaveMutation,
@@ -144,6 +150,7 @@ export function JobDraftFormPage({
   const tWm = useTranslations('Enums.workModel');
   const tEt = useTranslations('Enums.employmentType');
   const tSen = useTranslations('Enums.seniority');
+  const tSalary = useTranslations('Salary');
   const tJobs = useTranslations('Jobs');
   const tModReview = useTranslations('Moderator.review');
   const locale = useLocale();
@@ -197,6 +204,15 @@ export function JobDraftFormPage({
   const [pngCreativeUrl, setPngCreativeUrl] = React.useState(
     initial?.pngCreativeUrl ?? '',
   );
+  const [salaryInputs, setSalaryInputs] = React.useState(() =>
+    salaryInputsFrom(initial?.salary),
+  );
+  const salaryParsed = React.useMemo(
+    () => parseSalaryInputs(salaryInputs),
+    [salaryInputs],
+  );
+  const salaryInvalidRef = React.useRef(false);
+  salaryInvalidRef.current = salaryParsed.invalid;
   const [error, setError] = React.useState<string | null>(null);
   type AutosaveUi = 'idle' | 'saving' | 'saved' | 'error' | 'unsaved';
   const [autosaveUi, setAutosaveUi] = React.useState<AutosaveUi>('idle');
@@ -360,6 +376,7 @@ export function JobDraftFormPage({
       externalApplyUrl:
         applyMode === 'external' ? externalApplyUrl.trim() : undefined,
       primaryLanguage: initial?.primaryLanguage === 'en' ? 'en' : 'sr',
+      salary: salaryParsed.salary,
     };
     if (mode === 'edit') {
       base.featured = featured;
@@ -412,6 +429,7 @@ export function JobDraftFormPage({
       featured,
       crossborderVisible,
       pngCreativeUrl,
+      salaryParsed,
       canFeatured,
       canCrossborder,
       canPngCreative,
@@ -450,9 +468,11 @@ export function JobDraftFormPage({
         return;
       }
       if (
-        typeof body.pngCreativeUrl === 'string' &&
-        body.pngCreativeUrl.trim() !== '' &&
-        !isValidEmployerJobPngCreativeHttpsUrl(body.pngCreativeUrl.trim())
+        (typeof body.pngCreativeUrl === 'string' &&
+          body.pngCreativeUrl.trim() !== '' &&
+          !isValidEmployerJobPngCreativeHttpsUrl(body.pngCreativeUrl.trim())) ||
+        // A half-typed salary would clear the saved one.
+        salaryInvalidRef.current
       ) {
         setAutosaveUi('unsaved');
         return;
@@ -493,6 +513,10 @@ export function JobDraftFormPage({
       !isValidEmployerJobPngCreativeHttpsUrl(pngCreativeUrl.trim())
     ) {
       setError(t('pngCreativeInvalidUrl'));
+      return;
+    }
+    if (salaryParsed.invalid) {
+      setError(t('salaryInvalid'));
       return;
     }
     const body = buildBody();
@@ -865,6 +889,81 @@ export function JobDraftFormPage({
                 onValueChange={(v) => setSeniority(v as SeniorityLevel)}
               />
             </div>
+
+            <fieldset className="space-y-2 sm:col-span-2">
+              <legend className="text-sm font-medium text-foreground">
+                {t('salaryLabel')}
+              </legend>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <Input
+                  id="job-salary-min"
+                  aria-label={t('salaryMinLabel')}
+                  placeholder={t('salaryMinLabel')}
+                  inputMode="numeric"
+                  autoComplete="off"
+                  maxLength={12}
+                  value={salaryInputs.min}
+                  onChange={(e) =>
+                    setSalaryInputs((v) => ({ ...v, min: e.target.value }))
+                  }
+                  aria-invalid={salaryParsed.invalid}
+                  className="h-10"
+                />
+                <Input
+                  id="job-salary-max"
+                  aria-label={t('salaryMaxLabel')}
+                  placeholder={t('salaryMaxLabel')}
+                  inputMode="numeric"
+                  autoComplete="off"
+                  maxLength={12}
+                  value={salaryInputs.max}
+                  onChange={(e) =>
+                    setSalaryInputs((v) => ({ ...v, max: e.target.value }))
+                  }
+                  aria-invalid={salaryParsed.invalid}
+                  className="h-10"
+                />
+                <SelectField
+                  id="job-salary-period"
+                  triggerProps={{ 'aria-label': t('salaryPeriodLabel') }}
+                  options={salaryPeriods.map((v) => ({
+                    value: v,
+                    label: tSalary(`period.${v}`),
+                  }))}
+                  value={salaryInputs.period}
+                  onValueChange={(v) =>
+                    setSalaryInputs((s) => ({
+                      ...s,
+                      period: v as (typeof salaryPeriods)[number],
+                    }))
+                  }
+                />
+                <SelectField
+                  id="job-salary-basis"
+                  triggerProps={{ 'aria-label': t('salaryBasisLabel') }}
+                  options={salaryBases.map((v) => ({
+                    value: v,
+                    label: tSalary(`basis.${v}`),
+                  }))}
+                  value={salaryInputs.basis}
+                  onValueChange={(v) =>
+                    setSalaryInputs((s) => ({
+                      ...s,
+                      basis: v as (typeof salaryBases)[number],
+                    }))
+                  }
+                />
+              </div>
+              {salaryParsed.invalid ? (
+                <p className="text-xs text-destructive" role="alert">
+                  {t('salaryInvalid')}
+                </p>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  {t('salaryHint')}
+                </p>
+              )}
+            </fieldset>
           </div>
         </section>
 

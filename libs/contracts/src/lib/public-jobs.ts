@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import type { JobSalary } from './employer-jobs';
+
 const emptyToUndefined = (v: unknown) =>
   v === '' || v === undefined ? undefined : v;
 
@@ -98,6 +100,8 @@ export type PublicJobListItem = {
   shortId: string | null;
   /** Whether this row should be pinned in search (ŠEF/GAZDA perk). */
   featured: boolean;
+  /** Pay as the employer entered it; `null` when the ad names none. */
+  salary: JobSalary | null;
   /**
    * Plain-text excerpt (≤ 200 chars) used for Glassdoor-style cards. The full
    * description doc is NOT shipped with list responses (perf budget per SSOT
@@ -148,6 +152,8 @@ export type PublicJobDetailResponse = {
   externalApplyUrl: string | null;
   primaryLanguage: 'sr' | 'en';
   featured: boolean;
+  /** Pay as the employer entered it; `null` when the ad names none. */
+  salary: JobSalary | null;
   /** Visible outside domestic discovery when package allows. */
   crossborderVisible: boolean;
   /** Package PNG creative asset URL when set. */

@@ -22,6 +22,8 @@ import {
 } from '../lib/bilingual-label';
 import { jobEnumLabel } from '../lib/job-enum-label';
 
+import { JobSalaryLine } from './job-salary-line';
+
 import { GuestApplySheet } from './guest-apply-sheet';
 import { SimilarJobsSection } from './similar-jobs-section';
 
@@ -42,6 +44,7 @@ export function moderatorJobToPublicPreviewShape(
     featured: job.featured,
     crossborderVisible: job.crossborderVisible,
     pngCreativeUrl: job.pngCreativeUrl,
+    salary: job.salary,
     publishedAt: job.publishedAt,
     expiresAt: null,
     updatedAt: job.updatedAt,
@@ -299,6 +302,10 @@ export function JobListingPreview({
             {cityLine ? ` · ${cityLine}` : ''}
             {categoryLine ? ` · ${categoryLine}` : ''}
           </p>
+          <JobSalaryLine
+            salary={job.salary}
+            className="mt-3 block text-lg font-bold text-foreground @2xl:text-xl"
+          />
           <p className="m-0 mt-2.5 text-sm leading-normal text-muted-foreground">
             {listingState === 'preview' && !job.publishedAt
               ? t('previewNotPublished')
