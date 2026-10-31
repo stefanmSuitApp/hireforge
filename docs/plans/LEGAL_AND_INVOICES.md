@@ -294,7 +294,9 @@ izdavaoca` in **test mode only**. Production refuses to issue
     consent.
   - 2026-10-31, Stefan: Microsoft Clarity, loaded only after the visitor
     accepts, only on public pages and sign-up; no cookieless counter for
-    now. The banner exists only while `CLARITY_PROJECT_ID` is set.
+    now. Google Analytics 4 added the same day under the same banner and
+    rules. The banner exists only while `CLARITY_PROJECT_ID` or
+    `GA_MEASUREMENT_ID` is set.
   - The privacy policy lists the cookies.
 - **D7 — Billing emails** keep going to the employer user for now. The
   Phase T question about `billing_email` stays open.

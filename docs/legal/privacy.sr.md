@@ -24,13 +24,13 @@ Za sva pitanja o podacima o ličnosti piši na [maticstefan1996@gmail.com](mailt
 
 **Tehnički podaci:** radi zaštite od zloupotrebe (na primer pokušaja pogađanja lozinke) privremeno beležimo IP adresu uz broj pokušaja prijave, registracije i sličnih radnji. Ti zapisi se sami brišu posle najviše jednog sata (pri kliku na link za prijavu na spoljnom sajtu, posle najviše sedam dana i bez IP adrese).
 
-**Analitika, samo uz tvoj pristanak:** ako na traci o kolačićima izabereš „Prihvatam", Microsoft Clarity na javnim stranicama sajta (početna, oglasi, stranice kompanija, registracija) beleži kako koristiš stranicu: klikove, skrolovanje, pokrete miša, veličinu ekrana, vrstu uređaja i pregledača i približnu lokaciju po IP adresi. Ono što upisuješ u polja se ne beleži, a stranice naloga, kontrolne table i prijave na oglase se nikad ne snimaju. Ne koristimo alate za oglašavanje.
+**Analitika, samo uz tvoj pristanak:** ako na traci o kolačićima izabereš „Prihvatam", na javnim stranicama sajta (početna, oglasi, stranice kompanija, registracija) koristimo dva alata. Google Analytics broji posete i pokazuje odakle dolaze (pretraživač, društvene mreže, direktan dolazak), koje stranice se otvaraju i koliko se dugo čitaju. Microsoft Clarity beleži kako koristiš stranicu: klikove, skrolovanje i pokrete miša. Oba alata vide i veličinu ekrana, vrstu uređaja i pregledača i približnu lokaciju po IP adresi; Google Analytics ne čuva IP adresu. Ono što upisuješ u polja se ne beleži, a stranice naloga, kontrolne table i prijave na oglase se nikad ne snimaju. Ne koristimo alate za oglašavanje.
 
 ## Zašto ih koristimo i na kom osnovu
 
 - **Izvršenje ugovora** (član 12. stav 1. tačka 2) Zakona o zaštiti podataka o ličnosti): otvaranje i vođenje naloga, prijave na oglase i njihovo prosleđivanje poslodavcu, objava oglasa, paketi i plaćanje, slanje poruka vezanih za nalog (potvrda e-adrese, reset lozinke, obaveštenja o prijavama i oglasima, predračuni i računi).
 - **Zakonska obaveza** (tačka 3): čuvanje računovodstvenih isprava (predračuni, računi, knjižna odobrenja) i podataka potrebnih za njih.
-- **Pristanak** (tačka 1): analitika korišćenja sajta (Microsoft Clarity). Pristanak možeš povući u svakom trenutku preko linka „Podešavanja kolačića" u dnu stranice; povlačenje ne utiče na zakonitost obrade pre toga.
+- **Pristanak** (tačka 1): analitika korišćenja sajta (Google Analytics i Microsoft Clarity). Pristanak možeš povući u svakom trenutku preko linka „Podešavanja kolačića" u dnu stranice; povlačenje ne utiče na zakonitost obrade pre toga.
 - **Legitimni interes** (tačka 6): bezbednost sajta i zaštita od zloupotrebe, rezervne kopije baze, rešavanje sporova.
 
 Ne prodajemo podatke i ne koristimo ih za oglašavanje. Ne donosimo automatizovane odluke o tebi.
@@ -42,6 +42,7 @@ Ne prodajemo podatke i ne koristimo ih za oglašavanje. Ne donosimo automatizova
 - **Obrađivači** koji za nas pružaju tehničke usluge, po ugovoru i samo po našem nalogu:
   - Hetzner Online GmbH, Nemačka: serveri, baza podataka, fajlovi i rezervne kopije (centar podataka u Nirnbergu);
   - Resend, Inc., SAD: slanje e-pošte (tvoja e-adresa i sadržaj poruke);
+  - Google LLC, SAD: analitika korišćenja sajta (Google Analytics), samo ako si dao pristanak;
   - Microsoft Corporation, SAD: analitika korišćenja sajta (Microsoft Clarity), samo ako si dao pristanak.
 - **Državni organi**, kada to zakon nalaže.
 
@@ -56,7 +57,7 @@ Sadržaj sajta (tekstovi, oglasne kampanje) uređujemo u Sanity CMS-u; tamo se n
 - **Predračuni, računi, uplate i podaci o kompaniji:** 10 godina (zakonski rok).
 - **Evidencija radnji osoblja:** trajno.
 - **Rezervne kopije baze:** do 30 dana.
-- **Analitika (Microsoft Clarity):** snimci sesija do 30 dana, zbirni podaci (na primer mape klikova) do 13 meseci.
+- **Analitika:** Google Analytics do 14 meseci; Microsoft Clarity: snimci sesija do 30 dana, zbirni podaci (na primer mape klikova) do 13 meseci.
 
 ## Tvoja prava
 
@@ -76,7 +77,12 @@ Kolačiće i skladište neophodne za rad sajta koristimo bez pitanja; analitičk
 
 - **`hf_analytics_consent`**: pamti tvoj izbor o analitici, 6 meseci; posle toga te ponovo pitamo.
 
-**Analitički kolačići, samo uz pristanak:** `_clck` (prepoznaje isti pregledač, do godinu dana) i `_clsk` (spaja preglede stranica u jednu posetu, jedan dan), koje postavlja Microsoft Clarity na sljakam.com; Microsoft može postaviti i svoje kolačiće na domenu clarity.ms (na primer `CLID`, `MUID`, do 13 meseci). Ako odbiješ ili kasnije povučeš pristanak, Clarity se ne učitava, a kolačiće `_clck` i `_clsk` brišemo.
+**Analitički kolačići, samo uz pristanak:**
+
+- `_ga` i `_ga_<oznaka>` (razlikuju posetioce i posete, do dve godine), koje postavlja Google Analytics na sljakam.com;
+- `_clck` (prepoznaje isti pregledač, do godinu dana) i `_clsk` (spaja preglede stranica u jednu posetu, jedan dan), koje postavlja Microsoft Clarity na sljakam.com; Microsoft može postaviti i svoje kolačiće na domenu clarity.ms (na primer `CLID`, `MUID`, do 13 meseci).
+
+Ako odbiješ ili kasnije povučeš pristanak, nijedan od ova dva alata se ne učitava, a kolačiće `_ga`, `_ga_<oznaka>`, `_clck` i `_clsk` brišemo.
 
 Ne koristimo kolačiće za oglašavanje.
 

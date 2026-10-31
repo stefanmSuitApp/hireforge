@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
-// Clarity loads only after "Prihvatam", only on public pages, and a private
-// page reached by client navigation is masked from recordings.
+// Clarity and Google Analytics load only after "Prihvatam", only on public
+// pages, and a private page reached by client navigation is masked from
+// recordings and sends nothing to Google.
 import '@testing-library/jest-dom/vitest';
 import { act, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -25,6 +26,16 @@ vi.mock('@/i18n/navigation', () => ({
 
 const clarityScripts = () =>
   document.querySelectorAll('script[src^="https://www.clarity.ms/tag/"]');
+const gaScripts = () =>
+  document.querySelectorAll(
+    'script[src^="https://www.googletagmanager.com/gtag/js"]',
+  );
+/** gtag pushes `arguments` objects; compare them as arrays. */
+const gtagCalls = () =>
+  (window.dataLayer ?? []).map((a) => Array.from(a as ArrayLike<unknown>));
+const GA_ID = 'G-E2ETEST01';
+const gaDisabled = () =>
+  (window as unknown as Record<string, unknown>)[`ga-disable-${GA_ID}`];
 
 const banner = () =>
   screen.queryByRole('complementary', { name: 'Kolačići za analitiku' });
@@ -33,7 +44,8 @@ function renderBanner(initialChoice: 'granted' | 'denied' | null = null) {
   return renderApp(
     <LegalLinksProvider published={['privacy']}>
       <AnalyticsConsentBanner
-        projectId="e2eclarity1"
+        clarityId="e2eclarity1"
+        gaId={GA_ID}
         initialChoice={initialChoice}
       />
       <AnalyticsConsentSettingsButton />
@@ -46,8 +58,10 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  for (const s of clarityScripts()) s.remove();
+  for (const s of [...clarityScripts(), ...gaScripts()]) s.remove();
   delete window.clarity;
+  delete window.gtag;
+  delete window.dataLayer;
   document.body.removeAttribute('data-clarity-mask');
   document.cookie = 'hf_analytics_consent=; Path=/; Max-Age=0';
 });
@@ -56,10 +70,15 @@ describe('analytics consent', () => {
   it('loads nothing until the visitor accepts', async () => {
     renderBanner();
     expect(banner()).toBeInTheDocument();
+    expect(banner()).toHaveTextContent(
+      'koristimo Google Analytics i Microsoft Clarity:',
+    );
     expect(
       screen.getByRole('link', { name: 'Više u politici privatnosti.' }),
     ).toHaveAttribute('href', '/privacy');
     expect(clarityScripts()).toHaveLength(0);
+    expect(gaScripts()).toHaveLength(0);
+    expect(window.dataLayer).toBeUndefined();
 
     await userEvent.click(screen.getByRole('button', { name: 'Prihvatam' }));
 
@@ -73,14 +92,41 @@ describe('analytics consent', () => {
       'consentv2',
       { ad_Storage: 'denied', analytics_Storage: 'granted' },
     ]);
+    expect(gaScripts()[0]).toHaveAttribute(
+      'src',
+      `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`,
+    );
+    expect(gtagCalls()).toContainEqual([
+      'consent',
+      'default',
+      {
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        analytics_storage: 'granted',
+      },
+    ]);
+    expect(gtagCalls()).toContainEqual([
+      'config',
+      GA_ID,
+      {
+        send_page_view: false,
+        allow_google_signals: false,
+        allow_ad_personalization_signals: false,
+      },
+    ]);
+    expect(
+      gtagCalls().filter((c) => c[0] === 'event' && c[1] === 'page_view'),
+    ).toHaveLength(1);
     expect(document.cookie).toContain('hf_analytics_consent=granted');
   });
 
-  it('declining remembers the choice and never loads Clarity', async () => {
+  it('declining remembers the choice and never loads either tool', async () => {
     renderBanner();
     await userEvent.click(screen.getByRole('button', { name: 'Odbijam' }));
     expect(banner()).not.toBeInTheDocument();
     expect(clarityScripts()).toHaveLength(0);
+    expect(gaScripts()).toHaveLength(0);
     expect(document.cookie).toContain('hf_analytics_consent=denied');
   });
 
@@ -95,23 +141,39 @@ describe('analytics consent', () => {
     renderBanner('granted');
     expect(banner()).not.toBeInTheDocument();
     expect(clarityScripts()).toHaveLength(0);
+    expect(gaScripts()).toHaveLength(0);
     expect(document.body).toHaveAttribute('data-clarity-mask', 'true');
   });
 
-  it('masks a private page reached by client navigation after accepting', () => {
+  it('a private page reached by client navigation is masked and not sent to Google', () => {
     const view = renderBanner('granted');
+    const pageViews = () =>
+      gtagCalls().filter((c) => c[0] === 'event' && c[1] === 'page_view');
     expect(document.body).not.toHaveAttribute('data-clarity-mask');
+    expect(gaDisabled()).toBe(false);
+    expect(pageViews()).toHaveLength(1);
+
+    const rerender = () =>
+      view.rerender(
+        <LegalLinksProvider published={['privacy']}>
+          <AnalyticsConsentBanner
+            clarityId="e2eclarity1"
+            gaId={GA_ID}
+            initialChoice="granted"
+          />
+        </LegalLinksProvider>,
+      );
     nav.pathname = '/candidate/profile';
-    view.rerender(
-      <LegalLinksProvider published={['privacy']}>
-        <AnalyticsConsentBanner
-          projectId="e2eclarity1"
-          initialChoice="granted"
-        />
-      </LegalLinksProvider>,
-    );
+    rerender();
     expect(document.body).toHaveAttribute('data-clarity-mask', 'true');
     expect(window.clarity?.q).toContainEqual(['pause']);
+    expect(gaDisabled()).toBe(true);
+    expect(pageViews()).toHaveLength(1);
+
+    nav.pathname = '/jobs/city/beograd';
+    rerender();
+    expect(gaDisabled()).toBe(false);
+    expect(pageViews()).toHaveLength(2);
   });
 
   it('the footer link reopens the banner to change the choice', async () => {
@@ -125,7 +187,7 @@ describe('analytics consent', () => {
     expect(clarityScripts()).toHaveLength(1);
   });
 
-  it('withdrawing consent clears Clarity cookies and reloads without it', async () => {
+  it("withdrawing consent clears both tools' cookies and reloads without them", async () => {
     const reload = vi.fn();
     vi.spyOn(window, 'location', 'get').mockReturnValue({
       ...window.location,
@@ -134,12 +196,15 @@ describe('analytics consent', () => {
       reload,
     });
     document.cookie = '_clck=abc; Path=/';
+    document.cookie = '_ga=GA1.1.1; Path=/';
+    document.cookie = '_ga_E2ETEST01=GS1.1; Path=/';
     renderBanner('granted');
     await act(async () => {
       globalThis.dispatchEvent(new Event('hf:analytics-consent:open'));
     });
     await userEvent.click(screen.getByRole('button', { name: 'Odbijam' }));
     expect(document.cookie).not.toContain('_clck=');
+    expect(document.cookie).not.toContain('_ga');
     expect(document.cookie).toContain('hf_analytics_consent=denied');
     expect(reload).toHaveBeenCalled();
     vi.restoreAllMocks();

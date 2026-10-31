@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import {
   ANALYTICS_CONSENT_COOKIE,
   clarityProjectId,
+  gaMeasurementId,
   parseAnalyticsConsent,
 } from '@/lib/analytics-consent';
 import { LegalLinksProvider } from '@/features/legal/legal-links';
@@ -26,6 +27,8 @@ export async function SiteShell({ children }: { children: React.ReactNode }) {
     cookies(),
   ]);
   const clarity = clarityProjectId();
+  const ga = gaMeasurementId();
+  const analytics = clarity !== null || ga !== null;
   const guest = !anySession;
   const [legalPages, promo] = await Promise.all([
     fetchCmsPublishedLegalPages(),
@@ -51,11 +54,12 @@ export async function SiteShell({ children }: { children: React.ReactNode }) {
         >
           {children}
         </div>
-        <SiteFooter legal={legal} analyticsConsent={clarity !== null} />
+        <SiteFooter legal={legal} analyticsConsent={analytics} />
         <GuestSignUpBar guest={guest} />
-        {clarity ? (
+        {analytics ? (
           <AnalyticsConsentBanner
-            projectId={clarity}
+            clarityId={clarity}
+            gaId={ga}
             initialChoice={parseAnalyticsConsent(
               cookieStore.get(ANALYTICS_CONSENT_COOKIE)?.value,
             )}

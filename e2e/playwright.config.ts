@@ -24,6 +24,7 @@ export const CLARITY_WEB_PORT = Number(
   process.env['E2E_CLARITY_WEB_PORT'] ?? WEB_PORT + 1,
 );
 export const E2E_CLARITY_PROJECT_ID = 'e2eclarity1';
+export const E2E_GA_MEASUREMENT_ID = 'G-E2ETEST01';
 
 const databaseUrl = process.env['E2E_DATABASE_URL'] ?? '';
 const redisUrl = process.env['E2E_REDIS_URL'] ?? '';
@@ -127,6 +128,7 @@ export default defineConfig({
               NEST_API_URL: apiOrigin,
               NEXT_PUBLIC_APP_URL: `http://127.0.0.1:${WEB_PORT}`,
               CLARITY_PROJECT_ID: E2E_CLARITY_PROJECT_ID,
+              GA_MEASUREMENT_ID: E2E_GA_MEASUREMENT_ID,
             },
           },
         ]

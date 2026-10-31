@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   analyticsRecordsPath,
   clarityProjectId,
+  gaMeasurementId,
   parseAnalyticsConsent,
 } from './analytics-consent';
 
@@ -69,5 +70,20 @@ describe('clarityProjectId', () => {
   it('returns a valid id', () => {
     vi.stubEnv('CLARITY_PROJECT_ID', ' t8k2m4p9qz ');
     expect(clarityProjectId()).toBe('t8k2m4p9qz');
+  });
+});
+
+describe('gaMeasurementId', () => {
+  afterEach(() => vi.unstubAllEnvs());
+
+  it('accepts only a G- measurement id', () => {
+    vi.stubEnv('GA_MEASUREMENT_ID', 'G-6C1CJ9FVC6');
+    expect(gaMeasurementId()).toBe('G-6C1CJ9FVC6');
+    vi.stubEnv('GA_MEASUREMENT_ID', 'UA-12345-1');
+    expect(gaMeasurementId()).toBeNull();
+    vi.stubEnv('GA_MEASUREMENT_ID', 'G-6C1"><script>');
+    expect(gaMeasurementId()).toBeNull();
+    vi.stubEnv('GA_MEASUREMENT_ID', '');
+    expect(gaMeasurementId()).toBeNull();
   });
 });

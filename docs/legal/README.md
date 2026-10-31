@@ -39,7 +39,11 @@ starting draft and the copy for the lawyer.
     acts as our processor or as an independent controller under the
     Clarity terms, and the basis for the transfer to the USA;
   - the Clarity retention periods stated (recordings 30 days, aggregates
-    13 months) against the current Clarity settings.
+    13 months) against the current Clarity settings;
+  - Google Analytics (added 2026-10-31, consent only): Google LLC as the
+    contracting processor for a Serbian customer (outside the EEA) and the
+    transfer basis; GA data retention must stay at 14 months to match the
+    text.
 - Account deletion is by email request until C2 ships; then the privacy
   policy and terms should mention the settings page (a Sanity edit with a
   new "Effective from").
@@ -61,8 +65,8 @@ starting draft and the copy for the lawyer.
   There is no searchable candidate database.
 - **IP addresses:** only in Redis rate-limit counters, which expire within
   1 hour. No access logs, no advertising.
-- **Analytics (from 2026-10-31):** Microsoft Clarity, loaded only after the
-  visitor accepts the cookie bar, and only on public pages and the two
+- **Analytics (from 2026-10-31):** Google Analytics 4 and Microsoft Clarity,
+  loaded only after the visitor accepts the cookie bar, and only on public pages and the two
   sign-up pages (`apps/web/src/lib/analytics-consent.ts`). Inputs are masked
   by Clarity; other pages are masked and never load it. The choice is kept
   in `hf_analytics_consent` for 180 days.
@@ -70,9 +74,12 @@ starting draft and the copy for the lawyer.
   - Hetzner Online GmbH: server and backups, Nuremberg, Germany;
   - Resend, Inc. (USA): transactional email;
   - Microsoft Corporation (USA): Clarity analytics, consent only;
+  - Google LLC (USA): Google Analytics 4, consent only (no Google signals,
+    no ads features, no data sharing with Google products);
   - Sanity: CMS content only, no user data.
 - **Cookies:** sign-in cookies (14 min / 14 days), `NEXT_LOCALE`,
-  `hf_analytics_consent`, and with consent Clarity's `_clck` / `_clsk`;
+  `hf_analytics_consent`, and with consent `_ga` / `_ga_<id>` and
+  Clarity's `_clck` / `_clsk`;
   localStorage holds the theme, recently viewed jobs, sign-up bar state and
   an unfinished employer sign-up.
 - **Backups:** database dumps are kept 14 days on the server and 30 days in
