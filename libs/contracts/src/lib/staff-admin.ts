@@ -82,6 +82,8 @@ export type StaffCompanyDetailResponse = {
   createdAt: string;
   updatedAt: string;
   employers: StaffCompanyEmployerMember[];
+  /** Uploaded logo (versioned public URL), or null. */
+  logoUrl: string | null;
   // Step 3 additions — optional until Step 8 wires the moderator UI.
   isForeign?: boolean;
   countryCode?: string;
@@ -158,6 +160,11 @@ export const staffCompanyCreateBodySchema = z.object({
 export type StaffCompanyCreateBody = z.infer<
   typeof staffCompanyCreateBodySchema
 >;
+
+export type StaffCompanyLogoResponse = { logoUrl: string };
+
+/** `GET public/company-logos`: company slug → versioned logo URL. */
+export type PublicCompanyLogosResponse = Record<string, string>;
 
 /** Staff add an employer account to a company; the person gets an invite. */
 export const staffCompanyAccountCreateBodySchema = z.object({

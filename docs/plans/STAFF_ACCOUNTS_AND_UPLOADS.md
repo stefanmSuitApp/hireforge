@@ -120,8 +120,11 @@ nothing); staging gets `staging/`. Job description images keep their own
 seen from the repo, and moving them blind could lose images. Billing PDFs
 unchanged.
 
-**2b — company logos (next):** upload on the moderator company page, the
-same service (area `logo`), a public cached route, Sanity logo as fallback.
+**2b — company logos (done 2026-10-31, `feat/company-logos`):** upload on
+the moderator company page, the same service (area `logo`), migration 0042,
+a public slug → URL map merged over Sanity's in the layout, a versioned
+image route cached for a year; Sanity's logo field stays as the fallback
+(remove it once every logo is uploaded here).
 
 Original outline:
 

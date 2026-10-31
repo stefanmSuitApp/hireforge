@@ -859,6 +859,15 @@
         "languageEn": "English",
         "addHint": "The person gets an email with a link to set a password. The account is linked to this company right away.",
         "send": "Send invite"
+      },
+      "logo": {
+        "heading": "Logo",
+        "current": "Current logo",
+        "none": "No logo",
+        "upload": "Upload logo",
+        "uploading": "Uploading…",
+        "remove": "Remove logo",
+        "hint": "PNG, JPEG or WebP up to 2 MB. We turn it into a 256×256 square (a transparent background stays). It shows on job ads and the company page, instead of the Sanity logo."
       }
     },
     "jobsNew": {
@@ -1255,7 +1264,10 @@
     "CAMPAIGN_NOT_FOUND": "That campaign was not found.",
     "CAMPAIGN_OVERLAP": "Another active campaign already runs in that period. Pause it or pick other dates.",
     "STAFF_ACCOUNT_EMAIL_TAKEN": "This email already has an account. If that person signed up on their own, approve their join request instead.",
-    "ACCOUNT_ALREADY_ACTIVE": "This account is already active; no new invite is needed."
+    "ACCOUNT_ALREADY_ACTIVE": "This account is already active; no new invite is needed.",
+    "COMPANY_LOGO_MISSING": "Choose a logo image.",
+    "COMPANY_LOGO_TYPE_FORBIDDEN": "The logo must be a PNG, JPEG or WebP image.",
+    "COMPANY_LOGO_PROCESS_FAILED": "The image could not be read. Try another PNG, JPEG or WebP file."
   },
   "Candidate": {
     "workspaceLabel": "Candidate account",

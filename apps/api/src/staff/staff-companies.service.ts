@@ -20,6 +20,7 @@ import {
   codedServiceUnavailable,
 } from '../http/coded-http';
 import { getDb } from '../database';
+import { companyLogoUrl } from '../company-logos/company-logos.service';
 import { StaffAuditService } from './staff-audit.service';
 import { staffCanAccessCompany } from './staff-company-access';
 
@@ -189,6 +190,8 @@ export class StaffCompaniesService {
         closedWonAt: companies.closedWonAt,
         closedLostAt: companies.closedLostAt,
         source: companies.source,
+        logoUpdatedAt: companies.logoUpdatedAt,
+        logoStorageKey: companies.logoStorageKey,
         assignedModeratorEmail: modUser.email,
       })
       .from(companies)
@@ -238,6 +241,10 @@ export class StaffCompaniesService {
         email: m.email,
         activated: m.passwordHash != null,
       })),
+      logoUrl:
+        row.logoStorageKey && row.logoUpdatedAt
+          ? companyLogoUrl(row.id, row.logoUpdatedAt)
+          : null,
       isForeign: row.isForeign,
       countryCode: row.countryCode,
       pib: row.pib ?? null,

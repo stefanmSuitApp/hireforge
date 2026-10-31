@@ -7,6 +7,7 @@ import { AdminCompanyReassignPanel } from '@/features/admin';
 import {
   ModeratorCompanyAccounts,
   ModeratorCompanyDetailForm,
+  ModeratorCompanyLogo,
   ModeratorCompanySalesActions,
 } from '@/features/moderator';
 import {
@@ -64,6 +65,11 @@ export default async function ModeratorCompanyDetailPage({
           </Button>
         </div>
       </section>
+
+      <ModeratorCompanyLogo
+        companyId={companyId}
+        logoUrl={detail.data.logoUrl}
+      />
 
       <ModeratorCompanySalesActions
         company={detail.data}
