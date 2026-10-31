@@ -32,6 +32,7 @@ function renderWizard() {
   return renderApp(
     <CandidateCvBuildWizard
       locale="sr"
+      email="ana@primer.rs"
       initial={INITIAL}
       cityGroups={[]}
       flatCities={[]}
@@ -73,6 +74,7 @@ describe('building a CV', () => {
     expect(mutate).toHaveBeenCalledTimes(1);
     expect(mutate.mock.calls[0]?.[0]).toMatchObject({
       templateCode: 'klasican',
+      locale: 'sr',
       profile: {
         fullName: 'Jelena Jović',
         phone: null,

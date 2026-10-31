@@ -5,7 +5,9 @@ import { renderCvPdfBuffer } from './render-cv-pdf-buffer';
 describe('renderCvPdfBuffer', () => {
   it('renders a non-empty PDF for each template', async () => {
     const layout = {
+      locale: 'en' as const,
       fullName: 'Test Candidate',
+      email: 'test@example.com',
       phone: '+381 11 123 456',
       headline: 'Engineer',
       cityLine: 'Belgrade',

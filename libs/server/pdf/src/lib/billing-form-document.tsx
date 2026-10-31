@@ -1,20 +1,12 @@
-import {
-  Document,
-  Page,
-  Text,
-  View,
-  StyleSheet,
-  renderToBuffer,
-} from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 import type { ReactElement } from 'react';
 
 import {
   localePdfBoldStyle,
   localePdfBodyFontFamily,
-  registerLocalePdfFonts,
 } from './locale-pdf-fonts';
+import { renderPdfToBuffer } from './render-pdf';
 
-registerLocalePdfFonts();
 const pdfBody = localePdfBodyFontFamily();
 
 const styles = StyleSheet.create({
@@ -131,5 +123,5 @@ export function BillingFormDocument({
 export async function renderBillingFormToBuffer(
   props: BillingFormPdfProps,
 ): Promise<Buffer> {
-  return renderToBuffer(<BillingFormDocument {...props} />);
+  return renderPdfToBuffer(<BillingFormDocument {...props} />);
 }

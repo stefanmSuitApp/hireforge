@@ -53,6 +53,10 @@ export const cvTemplateCodes = ['klasican', 'moderan', 'minimalan'] as const;
 export type CvTemplateCode = (typeof cvTemplateCodes)[number];
 export const cvTemplateCodeSchema = z.enum(cvTemplateCodes);
 
+/** Language of the CV's own words (section titles, months), the builder's locale. */
+export const cvLocales = ['sr', 'en'] as const;
+export type CvLocale = (typeof cvLocales)[number];
+
 /** ISO date string YYYY-MM-DD */
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Expected YYYY-MM-DD');
 
@@ -89,7 +93,9 @@ export type CvProfile = z.infer<typeof cvProfileSchema>;
 
 /** Payload for PDF layout (resolved scalars + structured sections). */
 export type CvPdfLayoutInput = {
+  locale: CvLocale;
   fullName: string | null;
+  email: string | null;
   phone: string | null;
   headline: string | null;
   /** Single line for header, e.g. city name in builder locale */
@@ -99,6 +105,7 @@ export type CvPdfLayoutInput = {
 
 export const candidateGenerateResumeBodySchema = z.object({
   templateCode: cvTemplateCodeSchema,
+  locale: z.enum(cvLocales).default('sr'),
 });
 
 export type CandidateGenerateResumeBody = z.infer<

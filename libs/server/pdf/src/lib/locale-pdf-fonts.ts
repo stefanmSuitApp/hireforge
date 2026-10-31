@@ -1,46 +1,38 @@
 import { Font } from '@react-pdf/renderer';
 
-let registerAttempted = false;
-let bodyFontFamily: 'NotoSans' | 'Helvetica' = 'Helvetica';
+/** Noto Sans: Serbian Latin and Cyrillic in every PDF (CVs, invoices). */
+export const PDF_BODY_FONT = 'NotoSans';
+
+let registered = false;
 
 /**
- * Registers Noto Sans (Latin extended, Cyrillic, etc.) for @react-pdf PDFs.
- * Use for invoices, proformas, CVs, and any doc that may contain Serbian Latin / Cyrillic.
- * Falls back to built-in Helvetica if registration fails (offline, blocked fetch, etc.).
+ * Registers the bundled Noto Sans from `base`: a directory on the server
+ * (`pdfFontDir()`) or a URL path in the browser (`/fonts/pdf`). The files
+ * ship with the app, so a render never waits on (or fails with) the network.
+ * Call it before rendering; react-pdf keeps one registry per process.
  */
-export function registerLocalePdfFonts(): void {
-  if (registerAttempted) return;
-  registerAttempted = true;
-  try {
-    Font.register({
-      family: 'NotoSans',
-      fonts: [
-        {
-          src: 'https://raw.githubusercontent.com/googlefonts/noto-fonts/main/hinted/ttf/NotoSans/NotoSans-Regular.ttf',
-          fontWeight: 400,
-        },
-        {
-          src: 'https://raw.githubusercontent.com/googlefonts/noto-fonts/main/hinted/ttf/NotoSans/NotoSans-Bold.ttf',
-          fontWeight: 700,
-        },
-      ],
-    });
-    bodyFontFamily = 'NotoSans';
-  } catch {
-    bodyFontFamily = 'Helvetica';
-  }
+export function registerLocalePdfFonts(base: string): void {
+  if (registered) return;
+  registered = true;
+  // react-pdf hyphenates with English rules ("djord- je@primer.rs"); names,
+  // emails and Serbian words must stay whole.
+  Font.registerHyphenationCallback((word) => [word]);
+  Font.register({
+    family: PDF_BODY_FONT,
+    fonts: [
+      { src: `${base}/NotoSans-Regular.ttf`, fontWeight: 400 },
+      { src: `${base}/NotoSans-Bold.ttf`, fontWeight: 700 },
+    ],
+  });
 }
 
-export function localePdfBodyFontFamily(): 'NotoSans' | 'Helvetica' {
-  return bodyFontFamily;
+export function localePdfBodyFontFamily(): typeof PDF_BODY_FONT {
+  return PDF_BODY_FONT;
 }
 
-/** Bold heading / label styles (Helvetica-Bold vs Noto Sans 700). */
+/** Bold heading / label style (Noto Sans 700). */
 export function localePdfBoldStyle(
   extras: Record<string, string | number> = {},
 ): Record<string, string | number> {
-  if (bodyFontFamily === 'NotoSans') {
-    return { fontFamily: 'NotoSans', fontWeight: 700, ...extras };
-  }
-  return { fontFamily: 'Helvetica-Bold', ...extras };
+  return { fontFamily: PDF_BODY_FONT, fontWeight: 700, ...extras };
 }

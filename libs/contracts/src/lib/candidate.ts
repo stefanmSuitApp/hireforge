@@ -9,6 +9,7 @@ export type {
   CandidateGenerateResumeBody,
   CvEducationEntry,
   CvExperienceEntry,
+  CvLocale,
   CvPdfLayoutInput,
   CvProfile,
   CvSkillEntry,
@@ -16,6 +17,7 @@ export type {
 } from './cv-profile';
 export {
   candidateGenerateResumeBodySchema,
+  cvLocales,
   cvProfileSchema,
   cvTemplateCodeSchema,
   cvTemplateCodes,

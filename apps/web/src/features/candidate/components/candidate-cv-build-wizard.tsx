@@ -4,6 +4,7 @@ import type {
   CandidateMeResponse,
   CvEducationEntry,
   CvExperienceEntry,
+  CvLocale,
   CvPdfLayoutInput,
   CvProfile,
   CvSkillEntry,
@@ -41,10 +42,13 @@ import type { CmsCvTemplateRow } from '@/lib/cms-content';
 
 const PdfPreview = dynamic(
   async () => {
-    const [{ PDFViewer }, { CvPdfDocument }] = await Promise.all([
-      import('@react-pdf/renderer'),
-      import('server-cv-templates/document'),
-    ]);
+    const [{ PDFViewer }, { CvPdfDocument, registerLocalePdfFonts }] =
+      await Promise.all([
+        import('@react-pdf/renderer'),
+        import('server-cv-templates/document'),
+      ]);
+    // Same Noto Sans the server uses, served from `public/fonts/pdf`.
+    registerLocalePdfFonts('/fonts/pdf');
     return function PdfPreviewInner(props: {
       layout: CvPdfLayoutInput;
       code: CvTemplateCode;
@@ -125,6 +129,8 @@ function normalizeProfileForParse(profile: CvProfile): CvProfile {
 
 type Props = {
   locale: string;
+  /** Account email: printed on the CV under the name. */
+  email: string;
   initial: CandidateMeResponse['candidate'];
   cityGroups: PublicJobTaxonomyDistrictGroup[];
   flatCities: PublicJobTaxonomyItem[];
@@ -137,12 +143,14 @@ const CITY_NONE = '__hf_cv_city_none__';
 
 export function CandidateCvBuildWizard({
   locale,
+  email,
   initial,
   cityGroups,
   flatCities,
   cmsTemplates,
 }: Props) {
   const t = useTranslations('Candidate.cvBuild');
+  const cvLocale: CvLocale = locale === 'en' ? 'en' : 'sr';
 
   const [step, setStep] = React.useState(0);
   const [fullName, setFullName] = React.useState(initial.fullName ?? '');
@@ -240,13 +248,15 @@ export function CandidateCvBuildWizard({
       ? parsedCvProfile.data
       : cvProfileSchema.parse({});
     return {
+      locale: cvLocale,
       fullName: fullName.trim() || null,
+      email,
       phone: phone.trim() || null,
       headline: headline.trim() || null,
       cityLine,
       profile,
     };
-  }, [fullName, phone, headline, cityLine, parsedCvProfile]);
+  }, [cvLocale, fullName, email, phone, headline, cityLine, parsedCvProfile]);
 
   const previewIssuesText = React.useMemo(() => {
     if (parsedCvProfile.success) return null;
@@ -307,6 +317,7 @@ export function CandidateCvBuildWizard({
         cvProfile: parsedCvProfile.data,
       },
       templateCode,
+      locale: cvLocale,
     });
   }
 

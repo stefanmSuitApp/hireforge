@@ -38,6 +38,7 @@ export default async function CandidateCvBuildPage({
       <section className="rounded-2xl border border-border/70 bg-card p-5 shadow-sm">
         <CandidateCvBuildWizard
           locale={locale}
+          email={session.me.user.email}
           initial={session.me.candidate}
           cityGroups={taxonomy.data.cityGroups}
           flatCities={taxonomy.data.cities}

@@ -795,12 +795,14 @@ export class CandidateService {
     const [row] = await database.db
       .select({
         fullName: candidates.fullName,
+        email: users.email,
         phone: candidates.phone,
         headline: candidates.headline,
         cvProfile: candidates.cvProfile,
         cityLabel: cities.nameSr,
       })
       .from(candidates)
+      .innerJoin(users, eq(candidates.userId, users.id))
       .leftJoin(cities, eq(candidates.cityId, cities.id))
       .where(eq(candidates.id, base.candidateId))
       .limit(1);
@@ -812,7 +814,9 @@ export class CandidateService {
     }
     const profile = parseCvProfile(row.cvProfile);
     const layout = {
+      locale: body.locale,
       fullName: row.fullName,
+      email: row.email,
       phone: row.phone ?? null,
       headline: row.headline ?? null,
       cityLine: row.cityLabel ?? null,
