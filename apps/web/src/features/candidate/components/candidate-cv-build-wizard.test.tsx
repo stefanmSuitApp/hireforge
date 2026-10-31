@@ -215,4 +215,18 @@ describe('building a CV', () => {
       profile: { cvProfile: { accent: 'plum' } },
     });
   });
+
+  // CV templates PR 6: a driver's CV starts on Praktičan.
+  it('preselects Praktičan for a candidate with a driving licence', async () => {
+    renderWizard();
+    for (let i = 0; i < 4; i++) await next();
+    await userEvent.click(screen.getByRole('button', { name: 'C' }));
+    await next(); // template
+    expect(
+      screen.getByRole('button', {
+        name: new RegExp(t.templateNames.prakticni),
+      }),
+    ).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByText(t.templateHints.prakticni)).toBeVisible();
+  });
 });

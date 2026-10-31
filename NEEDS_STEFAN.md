@@ -21,7 +21,20 @@ priority. Remove an item when it is done. **No secrets in this file.**
    Until then CVs and logos stay on the VM disk, which no backup covers.
    Logos: upload them on the moderator company page ("Logo"), not in
    Sanity; Sanity's logo is only a fallback now.
-3. When convenient: `sudo systemctl restart docker` (item 2), Sentry (3),
+3. **CV templates (five, #77–#87 and the picker PR):** staging has them.
+   - The CV photo uses the same uploads storage (item 2): until the bucket
+     is on, photos stay on the VM disk too; the copy script moves them.
+   - Sanity → CV template: add documents for `evropski` and `prakticni`,
+     and change the three descriptions to say who each is for (the picker
+     shows Sanity's text over the built-in one). Draft text, yours to
+     change (`TODO(Stefan)`): Klasičan "Za kancelarijske poslove, IT i
+     online prijave.", Moderan "Za trgovinu, ugostiteljstvo i lepotu, kad
+     CV čita čovek.", Minimalan "Za mlađe stručnjake, marketing i
+     dizajn.", Evropski format "Za javni sektor, zdravstvo i rad u
+     inostranstvu.", Praktičan "Za vozače, magacin, gradilište, kuhinju i
+     prvi posao." The Studio needs a deploy to offer the two new codes
+     (`docs/deployment/hetzner.md` §6).
+4. When convenient: `sudo systemctl restart docker` (item 2), Sentry (3),
    accountant (4), legal texts (5), Phase T decisions, social profiles,
    analytics, Google Indexing API.
 

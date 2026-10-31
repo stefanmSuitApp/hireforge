@@ -47,6 +47,7 @@ import {
 import { useCandidateCvSaveAndGenerateMutation } from '@/hooks/mutations/use-candidate-cv-save-and-generate';
 import type { CmsCvTemplateRow } from '@/lib/cms-content';
 
+import { recommendCvTemplate } from '../lib/recommend-cv-template';
 import { CvBuildExtrasStep } from './cv-build-extras-step';
 import { cvPhotoUrl, CvPhotoField } from './cv-photo-field';
 
@@ -196,9 +197,9 @@ export function CandidateCvBuildWizard({
 
   React.useEffect(() => {
     if (step === 5 && templateCode == null) {
-      setTemplateCode(cvTemplateCodes[0]);
+      setTemplateCode(recommendCvTemplate(cvProfile));
     }
-  }, [step, templateCode]);
+  }, [step, templateCode, cvProfile]);
 
   const effectiveCityGroups =
     React.useMemo((): PublicJobTaxonomyDistrictGroup[] => {
@@ -352,7 +353,7 @@ export function CandidateCvBuildWizard({
   const canPreview = templateCode != null;
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr,minmax(300px,400px)]">
+    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(320px,420px)]">
       <div className="space-y-6 rounded-xl border border-border/70 bg-background p-5">
         <div className="rounded-lg border border-border/70 bg-card px-3 py-2 text-xs text-muted-foreground">
           {t('stepIndicator', { current: step + 1, total: STEPS })}{' '}
@@ -788,6 +789,7 @@ export function CandidateCvBuildWizard({
                   <button
                     key={code}
                     type="button"
+                    aria-pressed={active}
                     onClick={() => setTemplateCode(code)}
                     className={`rounded-lg border p-3 text-left transition-colors ${
                       active
@@ -799,7 +801,7 @@ export function CandidateCvBuildWizard({
                     <img
                       src={cms?.previewUrl ?? `/cv-templates/${code}.png`}
                       alt=""
-                      className="mb-2 h-28 w-full rounded border border-border/60 bg-white object-cover object-top"
+                      className="mb-2 h-36 w-full rounded border border-border/60 bg-white object-cover object-top"
                     />
                     <div className="text-sm font-medium">
                       {cms?.name ?? t(`templateNames.${code}`)}
@@ -820,11 +822,9 @@ export function CandidateCvBuildWizard({
                         {t('badgePhoto')}
                       </span>
                     ) : null}
-                    {cms?.description ? (
-                      <p className="mt-1 text-xs text-muted-foreground line-clamp-3">
-                        {cms.description}
-                      </p>
-                    ) : null}
+                    <p className="mt-1 text-xs text-muted-foreground line-clamp-3">
+                      {cms?.description ?? t(`templateHints.${code}`)}
+                    </p>
                   </button>
                 );
               })}
