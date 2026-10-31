@@ -12,6 +12,12 @@ import {
   type ErrorsTranslator,
 } from '@/lib/http/api-error-message';
 
+import {
+  CompanyIdentifierFields,
+  companyIdentifiersBody,
+  companyIdentifiersFrom,
+} from './company-identifier-fields';
+
 type Props = { company: StaffCompanyDetailResponse };
 
 export function ModeratorCompanyDetailForm({ company }: Props) {
@@ -21,6 +27,7 @@ export function ModeratorCompanyDetailForm({ company }: Props) {
   const [legalName, setLegalName] = useState(company.legalName);
   const [slug, setSlug] = useState(company.slug);
   const [verified, setVerified] = useState(company.verified);
+  const [ids, setIds] = useState(() => companyIdentifiersFrom(company));
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
@@ -35,6 +42,7 @@ export function ModeratorCompanyDetailForm({ company }: Props) {
         legalName: legalName.trim(),
         slug: slug.trim().toLowerCase(),
         verified,
+        ...companyIdentifiersBody(ids),
       });
       await queryClient.invalidateQueries({
         queryKey: ['tables', 'staff', 'companies'],
@@ -76,6 +84,7 @@ export function ModeratorCompanyDetailForm({ company }: Props) {
           className="font-mono"
         />
       </div>
+      <CompanyIdentifierFields idPrefix="co" value={ids} onChange={setIds} />
       <div className="flex items-center gap-2">
         <Checkbox
           id="co-verified"

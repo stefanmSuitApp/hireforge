@@ -812,9 +812,9 @@ Plan and the follow-ups: `docs/plans/STAFF_ACCOUNTS_AND_UPLOADS.md`
   address, billing contact) from the sign-up (branch
   `feat/optional-company-ids`, migration 0040 `company_input` on join
   requests; the moderator sees the submitted PIB/MB before approving).
-  Gap: an account staff create by invite never enters PIB/MB, and the
-  company "Detalji" form can't edit them yet (the API can) — next small
-  follow-up.
+  Staff can add or change PIB / MB (or the foreign identifiers) later in
+  the company "Detalji" form (branch `feat/company-details-ids`), e.g. for
+  a company whose account they created by invite.
 - Migration `0039_auth_tokens_account_invite` (token purpose). Found on
   the way: CVs live on the VM in `api_var`, which no backup covers (PR 2).
 - Tests: e2e (create company → add account → email → activate → sign in;
