@@ -9,6 +9,14 @@ Last updated: 2026-10-31 (uploads go to the backups' bucket; staff-created
 employer accounts; candidate display name refresh). Open items for Stefan:
 [`NEEDS_STEFAN.md`](./NEEDS_STEFAN.md).
 
+**Next: Phase G0 of the go-to-market review (2026-10-31).**
+[`docs/plans/GO_TO_MARKET_REVIEW.md`](./docs/plans/GO_TO_MARKET_REVIEW.md)
+(research, launch blockers, packages and pricing in §4.3–4.4, decisions
+D1–D9, work packages WP-A…C). Its proposed prices (free TEZGA, ŠLJAKA
+1.990, ŠEF 4.990 RSD, featured placement as the paid feature) are **not
+adopted** until Stefan decides D1. Claude is working through G0 on its own
+(order and decisions taken: the review's "Status" section).
+
 ## Current state
 
 - **Prod:** `sljakam.com` on one Hetzner VM (Docker Compose + Caddy, see

@@ -34,7 +34,11 @@ priority. Remove an item when it is done. **No secrets in this file.**
      inostranstvu.", Praktičan "Za vozače, magacin, gradilište, kuhinju i
      prvi posao." The Studio needs a deploy to offer the two new codes
      (`docs/deployment/hetzner.md` §6).
-4. When convenient: `sudo systemctl restart docker` (item 2), Sentry (3),
+4. **Go-to-market decisions** D1, D4, D5, D7, D8, D9 in
+   `docs/plans/GO_TO_MARKET_REVIEW.md` §6 (prices, guest gating, launch
+   city, launch offers, social profiles, facts-only entries), plus the
+   week-1 letters to MINRZS and the Ministry of Finance (§8).
+5. When convenient: `sudo systemctl restart docker` (item 2), Sentry (3),
    accountant (4), legal texts (5), Phase T decisions, social profiles,
    analytics, Google Indexing API.
 
