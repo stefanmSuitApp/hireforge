@@ -1624,6 +1624,7 @@ export class EmployerService {
         status: applications.status,
         createdAt: applications.createdAt,
         email: users.email,
+        fullName: candidates.fullName,
         // Snapshot taken at submission (applications are immutable).
         resumeOriginalFilename: applications.resumeFilename,
         coverLetterText: applications.coverLetterText,
@@ -1644,6 +1645,7 @@ export class EmployerService {
       id: r.id,
       status: r.status,
       candidateEmail: r.email,
+      candidateName: r.fullName?.trim() || null,
       createdAt: r.createdAt.toISOString(),
       resumeOriginalFilename: r.resumeOriginalFilename ?? null,
       coverLetterText: r.coverLetterText ?? null,

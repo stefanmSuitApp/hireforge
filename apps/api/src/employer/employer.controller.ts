@@ -22,9 +22,13 @@ import { AuthenticatedGuard } from '../auth/authenticated.guard';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 import { codedBadRequest } from '../http/coded-http';
+import { EmployerApplicationsService } from './employer-applications.service';
 import { EmployerService } from './employer.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
-import { employerJobDraftBodySchema } from 'contracts';
+import {
+  employerApplicationStatusPatchBodySchema,
+  employerJobDraftBodySchema,
+} from 'contracts';
 
 const MAX_JOB_DESCRIPTION_IMAGE_BYTES = 2 * 1024 * 1024;
 
@@ -34,6 +38,7 @@ const MAX_JOB_DESCRIPTION_IMAGE_BYTES = 2 * 1024 * 1024;
 export class EmployerController {
   constructor(
     private readonly employer: EmployerService,
+    private readonly applications: EmployerApplicationsService,
     private readonly subscriptions: SubscriptionsService,
   ) {}
 
@@ -114,6 +119,40 @@ export class EmployerController {
     @Param('id', new ParseUUIDPipe()) id: string,
   ) {
     return this.employer.listJobApplications(this.userId(req), id);
+  }
+
+  @Get('applications/:id/cv')
+  async downloadApplicationCv(
+    @Req() req: Request,
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ) {
+    const { buffer, mimeType, filename } =
+      await this.applications.getCvDownload(this.userId(req), id);
+    return new StreamableFile(buffer, {
+      type: mimeType,
+      disposition: `attachment; filename="${encodeURIComponent(filename)}"`,
+    });
+  }
+
+  @Patch('applications/:id')
+  setApplicationStatus(
+    @Req() req: Request,
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() body: unknown,
+  ) {
+    const parsed = employerApplicationStatusPatchBodySchema.safeParse(body);
+    if (!parsed.success) {
+      throw codedBadRequest(
+        'VALIDATION_FAILED',
+        'Invalid request body',
+        z.flattenError(parsed.error),
+      );
+    }
+    return this.applications.setStatus(
+      this.userId(req),
+      id,
+      parsed.data.status,
+    );
   }
 
   @Post('jobs/:id/submit')

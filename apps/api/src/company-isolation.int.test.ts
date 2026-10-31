@@ -186,6 +186,36 @@ describeIsolation({
   ],
 });
 
+describeIsolation({
+  name: 'employer applications',
+  app: () => app,
+  parties: employerParties,
+  create: async (a) => {
+    const job = await insertJob(a.companyId ?? '', a.userId, {
+      status: 'published',
+    });
+    const candidate = await insertCandidate();
+    return insertApplication(job.id, candidate.candidateId);
+  },
+  snapshot: (id) =>
+    row('select status, updated_at from applications where id = $1', id),
+  calls: [
+    // The CV file itself is proven in applications-flow.int.test.ts.
+    {
+      name: 'download the CV',
+      method: 'get',
+      path: (id) => `/api/employer/applications/${id}/cv`,
+      ownerSkip: true,
+    },
+    {
+      name: 'shortlist',
+      method: 'patch',
+      path: (id) => `/api/employer/applications/${id}`,
+      body: { status: 'shortlisted' },
+    },
+  ],
+});
+
 describe('employer company profile and purchases', () => {
   it("B's workspace is B's company, whatever company id B sends", async () => {
     const { a, b } = await employerParties();

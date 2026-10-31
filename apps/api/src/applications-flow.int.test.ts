@@ -226,6 +226,116 @@ describe('withdrawing', () => {
   });
 });
 
+describe('the employer handles an application', () => {
+  const decide = (id: string, status: string) =>
+    http(app)
+      .patch(`/api/employer/applications/${id}`)
+      .set(employerOf.headers)
+      .send({ status });
+  const statusOf = async (id: string) =>
+    (await q('select status from applications where id = $1', [id])).rows[0]
+      .status;
+
+  it('downloads the CV the candidate sent, which marks the application viewed', async () => {
+    const c = await candidate();
+    const { body } = await apply(c, { jobId: await job() }).expect(201);
+    const res = await http(app)
+      .get(`/api/employer/applications/${body.id}/cv`)
+      .set(employerOf.headers)
+      .buffer(true)
+      .parse((r, done) => {
+        const chunks: Buffer[] = [];
+        r.on('data', (ch: Buffer) => chunks.push(ch));
+        r.on('end', () => done(null, Buffer.concat(chunks)));
+      })
+      .expect(200);
+    expect(res.headers['content-type']).toContain('application/pdf');
+    expect(res.headers['content-disposition']).toContain('attachment');
+    expect(res.headers['content-disposition']).toContain(
+      encodeURIComponent('Petar Petrović CV.pdf'),
+    );
+    expect(Buffer.compare(res.body as Buffer, PDF)).toBe(0);
+    expect(await statusOf(body.id)).toBe('viewed');
+  });
+
+  it('shortlists, then hires; each step is stored', async () => {
+    const c = await candidate();
+    const { body } = await apply(c, { jobId: await job() }).expect(201);
+    const shortlisted = await decide(body.id, 'shortlisted').expect(200);
+    expect(shortlisted.body).toEqual({ id: body.id, status: 'shortlisted' });
+    await decide(body.id, 'hired').expect(200);
+    expect(await statusOf(body.id)).toBe('hired');
+    const mine = await http(app)
+      .get('/api/candidate/applications')
+      .set(c.headers)
+      .expect(200);
+    expect(JSON.stringify(mine.body)).toContain('"hired"');
+  });
+
+  it('cannot hire without shortlisting, or change a final decision', async () => {
+    const c = await candidate();
+    const { body } = await apply(c, { jobId: await job() }).expect(201);
+    const early = await decide(body.id, 'hired');
+    expect(early.status).toBe(409);
+    expect(early.body.error.code).toBe('APPLICATION_TRANSITION_FORBIDDEN');
+    await decide(body.id, 'rejected').expect(200);
+    const after = await decide(body.id, 'shortlisted');
+    expect(after.status).toBe(409);
+    expect(await statusOf(body.id)).toBe('rejected');
+  });
+
+  it('a status outside the employer list is VALIDATION_FAILED', async () => {
+    const c = await candidate();
+    const { body } = await apply(c, { jobId: await job() }).expect(201);
+    const res = await decide(body.id, 'withdrawn');
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe('VALIDATION_FAILED');
+  });
+
+  it('a withdrawn application is gone for the employer', async () => {
+    const c = await candidate();
+    const { body } = await apply(c, { jobId: await job() }).expect(201);
+    await http(app)
+      .patch(`/api/candidate/applications/${body.id}`)
+      .set(c.headers)
+      .send({ status: 'withdrawn' })
+      .expect(200);
+    const res = await decide(body.id, 'shortlisted');
+    expect(res.status).toBe(404);
+    expect(res.body.error.code).toBe('APPLICATION_NOT_FOUND');
+    await http(app)
+      .get(`/api/employer/applications/${body.id}/cv`)
+      .set(employerOf.headers)
+      .expect(404);
+  });
+
+  it('the candidate can still withdraw after the CV was read or they were shortlisted, not after a decision', async () => {
+    const c = await candidate();
+    const withdraw = (id: string) =>
+      http(app)
+        .patch(`/api/candidate/applications/${id}`)
+        .set(c.headers)
+        .send({ status: 'withdrawn' });
+
+    const read = await apply(c, { jobId: await job() }).expect(201);
+    await http(app)
+      .get(`/api/employer/applications/${read.body.id}/cv`)
+      .set(employerOf.headers)
+      .expect(200);
+    await withdraw(read.body.id).expect(200);
+
+    const listed = await apply(c, { jobId: await job() }).expect(201);
+    await decide(listed.body.id, 'shortlisted').expect(200);
+    await withdraw(listed.body.id).expect(200);
+
+    const decided = await apply(c, { jobId: await job() }).expect(201);
+    await decide(decided.body.id, 'rejected').expect(200);
+    const res = await withdraw(decided.body.id);
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe('APPLICATION_WITHDRAW_FORBIDDEN');
+  });
+});
+
 describe('CVs', () => {
   it('the candidate downloads their CV as a PDF attachment', async () => {
     const c = await candidate();

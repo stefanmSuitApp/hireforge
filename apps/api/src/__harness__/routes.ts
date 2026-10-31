@@ -96,6 +96,8 @@ export const ROUTES: Record<string, Access> = {
   'GET /api/employer/jobs': EMPLOYER,
   'POST /api/employer/jobs': EMPLOYER,
   'GET /api/employer/jobs/:id/applications': EMPLOYER,
+  'GET /api/employer/applications/:id/cv': EMPLOYER,
+  'PATCH /api/employer/applications/:id': EMPLOYER,
   'POST /api/employer/jobs/:id/submit': EMPLOYER,
   'POST /api/employer/jobs/:id/image': EMPLOYER,
   'GET /api/employer/jobs/:id': EMPLOYER,

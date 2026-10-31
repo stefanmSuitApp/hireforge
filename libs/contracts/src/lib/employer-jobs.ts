@@ -228,6 +228,8 @@ export type EmployerJobApplicationItem = {
   id: string;
   status: string;
   candidateEmail: string;
+  /** The name on the candidate's profile, when they gave one. */
+  candidateName: string | null;
   createdAt: string;
   /** Present when candidate attached a CV to the application. */
   resumeOriginalFilename: string | null;

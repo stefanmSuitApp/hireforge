@@ -1,4 +1,5 @@
 import type {
+  EmployerApplicationStatusTarget,
   EmployerJobApplicationItem,
   EmployerJobDetailResponse,
   EmployerJobDraftBody,
@@ -64,4 +65,20 @@ export async function getEmployerJobApplications(
     `/api/employer/jobs/${jobId}/applications`,
   );
   return data;
+}
+
+export async function patchEmployerApplicationStatus(
+  applicationId: string,
+  status: EmployerApplicationStatusTarget,
+): Promise<{ id: string; status: EmployerApplicationStatusTarget }> {
+  const { data } = await webHttp.patch<{
+    id: string;
+    status: EmployerApplicationStatusTarget;
+  }>(`/api/employer/applications/${applicationId}`, { status });
+  return data;
+}
+
+/** Same-origin BFF URL; the browser downloads it as an attachment. */
+export function employerApplicationCvUrl(applicationId: string): string {
+  return `/api/employer/applications/${applicationId}/cv`;
 }

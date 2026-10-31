@@ -13,11 +13,15 @@ import type {
   CvProfile,
   PublicJobListItem,
 } from 'contracts';
-import { cvProfileSchema, sanitizeCvProfileForPersist } from 'contracts';
+import {
+  candidateWithdrawableStatuses,
+  cvProfileSchema,
+  sanitizeCvProfileForPersist,
+} from 'contracts';
 import { randomUUID } from 'node:crypto';
 import * as path from 'node:path';
 
-import { and, count, desc, eq, ne, sql } from 'drizzle-orm';
+import { and, count, desc, eq, inArray, ne, sql } from 'drizzle-orm';
 import { isWithinReapplicationCooldown } from 'server-applications';
 import { renderCvPdfBuffer } from 'server-cv-templates';
 import sharp from 'sharp';
@@ -128,6 +132,9 @@ const ALLOWED_RESUME_MIME = new Set([
  * multer (busboy) decodes multipart file names as latin1, so a UTF-8 name
  * like "Petrović" arrives as mojibake; decode it back unless it wasn't UTF-8.
  */
+const isWithdrawable = (status: string): boolean =>
+  (candidateWithdrawableStatuses as readonly string[]).includes(status);
+
 export function utf8FileName(name: string): string {
   const decoded = Buffer.from(name, 'latin1').toString('utf8');
   return decoded.includes('\uFFFD') ? name : decoded;
@@ -1021,10 +1028,10 @@ export class CandidateService {
     if (!row) {
       throw codedNotFound('NOT_FOUND', 'Application not found');
     }
-    if (row.status !== 'submitted') {
+    if (!isWithdrawable(row.status)) {
       throw codedBadRequest(
         'APPLICATION_WITHDRAW_FORBIDDEN',
-        'Only submitted applications can be withdrawn',
+        'Only applications without a decision can be withdrawn',
       );
     }
     const updated = await database.db
@@ -1033,15 +1040,15 @@ export class CandidateService {
       .where(
         and(
           eq(applications.id, applicationId),
-          // The employer may have moved it on since the read above.
-          eq(applications.status, 'submitted'),
+          // The employer may have decided since the read above.
+          inArray(applications.status, [...candidateWithdrawableStatuses]),
         ),
       )
       .returning({ id: applications.id });
     if (updated.length === 0) {
       throw codedBadRequest(
         'APPLICATION_WITHDRAW_FORBIDDEN',
-        'Only submitted applications can be withdrawn',
+        'Only applications without a decision can be withdrawn',
       );
     }
     return { ok: true };
