@@ -4,7 +4,12 @@ import type { ReactElement, ReactNode } from 'react';
 import type { CvPdfLayoutInput } from 'contracts';
 
 import { CV_LABELS, cvLevelBand, formatCvRange } from '../labels';
-import { DescriptionText, formatCertificate, KeepWithFirst } from '../sections';
+import {
+  CvPhoto,
+  DescriptionText,
+  formatCertificate,
+  KeepWithFirst,
+} from '../sections';
 import { accentOf, CV_INK, CV_MUTED, CV_RULE, SANS, tint } from '../theme';
 
 // The European (Europass) structure Serbian candidates and public employers
@@ -124,27 +129,36 @@ export function EvropskiDoc({
             paddingBottom: 11,
             borderBottomWidth: 1.4,
             borderBottomColor: accent,
+            flexDirection: 'row',
+            alignItems: 'center',
           }}
         >
-          <Text
-            style={{
-              ...BOLD,
-              fontSize: 8,
-              textTransform: 'uppercase',
-              letterSpacing: 0.6,
-              color: accent,
-            }}
-          >
-            {labels.cvKicker}
-          </Text>
-          <Text
-            style={{ ...BOLD, fontSize: 21, lineHeight: 1.2, marginTop: 1 }}
-          >
-            {layout.fullName ?? 'CV'}
-          </Text>
-          {layout.headline ? (
-            <Text style={MUTED}>{layout.headline}</Text>
+          {layout.photo && p.showPhoto ? (
+            <View style={{ marginRight: 16 }}>
+              <CvPhoto layout={layout} size={78} round={false} />
+            </View>
           ) : null}
+          <View style={{ flex: 1 }}>
+            <Text
+              style={{
+                ...BOLD,
+                fontSize: 8,
+                textTransform: 'uppercase',
+                letterSpacing: 0.6,
+                color: accent,
+              }}
+            >
+              {labels.cvKicker}
+            </Text>
+            <Text
+              style={{ ...BOLD, fontSize: 21, lineHeight: 1.2, marginTop: 1 }}
+            >
+              {layout.fullName ?? 'CV'}
+            </Text>
+            {layout.headline ? (
+              <Text style={MUTED}>{layout.headline}</Text>
+            ) : null}
+          </View>
         </View>
 
         {hasPersonal ? (

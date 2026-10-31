@@ -110,6 +110,34 @@ export class CandidateController {
     });
   }
 
+  @Post('photo')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      limits: { fileSize: MAX_RESUME_BYTES },
+    }),
+  )
+  uploadPhoto(
+    @Req() req: Request,
+    @UploadedFile() file: Express.Multer.File | undefined,
+  ) {
+    if (!file?.buffer) {
+      throw codedBadRequest('VALIDATION_FAILED', 'Missing file field "file"');
+    }
+    return this.candidate.savePhoto(this.userId(req), file.buffer);
+  }
+
+  @Get('photo')
+  async photo(@Req() req: Request) {
+    const jpeg = await this.candidate.getPhoto(this.userId(req));
+    return new StreamableFile(jpeg, { type: 'image/jpeg' });
+  }
+
+  @Delete('photo')
+  deletePhoto(@Req() req: Request) {
+    return this.candidate.deletePhoto(this.userId(req));
+  }
+
   @Get('resumes/:id/download')
   async downloadResume(
     @Req() req: Request,

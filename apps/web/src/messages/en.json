@@ -1267,7 +1267,10 @@
     "ACCOUNT_ALREADY_ACTIVE": "This account is already active; no new invite is needed.",
     "COMPANY_LOGO_MISSING": "Choose a logo image.",
     "COMPANY_LOGO_TYPE_FORBIDDEN": "The logo must be a PNG, JPEG or WebP image.",
-    "COMPANY_LOGO_PROCESS_FAILED": "The image could not be read. Try another PNG, JPEG or WebP file."
+    "COMPANY_LOGO_PROCESS_FAILED": "The image could not be read. Try another PNG, JPEG or WebP file.",
+    "CANDIDATE_PHOTO_INVALID": "The photo must be a JPEG, PNG or WebP, at most 5 MB and at least 200×200 pixels.",
+    "CANDIDATE_PHOTO_NOT_FOUND": "Photo not found.",
+    "CV_PHOTO_RATE_LIMITED": "Too many photo uploads in the last hour. Try again later."
   },
   "Candidate": {
     "workspaceLabel": "Candidate account",
@@ -1468,7 +1471,16 @@
         "burgundy": "Burgundy",
         "graphite": "Graphite"
       },
-      "accentKlasicanNote": "Klasičan is always black and white."
+      "accentKlasicanNote": "Klasičan is always black and white.",
+      "photoTitle": "Photo (optional)",
+      "photoHint": "Shown in the Moderan and European format templates. JPEG, PNG or WebP, up to 5 MB.",
+      "photoUpload": "Add a photo",
+      "photoReplace": "Replace photo",
+      "photoRemove": "Remove photo",
+      "photoUploading": "Uploading…",
+      "photoAlt": "Your photo",
+      "showPhoto": "Show the photo on the CV",
+      "badgePhoto": "Photo optional"
     }
   },
   "Integration": {

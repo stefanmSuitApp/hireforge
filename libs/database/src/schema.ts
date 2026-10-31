@@ -464,6 +464,8 @@ export const candidates = pgTable(
       .notNull()
       .default(sql`'{}'::jsonb`)
       .$type<Record<string, unknown>>(),
+    /** CV photo: `UploadStorageService` key in the `photo` area (600×600 JPEG). */
+    photoStorageKey: text('photo_storage_key'),
     createdAt: timestamp('created_at', { withTimezone: true })
       .notNull()
       .defaultNow(),

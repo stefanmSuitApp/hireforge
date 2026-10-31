@@ -1267,7 +1267,10 @@
     "ACCOUNT_ALREADY_ACTIVE": "Nalog je već aktiviran; nova pozivnica nije potrebna.",
     "COMPANY_LOGO_MISSING": "Izaberi sliku logoa.",
     "COMPANY_LOGO_TYPE_FORBIDDEN": "Logo mora biti PNG, JPEG ili WebP slika.",
-    "COMPANY_LOGO_PROCESS_FAILED": "Sliku nije moguće pročitati. Probaj drugi PNG, JPEG ili WebP fajl."
+    "COMPANY_LOGO_PROCESS_FAILED": "Sliku nije moguće pročitati. Probaj drugi PNG, JPEG ili WebP fajl.",
+    "CANDIDATE_PHOTO_INVALID": "Fotografija mora biti JPEG, PNG ili WebP, najviše 5 MB i najmanje 200×200 piksela.",
+    "CANDIDATE_PHOTO_NOT_FOUND": "Fotografija nije pronađena.",
+    "CV_PHOTO_RATE_LIMITED": "Previše postavljenih fotografija u poslednjih sat vremena. Pokušaj kasnije."
   },
   "Candidate": {
     "workspaceLabel": "Kandidatski nalog",
@@ -1468,7 +1471,16 @@
         "burgundy": "Bordo",
         "graphite": "Grafit"
       },
-      "accentKlasicanNote": "Klasičan je uvek crno-beli."
+      "accentKlasicanNote": "Klasičan je uvek crno-beli.",
+      "photoTitle": "Fotografija (nije obavezno)",
+      "photoHint": "Prikazuje se u šablonima Moderan i Evropski format. JPEG, PNG ili WebP, do 5 MB.",
+      "photoUpload": "Dodaj fotografiju",
+      "photoReplace": "Zameni fotografiju",
+      "photoRemove": "Ukloni fotografiju",
+      "photoUploading": "Otpremanje…",
+      "photoAlt": "Tvoja fotografija",
+      "showPhoto": "Prikaži fotografiju na CV-u",
+      "badgePhoto": "Može sa fotografijom"
     }
   },
   "Integration": {

@@ -10,12 +10,13 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
 /** Kinds of uploaded file; each is a folder in the bucket and on disk. */
-export type UploadArea = 'cv' | 'logo';
+export type UploadArea = 'cv' | 'logo' | 'photo';
 
 /** Disk folders when no bucket is configured (dev, tests, until it exists). */
 const LOCAL_ROOT: Record<UploadArea, { env: string; fallback: string }> = {
   cv: { env: 'CANDIDATE_UPLOAD_DIR', fallback: 'var/candidate-uploads' },
   logo: { env: 'COMPANY_LOGO_DIR', fallback: 'var/company-logos' },
+  photo: { env: 'CANDIDATE_PHOTO_DIR', fallback: 'var/candidate-photos' },
 };
 
 // Keys are generated (ids + extension); refuse anything that could leave the

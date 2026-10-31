@@ -81,6 +81,7 @@ export function sanitizeCvProfileForPersist(
     availability: optionalText(profile.availability, 120),
     showEmail: profile.showEmail ?? true,
     accent: profile.accent ?? 'teal',
+    showPhoto: profile.showPhoto ?? false,
   };
 }
 
@@ -112,9 +113,9 @@ export type CvTemplateInfo = {
 
 export const cvTemplateInfo: Record<CvTemplateCode, CvTemplateInfo> = {
   klasican: { columns: 1, atsSafe: true, supportsPhoto: false },
-  moderan: { columns: 2, atsSafe: false, supportsPhoto: false },
+  moderan: { columns: 2, atsSafe: false, supportsPhoto: true },
   minimalan: { columns: 1, atsSafe: true, supportsPhoto: false },
-  evropski: { columns: 1, atsSafe: true, supportsPhoto: false },
+  evropski: { columns: 1, atsSafe: true, supportsPhoto: true },
   prakticni: { columns: 1, atsSafe: true, supportsPhoto: false },
 };
 
@@ -240,6 +241,8 @@ export const cvProfileSchema = z.object({
   showEmail: z.boolean().default(true),
   /** Colour of headings and the sidebar; remembered for the next CV. */
   accent: z.enum(cvAccents).default('teal'),
+  /** Print the uploaded photo (templates that support one). Off by default. */
+  showPhoto: z.boolean().default(false),
 });
 
 export type CvExperienceEntry = z.infer<typeof cvExperienceEntrySchema>;
@@ -261,6 +264,11 @@ export type CvPdfLayoutInput = {
   headline: string | null;
   /** Single line for header, e.g. city name in builder locale */
   cityLine: string | null;
+  /**
+   * The photo to print, when the candidate has one and `showPhoto` is on: JPEG
+   * bytes on the server, a same-origin URL in the browser preview.
+   */
+  photo?: { data: Uint8Array; format: 'jpg' } | string | null;
   profile: CvProfile;
 };
 

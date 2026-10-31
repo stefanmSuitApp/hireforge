@@ -43,6 +43,7 @@ for (const key of [
 // Uploads, PDFs and job images go to this file's own temp folder.
 const files = mkdtempSync(join(tmpdir(), 'hf-int-'));
 process.env['CANDIDATE_UPLOAD_DIR'] = join(files, 'cv');
+process.env['CANDIDATE_PHOTO_DIR'] = join(files, 'photos');
 process.env['BILLING_PDF_LOCAL_DIR'] = join(files, 'billing');
 process.env['JOB_DESCRIPTION_MEDIA_LOCAL_DIR'] = join(files, 'job-media');
 process.env['COMPANY_LOGO_DIR'] = join(files, 'logos');

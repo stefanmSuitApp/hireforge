@@ -48,6 +48,7 @@ import { useCandidateCvSaveAndGenerateMutation } from '@/hooks/mutations/use-can
 import type { CmsCvTemplateRow } from '@/lib/cms-content';
 
 import { CvBuildExtrasStep } from './cv-build-extras-step';
+import { cvPhotoUrl, CvPhotoField } from './cv-photo-field';
 
 const PdfPreview = dynamic(
   async () => {
@@ -184,6 +185,9 @@ export function CandidateCvBuildWizard({
     skills:
       initial.cvProfile.skills.length > 0 ? [...initial.cvProfile.skills] : [],
   }));
+  const [hasPhoto, setHasPhoto] = React.useState(initial.hasPhoto ?? false);
+  // Changes after each upload so the preview and <img> load the new photo.
+  const [photoVersion, setPhotoVersion] = React.useState(0);
   const [templateCode, setTemplateCode] = React.useState<CvTemplateCode | null>(
     null,
   );
@@ -268,8 +272,19 @@ export function CandidateCvBuildWizard({
       headline: headline.trim() || null,
       cityLine,
       profile,
+      photo: hasPhoto ? cvPhotoUrl(photoVersion) : null,
     };
-  }, [cvLocale, fullName, email, phone, headline, cityLine, parsedCvProfile]);
+  }, [
+    cvLocale,
+    fullName,
+    email,
+    phone,
+    headline,
+    cityLine,
+    parsedCvProfile,
+    hasPhoto,
+    photoVersion,
+  ]);
 
   const previewIssuesText = React.useMemo(() => {
     if (parsedCvProfile.success) return null;
@@ -409,6 +424,20 @@ export function CandidateCvBuildWizard({
                 })}
               </p>
             </div>
+            <CvPhotoField
+              hasPhoto={hasPhoto}
+              version={photoVersion}
+              onPhotoChange={(has) => {
+                setHasPhoto(has);
+                setPhotoVersion((v) => v + 1);
+                // A new photo is meant to be seen; a removed one can't be.
+                setCvProfile((p) => ({ ...p, showPhoto: has }));
+              }}
+              showPhoto={cvProfile.showPhoto}
+              onShowPhotoChange={(show) =>
+                setCvProfile((p) => ({ ...p, showPhoto: show }))
+              }
+            />
             <div className="flex items-center gap-3">
               <Switch
                 id="cv-show-email"
@@ -786,6 +815,11 @@ export function CandidateCvBuildWizard({
                         ? t('badgeAtsSafe')
                         : t('badgeTwoColumns')}
                     </span>
+                    {cvTemplateInfo[code].supportsPhoto ? (
+                      <span className="ml-1 mt-1 inline-block rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                        {t('badgePhoto')}
+                      </span>
+                    ) : null}
                     {cms?.description ? (
                       <p className="mt-1 text-xs text-muted-foreground line-clamp-3">
                         {cms.description}
