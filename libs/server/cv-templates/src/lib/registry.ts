@@ -20,8 +20,8 @@ type CvTemplate = CvTemplateInfo & {
 
 export const cvTemplates: Record<CvTemplateCode, CvTemplate> = {
   klasican: {
-    columns: 2,
-    atsSafe: false,
+    columns: 1,
+    atsSafe: true,
     supportsPhoto: false,
     Document: KlasicanDoc,
   },

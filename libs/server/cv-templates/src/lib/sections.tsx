@@ -1,25 +1,47 @@
 import { Text, View } from '@react-pdf/renderer';
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 
 import type { CvPdfLayoutInput } from 'contracts';
 
-import {
-  localePdfBodyFontFamily,
-  localePdfBoldStyle,
-} from 'server-pdf/locale-fonts';
-
 import { CV_LABELS, formatCvLanguage, formatCvRange } from './labels';
+import type { PdfStyle } from './theme';
 
-export const pdfBody = localePdfBodyFontFamily();
+/** How a template draws headings and text; the sections only arrange content. */
+export type CvTheme = {
+  /** Section heading. */
+  Title: (props: { children: string }) => ReactElement;
+  body: PdfStyle;
+  bold: PdfStyle;
+  muted: PdfStyle;
+  /** Company / school line under a title (e.g. italic in Klasičan). */
+  sub: PdfStyle;
+  /**
+   * `row`: title left, dates right, company below.
+   * `stacked`: title, then "company · dates".
+   */
+  entry: 'row' | 'stacked';
+  /** Space above each section. */
+  gap: number;
+  /** Titles in a left column this wide (pt) instead of above the content. */
+  titleWidth?: number;
+};
 
-/** Phone, email (unless hidden) and city on one line, whichever exist. */
-export function contactLine(layout: CvPdfLayoutInput): string {
+/** Phone, email (unless hidden) and city, whichever the candidate has. */
+export function contactParts(layout: CvPdfLayoutInput): string[] {
   const email = layout.profile.showEmail ? layout.email : null;
-  return [layout.phone, email, layout.cityLine].filter(Boolean).join(' · ');
+  return [layout.phone, email, layout.cityLine].filter((p): p is string =>
+    Boolean(p),
+  );
 }
 
 /** A job description: lines starting with "-" or "•" become bullets. */
-export function DescriptionText({ text }: { text: string }): ReactElement {
+export function DescriptionText({
+  text,
+  style,
+}: {
+  text: string;
+  style: PdfStyle;
+}): ReactElement {
   const lines = text
     .split('\n')
     .map((l) => l.trim())
@@ -28,9 +50,16 @@ export function DescriptionText({ text }: { text: string }): ReactElement {
     <View style={{ marginTop: 2 }}>
       {lines.map((line, i) => {
         const bullet = /^[-•]\s*/.exec(line);
-        return (
-          <Text key={i} style={{ fontFamily: pdfBody, fontSize: 9 }}>
-            {bullet ? `• ${line.slice(bullet[0].length)}` : line}
+        return bullet ? (
+          <View key={i} style={{ flexDirection: 'row', marginTop: 1 }}>
+            <Text style={{ ...style, width: 9 }}>•</Text>
+            <Text style={{ ...style, flex: 1 }}>
+              {line.slice(bullet[0].length)}
+            </Text>
+          </View>
+        ) : (
+          <Text key={i} style={style}>
+            {line}
           </Text>
         );
       })}
@@ -38,193 +67,201 @@ export function DescriptionText({ text }: { text: string }): ReactElement {
   );
 }
 
-/** "O meni" under the header, when the candidate wrote one. */
+function Section({
+  theme,
+  title,
+  children,
+}: {
+  theme: CvTheme;
+  title: string;
+  children: ReactNode;
+}): ReactElement {
+  if (theme.titleWidth) {
+    return (
+      <View style={{ marginTop: theme.gap, flexDirection: 'row' }}>
+        <View style={{ width: theme.titleWidth, paddingRight: 12 }}>
+          <theme.Title>{title}</theme.Title>
+        </View>
+        <View style={{ flex: 1 }}>{children}</View>
+      </View>
+    );
+  }
+  return (
+    <View style={{ marginTop: theme.gap }}>
+      <theme.Title>{title}</theme.Title>
+      {children}
+    </View>
+  );
+}
+
+type SectionProps = { layout: CvPdfLayoutInput; theme: CvTheme };
+
 export function SummarySection({
   layout,
-}: {
-  layout: CvPdfLayoutInput;
-}): ReactElement | null {
+  theme,
+}: SectionProps): ReactElement | null {
   if (!layout.profile.summary) return null;
   return (
-    <View>
-      <SectionTitle>{CV_LABELS[layout.locale].summary}</SectionTitle>
-      <Text style={{ fontFamily: pdfBody, fontSize: 9 }}>
-        {layout.profile.summary}
-      </Text>
-    </View>
+    <Section theme={theme} title={CV_LABELS[layout.locale].summary}>
+      <Text style={theme.body}>{layout.profile.summary}</Text>
+    </Section>
   );
 }
 
-/** Languages, driving licence, certificates, digital skills and links. */
-export function ExtraSections({
-  layout,
+function Entry({
+  theme,
+  title,
+  sub,
+  dates,
+  description,
 }: {
-  layout: CvPdfLayoutInput;
+  theme: CvTheme;
+  title: string;
+  sub: string;
+  dates: string;
+  description?: string;
 }): ReactElement {
-  const labels = CV_LABELS[layout.locale];
-  const { languages, drivingLicences, certificates, digitalSkills, links } =
-    layout.profile;
-  const line = { fontFamily: pdfBody, fontSize: 9 };
   return (
-    <>
-      {languages.length ? (
-        <View wrap={false}>
-          <SectionTitle>{labels.languages}</SectionTitle>
-          {languages.map((l, i) => (
-            <Text key={i} style={line}>
-              {formatCvLanguage(l.name, l.level, layout.locale)}
+    <View style={{ marginBottom: 7 }} wrap={false}>
+      {theme.entry === 'row' ? (
+        <>
+          <View
+            style={{ flexDirection: 'row', justifyContent: 'space-between' }}
+          >
+            <Text style={{ ...theme.bold, flex: 1, paddingRight: 8 }}>
+              {title}
             </Text>
-          ))}
-        </View>
-      ) : null}
-      {drivingLicences.length ? (
-        <View wrap={false}>
-          <SectionTitle>{labels.drivingLicence}</SectionTitle>
-          <Text style={line}>{drivingLicences.join(', ')}</Text>
-        </View>
-      ) : null}
-      {certificates.length ? (
-        <View wrap={false}>
-          <SectionTitle>{labels.certificates}</SectionTitle>
-          {certificates.map((c, i) => (
-            <Text key={i} style={line}>
-              {[c.name, c.issuer].filter(Boolean).join(', ')}
-              {c.year ? ` (${c.year})` : ''}
-            </Text>
-          ))}
-        </View>
-      ) : null}
-      {digitalSkills ? (
-        <View wrap={false}>
-          <SectionTitle>{labels.digitalSkills}</SectionTitle>
-          <Text style={line}>{digitalSkills}</Text>
-        </View>
-      ) : null}
-      {links.length ? (
-        <View wrap={false}>
-          <SectionTitle>{labels.links}</SectionTitle>
-          {links.map((l, i) => (
-            <Text key={i} style={line}>
-              {l.label}: {l.url}
-            </Text>
-          ))}
-        </View>
-      ) : null}
-    </>
-  );
-}
-
-export function SectionTitle({ children }: { children: string }): ReactElement {
-  return (
-    <Text
-      style={localePdfBoldStyle({
-        fontSize: 11,
-        marginTop: 10,
-        marginBottom: 4,
-      })}
-    >
-      {children}
-    </Text>
-  );
-}
-
-export function HeaderBlock({
-  layout,
-  nameSize,
-}: {
-  layout: CvPdfLayoutInput;
-  nameSize: number;
-}): ReactElement {
-  const contact = contactLine(layout);
-  return (
-    <View style={{ marginBottom: 14 }}>
-      <Text style={localePdfBoldStyle({ fontSize: nameSize })}>
-        {layout.fullName ?? 'CV'}
-      </Text>
-      {layout.headline ? (
-        <Text
-          style={{
-            fontFamily: pdfBody,
-            fontSize: 10,
-            marginTop: 2,
-            color: '#2d3748',
-          }}
-        >
-          {layout.headline}
-        </Text>
-      ) : null}
-      {contact ? (
-        <Text
-          style={{
-            fontFamily: pdfBody,
-            fontSize: 9,
-            marginTop: 4,
-            color: '#4a5568',
-          }}
-        >
-          {contact}
-        </Text>
-      ) : null}
-    </View>
-  );
-}
-
-/** Experience, education and skills in one column (Moderan, Minimalan). */
-export function BodySections({
-  layout,
-}: {
-  layout: CvPdfLayoutInput;
-}): ReactElement {
-  const labels = CV_LABELS[layout.locale];
-  const { experiences, education, skills } = layout.profile;
-  return (
-    <>
-      {experiences.length ? (
-        <View>
-          <SectionTitle>{labels.experience}</SectionTitle>
-          {experiences.map((ex, i) => (
-            <View key={i} style={{ marginBottom: 6 }} wrap={false}>
-              <Text style={localePdfBoldStyle({ fontSize: 10 })}>
-                {ex.title} · {ex.company}
-              </Text>
-              <Text
-                style={{ fontFamily: pdfBody, fontSize: 8, color: '#4a5568' }}
-              >
-                {formatCvRange(ex.startDate, ex.endDate, layout.locale)}
-              </Text>
-              {ex.summary ? <DescriptionText text={ex.summary} /> : null}
-            </View>
-          ))}
-        </View>
-      ) : null}
-      {education.length ? (
-        <View>
-          <SectionTitle>{labels.education}</SectionTitle>
-          {education.map((ed, i) => (
-            <View key={i} style={{ marginBottom: 6 }} wrap={false}>
-              <Text style={localePdfBoldStyle({ fontSize: 10 })}>
-                {ed.institution}
-              </Text>
-              <Text style={{ fontFamily: pdfBody, fontSize: 9 }}>
-                {[ed.degree, ed.field].filter(Boolean).join(' · ')}
-              </Text>
-              <Text
-                style={{ fontFamily: pdfBody, fontSize: 8, color: '#4a5568' }}
-              >
-                {formatCvRange(ed.startDate, ed.endDate, layout.locale)}
-              </Text>
-            </View>
-          ))}
-        </View>
-      ) : null}
-      {skills.length ? (
-        <View>
-          <SectionTitle>{labels.skills}</SectionTitle>
-          <Text style={{ fontFamily: pdfBody, fontSize: 9 }}>
-            {skills.map((s) => s.name).join(' · ')}
+            <Text style={theme.muted}>{dates}</Text>
+          </View>
+          {sub ? <Text style={theme.sub}>{sub}</Text> : null}
+        </>
+      ) : (
+        <>
+          <Text style={theme.bold}>{title}</Text>
+          <Text style={theme.muted}>
+            {[sub, dates].filter(Boolean).join(' · ')}
           </Text>
-        </View>
+        </>
+      )}
+      {description ? (
+        <DescriptionText text={description} style={theme.body} />
       ) : null}
-    </>
+    </View>
+  );
+}
+
+export function ExperienceSection({
+  layout,
+  theme,
+}: SectionProps): ReactElement | null {
+  const { experiences } = layout.profile;
+  if (!experiences.length) return null;
+  return (
+    <Section theme={theme} title={CV_LABELS[layout.locale].experience}>
+      {experiences.map((ex, i) => (
+        <Entry
+          key={i}
+          theme={theme}
+          title={ex.title}
+          sub={ex.company}
+          dates={formatCvRange(ex.startDate, ex.endDate, layout.locale)}
+          description={ex.summary}
+        />
+      ))}
+    </Section>
+  );
+}
+
+export function EducationSection({
+  layout,
+  theme,
+}: SectionProps): ReactElement | null {
+  const { education } = layout.profile;
+  if (!education.length) return null;
+  return (
+    <Section theme={theme} title={CV_LABELS[layout.locale].education}>
+      {education.map((ed, i) => (
+        <Entry
+          key={i}
+          theme={theme}
+          title={ed.institution}
+          sub={[ed.degree, ed.field].filter(Boolean).join(' · ')}
+          dates={formatCvRange(ed.startDate, ed.endDate, layout.locale)}
+        />
+      ))}
+    </Section>
+  );
+}
+
+/** The candidate's extras as "Label: value" lines. */
+export function extraLines(
+  layout: CvPdfLayoutInput,
+  { withSkills }: { withSkills: boolean },
+): [label: string, value: string][] {
+  const labels = CV_LABELS[layout.locale];
+  const p = layout.profile;
+  const lines: [string, string][] = [];
+  if (withSkills && p.skills.length) {
+    lines.push([labels.skills, p.skills.map((s) => s.name).join(', ')]);
+  }
+  if (p.drivingLicences.length) {
+    lines.push([labels.drivingLicence, p.drivingLicences.join(', ')]);
+  }
+  if (p.certificates.length) {
+    lines.push([
+      labels.certificates,
+      p.certificates.map(formatCertificate).join('; '),
+    ]);
+  }
+  if (p.languages.length) {
+    lines.push([
+      labels.languages,
+      p.languages
+        .map((l) => formatCvLanguage(l.name, l.level, layout.locale))
+        .join(', '),
+    ]);
+  }
+  if (p.digitalSkills) lines.push([labels.digitalSkills, p.digitalSkills]);
+  if (p.links.length) {
+    lines.push([
+      labels.links,
+      p.links.map((l) => `${l.label}: ${l.url}`).join(', '),
+    ]);
+  }
+  return lines;
+}
+
+export function formatCertificate(c: {
+  name: string;
+  issuer?: string;
+  year?: number;
+}): string {
+  return (
+    [c.name, c.issuer].filter(Boolean).join(', ') +
+    (c.year ? ` (${c.year})` : '')
+  );
+}
+
+/** One section of "Label: value" lines (skills, licence, languages, …). */
+export function ExtraLinesSection({
+  layout,
+  theme,
+  title,
+  withSkills,
+}: SectionProps & {
+  title: string;
+  withSkills: boolean;
+}): ReactElement | null {
+  const lines = extraLines(layout, { withSkills });
+  if (!lines.length) return null;
+  return (
+    <Section theme={theme} title={title}>
+      {lines.map(([label, value]) => (
+        <Text key={label} style={{ ...theme.body, marginTop: 1 }}>
+          <Text style={theme.bold}>{label}: </Text>
+          {value}
+        </Text>
+      ))}
+    </Section>
   );
 }
