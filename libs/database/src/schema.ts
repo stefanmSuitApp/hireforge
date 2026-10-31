@@ -648,6 +648,13 @@ export const jobs = pgTable(
     crossborderVisible: boolean('crossborder_visible').notNull().default(false),
     /** PNG creative URL when package entitles `png_creative` (employer-supplied https asset). */
     pngCreativeUrl: text('png_creative_url'),
+    /** Whole RSD; either bound may be missing ("od" / "do"). CHECK `jobs_salary_check`. */
+    salaryMin: integer('salary_min'),
+    salaryMax: integer('salary_max'),
+    /** `month | day | hour`; set exactly when an amount is. */
+    salaryPeriod: text('salary_period'),
+    /** `net | gross`; set exactly when an amount is. */
+    salaryBasis: text('salary_basis'),
     submittedAt: timestamp('submitted_at', { withTimezone: true }),
     publishedAt: timestamp('published_at', { withTimezone: true }),
     rejectedReason: text('rejected_reason'),
@@ -683,6 +690,16 @@ export const jobs = pgTable(
     check(
       'jobs_primary_language_check',
       sql`${t.primaryLanguage} IN ('sr', 'en')`,
+    ),
+    check(
+      'jobs_salary_check',
+      sql`(${t.salaryMin} IS NULL AND ${t.salaryMax} IS NULL AND ${t.salaryPeriod} IS NULL AND ${t.salaryBasis} IS NULL)
+        OR ((${t.salaryMin} IS NOT NULL OR ${t.salaryMax} IS NOT NULL)
+          AND (${t.salaryMin} IS NULL OR ${t.salaryMin} > 0)
+          AND (${t.salaryMax} IS NULL OR ${t.salaryMax} > 0)
+          AND (${t.salaryMin} IS NULL OR ${t.salaryMax} IS NULL OR ${t.salaryMin} <= ${t.salaryMax})
+          AND ${t.salaryPeriod} IS NOT NULL AND ${t.salaryPeriod} IN ('month', 'day', 'hour')
+          AND ${t.salaryBasis} IS NOT NULL AND ${t.salaryBasis} IN ('net', 'gross'))`,
     ),
   ],
 );

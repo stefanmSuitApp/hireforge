@@ -51,6 +51,7 @@ export type ModeratorJobDetailResponse = {
   featured: boolean;
   crossborderVisible: boolean;
   pngCreativeUrl: string | null;
+  salary: PublicJobDetailResponse['salary'];
   city: PublicJobDetailResponse['city'];
   category: PublicJobDetailResponse['category'];
   submittedAt: string | null;

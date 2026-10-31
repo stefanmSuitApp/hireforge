@@ -15,6 +15,7 @@ import {
   localizedCityLine,
 } from '../lib/bilingual-label';
 import { jobEnumLabel } from '../lib/job-enum-label';
+import { JobSalaryLine } from './job-salary-line';
 
 import { SaveJobButton } from './save-job-button';
 
@@ -105,6 +106,10 @@ export function PublicJobCard({
             {cat ? ` · ${cat}` : ''}
             {` · ${publishedLabel} ${publishedMedium(job.publishedAt)}`}
           </p>
+          <JobSalaryLine
+            salary={job.salary}
+            className="mt-1.5 block text-sm font-semibold text-foreground"
+          />
           <div className="mt-3 flex flex-wrap gap-1.5">
             {job.featured ? (
               <span className="rounded-full bg-featured-soft px-2.5 py-1 text-xs font-bold text-featured-soft-foreground">

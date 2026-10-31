@@ -587,7 +587,7 @@ than late in G1.
 - **Note:** production prices live in Sanity. Change them in the Studio (or
   re-run the CMS sync) and verify on sljakam.com.
 
-#### WP-A4 Salary fields
+#### WP-A4 Salary fields ✅ 2026-10-31
 
 - **Goal:** optional salary on every ad (min, max, currency RSD, period
   month/hour, net/gross) and a "Plata istaknuta" badge.

@@ -4,6 +4,7 @@ import type { DrizzleDbOrTx } from 'database';
 import { jobs, outboxEvents } from 'database';
 
 import { jobDescriptionHtmlFromDraftBody } from './job-description-html';
+import { jobSalaryColumns } from './job-salary';
 
 export type DemotePublishedJobDraftEditInput = {
   jobId: string;
@@ -49,6 +50,7 @@ export async function demotePublishedJobAfterDraftBodyEdit(
         featured: input.draft.featured ?? false,
         crossborderVisible: input.draft.crossborderVisible ?? false,
         pngCreativeUrl: input.draft.pngCreativeUrl ?? null,
+        ...jobSalaryColumns(input.draft.salary),
         primaryLanguage: input.apply.primaryLanguage,
         status: 'submitted',
         submittedAt: input.now,

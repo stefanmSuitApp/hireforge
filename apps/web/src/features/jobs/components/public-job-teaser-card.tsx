@@ -15,6 +15,7 @@ import {
   localizedCityLine,
 } from '../lib/bilingual-label';
 import { jobEnumLabel } from '../lib/job-enum-label';
+import { JobSalaryLine } from './job-salary-line';
 
 type Props = {
   job: PublicJobListItem;
@@ -80,6 +81,10 @@ export function PublicJobTeaserCard({
           </>
         ) : null}
       </p>
+      <JobSalaryLine
+        salary={job.salary}
+        className="mt-2 block text-sm font-semibold text-foreground"
+      />
 
       <div className="mt-auto flex flex-wrap items-center gap-1.5 pt-4">
         <span className="rounded-full bg-accent px-2.5 py-1 text-xs font-semibold text-accent-foreground">

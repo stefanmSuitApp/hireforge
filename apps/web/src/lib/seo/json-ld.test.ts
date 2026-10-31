@@ -34,6 +34,7 @@ function job(
     featured: false,
     crossborderVisible: false,
     pngCreativeUrl: null,
+    salary: null,
     publishedAt: '2026-10-01T08:00:00.000Z',
     expiresAt: '2026-11-01T08:00:00.000Z',
     updatedAt: '2026-10-02T08:00:00.000Z',
@@ -126,6 +127,35 @@ describe('jobPostingJsonLd', () => {
     expect(
       jobPostingJsonLd(job({ applyMode: 'external' }), ctx)?.directApply,
     ).toBe(false);
+  });
+
+  it('carries the salary the employer entered, and none otherwise', () => {
+    expect(jobPostingJsonLd(job(), ctx)).not.toHaveProperty('baseSalary');
+    const range = jobPostingJsonLd(
+      job({
+        salary: { min: 60000, max: 80000, period: 'month', basis: 'net' },
+      }),
+      ctx,
+    );
+    expect(range?.baseSalary).toEqual({
+      '@type': 'MonetaryAmount',
+      currency: 'RSD',
+      value: {
+        '@type': 'QuantitativeValue',
+        minValue: 60000,
+        maxValue: 80000,
+        unitText: 'MONTH',
+      },
+    });
+    const hourly = jobPostingJsonLd(
+      job({ salary: { min: 400, max: null, period: 'hour', basis: 'net' } }),
+      ctx,
+    );
+    expect(hourly?.baseSalary).toEqual({
+      '@type': 'MonetaryAmount',
+      currency: 'RSD',
+      value: { '@type': 'QuantitativeValue', minValue: 400, unitText: 'HOUR' },
+    });
   });
 
   it('emits nothing for an ended or unpublished ad', () => {

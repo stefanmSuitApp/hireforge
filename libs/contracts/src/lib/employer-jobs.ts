@@ -76,6 +76,63 @@ const pngCreativeHttpsUrl = z.preprocess(
   }),
 );
 
+// --- Salary (go-to-market WP-A4) ---------------------------------------------
+
+export const salaryPeriods = ['month', 'day', 'hour'] as const;
+export type SalaryPeriod = (typeof salaryPeriods)[number];
+export const salaryBases = ['net', 'gross'] as const;
+export type SalaryBasis = (typeof salaryBases)[number];
+
+const salaryAmount = z.number().int().positive().max(100_000_000).nullish();
+
+/**
+ * Whole RSD. A range, a floor ("od") or a ceiling ("do"); Serbian ads quote
+ * net pay per month unless they say otherwise. Matches `jobs_salary_check`.
+ */
+export const jobSalarySchema = z
+  .object({
+    min: salaryAmount.transform((v) => v ?? null),
+    max: salaryAmount.transform((v) => v ?? null),
+    period: z.enum(salaryPeriods).default('month'),
+    basis: z.enum(salaryBases).default('net'),
+  })
+  .superRefine((val, ctx) => {
+    if (val.min === null && val.max === null) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['min'],
+        message: 'A salary needs a minimum, a maximum or both',
+      });
+    }
+    if (val.min !== null && val.max !== null && val.min > val.max) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['max'],
+        message: 'The maximum salary must not be below the minimum',
+      });
+    }
+  });
+
+export type JobSalary = z.infer<typeof jobSalarySchema>;
+
+/**
+ * The amount part of a salary line; the caller adds currency, period and
+ * net/gross in its own language.
+ */
+export function formatSalaryAmount(
+  salary: Pick<JobSalary, 'min' | 'max'>,
+  formatNumber: (n: number) => string,
+): { kind: 'range' | 'exact' | 'from' | 'upTo'; text: string } {
+  const { min, max } = salary;
+  if (min !== null && max !== null) {
+    return min === max
+      ? { kind: 'exact', text: formatNumber(min) }
+      : { kind: 'range', text: `${formatNumber(min)}–${formatNumber(max)}` };
+  }
+  if (min !== null) return { kind: 'from', text: formatNumber(min) };
+  return { kind: 'upTo', text: formatNumber(max ?? 0) };
+}
+
 /** Body for `POST /api/employer/jobs` and `PATCH /api/employer/jobs/:id` (draft only). */
 export const employerJobDraftBodySchema = z
   .object({
@@ -108,6 +165,8 @@ export const employerJobDraftBodySchema = z
       (v) => (v === '' ? null : v),
       z.union([pngCreativeHttpsUrl, z.null()]).optional(),
     ),
+    /** Optional pay; omitted or `null` means the ad shows none. */
+    salary: jobSalarySchema.nullish(),
     /**
      * Required when the company has more than one active subscription; ignored on PATCH.
      * Binds a new draft to that subscription’s entitlements and slot cap.
@@ -154,6 +213,7 @@ export type EmployerJobDetailResponse = {
   crossborderVisible: boolean;
   /** Package PNG creative slot; null when unset or not entitled. */
   pngCreativeUrl: string | null;
+  salary: JobSalary | null;
   citySlug: string | null;
   categorySlug: string | null;
   workModel: string;
