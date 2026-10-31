@@ -5,7 +5,7 @@ import type { CvPdfLayoutInput } from 'contracts';
 
 import { CV_LABELS, formatCvLanguage, formatCvRange } from '../labels';
 import { DescriptionText, formatCertificate, KeepWithFirst } from '../sections';
-import { CV_ACCENT, CV_INK, CV_MUTED, SANS, tint } from '../theme';
+import { accentOf, CV_INK, CV_MUTED, SANS, tint } from '../theme';
 
 // Skills first for hands-on jobs (drivers, warehouse, kitchens, building):
 // licence, start date, certificates and languages in a box at the top, then
@@ -77,7 +77,7 @@ export function PrakticniDoc({
 }: {
   layout: CvPdfLayoutInput;
 }): ReactElement {
-  const accent = CV_ACCENT;
+  const accent = accentOf(layout);
   const labels = CV_LABELS[layout.locale];
   const p = layout.profile;
   const email = p.showEmail ? layout.email : null;

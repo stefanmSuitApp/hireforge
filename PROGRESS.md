@@ -114,6 +114,13 @@ pnpm build` (+ `pnpm check:i18n`) = `pnpm verify`; PRs run it locally, CI on
     template prints it. Tests: every field in every template (unit), and an
     e2e that fills every field through the UI and checks all five PDFs.
     Headings never end a page alone (`KeepWithFirst`).
+  - **PR 5a done** (`feat/cv-accent-colour`): five accent colours (teal,
+    navy, plum, burgundy, graphite; `cvAccentColors` in contracts, each
+    ≥ 4.5:1 with white) picked in the template step; stored in
+    `cv_profile.accent` (no migration), so the next CV keeps it. Klasičan
+    stays black and white (swatches disabled, note shown). **PR 5b
+    (candidate photo) waits** for the uploads bucket
+    (`STAFF_ACCOUNTS_AND_UPLOADS.md` PR 2, needs Stefan's bucket).
 
 ### Plan steps, verified against code
 

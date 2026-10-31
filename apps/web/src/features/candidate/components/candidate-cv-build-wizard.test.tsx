@@ -194,4 +194,25 @@ describe('building a CV', () => {
       screen.getByRole('button', { name: new RegExp(t.templateNames.moderan) }),
     ).toHaveTextContent(t.badgeTwoColumns);
   });
+
+  // CV templates PR 5a: the colour picked in the template step is saved.
+  it('the picked accent colour is saved with the profile', async () => {
+    renderWizard();
+    for (let i = 0; i < 5; i++) await next();
+    const plum = screen.getByRole('radio', { name: t.accentNames.plum });
+    // Klasičan (picked by default) is black and white: no colour choice.
+    expect(plum).toBeDisabled();
+    expect(screen.getByText(t.accentKlasicanNote)).toBeVisible();
+    await userEvent.click(
+      screen.getByRole('button', { name: new RegExp(t.templateNames.moderan) }),
+    );
+    await userEvent.click(plum);
+    expect(plum).toBeChecked();
+    await next(); // generate
+    await userEvent.click(screen.getByRole('button', { name: t.generateCta }));
+    expect(mutate.mock.calls[0]?.[0]).toMatchObject({
+      templateCode: 'moderan',
+      profile: { cvProfile: { accent: 'plum' } },
+    });
+  });
 });

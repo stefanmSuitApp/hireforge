@@ -2,8 +2,9 @@
 // Serbian letters included, and leaves out empty sections. Headings may be
 // drawn in capitals, so text checks ignore case.
 import { describe, expect, it } from 'vitest';
-import { extractText, getDocumentProxy } from 'unpdf';
+import { extractText, getDocumentProxy, getResolvedPDFJS } from 'unpdf';
 import {
+  cvAccentColors,
   cvProfileSchema,
   cvTemplateCodes,
   type CvPdfLayoutInput,
@@ -344,6 +345,34 @@ describe.each(cvTemplateCodes)('CV template %s', (template) => {
       }
     }
   });
+
+  // PR 5a: the colour the candidate picks is the one drawn (Klasičan: none).
+  it(
+    template === 'klasican'
+      ? 'stays black and white whatever the accent'
+      : 'draws in the accent the candidate picked',
+    async () => {
+      const pdf = await getDocumentProxy(
+        new Uint8Array(
+          await renderCvPdfBuffer(template, {
+            ...LAYOUT,
+            profile: { ...LAYOUT.profile, accent: 'plum' },
+          }),
+        ),
+      );
+      const { OPS } = await getResolvedPDFJS();
+      const ops = await (await pdf.getPage(1)).getOperatorList();
+      const fills = new Set(
+        ops.fnArray.flatMap((fn, i) =>
+          fn === OPS.setFillRGBColor ? [String(ops.argsArray[i]?.[0])] : [],
+        ),
+      );
+      const plum = cvAccentColors.plum.toLowerCase();
+      const teal = cvAccentColors.teal.toLowerCase();
+      expect(fills.has(plum)).toBe(template !== 'klasican');
+      expect(fills.has(teal)).toBe(false);
+    },
+  );
 
   if (cvTemplates[template].atsSafe) {
     // A CV scanner reads text in order: name, story, jobs, school.

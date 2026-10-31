@@ -1,7 +1,7 @@
 // CV templates (docs/plans/CV_TEMPLATES.md): a candidate builds a CV in the
 // app, and the PDF a scanner reads has what they entered, in Serbian.
 import { expect, test, type Page } from '@playwright/test';
-import { extractText, getDocumentProxy } from 'unpdf';
+import { extractText, getDocumentProxy, getResolvedPDFJS } from 'unpdf';
 
 import { readyCandidate } from './support/candidate';
 import { gotoHydrated } from './support/ui';
@@ -18,8 +18,8 @@ async function signIn(page: Page): Promise<Candidate> {
   return cand;
 }
 
-/** The text a scanner reads out of the candidate's newest generated CV. */
-async function generatedCvText(cand: Candidate): Promise<string> {
+/** The candidate's newest generated CV, as a pdf.js document. */
+async function newestGeneratedCv(cand: Candidate) {
   const list = await cand.api.get('candidate/resumes');
   const resumes = (await list.json()) as {
     id: string;
@@ -32,8 +32,14 @@ async function generatedCvText(cand: Candidate): Promise<string> {
   expect(generated).toBeDefined();
   const pdf = await cand.api.get(`candidate/resumes/${generated!.id}/download`);
   expect(pdf.ok()).toBeTruthy();
-  const doc = await getDocumentProxy(new Uint8Array(await pdf.body()));
-  const { text } = await extractText(doc, { mergePages: true });
+  return getDocumentProxy(new Uint8Array(await pdf.body()));
+}
+
+/** The text a scanner reads out of the candidate's newest generated CV. */
+async function generatedCvText(cand: Candidate): Promise<string> {
+  const { text } = await extractText(await newestGeneratedCv(cand), {
+    mergePages: true,
+  });
   return text;
 }
 
@@ -265,4 +271,32 @@ test('everything typed in the builder is on the CV, in all five templates', asyn
       expect(text, `${name}: ${value}`).toContain(value.toLowerCase());
     }
   }
+});
+
+// PR 5a: the colour picked in the builder is the colour of the CV.
+test('the colour picked in the builder is the colour on the CV', async ({
+  page,
+}) => {
+  const cand = await signIn(page);
+  await gotoHydrated(page, '/sr/candidate/cv/build', '#cv-fullName');
+  await page.getByLabel('Ime i prezime').fill('Ana Bojić');
+  const next = page.getByRole('button', { name: 'Dalje' });
+  for (let i = 0; i < 5; i++) await next.click();
+  await page.getByRole('button', { name: /Moderan/ }).click();
+  await page.getByRole('radio', { name: 'Šljiva' }).click();
+  await expect(page.getByRole('radio', { name: 'Šljiva' })).toBeChecked();
+  await next.click(); // generate
+  await page
+    .getByRole('button', { name: 'Sačuvaj profil i generiši CV' })
+    .click();
+  await expect(page.getByText('Generisan (Moderan)')).toBeVisible();
+
+  const pdf = await newestGeneratedCv(cand);
+  const { OPS } = await getResolvedPDFJS();
+  const ops = await (await pdf.getPage(1)).getOperatorList();
+  const fills = ops.fnArray.flatMap((fn, i) =>
+    fn === OPS.setFillRGBColor ? [String(ops.argsArray[i]?.[0])] : [],
+  );
+  expect(fills).toContain('#5b2a55');
+  expect(fills).not.toContain('#0b6e65');
 });

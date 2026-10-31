@@ -2,6 +2,7 @@
 
 import type {
   CandidateMeResponse,
+  CvAccent,
   CvEducationEntry,
   CvExperienceEntry,
   CvLocale,
@@ -13,6 +14,8 @@ import type {
   PublicJobTaxonomyItem,
 } from 'contracts';
 import {
+  cvAccentColors,
+  cvAccents,
   cvProfileSchema,
   cvTemplateCodes,
   cvTemplateInfo,
@@ -32,6 +35,8 @@ import {
   Input,
   IsoDatePicker,
   Label,
+  RadioGroup,
+  RadioGroupItem,
   Switch,
   Textarea,
 } from '@/components/ui';
@@ -789,6 +794,36 @@ export function CandidateCvBuildWizard({
                   </button>
                 );
               })}
+            </div>
+            <div className="space-y-2">
+              <h4 id="cv-accent-title" className="text-sm font-medium">
+                {t('accentTitle')}
+              </h4>
+              <RadioGroup
+                aria-labelledby="cv-accent-title"
+                value={cvProfile.accent}
+                disabled={templateCode === 'klasican'}
+                onValueChange={(accent) =>
+                  setCvProfile((p) => ({ ...p, accent: accent as CvAccent }))
+                }
+                className="flex flex-wrap gap-3"
+              >
+                {cvAccents.map((accent) => (
+                  <RadioGroupItem
+                    key={accent}
+                    value={accent}
+                    aria-label={t(`accentNames.${accent}`)}
+                    title={t(`accentNames.${accent}`)}
+                    className="size-9 border-2 border-background data-[state=checked]:ring-2 data-[state=checked]:ring-foreground data-[state=checked]:ring-offset-2"
+                    style={{ backgroundColor: cvAccentColors[accent] }}
+                  />
+                ))}
+              </RadioGroup>
+              {templateCode === 'klasican' ? (
+                <p className="text-xs text-muted-foreground">
+                  {t('accentKlasicanNote')}
+                </p>
+              ) : null}
             </div>
           </section>
         ) : null}
