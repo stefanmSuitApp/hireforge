@@ -28,6 +28,7 @@ export function CandidateProfilePanel({
   resumesError,
 }: Props) {
   const t = useTranslations('Candidate.profile');
+  const tTemplates = useTranslations('Candidate.cvBuild.templateNames');
   const tErrors = useTranslations('Errors');
   const router = useRouter();
   const [fullName, setFullName] = React.useState(initialFullName ?? '');
@@ -189,7 +190,7 @@ export function CandidateProfilePanel({
                         {r.source === 'generated'
                           ? r.templateCode
                             ? t('resumeGeneratedWithTemplate', {
-                                code: r.templateCode,
+                                code: tTemplates(r.templateCode),
                               })
                             : t('resumeGenerated')
                           : t('resumeUploaded')}

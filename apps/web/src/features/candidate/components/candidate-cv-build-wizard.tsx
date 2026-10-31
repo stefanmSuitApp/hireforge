@@ -15,6 +15,7 @@ import type {
 import {
   cvProfileSchema,
   cvTemplateCodes,
+  cvTemplateInfo,
   sanitizeCvProfileForPersist,
 } from 'contracts';
 import dynamic from 'next/dynamic';
@@ -769,6 +770,17 @@ export function CandidateCvBuildWizard({
                     <div className="text-sm font-medium">
                       {cms?.name ?? t(`templateNames.${code}`)}
                     </div>
+                    <span
+                      className={
+                        cvTemplateInfo[code].atsSafe
+                          ? 'mt-1 inline-block rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary'
+                          : 'mt-1 inline-block rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground'
+                      }
+                    >
+                      {cvTemplateInfo[code].atsSafe
+                        ? t('badgeAtsSafe')
+                        : t('badgeTwoColumns')}
+                    </span>
                     {cms?.description ? (
                       <p className="mt-1 text-xs text-muted-foreground line-clamp-3">
                         {cms.description}

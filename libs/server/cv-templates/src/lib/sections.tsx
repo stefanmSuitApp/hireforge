@@ -1,5 +1,5 @@
 import { Text, View } from '@react-pdf/renderer';
-import type { ReactElement, ReactNode } from 'react';
+import { Children, type ReactElement, type ReactNode } from 'react';
 
 import type { CvPdfLayoutInput } from 'contracts';
 
@@ -67,6 +67,28 @@ export function DescriptionText({
   );
 }
 
+/** A heading never ends a page alone: it is kept with the first entry. */
+export function KeepWithFirst({
+  head,
+  children,
+  style,
+}: {
+  head: ReactNode;
+  children: ReactNode;
+  style?: PdfStyle;
+}): ReactElement {
+  const [first, ...rest] = Children.toArray(children);
+  return (
+    <View style={style}>
+      <View wrap={false}>
+        {head}
+        {first}
+      </View>
+      {rest}
+    </View>
+  );
+}
+
 function Section({
   theme,
   title,
@@ -77,20 +99,27 @@ function Section({
   children: ReactNode;
 }): ReactElement {
   if (theme.titleWidth) {
+    // One row per entry, the title in the first: it can't be split from it.
     return (
-      <View style={{ marginTop: theme.gap, flexDirection: 'row' }}>
-        <View style={{ width: theme.titleWidth, paddingRight: 12 }}>
-          <theme.Title>{title}</theme.Title>
-        </View>
-        <View style={{ flex: 1 }}>{children}</View>
+      <View style={{ marginTop: theme.gap }}>
+        {Children.toArray(children).map((item, i) => (
+          <View key={i} style={{ flexDirection: 'row' }} wrap={false}>
+            <View style={{ width: theme.titleWidth, paddingRight: 12 }}>
+              {i === 0 ? <theme.Title>{title}</theme.Title> : null}
+            </View>
+            <View style={{ flex: 1 }}>{item}</View>
+          </View>
+        ))}
       </View>
     );
   }
   return (
-    <View style={{ marginTop: theme.gap }}>
-      <theme.Title>{title}</theme.Title>
+    <KeepWithFirst
+      style={{ marginTop: theme.gap }}
+      head={<theme.Title>{title}</theme.Title>}
+    >
       {children}
-    </View>
+    </KeepWithFirst>
   );
 }
 
@@ -222,6 +251,7 @@ export function extraLines(
     ]);
   }
   if (p.digitalSkills) lines.push([labels.digitalSkills, p.digitalSkills]);
+  if (p.availability) lines.push([labels.availableFrom, p.availability]);
   if (p.links.length) {
     lines.push([
       labels.links,

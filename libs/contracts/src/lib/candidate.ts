@@ -20,6 +20,7 @@ export type {
   CvProfileInput,
   CvSkillEntry,
   CvTemplateCode,
+  CvTemplateInfo,
 } from './cv-profile';
 export {
   candidateGenerateResumeBodySchema,
@@ -29,6 +30,7 @@ export {
   cvProfileSchema,
   cvTemplateCodeSchema,
   cvTemplateCodes,
+  cvTemplateInfo,
   sanitizeCvProfileForPersist,
 } from './cv-profile';
 

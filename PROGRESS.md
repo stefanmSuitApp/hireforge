@@ -101,6 +101,19 @@ pnpm build` (+ `pnpm check:i18n`) = `pnpm verify`; PRs run it locally, CI on
     kept below that. Picker thumbnails: `pnpm cv:previews` (macOS `sips`)
     writes `apps/web/public/cv-templates/<code>.png`; the picker uses them
     when Sanity has no preview image.
+  - **PR 4 done** (`feat/cv-templates-new`): Evropski (Europass structure:
+    label column, CEFR table; no Europass name or logo) and Praktičan
+    (licence, start date, certificates and languages in a box first, big
+    phone). Codes: contracts, migration `0041_cv_template_codes.sql`,
+    Sanity list, messages, registry, thumbnails. Picker facts
+    (`cvTemplateInfo`) live in contracts so the web doesn't load react-pdf;
+    cards show "Pogodan za online prijave" / "Najbolji za slanje direktno".
+    The CV list shows the template name ("Generisan (Praktičan)"), not the
+    code. Stefan asked to check that nothing from the form is lost: the
+    start date ("Kada možeš da počneš") only reached Praktičan; now every
+    template prints it. Tests: every field in every template (unit), and an
+    e2e that fills every field through the UI and checks all five PDFs.
+    Headings never end a page alone (`KeepWithFirst`).
 
 ### Plan steps, verified against code
 
