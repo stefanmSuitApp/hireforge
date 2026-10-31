@@ -895,6 +895,9 @@ Plan and the follow-ups: `docs/plans/STAFF_ACCOUNTS_AND_UPLOADS.md`
   the bucket (downloads would 404 until the copy ran).
 - Docs (hetzner.md §6, env example), test fixtures (nested prefix
   `uploads/staging/`). No behaviour change in the app.
+- Staging switched to the bucket (Stefan ran hetzner.md §6 by hand,
+  2026-10-31): uploaded logos served from `/api/public/company-logos/…`
+  answer 200 `image/webp`. Production still on disk until its deploy.
 
 ## Uploads bucket, part 2a (branch `feat/uploads-storage`, 2026-10-31)
 

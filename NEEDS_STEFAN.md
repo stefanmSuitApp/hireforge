@@ -14,11 +14,11 @@ priority. Remove an item when it is done. **No secrets in this file.**
    still has the old categories).
 2. **Uploads bucket** (code ready since PR 2a): no new bucket, the
    backups' `hireforge` bucket under `uploads/production/` and
-   `uploads/staging/` (your call, 2026-10-31). Switch staging first,
-   production after its deploy: `docs/deployment/hetzner.md` §6 "Uploaded
-   files" (one or two env lines, a copy script, a restart; on your OK I do
-   it on the server).
-   Until then CVs and logos stay on the VM disk, which no backup covers.
+   `uploads/staging/` (your call, 2026-10-31). **Staging is on the bucket**
+   (switched by Stefan, 2026-10-31). Production: after its next deploy,
+   `docs/deployment/hetzner.md` §6 "Uploaded files" (two env lines, the
+   copy script, an API restart, the copy again). Until then production's
+   CVs, logos and CV photos stay on the VM disk, which no backup covers.
    Logos: upload them on the moderator company page ("Logo"), not in
    Sanity; Sanity's logo is only a fallback now.
 3. **CV templates (five, #77–#87 and the picker PR):** staging has them.
