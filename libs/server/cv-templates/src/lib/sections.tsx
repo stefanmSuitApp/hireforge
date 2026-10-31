@@ -8,15 +8,110 @@ import {
   localePdfBoldStyle,
 } from 'server-pdf/locale-fonts';
 
-import { CV_LABELS, formatCvRange } from './labels';
+import { CV_LABELS, formatCvLanguage, formatCvRange } from './labels';
 
 export const pdfBody = localePdfBodyFontFamily();
 
-/** Phone, email and city on one line, whichever the candidate filled in. */
+/** Phone, email (unless hidden) and city on one line, whichever exist. */
 export function contactLine(layout: CvPdfLayoutInput): string {
-  return [layout.phone, layout.email, layout.cityLine]
-    .filter(Boolean)
-    .join(' · ');
+  const email = layout.profile.showEmail ? layout.email : null;
+  return [layout.phone, email, layout.cityLine].filter(Boolean).join(' · ');
+}
+
+/** A job description: lines starting with "-" or "•" become bullets. */
+export function DescriptionText({ text }: { text: string }): ReactElement {
+  const lines = text
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean);
+  return (
+    <View style={{ marginTop: 2 }}>
+      {lines.map((line, i) => {
+        const bullet = /^[-•]\s*/.exec(line);
+        return (
+          <Text key={i} style={{ fontFamily: pdfBody, fontSize: 9 }}>
+            {bullet ? `• ${line.slice(bullet[0].length)}` : line}
+          </Text>
+        );
+      })}
+    </View>
+  );
+}
+
+/** "O meni" under the header, when the candidate wrote one. */
+export function SummarySection({
+  layout,
+}: {
+  layout: CvPdfLayoutInput;
+}): ReactElement | null {
+  if (!layout.profile.summary) return null;
+  return (
+    <View>
+      <SectionTitle>{CV_LABELS[layout.locale].summary}</SectionTitle>
+      <Text style={{ fontFamily: pdfBody, fontSize: 9 }}>
+        {layout.profile.summary}
+      </Text>
+    </View>
+  );
+}
+
+/** Languages, driving licence, certificates, digital skills and links. */
+export function ExtraSections({
+  layout,
+}: {
+  layout: CvPdfLayoutInput;
+}): ReactElement {
+  const labels = CV_LABELS[layout.locale];
+  const { languages, drivingLicences, certificates, digitalSkills, links } =
+    layout.profile;
+  const line = { fontFamily: pdfBody, fontSize: 9 };
+  return (
+    <>
+      {languages.length ? (
+        <View wrap={false}>
+          <SectionTitle>{labels.languages}</SectionTitle>
+          {languages.map((l, i) => (
+            <Text key={i} style={line}>
+              {formatCvLanguage(l.name, l.level, layout.locale)}
+            </Text>
+          ))}
+        </View>
+      ) : null}
+      {drivingLicences.length ? (
+        <View wrap={false}>
+          <SectionTitle>{labels.drivingLicence}</SectionTitle>
+          <Text style={line}>{drivingLicences.join(', ')}</Text>
+        </View>
+      ) : null}
+      {certificates.length ? (
+        <View wrap={false}>
+          <SectionTitle>{labels.certificates}</SectionTitle>
+          {certificates.map((c, i) => (
+            <Text key={i} style={line}>
+              {[c.name, c.issuer].filter(Boolean).join(', ')}
+              {c.year ? ` (${c.year})` : ''}
+            </Text>
+          ))}
+        </View>
+      ) : null}
+      {digitalSkills ? (
+        <View wrap={false}>
+          <SectionTitle>{labels.digitalSkills}</SectionTitle>
+          <Text style={line}>{digitalSkills}</Text>
+        </View>
+      ) : null}
+      {links.length ? (
+        <View wrap={false}>
+          <SectionTitle>{labels.links}</SectionTitle>
+          {links.map((l, i) => (
+            <Text key={i} style={line}>
+              {l.label}: {l.url}
+            </Text>
+          ))}
+        </View>
+      ) : null}
+    </>
+  );
 }
 
 export function SectionTitle({ children }: { children: string }): ReactElement {
@@ -97,13 +192,7 @@ export function BodySections({
               >
                 {formatCvRange(ex.startDate, ex.endDate, layout.locale)}
               </Text>
-              {ex.summary ? (
-                <Text
-                  style={{ fontFamily: pdfBody, fontSize: 9, marginTop: 2 }}
-                >
-                  {ex.summary}
-                </Text>
-              ) : null}
+              {ex.summary ? <DescriptionText text={ex.summary} /> : null}
             </View>
           ))}
         </View>

@@ -7,16 +7,24 @@ import type { PublicJobListItem } from './public-jobs';
 
 export type {
   CandidateGenerateResumeBody,
+  CvCertificateEntry,
+  CvDrivingLicenceCategory,
   CvEducationEntry,
   CvExperienceEntry,
+  CvLanguageEntry,
+  CvLanguageLevel,
+  CvLinkEntry,
   CvLocale,
   CvPdfLayoutInput,
   CvProfile,
+  CvProfileInput,
   CvSkillEntry,
   CvTemplateCode,
 } from './cv-profile';
 export {
   candidateGenerateResumeBodySchema,
+  cvDrivingLicenceCategories,
+  cvLanguageLevels,
   cvLocales,
   cvProfileSchema,
   cvTemplateCodeSchema,

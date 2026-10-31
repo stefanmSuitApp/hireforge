@@ -13,8 +13,10 @@ function cleanOptionalIso(value: string | null | undefined): string | null {
  * Drops incomplete draft rows so Zod validation matches what users expect.
  * Call before `cvProfileSchema.parse` / `safeParse` on PATCH and in the CV builder.
  */
-export function sanitizeCvProfileForPersist(profile: CvProfile): CvProfile {
-  const experiences = profile.experiences
+export function sanitizeCvProfileForPersist(
+  profile: CvProfileInput,
+): CvProfile {
+  const experiences = (profile.experiences ?? [])
     .filter(
       (e) =>
         e.company.trim().length > 0 &&
@@ -29,7 +31,7 @@ export function sanitizeCvProfileForPersist(profile: CvProfile): CvProfile {
       summary: e.summary?.trim() ? e.summary.trim().slice(0, 500) : undefined,
     }));
 
-  const education = profile.education
+  const education = (profile.education ?? [])
     .filter(
       (ed) =>
         ed.institution.trim().length > 0 && ISO_DATE.test(ed.startDate.trim()),
@@ -42,11 +44,51 @@ export function sanitizeCvProfileForPersist(profile: CvProfile): CvProfile {
       endDate: cleanOptionalIso(ed.endDate ?? undefined),
     }));
 
-  const skills = profile.skills
+  const skills = (profile.skills ?? [])
     .filter((s) => s.name.trim().length > 0)
     .map((s) => ({ name: s.name.trim().slice(0, 80) }));
 
-  return { experiences, education, skills };
+  const languages = (profile.languages ?? [])
+    .filter((l) => l.name.trim().length > 0)
+    .map((l) => ({ name: l.name.trim().slice(0, 60), level: l.level }));
+
+  // Unique, in the order a licence lists them.
+  const held = new Set(profile.drivingLicences ?? []);
+  const drivingLicences = cvDrivingLicenceCategories.filter((c) => held.has(c));
+
+  const certificates = (profile.certificates ?? [])
+    .filter((c) => c.name.trim().length > 0)
+    .map((c) => ({
+      name: c.name.trim().slice(0, 120),
+      issuer: optionalText(c.issuer, 120),
+      year: c.year ?? undefined,
+    }));
+
+  const links = (profile.links ?? [])
+    .filter((l) => l.label.trim().length > 0 && l.url.trim().length > 0)
+    .map((l) => ({ label: l.label.trim().slice(0, 40), url: l.url.trim() }));
+
+  return {
+    experiences,
+    education,
+    skills,
+    summary: optionalText(profile.summary, 600),
+    languages,
+    drivingLicences,
+    certificates,
+    links,
+    digitalSkills: optionalText(profile.digitalSkills, 200),
+    availability: optionalText(profile.availability, 120),
+    showEmail: profile.showEmail ?? true,
+  };
+}
+
+function optionalText(
+  value: string | null | undefined,
+  max: number,
+): string | undefined {
+  const v = value?.trim();
+  return v ? v.slice(0, max) : undefined;
 }
 
 export const cvTemplateCodes = ['klasican', 'moderan', 'minimalan'] as const;
@@ -80,16 +122,91 @@ export const cvSkillEntrySchema = z.object({
   name: z.string().trim().min(1).max(80),
 });
 
+/** CEFR levels; `native` is the mother tongue. */
+export const cvLanguageLevels = [
+  'native',
+  'A1',
+  'A2',
+  'B1',
+  'B2',
+  'C1',
+  'C2',
+] as const;
+export type CvLanguageLevel = (typeof cvLanguageLevels)[number];
+
+export const cvLanguageEntrySchema = z.object({
+  name: z.string().trim().min(1).max(60),
+  level: z.enum(cvLanguageLevels),
+});
+
+/** Serbian driving licence categories, in the order a licence lists them. */
+export const cvDrivingLicenceCategories = [
+  'AM',
+  'A1',
+  'A2',
+  'A',
+  'B1',
+  'B',
+  'BE',
+  'C1',
+  'C1E',
+  'C',
+  'CE',
+  'D1',
+  'D1E',
+  'D',
+  'DE',
+  'F',
+  'M',
+] as const;
+export type CvDrivingLicenceCategory =
+  (typeof cvDrivingLicenceCategories)[number];
+
+export const cvCertificateEntrySchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  issuer: z.string().trim().max(120).optional(),
+  year: z
+    .number()
+    .int()
+    .min(1950)
+    .refine((y) => y <= new Date().getFullYear(), 'Year is in the future')
+    .optional(),
+});
+
+export const cvLinkEntrySchema = z.object({
+  label: z.string().trim().min(1).max(40),
+  url: z.url({ protocol: /^https$/ }).max(300),
+});
+
 export const cvProfileSchema = z.object({
   experiences: z.array(cvExperienceEntrySchema).max(15).default([]),
   education: z.array(cvEducationEntrySchema).max(10).default([]),
   skills: z.array(cvSkillEntrySchema).max(40).default([]),
+  /** "O meni": two or three sentences under the name. */
+  summary: z.string().trim().max(600).optional(),
+  languages: z.array(cvLanguageEntrySchema).max(8).default([]),
+  drivingLicences: z
+    .array(z.enum(cvDrivingLicenceCategories))
+    .max(cvDrivingLicenceCategories.length)
+    .default([]),
+  certificates: z.array(cvCertificateEntrySchema).max(15).default([]),
+  links: z.array(cvLinkEntrySchema).max(3).default([]),
+  digitalSkills: z.string().trim().max(200).optional(),
+  /** When the candidate can start, e.g. "odmah", "smene". */
+  availability: z.string().trim().max(120).optional(),
+  /** Print the account email on the CV. */
+  showEmail: z.boolean().default(true),
 });
 
 export type CvExperienceEntry = z.infer<typeof cvExperienceEntrySchema>;
 export type CvEducationEntry = z.infer<typeof cvEducationEntrySchema>;
 export type CvSkillEntry = z.infer<typeof cvSkillEntrySchema>;
 export type CvProfile = z.infer<typeof cvProfileSchema>;
+/** A profile before defaults: older rows and form state may lack the newer fields. */
+export type CvProfileInput = z.input<typeof cvProfileSchema>;
+export type CvLanguageEntry = z.infer<typeof cvLanguageEntrySchema>;
+export type CvCertificateEntry = z.infer<typeof cvCertificateEntrySchema>;
+export type CvLinkEntry = z.infer<typeof cvLinkEntrySchema>;
 
 /** Payload for PDF layout (resolved scalars + structured sections). */
 export type CvPdfLayoutInput = {
