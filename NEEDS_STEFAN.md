@@ -13,12 +13,14 @@ priority. Remove an item when it is done. **No secrets in this file.**
    has #59's home tiles, About and navigation (seeded 2026-10-30), so
    sljakam.com shows **no category tiles until this deploy** (its database
    still has the old categories).
-2. **Uploads bucket** (for `docs/plans/STAFF_ACCOUNTS_AND_UPLOADS.md`
-   PR 2): Hetzner Console → Object Storage → create a **private** bucket
+2. **Uploads bucket** (code ready since PR 2a, `feat/uploads-storage`):
+   Hetzner Console → Object Storage → create a **private** bucket
    `hireforge-uploads` in nbg1, DEVLEGION project (the existing keys reach
-   it; no new secrets). Until then CVs stay on the VM disk, which no backup
-   covers. Also: hold off on uploading logos in Sanity; they move to the
-   bucket in that PR.
+   it; no new secrets). Then switch staging first, production later:
+   `docs/deployment/hetzner.md` §6 "Uploaded files" (two env lines, a copy
+   script, a restart; I can walk you through it or do it on your OK).
+   Until then CVs stay on the VM disk, which no backup covers. Also: hold
+   off on uploading logos in Sanity; they move to the bucket in PR 2b.
 3. When convenient: `sudo systemctl restart docker` (item 2), Sentry (3),
    accountant (4), legal texts (5), Phase T decisions, social profiles,
    analytics, Google Indexing API.

@@ -848,6 +848,25 @@ Plan and the follow-ups: `docs/plans/STAFF_ACCOUNTS_AND_UPLOADS.md`
   (branch `fix/admin-company-create`, e2e `admin-companies.spec.ts`, shown
   failing first).
 
+## Uploads bucket, part 2a (branch `feat/uploads-storage`, 2026-10-31)
+
+- CVs (uploaded and generated) are stored through one
+  `UploadStorageService`: the private bucket `hireforge-uploads` under
+  `S3_UPLOADS_PREFIX` (`production/`, `staging/`) once
+  `S3_UPLOADS_BUCKET` is set, the old `api_var` folder until then (so this
+  deploys safely before the bucket exists). A bucket without prefix/keys
+  refuses to boot.
+- `scripts/storage/copy-uploads-to-bucket.mjs` (in the api image) copies
+  existing CVs; re-runnable, deletes nothing. Steps:
+  `docs/deployment/hetzner.md` §6. `staging-init.sh` shares the bucket and
+  sets `staging/`.
+- Tests: integration against an S3 server (`adobe/s3mock` container):
+  upload/download/delete land under the prefix with nothing on disk, a
+  missing object is a clean 404, the copy script copies then skips;
+  shown failing before. Units for the disk mode, unsafe keys, missing
+  prefix.
+- Waiting on Stefan: create the bucket (NEEDS_STEFAN 2). Next: 2b logos.
+
 ## Analytics: Google Analytics 4 under the same banner (branch `feat/ga4-consent`, 2026-10-31)
 
 - Stefan created the GA4 property (`G-6C1CJ9FVC6`, account "Šljakam",
