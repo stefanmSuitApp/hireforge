@@ -1447,7 +1447,16 @@
       "availability": "When you can start",
       "availabilityPlaceholder": "e.g. right away, from 1 December, shift work",
       "badgeAtsSafe": "Good for online applications",
-      "badgeTwoColumns": "Best sent directly"
+      "badgeTwoColumns": "Best sent directly",
+      "accentTitle": "Colour",
+      "accentNames": {
+        "teal": "Teal",
+        "navy": "Navy",
+        "plum": "Plum",
+        "burgundy": "Burgundy",
+        "graphite": "Graphite"
+      },
+      "accentKlasicanNote": "Klasičan is always black and white."
     }
   },
   "Integration": {

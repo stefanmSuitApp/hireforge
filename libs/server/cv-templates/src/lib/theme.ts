@@ -1,11 +1,14 @@
+import { cvAccentColors, type CvPdfLayoutInput } from 'contracts';
 import { PDF_BODY_FONT, PDF_SERIF_FONT } from 'server-pdf/locale-fonts';
 
 /** Colours and fonts every template draws with (1 pt = 1/595 of A4 width). */
 export const CV_INK = '#1B1F22';
 export const CV_MUTED = '#5B6468';
 export const CV_RULE = '#D9DEE0';
-/** Šljakam teal; PR 5 lets the candidate pick another accent. */
-export const CV_ACCENT = '#0B6E65';
+/** The accent the candidate picked (Šljakam teal by default). */
+export function accentOf(layout: CvPdfLayoutInput): string {
+  return cvAccentColors[layout.profile.accent ?? 'teal'];
+}
 
 export const SANS = PDF_BODY_FONT;
 export const SERIF = PDF_SERIF_FONT;

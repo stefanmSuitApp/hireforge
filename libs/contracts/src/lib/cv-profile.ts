@@ -80,6 +80,7 @@ export function sanitizeCvProfileForPersist(
     digitalSkills: optionalText(profile.digitalSkills, 200),
     availability: optionalText(profile.availability, 120),
     showEmail: profile.showEmail ?? true,
+    accent: profile.accent ?? 'teal',
   };
 }
 
@@ -115,6 +116,25 @@ export const cvTemplateInfo: Record<CvTemplateCode, CvTemplateInfo> = {
   minimalan: { columns: 1, atsSafe: true, supportsPhoto: false },
   evropski: { columns: 1, atsSafe: true, supportsPhoto: false },
   prakticni: { columns: 1, atsSafe: true, supportsPhoto: false },
+};
+
+/** Accent colours a candidate can pick; Klasičan stays black and white. */
+export const cvAccents = [
+  'teal',
+  'navy',
+  'plum',
+  'burgundy',
+  'graphite',
+] as const;
+export type CvAccent = (typeof cvAccents)[number];
+
+/** Dark enough for white text on them and for coloured text on white (≥ 4.5:1). */
+export const cvAccentColors: Record<CvAccent, string> = {
+  teal: '#0B6E65',
+  navy: '#1F3A5F',
+  plum: '#5B2A55',
+  burgundy: '#7A1F2B',
+  graphite: '#2F3437',
 };
 
 /** Language of the CV's own words (section titles, months), the builder's locale. */
@@ -218,6 +238,8 @@ export const cvProfileSchema = z.object({
   availability: z.string().trim().max(120).optional(),
   /** Print the account email on the CV. */
   showEmail: z.boolean().default(true),
+  /** Colour of headings and the sidebar; remembered for the next CV. */
+  accent: z.enum(cvAccents).default('teal'),
 });
 
 export type CvExperienceEntry = z.infer<typeof cvExperienceEntrySchema>;

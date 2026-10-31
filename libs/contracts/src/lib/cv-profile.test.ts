@@ -3,6 +3,8 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  cvAccentColors,
+  cvAccents,
   cvProfileSchema,
   sanitizeCvProfileForPersist,
   type CvProfileInput,
@@ -97,4 +99,25 @@ describe('CV profile', () => {
       }),
     ).toBe(false);
   });
+
+  it('remembers the accent colour, teal unless picked, and refuses others', () => {
+    expect(cvProfileSchema.parse({}).accent).toBe('teal');
+    expect(cvProfileSchema.parse({ accent: 'plum' }).accent).toBe('plum');
+    expect(cvProfileSchema.safeParse({ accent: 'pink' }).success).toBe(false);
+  });
+
+  // White sidebar text sits on the accent; headings in the accent sit on white.
+  it.each(cvAccents)(
+    'the %s accent has 4.5:1 contrast with white',
+    (accent) => {
+      const hex = cvAccentColors[accent];
+      const channel = (i: number) => {
+        const c = Number.parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16) / 255;
+        return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+      };
+      const lum =
+        0.2126 * channel(0) + 0.7152 * channel(1) + 0.0722 * channel(2);
+      expect((1 + 0.05) / (lum + 0.05)).toBeGreaterThanOrEqual(4.5);
+    },
+  );
 });

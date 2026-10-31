@@ -5,7 +5,7 @@ import type { CvPdfLayoutInput } from 'contracts';
 
 import { CV_LABELS, cvLevelBand, formatCvRange } from '../labels';
 import { DescriptionText, formatCertificate, KeepWithFirst } from '../sections';
-import { CV_ACCENT, CV_INK, CV_MUTED, CV_RULE, SANS, tint } from '../theme';
+import { accentOf, CV_INK, CV_MUTED, CV_RULE, SANS, tint } from '../theme';
 
 // The European (Europass) structure Serbian candidates and public employers
 // know: a label column beside the content, row by row, CEFR language levels.
@@ -96,7 +96,7 @@ export function EvropskiDoc({
 }: {
   layout: CvPdfLayoutInput;
 }): ReactElement {
-  const accent = CV_ACCENT;
+  const accent = accentOf(layout);
   const labels = CV_LABELS[layout.locale];
   const p = layout.profile;
   const email = p.showEmail ? layout.email : null;

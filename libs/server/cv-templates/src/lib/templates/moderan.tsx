@@ -13,7 +13,7 @@ import {
   SummarySection,
   type CvTheme,
 } from '../sections';
-import { CV_ACCENT, CV_INK, CV_MUTED, SANS, tint } from '../theme';
+import { accentOf, CV_INK, CV_MUTED, SANS, tint } from '../theme';
 
 // Coloured sidebar (contact, skills, languages, licence) beside the story.
 // Two columns: for a person to read, not the safest for CV scanners.
@@ -95,7 +95,7 @@ export function ModeranDoc({
 }: {
   layout: CvPdfLayoutInput;
 }): ReactElement {
-  const accent = CV_ACCENT;
+  const accent = accentOf(layout);
   const theme = makeTheme(accent);
   const labels = CV_LABELS[layout.locale];
   const p = layout.profile;

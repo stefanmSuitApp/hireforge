@@ -7,6 +7,7 @@ import type { PublicJobListItem } from './public-jobs';
 
 export type {
   CandidateGenerateResumeBody,
+  CvAccent,
   CvCertificateEntry,
   CvDrivingLicenceCategory,
   CvEducationEntry,
@@ -24,6 +25,8 @@ export type {
 } from './cv-profile';
 export {
   candidateGenerateResumeBodySchema,
+  cvAccentColors,
+  cvAccents,
   cvDrivingLicenceCategories,
   cvLanguageLevels,
   cvLocales,
