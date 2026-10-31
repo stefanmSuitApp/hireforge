@@ -1,6 +1,7 @@
 'use client';
 
 import type { CandidateResumeItem } from 'contracts';
+import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
@@ -28,8 +29,14 @@ export function CandidateProfilePanel({
 }: Props) {
   const t = useTranslations('Candidate.profile');
   const tErrors = useTranslations('Errors');
+  const router = useRouter();
   const [fullName, setFullName] = React.useState(initialFullName ?? '');
+  const [savedName, setSavedName] = React.useState(
+    (initialFullName ?? '').trim(),
+  );
+  const [savedVisible, setSavedVisible] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
+  const dirty = fullName.trim() !== savedName;
   const [uploading, setUploading] = React.useState(false);
   const [resumes, setResumes] = React.useState(initialResumes);
   const [error, setError] = React.useState<string | null>(null);
@@ -39,10 +46,16 @@ export function CandidateProfilePanel({
     e.preventDefault();
     setError(null);
     setSaving(true);
+    const next = fullName.trim();
     try {
       await webHttp.patch('/api/candidate/profile', {
-        fullName: fullName.trim() || null,
+        fullName: next || null,
       });
+      setFullName(next);
+      setSavedName(next);
+      setSavedVisible(true);
+      // The account title and header menu are server-rendered from this name.
+      router.refresh();
     } catch (err) {
       setError(getTranslatedApiErrorMessage(err, tErrors as ErrorsTranslator));
     } finally {
@@ -88,19 +101,36 @@ export function CandidateProfilePanel({
           <CardTitle className="text-base">{t('nameSection')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={saveName} className="max-w-md space-y-4">
+          <form onSubmit={saveName} className="max-w-xl space-y-4">
             <div className="space-y-2">
               <Label htmlFor="fullName">{t('fullNameLabel')}</Label>
-              <Input
-                id="fullName"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                autoComplete="name"
-              />
+              <p className="text-sm text-muted-foreground">{t('nameHint')}</p>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <Input
+                  id="fullName"
+                  value={fullName}
+                  onChange={(e) => {
+                    setFullName(e.target.value);
+                    setSavedVisible(false);
+                  }}
+                  autoComplete="name"
+                  className="sm:max-w-sm"
+                />
+                <div className="flex items-center gap-3">
+                  <Button type="submit" disabled={saving || !dirty} size="sm">
+                    {saving ? t('saving') : t('saveName')}
+                  </Button>
+                  {savedVisible && !dirty ? (
+                    <span
+                      className="text-sm text-muted-foreground"
+                      role="status"
+                    >
+                      {t('nameSaved')}
+                    </span>
+                  ) : null}
+                </div>
+              </div>
             </div>
-            <Button type="submit" disabled={saving} size="sm">
-              {saving ? t('saving') : t('saveName')}
-            </Button>
           </form>
         </CardContent>
       </Card>
