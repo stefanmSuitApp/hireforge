@@ -7,7 +7,9 @@ import {
   type NotificationEmail,
 } from './notification-templates';
 import {
+  accountInviteMessage,
   emailLocale,
+  type EmailLocale,
   escapeHtml,
   passwordResetMessage,
   renderActionEmail,
@@ -90,6 +92,10 @@ describe.each(['sr', 'en'] as const)('notifications in %s', (locale) => {
   it.each([
     ['verification', verifyEmailMessage],
     ['password reset', passwordResetMessage],
+    [
+      'account invite',
+      (l: EmailLocale, u: string) => accountInviteMessage(l, u, 'Firma d.o.o.'),
+    ],
   ] as const)(
     '%s email renders completely with its validity footnote',
     (_, render) => {

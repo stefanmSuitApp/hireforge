@@ -5,8 +5,9 @@ Living status file. **Trust this over the `Status:` lines in
 which went stale during the Cursor phase (Steps 4, 5, 14, 15 say "pending"
 but shipped). Update this file in the same PR as the work.
 
-Last updated: 2026-10-31 (candidate display name refreshes after save).
-Open items for Stefan: [`NEEDS_STEFAN.md`](./NEEDS_STEFAN.md).
+Last updated: 2026-10-31 (staff-created employer accounts; candidate
+display name refresh). Open items for Stefan:
+[`NEEDS_STEFAN.md`](./NEEDS_STEFAN.md).
 
 ## Current state
 
@@ -759,6 +760,32 @@ public pages and the two sign-up pages**, no cookieless counter for now.
   in `docs/legal/README.md`. `cms:seed:legal` gained `--only <kind>` and
   per-page dates. **Not live:** waits for Stefan to read the text and send
   the project id (NEEDS_STEFAN).
+
+## Staff-created employer accounts (branch `feat/staff-employer-accounts`, 2026-10-31)
+
+Plan and the follow-ups: `docs/plans/STAFF_ACCOUNTS_AND_UPLOADS.md`
+(owner: session `hireforge-tests-b3`; PR 2 there is the uploads bucket).
+
+- **Stefan's decisions:** companies never upload logos or photos, staff do;
+  a company can exist without an account; staff create accounts by invite
+  link; every uploaded file (CVs, candidate photos, job images, logos)
+  moves to one private Hetzner bucket; Sanity keeps editorial content.
+- On the moderator company page: **Add account** (email + invite language)
+  links the account at once and emails a 7-day, single-use link; the link
+  is also shown with **Copy link** (instead of a temporary password, which
+  would have needed a forced change-password screen). Members show
+  "Čeka aktivaciju" / "Aktivan", with **Pošalji ponovo** until activated.
+  Audited as `employer_account.invite` / `invite_resend`.
+- `/{locale}/accept-invite` sets the password, verifies the email, records
+  the terms version (BFF, as on sign-up) and signs out other sessions.
+- Staff-created companies need PIB or MB (foreign: VAT ID, tax ID or
+  registration number), so a later self-signup matches instead of making a
+  duplicate company.
+- Migration `0039_auth_tokens_account_invite` (token purpose). Found on
+  the way: CVs live on the VM in `api_var`, which no backup covers (PR 2).
+- Tests: e2e (create company → add account → email → activate → sign in;
+  resend voids the old link), shown failing before the change;
+  integration `staff-accounts.int.test.ts` (9); contracts and email units.
 
 ## Analytics: Google Analytics 4 under the same banner (branch `feat/ga4-consent`, 2026-10-31)
 

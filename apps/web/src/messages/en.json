@@ -791,7 +791,7 @@
       "no": "No",
       "open": "Open",
       "createHeading": "Register a company",
-      "createLead": "Creates an empty company record. Link employer accounts from the Employers screen.",
+      "createLead": "A company can exist without an account. Add an employer account on the company screen after creating it.",
       "legalName": "Legal name",
       "slug": "URL slug",
       "verified": "Verified employer",
@@ -800,8 +800,6 @@
       "saved": "Saved.",
       "create": "Create company",
       "creating": "Creating…",
-      "membersHeading": "Employer accounts",
-      "noMembers": "No employer users are linked to this company yet.",
       "editHeading": "Company details",
       "viewMy": "My companies",
       "viewPool": "Lead pool",
@@ -831,7 +829,37 @@
       "closeLostNotePlaceholder": "Reason or context",
       "confirmCloseLost": "Mark this lead as closed lost and release it?",
       "confirmCloseLostSubmit": "Confirm close lost",
-      "createListing": "Create listing (staff)"
+      "createListing": "Create listing (staff)",
+      "foreign": "Foreign company",
+      "pib": "PIB",
+      "mb": "MB",
+      "countryCode": "Country (ISO code, e.g. DE)",
+      "vatId": "VAT ID (EU)",
+      "taxId": "Tax ID (outside the EU)",
+      "registrationNumber": "Registration number",
+      "identifierHint": "Enter the PIB or MB. That is how we recognise the company when someone from it signs up, so no duplicate is created.",
+      "identifierHintForeign": "Enter the VAT ID, tax ID or registration number, so we recognise the company when someone from it signs up.",
+      "accounts": {
+        "heading": "Employer accounts",
+        "none": "No accounts yet. The company can exist without one, and you can add one at any time.",
+        "active": "Active",
+        "waiting": "Waiting for activation",
+        "resend": "Resend",
+        "sending": "Sending…",
+        "sent": "Invite sent to {email}.",
+        "notSent": "The account for {email} was created, but the email was not sent. Send the link below another way.",
+        "linkLabel": "Activation link",
+        "copy": "Copy link",
+        "copied": "Copied",
+        "linkHint": "The link is valid for 7 days and works once. Whoever has it can set the password, so send it only to the person at the company.",
+        "addHeading": "Add an account",
+        "email": "Account email",
+        "language": "Invite language",
+        "languageSr": "Serbian",
+        "languageEn": "English",
+        "addHint": "The person gets an email with a link to set a password. The account is linked to this company right away.",
+        "send": "Send invite"
+      }
     },
     "jobsNew": {
       "noSubscriptionsTitle": "No active package",
@@ -1237,7 +1265,10 @@
     "tableRenderFailed": "Could not render this table right now.",
     "apiNotConfigured": "The service is not available right now. Please try again in a few minutes.",
     "CAMPAIGN_NOT_FOUND": "That campaign was not found.",
-    "CAMPAIGN_OVERLAP": "Another active campaign already runs in that period. Pause it or pick other dates."
+    "CAMPAIGN_OVERLAP": "Another active campaign already runs in that period. Pause it or pick other dates.",
+    "COMPANY_IDENTIFIER_REQUIRED": "Enter the PIB or MB (for a foreign company: VAT ID, tax ID or registration number).",
+    "STAFF_ACCOUNT_EMAIL_TAKEN": "This email already has an account. If that person signed up on their own, approve their join request instead.",
+    "ACCOUNT_ALREADY_ACTIVE": "This account is already active; no new invite is needed."
   },
   "Candidate": {
     "workspaceLabel": "Candidate account",
@@ -1427,7 +1458,12 @@
     "resendVerificationSent": "Sent. Check your inbox and spam folder.",
     "forgotPasswordLink": "Forgot your password?",
     "passwordShow": "Show password",
-    "passwordHide": "Hide password"
+    "passwordHide": "Hide password",
+    "inviteTitle": "Activate your account",
+    "inviteSubtitle": "The Šljakam team opened an account for your company. Set a password and sign in.",
+    "inviteSubmit": "Activate account",
+    "inviteDone": "Your account is activated. Now sign in with your email and new password.",
+    "inviteLinkMissing": "The link is incomplete. Open it again from the email, or ask your Šljakam contact for a new one."
   },
   "Landing": {
     "cityTitle": "Jobs in {city}",

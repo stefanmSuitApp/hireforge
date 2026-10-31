@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { eq, sql } from 'drizzle-orm';
 import { users } from 'database';
 import {
+  accountInviteMessage,
   appPublicOrigin,
   type EmailLocale,
   type RenderedEmail,
@@ -12,7 +13,11 @@ import {
 
 import { codedBadRequest, codedServiceUnavailable } from '../http/coded-http';
 import { getDb } from '../database';
-import { consumeAuthToken, issueAuthToken } from './auth-tokens';
+import {
+  type AuthTokenPurpose,
+  consumeAuthToken,
+  issueAuthToken,
+} from './auth-tokens';
 import { hashPassword } from './password';
 
 /**
@@ -182,10 +187,66 @@ export class AuthEmailService {
   }
 
   async resetPassword(token: string, password: string): Promise<{ ok: true }> {
+    return this.setPasswordFromLink(token, 'password_reset', password);
+  }
+
+  /**
+   * Staff-created account (no password yet): issues an invite link and emails
+   * it. The link is returned too, so staff can pass it on another way; a
+   * failed send must not lose the account that was just created.
+   */
+  async sendAccountInvite(input: {
+    userId: string;
+    email: string;
+    companyName: string;
+    locale: EmailLocale;
+  }): Promise<{ inviteUrl: string; emailSent: boolean }> {
+    const { db } = this.requireDb();
+    const token = await issueAuthToken(db, input.userId, 'account_invite');
+    const inviteUrl = this.link(input.locale, 'accept-invite', token);
+    let emailSent = false;
+    try {
+      emailSent = await this.deliver(
+        input.email,
+        accountInviteMessage(input.locale, inviteUrl, input.companyName),
+        inviteUrl,
+      );
+    } catch (error) {
+      this.logger.error(
+        `account invite email failed for user ${input.userId}: ${
+          error instanceof Error ? error.message : 'unknown error'
+        }`,
+      );
+    }
+    return { inviteUrl, emailSent };
+  }
+
+  /** The invited person never saw a sign-up form, so the terms are accepted here. */
+  async acceptInvite(
+    token: string,
+    password: string,
+    acceptedTermsVersion: string | undefined,
+  ): Promise<{ ok: true }> {
+    return this.setPasswordFromLink(
+      token,
+      'account_invite',
+      password,
+      acceptedTermsVersion
+        ? { termsVersion: acceptedTermsVersion, termsAcceptedAt: new Date() }
+        : {},
+    );
+  }
+
+  private async setPasswordFromLink(
+    token: string,
+    purpose: Extract<AuthTokenPurpose, 'password_reset' | 'account_invite'>,
+    password: string,
+    extra: Partial<typeof users.$inferInsert> = {},
+  ): Promise<{ ok: true }> {
     const { db } = this.requireDb();
     const passwordHash = await hashPassword(password);
-    const reset = await db.transaction(async (tx) => {
-      const userId = await consumeAuthToken(tx, token, 'password_reset');
+    const done = await db.transaction(async (tx) => {
+      const userId = await consumeAuthToken(tx, token, purpose);
       if (!userId) {
         return false;
       }
@@ -197,6 +258,7 @@ export class AuthEmailService {
       await tx
         .update(users)
         .set({
+          ...extra,
           passwordHash,
           updatedAt: new Date(),
           // Sign out every existing session (someone may know the old password).
@@ -207,7 +269,7 @@ export class AuthEmailService {
         .where(eq(users.id, userId));
       return true;
     });
-    if (!reset) {
+    if (!done) {
       throw codedBadRequest(
         'AUTH_TOKEN_INVALID',
         'This link is invalid or has expired',

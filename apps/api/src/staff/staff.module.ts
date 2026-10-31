@@ -5,7 +5,9 @@ import { AdminCampaignsService } from '../admin/admin-campaigns.service';
 import { AdminPromoCodesService } from '../admin/admin-promo-codes.service';
 import { PublicCampaignController } from '../admin/public-campaign.controller';
 import { AdminService } from '../admin/admin.service';
+import { AuthModule } from '../auth/auth.module';
 import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
+import { StaffAccountsService } from './staff-accounts.service';
 import { StaffAuditService } from './staff-audit.service';
 import { StaffCompaniesController } from './staff-companies.controller';
 import { StaffCompaniesService } from './staff-companies.service';
@@ -15,9 +17,10 @@ import { StaffJoinRequestsController } from './staff-join-requests.controller';
 import { StaffJoinRequestsService } from './staff-join-requests.service';
 
 @Module({
-  imports: [SubscriptionsModule],
+  imports: [AuthModule, SubscriptionsModule],
   providers: [
     StaffAuditService,
+    StaffAccountsService,
     StaffCompaniesService,
     StaffEmployersService,
     StaffJoinRequestsService,

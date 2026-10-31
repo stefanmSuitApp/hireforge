@@ -3,7 +3,7 @@
 Things Claude could not (or must not) do alone. Newest first within each
 priority. Remove an item when it is done. **No secrets in this file.**
 
-## ▶ Next, in order (updated 2026-10-29)
+## ▶ Next, in order (updated 2026-10-31)
 
 1. Redesign A (2026-10-29, #60–#64): staging has every step; production
    is the manual `deploy-production` run when you are happy with staging.
@@ -13,7 +13,13 @@ priority. Remove an item when it is done. **No secrets in this file.**
    has #59's home tiles, About and navigation (seeded 2026-10-30), so
    sljakam.com shows **no category tiles until this deploy** (its database
    still has the old categories).
-2. When convenient: `sudo systemctl restart docker` (item 2), Sentry (3),
+2. **Uploads bucket** (for `docs/plans/STAFF_ACCOUNTS_AND_UPLOADS.md`
+   PR 2): Hetzner Console → Object Storage → create a **private** bucket
+   `hireforge-uploads` in nbg1, DEVLEGION project (the existing keys reach
+   it; no new secrets). Until then CVs stay on the VM disk, which no backup
+   covers. Also: hold off on uploading logos in Sanity; they move to the
+   bucket in that PR.
+3. When convenient: `sudo systemctl restart docker` (item 2), Sentry (3),
    accountant (4), legal texts (5), Phase T decisions, social profiles,
    analytics, Google Indexing API.
 

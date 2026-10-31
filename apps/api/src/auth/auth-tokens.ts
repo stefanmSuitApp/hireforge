@@ -3,11 +3,16 @@ import { createHash, randomBytes } from 'node:crypto';
 import { and, eq, isNull } from 'drizzle-orm';
 import { authTokens, type DrizzleDb, type DrizzleTransaction } from 'database';
 
-export type AuthTokenPurpose = 'email_verify' | 'password_reset';
+export type AuthTokenPurpose =
+  | 'email_verify'
+  | 'password_reset'
+  | 'account_invite';
 
 export const AUTH_TOKEN_TTL_MS: Record<AuthTokenPurpose, number> = {
   email_verify: 48 * 60 * 60 * 1000,
   password_reset: 60 * 60 * 1000,
+  // Staff send it to a company they're talking to; an hour is too short.
+  account_invite: 7 * 24 * 60 * 60 * 1000,
 };
 
 export function hashAuthToken(raw: string): string {

@@ -375,7 +375,7 @@ export const authTokens = pgTable(
     userId: uuid('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
-    /** `email_verify | password_reset` (`text + CHECK`). */
+    /** `email_verify | password_reset | account_invite` (`text + CHECK`). */
     purpose: text('purpose').notNull(),
     tokenHash: text('token_hash').notNull(),
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
@@ -387,7 +387,7 @@ export const authTokens = pgTable(
   (t) => [
     check(
       'auth_tokens_purpose_check',
-      sql`${t.purpose} IN ('email_verify', 'password_reset')`,
+      sql`${t.purpose} IN ('email_verify', 'password_reset', 'account_invite')`,
     ),
     uniqueIndex('auth_tokens_token_hash_unique').on(t.tokenHash),
     index('auth_tokens_user_purpose_idx').on(t.userId, t.purpose),

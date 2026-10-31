@@ -77,7 +77,11 @@ describe('a moderator works the sales pipeline', () => {
     const res = await http(app)
       .post('/api/moderator/companies')
       .set(moderator.headers)
-      .send({ slug: 'zauzet-slug', legalName: 'Neko Drugi d.o.o.' });
+      .send({
+        slug: 'zauzet-slug',
+        legalName: 'Neko Drugi d.o.o.',
+        pib: '108000002',
+      });
     expect(res.status).toBe(409);
   });
 

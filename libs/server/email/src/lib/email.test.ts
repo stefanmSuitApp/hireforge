@@ -2,7 +2,11 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { appPublicOrigin, sendEmail } from './send-email';
 import { notificationMessage } from './notification-templates';
-import { passwordResetMessage, verifyEmailMessage } from './templates';
+import {
+  accountInviteMessage,
+  passwordResetMessage,
+  verifyEmailMessage,
+} from './templates';
 
 describe('templates', () => {
   it('escapes the link in HTML and keeps it raw in text', () => {
@@ -20,6 +24,16 @@ describe('templates', () => {
     const msg = passwordResetMessage('en', 'https://x.test/r');
     expect(msg.subject).toBe('Šljakam — reset your password');
     expect(msg.text).toContain('Set a new password: https://x.test/r');
+  });
+});
+
+describe('accountInviteMessage', () => {
+  it('names the company, escaped in HTML', () => {
+    const msg = accountInviteMessage('sr', 'https://x.test/i', 'A <b> d.o.o.');
+    expect(msg.subject).toBe('Šljakam — pozvani ste na nalog kompanije');
+    expect(msg.text).toContain('A <b> d.o.o.');
+    expect(msg.html).toContain('A &lt;b&gt; d.o.o.');
+    expect(msg.text).toContain('Aktiviraj nalog: https://x.test/i');
   });
 });
 

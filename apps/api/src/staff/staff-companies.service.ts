@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import {
+  companyHasIdentifier,
   isEUCountry,
   type StaffCompanyCloseLostBody,
   type StaffCompanyCreateBody,
@@ -214,10 +215,12 @@ export class StaffCompaniesService {
         employerId: employers.id,
         userId: employers.userId,
         email: users.email,
+        passwordHash: users.passwordHash,
       })
       .from(employers)
       .innerJoin(users, eq(employers.userId, users.id))
-      .where(eq(employers.companyId, companyId));
+      .where(eq(employers.companyId, companyId))
+      .orderBy(employers.createdAt);
 
     const iso = (d: Date | null | undefined) => (d ? d.toISOString() : null);
 
@@ -234,6 +237,7 @@ export class StaffCompaniesService {
         employerId: m.employerId,
         userId: m.userId,
         email: m.email,
+        activated: m.passwordHash != null,
       })),
       isForeign: row.isForeign,
       countryCode: row.countryCode,
@@ -279,6 +283,15 @@ export class StaffCompaniesService {
       throw codedServiceUnavailable(
         'DATABASE_UNAVAILABLE',
         'Database is not configured (DATABASE_URL)',
+      );
+    }
+
+    if (!companyHasIdentifier(body)) {
+      throw codedBadRequest(
+        'COMPANY_IDENTIFIER_REQUIRED',
+        body.isForeign
+          ? 'A VAT ID, tax ID or registration number is required'
+          : 'A PIB or MB is required',
       );
     }
 

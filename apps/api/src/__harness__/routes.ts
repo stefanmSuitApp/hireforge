@@ -35,6 +35,9 @@ export const ROUTES: Record<string, Access> = {
   'POST /api/auth/password-reset/confirm': PUBLIC(
     'the emailed token is the credential',
   ),
+  'POST /api/auth/invite/accept': PUBLIC(
+    'the emailed (or staff-shared) invite token is the credential',
+  ),
   'POST /api/auth/verify-email/resend': SESSION,
 
   'GET /api/public/jobs/filters': PUBLIC('taxonomy for the filter UI'),
@@ -109,6 +112,8 @@ export const ROUTES: Record<string, Access> = {
   'GET /api/moderator/companies': STAFF,
   'GET /api/moderator/companies/:id': STAFF,
   'POST /api/moderator/companies': STAFF,
+  'POST /api/moderator/companies/:id/accounts': STAFF,
+  'POST /api/moderator/companies/:id/accounts/:userId/invite': STAFF,
   'POST /api/moderator/companies/:id/pickup': STAFF,
   'POST /api/moderator/companies/:id/close-won': STAFF,
   'POST /api/moderator/companies/:id/close-lost': STAFF,

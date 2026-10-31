@@ -41,6 +41,7 @@ describe('analyticsRecordsPath', () => {
     '/sign-in',
     '/forgot-password',
     '/reset-password',
+    '/accept-invite',
     '/verify-email',
     '/integration',
   ])('never records %s', (path) => {

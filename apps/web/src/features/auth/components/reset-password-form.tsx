@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useState, type SubmitEvent } from 'react';
 
 import { Button, Label, PasswordInput } from '@/components/ui';
+import { SignUpLegalNotice } from '@/features/legal/legal-links';
 import { Link } from '@/i18n/navigation';
 import {
   getTranslatedApiErrorMessage,
@@ -12,8 +13,20 @@ import {
 } from '@/lib/http/api-error-message';
 import { webHttp } from '@/lib/http/web-axios';
 
-/** Token comes from the emailed link; nothing is consumed until the form is submitted. */
-export function ResetPasswordForm({ token }: { token: string }) {
+/**
+ * Token comes from the emailed link; nothing is consumed until the form is
+ * submitted. `invite`: a staff-created employer account sets its first
+ * password (and accepts the terms, as on sign-up).
+ */
+export function ResetPasswordForm({
+  token,
+  mode = 'reset',
+}: {
+  token: string;
+  mode?: 'reset' | 'invite';
+}) {
+  const invite = mode === 'invite';
+  const idPrefix = invite ? 'invite-password' : 'reset-password';
   const t = useTranslations('AccountEmail');
   const tErrors = useTranslations('Errors');
   const [password, setPassword] = useState('');
@@ -22,7 +35,10 @@ export function ResetPasswordForm({ token }: { token: string }) {
 
   const reset = useMutation({
     mutationFn: () =>
-      webHttp.post('/api/auth/password-reset/confirm', { token, password }),
+      webHttp.post(
+        invite ? '/api/auth/invite/accept' : '/api/auth/password-reset/confirm',
+        { token, password },
+      ),
   });
 
   function onSubmit(e: SubmitEvent<HTMLFormElement>) {
@@ -39,10 +55,12 @@ export function ResetPasswordForm({ token }: { token: string }) {
     return (
       <div className="flex flex-col gap-4 text-sm">
         <p role="status" className="m-0 text-foreground">
-          {t('resetDone')}
+          {invite ? t('inviteDone') : t('resetDone')}
         </p>
         <Button asChild className="h-11 rounded-full">
-          <Link href="/sign-in">{t('goToSignIn')}</Link>
+          <Link href={invite ? '/employer/login' : '/sign-in'}>
+            {t('goToSignIn')}
+          </Link>
         </Button>
       </div>
     );
@@ -51,9 +69,9 @@ export function ResetPasswordForm({ token }: { token: string }) {
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4">
       <div className="space-y-2">
-        <Label htmlFor="reset-password">{t('newPassword')}</Label>
+        <Label htmlFor={idPrefix}>{t('newPassword')}</Label>
         <PasswordInput
-          id="reset-password"
+          id={idPrefix}
           autoComplete="new-password"
           showLabel={t('passwordShow')}
           hideLabel={t('passwordHide')}
@@ -65,9 +83,9 @@ export function ResetPasswordForm({ token }: { token: string }) {
         <p className="m-0 text-xs text-muted-foreground">{t('passwordHint')}</p>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="reset-password-confirm">{t('confirmPassword')}</Label>
+        <Label htmlFor={`${idPrefix}-confirm`}>{t('confirmPassword')}</Label>
         <PasswordInput
-          id="reset-password-confirm"
+          id={`${idPrefix}-confirm`}
           autoComplete="new-password"
           showLabel={t('passwordShow')}
           hideLabel={t('passwordHide')}
@@ -90,12 +108,13 @@ export function ResetPasswordForm({ token }: { token: string }) {
           )}
         </p>
       ) : null}
+      {invite ? <SignUpLegalNotice /> : null}
       <Button
         type="submit"
         disabled={reset.isPending}
         className="h-11 rounded-full"
       >
-        {t('resetSubmit')}
+        {invite ? t('inviteSubmit') : t('resetSubmit')}
       </Button>
     </form>
   );

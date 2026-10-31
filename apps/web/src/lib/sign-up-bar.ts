@@ -12,7 +12,7 @@ export function signUpBarPlacement(
   pathname: string,
 ): 'none' | 'desktop' | 'all' {
   if (
-    /^\/(sign-in|forgot-password|reset-password|verify-email)(\/|$)/.test(
+    /^\/(sign-in|forgot-password|reset-password|accept-invite|verify-email)(\/|$)/.test(
       pathname,
     ) ||
     /^\/(candidate|employer|moderator)\/(login|register)(\/|$)/.test(

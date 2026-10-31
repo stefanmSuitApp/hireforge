@@ -240,28 +240,29 @@ The following are decided as **not ours** for the foreseeable future:
 
 ## 4. Roles & permissions
 
-| Action                                      |           Candidate           |                 Employer                  |         Moderator         |             Admin             |
-| ------------------------------------------- | :---------------------------: | :---------------------------------------: | :-----------------------: | :---------------------------: |
-| Browse public jobs / companies              |              yes              |                    yes                    |            yes            |              yes              |
-| Apply to job (internal mode)                | **yes** (logged in, verified) |                     —                     |             —             |               —               |
-| Open external apply URL                     |              yes              |                    yes                    |            yes            |              yes              |
-| Self-register company                       |               —               | **yes** (PIB + MB or VAT/Tax ID required) |             —             |               —               |
-| Create company as sales lead                |               —               |                     —                     |          **yes**          |              yes              |
-| Pickup `unassigned` / `closed_lost` company |               —               |                     —                     |          **yes**          |              yes              |
-| Reassign company ownership                  |               —               |                     —                     |            no             | **yes (admin only, audited)** |
-| Mark proforma paid (TEZGA / ŠLJAKA / ŠEF)   |               —               |                     —                     |          **yes**          |              yes              |
-| Activate Enterprise (GAZDA) subscription    |               —               |                     —                     |          **no**           |     **yes (admin only)**      |
-| Create job ad on behalf of company          |               —               |                     —                     | **yes** (non-Enterprise)  |              yes              |
-| Save draft                                  |           yes (n/a)           |                  **yes**                  | **yes** (for any company) |              yes              |
-| Submit job for review                       |               —               |                  **yes**                  |          (auto)           |            (auto)             |
-| Direct publish (bypass review)              |               —               |                  **no**                   |          **yes**          |            **yes**            |
-| Approve / reject submitted job              |               —               |                     —                     |          **yes**          |              yes              |
-| Force-archive live job                      |               —               |                     —                     |            no             |            **yes**            |
-| Edit live job (triggers re-review)          |               —               |                 yes (own)                 |            yes            |              yes              |
-| Trivial patch publish (admin override)      |               —               |                     —                     |            no             |       **yes (audited)**       |
-| Manage CMS packages, prices, copy           |               —               |                     —                     |        (CMS role)         |          (CMS role)           |
-| Create / disable staff users                |               —               |                     —                     |            no             |            **yes**            |
-| View staff audit log                        |               —               |                     —                     |       (own actions)       |        **yes (full)**         |
+| Action                                              |           Candidate           |                 Employer                  |         Moderator         |             Admin             |
+| --------------------------------------------------- | :---------------------------: | :---------------------------------------: | :-----------------------: | :---------------------------: |
+| Browse public jobs / companies                      |              yes              |                    yes                    |            yes            |              yes              |
+| Apply to job (internal mode)                        | **yes** (logged in, verified) |                     —                     |             —             |               —               |
+| Open external apply URL                             |              yes              |                    yes                    |            yes            |              yes              |
+| Self-register company                               |               —               | **yes** (PIB + MB or VAT/Tax ID required) |             —             |               —               |
+| Create company as sales lead                        |               —               |                     —                     |          **yes**          |              yes              |
+| Create employer account for a company (invite link) |               —               |                     —                     | **yes** (own + lead pool) |              yes              |
+| Pickup `unassigned` / `closed_lost` company         |               —               |                     —                     |          **yes**          |              yes              |
+| Reassign company ownership                          |               —               |                     —                     |            no             | **yes (admin only, audited)** |
+| Mark proforma paid (TEZGA / ŠLJAKA / ŠEF)           |               —               |                     —                     |          **yes**          |              yes              |
+| Activate Enterprise (GAZDA) subscription            |               —               |                     —                     |          **no**           |     **yes (admin only)**      |
+| Create job ad on behalf of company                  |               —               |                     —                     | **yes** (non-Enterprise)  |              yes              |
+| Save draft                                          |           yes (n/a)           |                  **yes**                  | **yes** (for any company) |              yes              |
+| Submit job for review                               |               —               |                  **yes**                  |          (auto)           |            (auto)             |
+| Direct publish (bypass review)                      |               —               |                  **no**                   |          **yes**          |            **yes**            |
+| Approve / reject submitted job                      |               —               |                     —                     |          **yes**          |              yes              |
+| Force-archive live job                              |               —               |                     —                     |            no             |            **yes**            |
+| Edit live job (triggers re-review)                  |               —               |                 yes (own)                 |            yes            |              yes              |
+| Trivial patch publish (admin override)              |               —               |                     —                     |            no             |       **yes (audited)**       |
+| Manage CMS packages, prices, copy                   |               —               |                     —                     |        (CMS role)         |          (CMS role)           |
+| Create / disable staff users                        |               —               |                     —                     |            no             |            **yes**            |
+| View staff audit log                                |               —               |                     —                     |       (own actions)       |        **yes (full)**         |
 
 > Direct-publish events, trivial patch publishes, ownership reassignments, paid
 > markings, and Enterprise activations **always** write to `staff_audit_log`.
@@ -346,14 +347,28 @@ match against existing `companies` rows, in this priority order:
 
 **Rules:**
 
-- A match merges the self-signup user **into the existing company row** and
-  updates only fields the moderator left empty. Existing values are not
-  overwritten.
+- A match does **not** link the user: identifiers are public, so it creates
+  a pending `company_join_requests` row that the company's moderator (or
+  any moderator for the lead pool, or an admin) approves or rejects. The
+  existing company row is never written by the signup.
 - The existing `assigned_moderator_id` and `sales_status` are preserved.
+- Staff-created companies need an identifier (PIB or MB; VAT ID, tax ID or
+  registration number abroad) so this match can find them.
+- Staff can also create the employer account themselves (§5.4.1).
 - If no match, a new `companies` row is created with `source = self_signup`
   and `sales_status = unassigned`.
 - A duplicate cannot be created later: PIB / MB / VAT ID partial unique
   indexes guarantee it.
+
+### 5.4.1 Staff-created employer accounts
+
+A moderator (own companies and the lead pool) or an admin adds an account
+on the company page with an email. The account is linked to the company at
+once, has no password, and gets an invite link (7 days, single use) by
+email; staff also see the link, to pass it on another way. Following it
+sets the password, verifies the email and records the accepted terms.
+Staff can resend the link until it is used. A company may also exist
+without any account.
 
 ### 5.5 Sales ownership
 

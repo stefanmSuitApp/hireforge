@@ -14,6 +14,7 @@ describe('signUpBarPlacement', () => {
       '/sign-in',
       '/forgot-password',
       '/reset-password',
+      '/accept-invite',
       '/verify-email',
       '/candidate/login',
       '/candidate/register',

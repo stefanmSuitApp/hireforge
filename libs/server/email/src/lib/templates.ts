@@ -72,6 +72,37 @@ export function verifyEmailMessage(
       });
 }
 
+/** Staff created the account; the person sets their first password. */
+export function accountInviteMessage(
+  locale: EmailLocale,
+  url: string,
+  companyName: string,
+): RenderedEmail {
+  return locale === 'en'
+    ? renderActionEmail({
+        subject: 'Šljakam — you are invited to your company account',
+        paragraphs: [
+          'Hello,',
+          `The Šljakam team has opened an account for ${companyName}. Set a password to activate it, then post jobs and follow applications.`,
+        ],
+        actionLabel: 'Activate account',
+        actionUrl: url,
+        footnote:
+          'The link is valid for 7 days and works once. If you did not expect this email, ignore it.',
+      })
+    : renderActionEmail({
+        subject: 'Šljakam — pozvani ste na nalog kompanije',
+        paragraphs: [
+          'Zdravo,',
+          `Tim Šljakam je otvorio nalog za kompaniju ${companyName}. Postavite lozinku da biste ga aktivirali, a zatim objavljujte oglase i pratite prijave.`,
+        ],
+        actionLabel: 'Aktiviraj nalog',
+        actionUrl: url,
+        footnote:
+          'Link važi 7 dana i može se iskoristiti jednom. Ako niste očekivali ovu poruku, zanemarite je.',
+      });
+}
+
 export function passwordResetMessage(
   locale: EmailLocale,
   url: string,
