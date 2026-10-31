@@ -848,6 +848,24 @@ Plan and the follow-ups: `docs/plans/STAFF_ACCOUNTS_AND_UPLOADS.md`
   (branch `fix/admin-company-create`, e2e `admin-companies.spec.ts`, shown
   failing first).
 
+## Company logos, part 2b (branch `feat/company-logos`, 2026-10-31)
+
+- Staff upload a company's logo on the moderator company page ("Logo":
+  preview, "Otpremi logo", "Ukloni logo"); companies don't manage their
+  own. PNG / JPEG / WebP ≤ 2 MB (no SVG: it can carry script), re-encoded
+  to a 256 px square WebP with transparency kept, stored through
+  `UploadStorageService` (area `logo`: bucket when configured, else
+  `COMPANY_LOGO_DIR`); replacing or removing deletes the old file; audited.
+- Migration 0042 (`companies.logo_storage_key`, `logo_updated_at`).
+  `GET public/company-logos` (slug → versioned URL) is merged in the
+  layout over Sanity's map, so every card and page shows it and Sanity
+  logos stay a fallback; the BFF expires that cache on upload/removal.
+  The image route caches for a year (the URL changes with each upload).
+- The copy script also moves logos from disk. Tests: integration (square
+  WebP, map, replace/remove leave no old files, SVG / broken files refused,
+  moderator scope) and e2e (upload → public company page shows it →
+  removed), both shown failing first.
+
 ## Uploads bucket, part 2a (branch `feat/uploads-storage`, 2026-10-31)
 
 - CVs (uploaded and generated) are stored through one
@@ -865,7 +883,7 @@ Plan and the follow-ups: `docs/plans/STAFF_ACCOUNTS_AND_UPLOADS.md`
   missing object is a clean 404, the copy script copies then skips;
   shown failing before. Units for the disk mode, unsafe keys, missing
   prefix.
-- Waiting on Stefan: create the bucket (NEEDS_STEFAN 2). Next: 2b logos.
+- Waiting on Stefan: create the bucket (NEEDS_STEFAN 2).
 
 ## Analytics: Google Analytics 4 under the same banner (branch `feat/ga4-consent`, 2026-10-31)
 

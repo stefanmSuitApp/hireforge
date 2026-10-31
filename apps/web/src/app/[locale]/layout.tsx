@@ -13,6 +13,7 @@ import { notFound } from 'next/navigation';
 import { AppQueryProvider } from '../../components/providers/app-query-provider';
 import { CompanyLogosProvider } from '../../components/providers/company-logos-provider';
 import { fetchCmsEmployerLogos } from '../../lib/cms-content';
+import { fetchCompanyLogos } from '../../lib/company-logos';
 import { SiteShell } from '../../components/site-shell';
 import { AppToaster } from '../../components/app-toaster';
 import { THEME_SCRIPT } from '../../components/theme-toggle';
@@ -107,10 +108,13 @@ export default async function LocaleLayout({
     notFound();
   }
   setRequestLocale(locale);
-  const [messages, companyLogos] = await Promise.all([
+  const [messages, cmsLogos, uploadedLogos] = await Promise.all([
     getMessages(),
     fetchCmsEmployerLogos(),
+    fetchCompanyLogos(),
   ]);
+  // Logos staff upload win; Sanity's stay as the fallback.
+  const companyLogos = { ...cmsLogos, ...uploadedLogos };
 
   return (
     <html lang={locale} className={inter.variable} suppressHydrationWarning>

@@ -240,6 +240,10 @@ export const companies = pgTable(
      * Default `self_signup` keeps historical / dev-fixture rows valid; new code paths set explicitly.
      */
     source: companySourceEnum('source').notNull().default('self_signup'),
+    /** Uploaded logo (uploads storage, area `logo`); null = Sanity's or initials. */
+    logoStorageKey: text('logo_storage_key'),
+    /** Versions the public logo URL so caches refresh on a new upload. */
+    logoUpdatedAt: timestamp('logo_updated_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true })
       .notNull()
       .defaultNow(),

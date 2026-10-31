@@ -165,7 +165,7 @@ Test: change a field, the page shows it within seconds; revert it. Each
 webhook's Attempts log (or `sanity hook logs "<name>"` from `apps/cms`)
 shows the status codes.
 
-**Uploaded files (CVs)** live in the private bucket `hireforge-uploads`
+**Uploaded files (CVs, company logos)** live in the private bucket `hireforge-uploads`
 (nbg1, DEVLEGION project) once `S3_UPLOADS_BUCKET` is set, under
 `S3_UPLOADS_PREFIX` (`production/`; staging gets `staging/` from
 `staging-init.sh`). Same endpoint and keys as the backups. Without the

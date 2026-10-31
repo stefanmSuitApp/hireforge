@@ -40,6 +40,10 @@ export const ROUTES: Record<string, Access> = {
   ),
   'POST /api/auth/verify-email/resend': SESSION,
 
+  'GET /api/public/company-logos': PUBLIC(
+    'slug → logo URL of companies with a logo; logos are public',
+  ),
+  'GET /api/public/company-logos/:companyId': PUBLIC('a public logo image'),
   'GET /api/public/jobs/filters': PUBLIC('taxonomy for the filter UI'),
   'GET /api/public/jobs/previews': PUBLIC('published jobs only'),
   'GET /api/public/jobs/sitemap': PUBLIC(
@@ -114,6 +118,8 @@ export const ROUTES: Record<string, Access> = {
   'POST /api/moderator/companies': STAFF,
   'POST /api/moderator/companies/:id/accounts': STAFF,
   'POST /api/moderator/companies/:id/accounts/:userId/invite': STAFF,
+  'POST /api/moderator/companies/:id/logo': STAFF,
+  'DELETE /api/moderator/companies/:id/logo': STAFF,
   'POST /api/moderator/companies/:id/pickup': STAFF,
   'POST /api/moderator/companies/:id/close-won': STAFF,
   'POST /api/moderator/companies/:id/close-lost': STAFF,

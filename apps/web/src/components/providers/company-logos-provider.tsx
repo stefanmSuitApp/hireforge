@@ -4,7 +4,7 @@ import { createContext, useContext, type ReactNode } from 'react';
 
 const CompanyLogosContext = createContext<Record<string, string>>({});
 
-/** Logos from CMS (slug → URL), loaded once in the layout for every page. */
+/** Company logos (slug → URL: uploaded, else Sanity's), loaded once in the layout. */
 export function CompanyLogosProvider({
   logos,
   children,
