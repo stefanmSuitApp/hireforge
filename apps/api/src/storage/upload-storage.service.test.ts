@@ -65,7 +65,7 @@ describe('UploadStorageService with a bucket', () => {
 
   it('refuses to start without a prefix (staging must not write into production/)', () => {
     Object.assign(process.env, {
-      S3_UPLOADS_BUCKET: 'hireforge-uploads',
+      S3_UPLOADS_BUCKET: 'hireforge',
       S3_ENDPOINT: 'https://nbg1.your-objectstorage.com',
       AWS_ACCESS_KEY_ID: 'k',
       AWS_SECRET_ACCESS_KEY: 's',

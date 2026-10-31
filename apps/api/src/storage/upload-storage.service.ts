@@ -30,9 +30,9 @@ function assertSafeKey(key: string): void {
 }
 
 /**
- * Uploaded files (CVs; logos and photos next). With `S3_UPLOADS_BUCKET`
- * they live in the bucket under `S3_UPLOADS_PREFIX` (`production/`,
- * `staging/`: one bucket for both); otherwise on disk as before.
+ * Uploaded files (CVs, company logos, CV photos). With `S3_UPLOADS_BUCKET`
+ * they live in the bucket under `S3_UPLOADS_PREFIX` (`uploads/production/`,
+ * `uploads/staging/`, next to the database backups); otherwise on disk.
  */
 @Injectable()
 export class UploadStorageService implements OnModuleInit {

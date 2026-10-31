@@ -5,8 +5,8 @@ Living status file. **Trust this over the `Status:` lines in
 which went stale during the Cursor phase (Steps 4, 5, 14, 15 say "pending"
 but shipped). Update this file in the same PR as the work.
 
-Last updated: 2026-10-31 (staff-created employer accounts; candidate
-display name refresh). Open items for Stefan:
+Last updated: 2026-10-31 (uploads go to the backups' bucket; staff-created
+employer accounts; candidate display name refresh). Open items for Stefan:
 [`NEEDS_STEFAN.md`](./NEEDS_STEFAN.md).
 
 ## Current state
@@ -882,11 +882,25 @@ Plan and the follow-ups: `docs/plans/STAFF_ACCOUNTS_AND_UPLOADS.md`
   moderator scope) and e2e (upload → public company page shows it →
   removed), both shown failing first.
 
+## Uploads in the backups' bucket (branch `fix/uploads-in-backup-bucket`, 2026-10-31)
+
+- Stefan: no separate bucket; uploads go into the existing private bucket
+  `hireforge` (the database dumps' one) under `uploads/production/` and
+  `uploads/staging/`. The dumps' 30-day cleanup lists only
+  `backups/postgres/…`, and the Hetzner keys reach every bucket in the
+  project anyway, so a second bucket would isolate nothing.
+- `staging-init.sh` no longer copies `S3_UPLOADS_BUCKET` from production:
+  each environment sets it itself, after copying its own files. Copying it
+  would have switched production at its next deploy, before its CVs were in
+  the bucket (downloads would 404 until the copy ran).
+- Docs (hetzner.md §6, env example), test fixtures (nested prefix
+  `uploads/staging/`). No behaviour change in the app.
+
 ## Uploads bucket, part 2a (branch `feat/uploads-storage`, 2026-10-31)
 
 - CVs (uploaded and generated) are stored through one
-  `UploadStorageService`: the private bucket `hireforge-uploads` under
-  `S3_UPLOADS_PREFIX` (`production/`, `staging/`) once
+  `UploadStorageService`: a private bucket under
+  `S3_UPLOADS_PREFIX` (later: `hireforge`, `uploads/production/`) once
   `S3_UPLOADS_BUCKET` is set, the old `api_var` folder until then (so this
   deploys safely before the bucket exists). A bucket without prefix/keys
   refuses to boot.

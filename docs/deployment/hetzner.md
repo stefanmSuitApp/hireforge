@@ -165,17 +165,21 @@ Test: change a field, the page shows it within seconds; revert it. Each
 webhook's Attempts log (or `sanity hook logs "<name>"` from `apps/cms`)
 shows the status codes.
 
-**Uploaded files (CVs, company logos)** live in the private bucket `hireforge-uploads`
-(nbg1, DEVLEGION project) once `S3_UPLOADS_BUCKET` is set, under
-`S3_UPLOADS_PREFIX` (`production/`; staging gets `staging/` from
-`staging-init.sh`). Same endpoint and keys as the backups. Without the
-bucket the API keeps them in `api_var` on the VM, which no backup covers.
+**Uploaded files (CVs, company logos, CV photos)** live in the backups'
+private bucket `hireforge` (nbg1, DEVLEGION project) once
+`S3_UPLOADS_BUCKET` is set, under `S3_UPLOADS_PREFIX`
+(`uploads/production/`; staging gets `uploads/staging/` from
+`staging-init.sh`). Same endpoint and keys as the backups; the backups'
+30-day cleanup only touches `backups/postgres/…`. Without the bucket the
+API keeps them in `api_var` on the VM, which no backup covers. Each
+environment sets `S3_UPLOADS_BUCKET` itself (staging does not copy it from
+production), so each switches only after its own files were copied.
 Switching an environment over (production shown; staging: `cd
-/opt/hireforge-staging`, `compose.staging.yml`, and first
-`scripts/deploy/staging-init.sh --env-only` to copy the bucket name):
+/opt/hireforge-staging`, `deploy/.env.staging`, `compose.staging.yml`):
 
-1. Add `S3_UPLOADS_BUCKET=hireforge-uploads` and
-   `S3_UPLOADS_PREFIX=production/` to `deploy/.env.production`.
+1. Add `S3_UPLOADS_BUCKET=hireforge` and
+   `S3_UPLOADS_PREFIX=uploads/production/` to `deploy/.env.production`
+   (staging: only the bucket line; `staging-init.sh` sets the prefix).
 2. Copy what is on disk (dry run first; nothing is deleted):
    `docker compose -f compose.prod.yml run --rm api node scripts/storage/copy-uploads-to-bucket.mjs --dry-run`,
    then without `--dry-run`.
@@ -395,7 +399,8 @@ runtime.
 `/opt/hireforge/deploy/.env.production` before every staging release, so a
 key rotated on production reaches staging by itself): the Sanity project,
 dataset and read token
-(same CMS content), the bucket keys (dumps under `backups/postgres/staging/`)
+(same CMS content), the bucket keys (dumps under `backups/postgres/staging/`,
+uploads under `uploads/staging/` once staging sets `S3_UPLOADS_BUCKET`)
 and the Resend key, the latter **only with `EMAIL_REDIRECT_TO` set**: every
 staging email then goes to that inbox, its subject naming the real
 recipient (`[→ someone@firma.rs] …`); `release.sh` refuses to start staging
