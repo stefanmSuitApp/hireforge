@@ -115,9 +115,9 @@ export class CandidateController {
     @Req() req: Request,
     @Param('id', new ParseUUIDPipe()) id: string,
   ) {
-    const { stream, mimeType, filename } =
-      await this.candidate.getResumeDownloadStream(this.userId(req), id);
-    return new StreamableFile(stream, {
+    const { buffer, mimeType, filename } =
+      await this.candidate.getResumeDownload(this.userId(req), id);
+    return new StreamableFile(buffer, {
       type: mimeType,
       disposition: `attachment; filename="${encodeURIComponent(filename)}"`,
     });

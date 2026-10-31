@@ -43,6 +43,7 @@ COPY --from=builder /app/drizzle ./drizzle
 # Production-safe scripts only: no dev seed (`seed-domain-baseline`) here.
 COPY --from=builder /app/scripts/db/migrate.mjs /app/scripts/db/seed-rs-locations.mjs /app/scripts/db/backup-offsite.mjs ./scripts/db/
 COPY --from=builder /app/scripts/db/data ./scripts/db/data
+COPY --from=builder /app/scripts/storage/copy-uploads-to-bucket.mjs ./scripts/storage/
 COPY --from=builder /app/dist/apps/api ./dist/apps/api
 
 EXPOSE 4000

@@ -36,7 +36,7 @@ SHARED_KEYS=(SANITY_API_READ_TOKEN SANITY_PROJECT_ID SANITY_DATASET
   NEXT_PUBLIC_SANITY_PROJECT_ID NEXT_PUBLIC_SANITY_DATASET
   SANITY_STUDIO_PROJECT_ID SANITY_STUDIO_DATASET
   RESEND_API_KEY AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY
-  S3_ENDPOINT S3_REGION S3_FORCE_PATH_STYLE S3_BACKUP_BUCKET)
+  S3_ENDPOINT S3_REGION S3_FORCE_PATH_STYLE S3_BACKUP_BUCKET S3_UPLOADS_BUCKET)
 secret() { openssl rand -hex 32; }
 get() { grep -E "^$1=" "$2" | tail -1 | cut -d= -f2- || true; }
 [[ -f $PROD_ENV ]] || { echo "no $PROD_ENV (HIREFORGE_PROD_ROOT=$PROD_ROOT)" >&2; exit 1; }
@@ -102,6 +102,8 @@ fi
 shared=()
 for k in "${SHARED_KEYS[@]}"; do shared+=("$k=$(get "$k" "$PROD_ENV")"); done
 shared+=("S3_BACKUP_PREFIX=backups/postgres/staging/")
+# One uploads bucket for both: staging must never use production's folder.
+shared+=("S3_UPLOADS_PREFIX=staging/")
 redirect=${STAGING_EMAIL_TO:-$(get EMAIL_REDIRECT_TO "$STAGING_ENV")}
 if [[ -n $redirect ]]; then
   shared+=("EMAIL_REDIRECT_TO=$redirect")

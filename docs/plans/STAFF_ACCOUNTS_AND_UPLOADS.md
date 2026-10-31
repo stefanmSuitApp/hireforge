@@ -108,7 +108,22 @@ Plan, 2026-10-31. Owner: Claude session `hireforge-tests-b3`.
 - **Checks**: `pnpm verify`, `E2E_WEB=start pnpm e2e`,
   `pnpm test:integration`; UI at 375 and 1440 px.
 
-## PR 2 — `feat/uploads-bucket` (needs Stefan: bucket)
+## PR 2 — uploads bucket, in two parts
+
+**2a — `feat/uploads-storage` (done 2026-10-31):** `UploadStorageService`
+(bucket under `S3_UPLOADS_PREFIX` when `S3_UPLOADS_BUCKET` is set, the old
+disk folder otherwise; a bucket without prefix or keys refuses to boot);
+CVs (uploaded and generated) go through it; `copy-uploads-to-bucket.mjs`
+copies existing files (in the api image; skips what is there, deletes
+nothing); staging gets `staging/`. Job description images keep their own
+`S3_JOB_MEDIA_BUCKET` path for now: whether production sets it can't be
+seen from the repo, and moving them blind could lose images. Billing PDFs
+unchanged.
+
+**2b — company logos (next):** upload on the moderator company page, the
+same service (area `logo`), a public cached route, Sanity logo as fallback.
+
+Original outline:
 
 - Stefan creates the private bucket `hireforge-uploads` (nbg1) in the
   DEVLEGION project; the existing keys reach it. Keys under

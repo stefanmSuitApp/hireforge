@@ -165,6 +165,28 @@ Test: change a field, the page shows it within seconds; revert it. Each
 webhook's Attempts log (or `sanity hook logs "<name>"` from `apps/cms`)
 shows the status codes.
 
+**Uploaded files (CVs)** live in the private bucket `hireforge-uploads`
+(nbg1, DEVLEGION project) once `S3_UPLOADS_BUCKET` is set, under
+`S3_UPLOADS_PREFIX` (`production/`; staging gets `staging/` from
+`staging-init.sh`). Same endpoint and keys as the backups. Without the
+bucket the API keeps them in `api_var` on the VM, which no backup covers.
+Switching an environment over (production shown; staging: `cd
+/opt/hireforge-staging`, `compose.staging.yml`, and first
+`scripts/deploy/staging-init.sh --env-only` to copy the bucket name):
+
+1. Add `S3_UPLOADS_BUCKET=hireforge-uploads` and
+   `S3_UPLOADS_PREFIX=production/` to `deploy/.env.production`.
+2. Copy what is on disk (dry run first; nothing is deleted):
+   `docker compose -f compose.prod.yml run --rm api node scripts/storage/copy-uploads-to-bucket.mjs --dry-run`,
+   then without `--dry-run`.
+3. Restart the API so it reads the bucket:
+   `docker compose -f compose.prod.yml up -d api`.
+4. Run step 2 again: it copies only what was uploaded in between.
+5. Check: download a CV in the app. The disk copies can go after a week.
+
+A bucket set without a prefix (or keys) stops the API at boot, so a typo
+fails the deploy's health gate instead of mixing environments.
+
 For billing PDFs on Hetzner Object Storage, set:
 
 - `S3_BILLING_BUCKET`
