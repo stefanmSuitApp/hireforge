@@ -91,9 +91,31 @@ function optionalText(
   return v ? v.slice(0, max) : undefined;
 }
 
-export const cvTemplateCodes = ['klasican', 'moderan', 'minimalan'] as const;
+export const cvTemplateCodes = [
+  'klasican',
+  'moderan',
+  'minimalan',
+  'evropski',
+  'prakticni',
+] as const;
 export type CvTemplateCode = (typeof cvTemplateCodes)[number];
 export const cvTemplateCodeSchema = z.enum(cvTemplateCodes);
+
+/** What the template picker tells a candidate (the PDFs live in server-cv-templates). */
+export type CvTemplateInfo = {
+  /** Two-column layouts can come out of a CV scanner (ATS) mixed up. */
+  columns: 1 | 2;
+  atsSafe: boolean;
+  supportsPhoto: boolean;
+};
+
+export const cvTemplateInfo: Record<CvTemplateCode, CvTemplateInfo> = {
+  klasican: { columns: 1, atsSafe: true, supportsPhoto: false },
+  moderan: { columns: 2, atsSafe: false, supportsPhoto: false },
+  minimalan: { columns: 1, atsSafe: true, supportsPhoto: false },
+  evropski: { columns: 1, atsSafe: true, supportsPhoto: false },
+  prakticni: { columns: 1, atsSafe: true, supportsPhoto: false },
+};
 
 /** Language of the CV's own words (section titles, months), the builder's locale. */
 export const cvLocales = ['sr', 'en'] as const;

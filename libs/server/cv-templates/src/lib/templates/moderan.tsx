@@ -9,6 +9,7 @@ import {
   EducationSection,
   ExperienceSection,
   formatCertificate,
+  KeepWithFirst,
   SummarySection,
   type CvTheme,
 } from '../sections';
@@ -174,6 +175,11 @@ export function ModeranDoc({
               ))}
             </SideGroup>
           ) : null}
+          {p.availability ? (
+            <SideGroup title={labels.availableFrom} accent={accent}>
+              <Text style={SIDE_TEXT}>{p.availability}</Text>
+            </SideGroup>
+          ) : null}
           {p.drivingLicences.length ? (
             <SideGroup title={labels.drivingLicence} accent={accent}>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
@@ -226,14 +232,16 @@ export function ModeranDoc({
         <ExperienceSection layout={layout} theme={theme} />
         <EducationSection layout={layout} theme={theme} />
         {p.certificates.length ? (
-          <View style={{ marginTop: theme.gap }}>
-            <theme.Title>{labels.certificates}</theme.Title>
+          <KeepWithFirst
+            style={{ marginTop: theme.gap }}
+            head={<theme.Title>{labels.certificates}</theme.Title>}
+          >
             {p.certificates.map((c, i) => (
               <Text key={i} style={BASE}>
                 {formatCertificate(c)}
               </Text>
             ))}
-          </View>
+          </KeepWithFirst>
         ) : null}
       </Page>
     </Document>

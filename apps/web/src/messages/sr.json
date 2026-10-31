@@ -1396,7 +1396,9 @@
       "templateNames": {
         "klasican": "Klasičan",
         "moderan": "Moderan",
-        "minimalan": "Minimalan"
+        "minimalan": "Minimalan",
+        "evropski": "Evropski format",
+        "prakticni": "Praktičan"
       },
       "previewTitle": "Pregled uživo",
       "previewPlaceholder": "Izaberi šablon da vidiš PDF pregled.",
@@ -1443,7 +1445,9 @@
       "digitalSkills": "Digitalne veštine",
       "digitalSkillsPlaceholder": "npr. MS Excel, kasa, tahograf",
       "availability": "Kada možeš da počneš",
-      "availabilityPlaceholder": "npr. odmah, od 1. decembra, rad u smenama"
+      "availabilityPlaceholder": "npr. odmah, od 1. decembra, rad u smenama",
+      "badgeAtsSafe": "Pogodan za online prijave",
+      "badgeTwoColumns": "Najbolji za slanje direktno"
     }
   },
   "Integration": {

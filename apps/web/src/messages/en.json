@@ -1396,7 +1396,9 @@
       "templateNames": {
         "klasican": "Classic",
         "moderan": "Modern",
-        "minimalan": "Minimal"
+        "minimalan": "Minimal",
+        "evropski": "European format",
+        "prakticni": "Practical"
       },
       "previewTitle": "Live preview",
       "previewPlaceholder": "Choose a template to see the PDF preview.",
@@ -1443,7 +1445,9 @@
       "digitalSkills": "Digital skills",
       "digitalSkillsPlaceholder": "e.g. MS Excel, cash register, tachograph",
       "availability": "When you can start",
-      "availabilityPlaceholder": "e.g. right away, from 1 December, shift work"
+      "availabilityPlaceholder": "e.g. right away, from 1 December, shift work",
+      "badgeAtsSafe": "Good for online applications",
+      "badgeTwoColumns": "Best sent directly"
     }
   },
   "Integration": {

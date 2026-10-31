@@ -308,6 +308,26 @@ describe('CVs', () => {
       .expect(200);
     expect(file.headers['content-type']).toContain('application/pdf');
   });
+
+  // CV templates PR 4: the two new templates are stored like the others, and
+  // the database still refuses a code no template has.
+  it('the European and Practical templates generate and keep their code', async () => {
+    const c = await candidate({ withCv: false });
+    for (const templateCode of ['evropski', 'prakticni']) {
+      const res = await http(app)
+        .post('/api/candidate/resumes/generate')
+        .set(c.headers)
+        .send({ templateCode, locale: 'sr' });
+      expect(res.status, JSON.stringify(res.body)).toBe(201);
+      expect(res.body.templateCode).toBe(templateCode);
+    }
+    await expect(
+      q(
+        `UPDATE resume_assets SET template_code = 'nepostojeci'
+           WHERE id = (SELECT id FROM resume_assets WHERE template_code = 'evropski' LIMIT 1)`,
+      ),
+    ).rejects.toThrow(/resume_assets_template_code_check/);
+  });
 });
 
 describe('saved jobs and searches', () => {

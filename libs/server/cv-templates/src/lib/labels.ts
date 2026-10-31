@@ -14,6 +14,21 @@ export type CvLabels = {
   contact: string;
   skillsAndMore: string;
   additional: string;
+  /** European format. */
+  cvKicker: string;
+  personal: string;
+  phone: string;
+  email: string;
+  city: string;
+  motherTongue: string;
+  otherLanguages: string;
+  language: string;
+  cefrLevel: string;
+  levelDescription: string;
+  /** Practical. */
+  callMe: string;
+  availableFrom: string;
+  school: string;
   present: string;
   native: string;
   basic: string;
@@ -35,6 +50,19 @@ export const CV_LABELS: Record<CvLocale, CvLabels> = {
     contact: 'Kontakt',
     skillsAndMore: 'Veštine i dozvole',
     additional: 'Dodatno',
+    cvKicker: 'Biografija',
+    personal: 'Lični podaci',
+    phone: 'Telefon',
+    email: 'E-pošta',
+    city: 'Mesto',
+    motherTongue: 'Maternji jezik',
+    otherLanguages: 'Drugi jezici',
+    language: 'Jezik',
+    cefrLevel: 'Nivo (ZEO)',
+    levelDescription: 'Opis',
+    callMe: 'Pozovite me',
+    availableFrom: 'Mogu da počnem',
+    school: 'Škola',
     present: 'danas',
     native: 'maternji',
     basic: 'osnovni',
@@ -54,6 +82,19 @@ export const CV_LABELS: Record<CvLocale, CvLabels> = {
     contact: 'Contact',
     skillsAndMore: 'Skills and licences',
     additional: 'Additional',
+    cvKicker: 'Curriculum vitae',
+    personal: 'Personal information',
+    phone: 'Phone',
+    email: 'Email',
+    city: 'City',
+    motherTongue: 'Mother tongue',
+    otherLanguages: 'Other languages',
+    language: 'Language',
+    cefrLevel: 'Level (CEFR)',
+    levelDescription: 'Description',
+    callMe: 'Call me',
+    availableFrom: 'Available',
+    school: 'Education',
     present: 'present',
     native: 'native',
     basic: 'basic',
@@ -124,4 +165,12 @@ export function formatCvLanguage(
       ? labels.intermediate
       : labels.advanced;
   return `${name} — ${level} (${band})`;
+}
+
+/** `basic` / `intermediate` / `advanced` for a CEFR level, `native` as is. */
+export function cvLevelBand(level: CvLanguageLevel, locale: CvLocale): string {
+  const labels = CV_LABELS[locale];
+  if (level === 'native') return labels.native;
+  if (level.startsWith('A')) return labels.basic;
+  return level.startsWith('B') ? labels.intermediate : labels.advanced;
 }

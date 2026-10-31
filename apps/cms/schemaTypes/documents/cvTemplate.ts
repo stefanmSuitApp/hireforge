@@ -4,6 +4,8 @@ const TEMPLATE_CODES = [
   { title: 'Klasičan', value: 'klasican' },
   { title: 'Moderan', value: 'moderan' },
   { title: 'Minimalan', value: 'minimalan' },
+  { title: 'Evropski format', value: 'evropski' },
+  { title: 'Praktičan', value: 'prakticni' },
 ] as const;
 
 export const cvTemplate = defineType({

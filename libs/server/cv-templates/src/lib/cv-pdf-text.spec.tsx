@@ -2,7 +2,7 @@
 // Serbian letters included, and leaves out empty sections. Headings may be
 // drawn in capitals, so text checks ignore case.
 import { describe, expect, it } from 'vitest';
-import { getDocumentProxy } from 'unpdf';
+import { extractText, getDocumentProxy } from 'unpdf';
 import {
   cvProfileSchema,
   cvTemplateCodes,
@@ -10,6 +10,7 @@ import {
 } from 'contracts';
 import { pdfText } from 'testing/pdf';
 import { renderCvPdfBuffer } from './render-cv-pdf-buffer';
+import { CV_LABELS } from './labels';
 import { cvTemplates } from './registry';
 
 const LAYOUT: CvPdfLayoutInput = {
@@ -73,6 +74,47 @@ function expectNone(text: string, items: string[]) {
   }
 }
 
+/** One distinct value in every field the builder has. */
+const EVERY_FIELD: CvPdfLayoutInput = {
+  locale: 'sr',
+  fullName: 'Ime Prezimić',
+  email: 'puna@primer.rs',
+  phone: '+381 11 222 3333',
+  headline: 'Naslov Polje',
+  cityLine: 'Novi Sad',
+  profile: cvProfileSchema.parse({
+    summary: 'Sažetak polje.',
+    experiences: [
+      {
+        company: 'Firma Polje',
+        title: 'Pozicija Polje',
+        startDate: '2020-01-01',
+        endDate: '2021-02-01',
+        summary: 'Opis polje.',
+      },
+    ],
+    education: [
+      {
+        institution: 'Škola Polje',
+        degree: 'Zvanje Polje',
+        field: 'Smer Polje',
+        startDate: '2014-09-01',
+        endDate: '2018-06-01',
+      },
+    ],
+    skills: [{ name: 'Veština Polje' }],
+    languages: [{ name: 'Jezik Polje', level: 'B2' }],
+    drivingLicences: ['CE'],
+    certificates: [
+      { name: 'Sertifikat Polje', issuer: 'Izdavač Polje', year: 2020 },
+    ],
+    links: [{ label: 'Portfolio', url: 'https://primer.rs/radovi' }],
+    digitalSkills: 'Digitalno Polje',
+    availability: 'Dostupnost Polje',
+    showEmail: true,
+  }),
+};
+
 describe.each(cvTemplateCodes)('CV template %s', (template) => {
   it("shows the candidate's name, contact, headline, experience, education and skills", async () => {
     expectAll(await textOf(template, LAYOUT), [
@@ -89,13 +131,48 @@ describe.each(cvTemplateCodes)('CV template %s', (template) => {
     ]);
   });
 
+  // Stefan, 2026-10-31: "some information from the forms is missing on the
+  // PDFs". Nothing the candidate typed may be dropped by a template.
+  it('prints every field the builder asks for', async () => {
+    const text = await textOf(template, EVERY_FIELD);
+    expectAll(text, [
+      'Ime Prezimić',
+      'puna@primer.rs',
+      '+381 11 222 3333',
+      'Naslov Polje',
+      'Novi Sad',
+      'Sažetak polje.',
+      'Firma Polje',
+      'Pozicija Polje',
+      'jan 2020.',
+      'feb 2021.',
+      'Opis polje.',
+      'Škola Polje',
+      'Zvanje Polje',
+      'Smer Polje',
+      'sep 2014.',
+      'Veština Polje',
+      'Jezik Polje',
+      'B2',
+      'CE',
+      'Sertifikat Polje',
+      'Izdavač Polje',
+      '2020',
+      'Portfolio',
+      'https://primer.rs/radovi',
+      'Digitalno Polje',
+      'Dostupnost Polje',
+    ]);
+  });
+
   // Stefan, 2026-10-31: a Serbian user got "Experience", "present" and
   // raw ISO dates, and no email at all.
   it('speaks the builder language: Serbian titles, months and email', async () => {
     const text = await textOf(template, LAYOUT);
+    // Praktičan calls the school section "Škola".
+    expect(text).toMatch(/obrazovanje|škola/);
     expectAll(text, [
       'Radno iskustvo',
-      'Obrazovanje',
       'Veštine',
       'mar 2019. — danas',
       'sep 2012. — jun 2016.',
@@ -137,8 +214,6 @@ describe.each(cvTemplateCodes)('CV template %s', (template) => {
       'Održavanje trafostanica',
       'Dežurstva vikendom',
       'Jezici',
-      'Srpski — maternji',
-      'Engleski — B1 (srednji)',
       'Vozačka dozvola',
       'Sertifikati',
       'Rad na visini (2021)',
@@ -147,6 +222,9 @@ describe.each(cvTemplateCodes)('CV template %s', (template) => {
       'https://linkedin.com/in/primer',
     ]);
     expect(text).toMatch(/vozačka dozvola:?\s+b[\s,]+c/);
+    // "Engleski — B1 (srednji)", or a table row in the European format.
+    expect(text).toMatch(/engleski\W+b1\W+srednji/);
+    expect(text).toMatch(/srpski\W+maternji|maternji jezik\W+srpski/);
     // Bullets, not a dash-run paragraph.
     expect(text).toMatch(/•\s*održavanje trafostanica/);
     expect(text).not.toContain('- održavanje');
@@ -219,6 +297,52 @@ describe.each(cvTemplateCodes)('CV template %s', (template) => {
     const n = await pages({ ...LAYOUT, profile: max });
     expect(n).toBeGreaterThan(1);
     expect(n).toBeLessThanOrEqual(8);
+  });
+
+  // A heading left alone at the bottom of a page, its entries on the next.
+  it('never ends a page on a section heading', async () => {
+    const l = CV_LABELS.sr;
+    const headings = [
+      l.summary,
+      l.experience,
+      l.education,
+      l.skills,
+      l.languages,
+      l.drivingLicence,
+      l.certificates,
+      l.digitalSkills,
+      l.links,
+      l.contact,
+      l.skillsAndMore,
+      l.additional,
+      l.personal,
+      l.school,
+    ].map((h) => h.toLowerCase());
+    const job = LAYOUT.profile.experiences[0];
+    for (const jobs of [4, 5, 6, 7, 8, 9]) {
+      const buffer = await renderCvPdfBuffer(template, {
+        ...LAYOUT,
+        profile: cvProfileSchema.parse({
+          ...LAYOUT.profile,
+          ...EXTRAS,
+          experiences: Array.from({ length: jobs }, (_, i) => ({
+            ...job,
+            title: `Pozicija ${i + 1}`,
+            summary: '- Prvi zadatak\n- Drugi zadatak\n- Treći zadatak',
+          })),
+        }),
+      });
+      const { text } = await extractText(
+        await getDocumentProxy(new Uint8Array(buffer)),
+      );
+      for (const page of text.slice(0, -1)) {
+        const end = page.replace(/\s+/g, ' ').trim().toLowerCase();
+        const orphan = headings.find((h) => end.endsWith(h));
+        expect(orphan, `${jobs} jobs: page ends on "${orphan}"`).toBe(
+          undefined,
+        );
+      }
+    }
   });
 
   if (cvTemplates[template].atsSafe) {

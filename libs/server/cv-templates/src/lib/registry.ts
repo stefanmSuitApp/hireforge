@@ -1,40 +1,26 @@
 import type { ReactElement } from 'react';
 
-import type { CvPdfLayoutInput, CvTemplateCode } from 'contracts';
+import {
+  cvTemplateInfo,
+  type CvPdfLayoutInput,
+  type CvTemplateCode,
+  type CvTemplateInfo,
+} from 'contracts';
 
+import { EvropskiDoc } from './templates/evropski';
 import { KlasicanDoc } from './templates/klasican';
 import { MinimalanDoc } from './templates/minimalan';
 import { ModeranDoc } from './templates/moderan';
-
-/** What the picker tells the candidate about a template. */
-export type CvTemplateInfo = {
-  /** Two-column layouts can come out of a CV scanner (ATS) mixed up. */
-  columns: 1 | 2;
-  atsSafe: boolean;
-  supportsPhoto: boolean;
-};
+import { PrakticniDoc } from './templates/prakticni';
 
 type CvTemplate = CvTemplateInfo & {
   Document: (props: { layout: CvPdfLayoutInput }) => ReactElement;
 };
 
 export const cvTemplates: Record<CvTemplateCode, CvTemplate> = {
-  klasican: {
-    columns: 1,
-    atsSafe: true,
-    supportsPhoto: false,
-    Document: KlasicanDoc,
-  },
-  moderan: {
-    columns: 2,
-    atsSafe: false,
-    supportsPhoto: false,
-    Document: ModeranDoc,
-  },
-  minimalan: {
-    columns: 1,
-    atsSafe: true,
-    supportsPhoto: false,
-    Document: MinimalanDoc,
-  },
+  klasican: { ...cvTemplateInfo.klasican, Document: KlasicanDoc },
+  moderan: { ...cvTemplateInfo.moderan, Document: ModeranDoc },
+  minimalan: { ...cvTemplateInfo.minimalan, Document: MinimalanDoc },
+  evropski: { ...cvTemplateInfo.evropski, Document: EvropskiDoc },
+  prakticni: { ...cvTemplateInfo.prakticni, Document: PrakticniDoc },
 };

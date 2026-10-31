@@ -178,4 +178,20 @@ describe('building a CV', () => {
       },
     });
   });
+
+  // CV templates PR 4: five templates, each saying where it works best.
+  it('the template step offers five templates with a badge each', async () => {
+    renderWizard();
+    for (let i = 0; i < 5; i++) await next();
+    for (const name of Object.values(t.templateNames)) {
+      expect(
+        screen.getByRole('button', { name: new RegExp(name) }),
+      ).toBeVisible();
+    }
+    expect(screen.getAllByText(t.badgeAtsSafe)).toHaveLength(4);
+    expect(screen.getAllByText(t.badgeTwoColumns)).toHaveLength(1);
+    expect(
+      screen.getByRole('button', { name: new RegExp(t.templateNames.moderan) }),
+    ).toHaveTextContent(t.badgeTwoColumns);
+  });
 });
