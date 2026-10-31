@@ -5,7 +5,13 @@ import type { CvPdfLayoutInput } from 'contracts';
 
 import { localePdfBoldStyle } from 'server-pdf/locale-fonts';
 
-import { BodySections, contactLine, pdfBody } from '../sections';
+import {
+  BodySections,
+  contactLine,
+  ExtraSections,
+  pdfBody,
+  SummarySection,
+} from '../sections';
 
 const styles = StyleSheet.create({
   page: { padding: 48, fontFamily: pdfBody, fontSize: 10 },
@@ -55,7 +61,9 @@ export function MinimalanDoc({
             width: 48,
           }}
         />
+        <SummarySection layout={layout} />
         <BodySections layout={layout} />
+        <ExtraSections layout={layout} />
       </Page>
     </Document>
   );

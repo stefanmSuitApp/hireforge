@@ -6,7 +6,13 @@ import type { CvPdfLayoutInput } from 'contracts';
 import { localePdfBoldStyle } from 'server-pdf/locale-fonts';
 
 import { CV_LABELS, formatCvRange } from '../labels';
-import { HeaderBlock, pdfBody } from '../sections';
+import {
+  DescriptionText,
+  ExtraSections,
+  HeaderBlock,
+  pdfBody,
+  SummarySection,
+} from '../sections';
 
 const styles = StyleSheet.create({
   page: { padding: 40, fontFamily: pdfBody, fontSize: 10 },
@@ -44,6 +50,7 @@ export function KlasicanDoc({
             ) : null}
           </View>
           <View style={styles.right}>
+            <SummarySection layout={layout} />
             {experiences.length ? (
               <View>
                 <Text style={localePdfBoldStyle({ fontSize: 11 })}>
@@ -72,17 +79,7 @@ export function KlasicanDoc({
                     >
                       {formatCvRange(ex.startDate, ex.endDate, layout.locale)}
                     </Text>
-                    {ex.summary ? (
-                      <Text
-                        style={{
-                          fontFamily: pdfBody,
-                          fontSize: 9,
-                          marginTop: 2,
-                        }}
-                      >
-                        {ex.summary}
-                      </Text>
-                    ) : null}
+                    {ex.summary ? <DescriptionText text={ex.summary} /> : null}
                   </View>
                 ))}
               </View>
@@ -113,6 +110,7 @@ export function KlasicanDoc({
                 ))}
               </View>
             ) : null}
+            <ExtraSections layout={layout} />
           </View>
         </View>
       </Page>
