@@ -72,6 +72,16 @@ pnpm build` (+ `pnpm check:i18n`) = `pnpm verify`; PRs run it locally, CI on
   (Serbian CV text, email, bundled font) → new profile fields → restyle the
   three → add Evropski and Praktičan → photo and accent (after the storage
   work) → picker and Sanity copy.
+  - **PR 1 done** (`fix/cv-pdf-foundation`): CVs use the builder's
+    language (titles, "mar 2019.", "danas") and show the account email;
+    Noto Sans ships in the repo (`libs/server/pdf/src/fonts`, copied into
+    the API bundle and `apps/web/public/fonts/pdf`, a test keeps the copies
+    equal); hyphenation is off (emails were split). Found and fixed: after
+    one PDF with bold "Š"/"ć", the next PDF in the same process lost bold
+    "S"/"c" from its text layer (scanners read "Experiene"); every server
+    render now reloads the font (`renderPdfToBuffer`, invoices too).
+    Templates split into `templates/*` with a `registry`. First e2e
+    through the builder: `e2e/cv-builder.spec.ts`.
 
 ### Plan steps, verified against code
 

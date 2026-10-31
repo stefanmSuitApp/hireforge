@@ -15,7 +15,15 @@ module.exports = {
       compiler: 'tsc',
       main: './src/main.ts',
       tsConfig: './tsconfig.app.json',
-      assets: ['./src/assets'],
+      assets: [
+        './src/assets',
+        // PDF fonts (CVs, invoices) ship with the bundle: no fetch at render.
+        {
+          input: '../../libs/server/pdf/src/fonts',
+          glob: '*',
+          output: 'assets/fonts',
+        },
+      ],
       optimization: false,
       outputHashing: 'none',
       generatePackageJson: true,

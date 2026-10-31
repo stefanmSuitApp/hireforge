@@ -3,6 +3,7 @@
 import type {
   CandidateProfilePatch,
   CandidateResumeItem,
+  CvLocale,
   CvTemplateCode,
 } from 'contracts';
 import { useMutation } from '@tanstack/react-query';
@@ -21,6 +22,7 @@ const TOAST_ID = 'candidate-cv-generate';
 type Vars = {
   profile: CandidateProfilePatch;
   templateCode: CvTemplateCode;
+  locale: CvLocale;
 };
 
 export function useCandidateCvSaveAndGenerateMutation() {
@@ -33,7 +35,7 @@ export function useCandidateCvSaveAndGenerateMutation() {
       await webHttp.patch('/api/candidate/profile', vars.profile);
       const res = await webHttp.post<CandidateResumeItem>(
         '/api/candidate/resumes/generate',
-        { templateCode: vars.templateCode },
+        { templateCode: vars.templateCode, locale: vars.locale },
       );
       return res.data;
     },
