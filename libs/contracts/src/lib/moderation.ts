@@ -45,8 +45,10 @@ export type ModeratorJobDetailResponse = {
   workModel: string;
   employmentType: string;
   seniority: string;
-  applyMode: 'internal' | 'external';
+  applyMode: PublicJobDetailResponse['applyMode'];
   externalApplyUrl: string | null;
+  applyPhone: string | null;
+  applyEmail: string | null;
   primaryLanguage: 'sr' | 'en';
   featured: boolean;
   crossborderVisible: boolean;

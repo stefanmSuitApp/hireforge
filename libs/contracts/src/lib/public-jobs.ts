@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
-import type { JobSalary } from './employer-jobs';
+import type { ContactChannel } from './contact-apply';
+import type { ApplyMode, JobSalary } from './employer-jobs';
 
 const emptyToUndefined = (v: unknown) =>
   v === '' || v === undefined ? undefined : v;
@@ -108,7 +109,7 @@ export type PublicJobListItem = {
    * §11.1).
    */
   excerpt: string | null;
-  applyMode: 'internal' | 'external';
+  applyMode: ApplyMode;
   publishedAt: string | null;
   workModel: string;
   employmentType: string;
@@ -148,8 +149,10 @@ export type PublicJobDetailResponse = {
   descriptionHtml: string | null;
   slug: string | null;
   shortId: string | null;
-  applyMode: 'internal' | 'external';
+  applyMode: ApplyMode;
   externalApplyUrl: string | null;
+  /** Contact buttons (phone/e-mail apply); the number itself comes on tap. */
+  contactChannels: ContactChannel[];
   primaryLanguage: 'sr' | 'en';
   featured: boolean;
   /** Pay as the employer entered it; `null` when the ad names none. */

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import type {
+  ApplyMode,
   EmployerJobApplicationItem,
   EmployerJobDetailResponse,
   EmployerJobCounts,
@@ -22,6 +23,7 @@ import {
   employerPackageUpgradeMessageSchema,
   entitlementsBlobSchema,
   packageCodeSchema,
+  toApplyMode,
 } from 'contracts';
 import { and, count, desc, eq, inArray, isNotNull, ne } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
@@ -161,6 +163,14 @@ function violationToBadRequest(
 
 /** Jobs that consume `max_active_jobs` toward a subscription (DB enums; SSOT “pending/live”). */
 const JOB_STATUSES_FOR_SUBSCRIPTION_CAP = ['submitted', 'published'] as const;
+
+type ResolvedApplyFields = {
+  applyMode: ApplyMode;
+  externalApplyUrl: string | null;
+  applyPhone: string | null;
+  applyEmail: string | null;
+  primaryLanguage: 'sr' | 'en';
+};
 
 @Injectable()
 export class EmployerService {
@@ -710,11 +720,13 @@ export class EmployerService {
   }
 
   private assertApplyUnchangedForPublished(
-    row: { applyMode: string; externalApplyUrl: string | null },
-    apply: {
-      applyMode: 'internal' | 'external';
+    row: {
+      applyMode: string;
       externalApplyUrl: string | null;
+      applyPhone: string | null;
+      applyEmail: string | null;
     },
+    apply: ResolvedApplyFields,
   ): void {
     if (row.applyMode !== apply.applyMode) {
       throw codedBadRequest(
@@ -730,30 +742,52 @@ export class EmployerService {
         'External apply URL cannot be changed after a job is published',
       );
     }
+    if (
+      (row.applyPhone ?? null) !== apply.applyPhone ||
+      (row.applyEmail ?? null) !== apply.applyEmail
+    ) {
+      throw codedBadRequest(
+        'JOB_APPLY_MODE_IMMUTABLE',
+        'The apply phone or e-mail cannot be changed after a job is published',
+      );
+    }
   }
 
-  private resolveApplyDraftFields(input: EmployerJobDraftBody): {
-    applyMode: 'internal' | 'external';
-    externalApplyUrl: string | null;
-    primaryLanguage: 'sr' | 'en';
-  } {
+  private resolveApplyDraftFields(
+    input: EmployerJobDraftBody,
+  ): ResolvedApplyFields {
     const primaryLanguage = input.primaryLanguage === 'en' ? 'en' : 'sr';
+    const none = { externalApplyUrl: null, applyPhone: null, applyEmail: null };
     if (input.applyMode === 'external') {
       const v = validateExternalApplyUrl(input.externalApplyUrl ?? '');
       if (v.ok === false) {
         throw codedBadRequest('EXTERNAL_APPLY_URL_FORBIDDEN', v.message);
       }
       return {
+        ...none,
         applyMode: 'external',
         externalApplyUrl: v.href,
         primaryLanguage,
       };
     }
-    return {
-      applyMode: 'internal',
-      externalApplyUrl: null,
-      primaryLanguage,
-    };
+    // The contract has already normalized and required these.
+    if (input.applyMode === 'phone') {
+      return {
+        ...none,
+        applyMode: 'phone',
+        applyPhone: input.applyPhone ?? null,
+        primaryLanguage,
+      };
+    }
+    if (input.applyMode === 'email') {
+      return {
+        ...none,
+        applyMode: 'email',
+        applyEmail: input.applyEmail ?? null,
+        primaryLanguage,
+      };
+    }
+    return { ...none, applyMode: 'internal', primaryLanguage };
   }
 
   async createDraftJob(
@@ -807,6 +841,8 @@ export class EmployerService {
         seniority: input.seniority,
         applyMode: apply.applyMode,
         externalApplyUrl: apply.externalApplyUrl,
+        applyPhone: apply.applyPhone,
+        applyEmail: apply.applyEmail,
         primaryLanguage: apply.primaryLanguage,
         subscriptionId: chosenSubId,
         featured,
@@ -888,6 +924,8 @@ export class EmployerService {
         seniority: input.seniority,
         applyMode: apply.applyMode,
         externalApplyUrl: apply.externalApplyUrl,
+        applyPhone: apply.applyPhone,
+        applyEmail: apply.applyEmail,
         primaryLanguage: apply.primaryLanguage,
         subscriptionId: chosenSubId,
         featured,
@@ -976,6 +1014,8 @@ export class EmployerService {
         shortId: jobs.shortId,
         applyMode: jobs.applyMode,
         externalApplyUrl: jobs.externalApplyUrl,
+        applyPhone: jobs.applyPhone,
+        applyEmail: jobs.applyEmail,
         primaryLanguage: jobs.primaryLanguage,
         featured: jobs.featured,
         crossborderVisible: jobs.crossborderVisible,
@@ -1034,8 +1074,10 @@ export class EmployerService {
       status: row.status,
       slug: row.slug ?? null,
       shortId: row.shortId ?? null,
-      applyMode: row.applyMode === 'external' ? 'external' : 'internal',
+      applyMode: toApplyMode(row.applyMode),
       externalApplyUrl: row.externalApplyUrl ?? null,
+      applyPhone: row.applyPhone ?? null,
+      applyEmail: row.applyEmail ?? null,
       primaryLanguage: row.primaryLanguage === 'en' ? 'en' : 'sr',
       featured: row.featured === true,
       crossborderVisible: row.crossborderVisible === true,
@@ -1080,6 +1122,8 @@ export class EmployerService {
         shortId: jobs.shortId,
         applyMode: jobs.applyMode,
         externalApplyUrl: jobs.externalApplyUrl,
+        applyPhone: jobs.applyPhone,
+        applyEmail: jobs.applyEmail,
         primaryLanguage: jobs.primaryLanguage,
         featured: jobs.featured,
         crossborderVisible: jobs.crossborderVisible,
@@ -1134,8 +1178,10 @@ export class EmployerService {
       status: row.status,
       slug: row.slug ?? null,
       shortId: row.shortId ?? null,
-      applyMode: row.applyMode === 'external' ? 'external' : 'internal',
+      applyMode: toApplyMode(row.applyMode),
       externalApplyUrl: row.externalApplyUrl ?? null,
+      applyPhone: row.applyPhone ?? null,
+      applyEmail: row.applyEmail ?? null,
       primaryLanguage: row.primaryLanguage === 'en' ? 'en' : 'sr',
       featured: row.featured === true,
       crossborderVisible: row.crossborderVisible === true,
@@ -1181,6 +1227,8 @@ export class EmployerService {
         status: jobs.status,
         applyMode: jobs.applyMode,
         externalApplyUrl: jobs.externalApplyUrl,
+        applyPhone: jobs.applyPhone,
+        applyEmail: jobs.applyEmail,
         subscriptionId: jobs.subscriptionId,
         featured: jobs.featured,
         crossborderVisible: jobs.crossborderVisible,
@@ -1236,6 +1284,8 @@ export class EmployerService {
           seniority: input.seniority,
           applyMode: apply.applyMode,
           externalApplyUrl: apply.externalApplyUrl,
+          applyPhone: apply.applyPhone,
+          applyEmail: apply.applyEmail,
           primaryLanguage: apply.primaryLanguage,
           featured: resolved.featured ?? false,
           crossborderVisible: resolved.crossborderVisible ?? false,
@@ -1300,6 +1350,8 @@ export class EmployerService {
         subscriptionId: jobs.subscriptionId,
         applyMode: jobs.applyMode,
         externalApplyUrl: jobs.externalApplyUrl,
+        applyPhone: jobs.applyPhone,
+        applyEmail: jobs.applyEmail,
         featured: jobs.featured,
         crossborderVisible: jobs.crossborderVisible,
         pngCreativeUrl: jobs.pngCreativeUrl,
@@ -1434,6 +1486,8 @@ export class EmployerService {
         seniority: input.seniority,
         applyMode: apply.applyMode,
         externalApplyUrl: apply.externalApplyUrl,
+        applyPhone: apply.applyPhone,
+        applyEmail: apply.applyEmail,
         primaryLanguage: apply.primaryLanguage,
         featured: resolved.featured ?? false,
         crossborderVisible: resolved.crossborderVisible ?? false,

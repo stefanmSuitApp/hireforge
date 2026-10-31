@@ -8,6 +8,7 @@ import type {
   ModeratorJobDetailResponse,
   PublicJobDetailResponse,
 } from 'contracts';
+import { contactChannelsFor } from 'contracts';
 
 import { CompanyInitials } from '@/components/company-initials';
 import { Button } from '@/components/ui/button';
@@ -24,6 +25,7 @@ import { jobEnumLabel } from '../lib/job-enum-label';
 
 import { JobSalaryLine } from './job-salary-line';
 
+import { ContactApplyCta } from './contact-apply-cta';
 import { GuestApplySheet } from './guest-apply-sheet';
 import { SimilarJobsSection } from './similar-jobs-section';
 
@@ -40,6 +42,7 @@ export function moderatorJobToPublicPreviewShape(
     shortId: job.shortId,
     applyMode: job.applyMode,
     externalApplyUrl: job.externalApplyUrl,
+    contactChannels: contactChannelsFor(job),
     primaryLanguage: job.primaryLanguage,
     featured: job.featured,
     crossborderVisible: job.crossborderVisible,
@@ -199,6 +202,9 @@ export function JobListingPreview({
   /** The page's one action: under the title (and at the end of a long ad). */
   function applyCta(ctaClass?: string) {
     if (listingState !== 'live') return null;
+    if (job.contactChannels.length > 0) {
+      return <ContactApplyCta job={job} className={ctaClass} />;
+    }
     return job.applyMode === 'external' ? (
       <ExternalApplyCta
         job={job}
@@ -382,10 +388,14 @@ export function JobListingPreview({
               <p className="m-0 mb-4 leading-relaxed text-muted-foreground">
                 {job.applyMode === 'external'
                   ? t('applyHintExternal')
-                  : t('applyHint')}
+                  : job.applyMode === 'phone'
+                    ? t('applyHintPhone')
+                    : job.applyMode === 'email'
+                      ? t('applyHintEmail')
+                      : t('applyHint')}
               </p>
               {applyCta(cn('hf-press min-h-14 rounded-[18px]', asideCtaClass))}
-              {guest && job.applyMode !== 'external' ? (
+              {guest && job.applyMode === 'internal' ? (
                 <p className="m-0 mt-3.5 text-center text-sm text-muted-foreground">
                   {t('applyHaveAccount')}{' '}
                   <Link
@@ -451,7 +461,7 @@ export function JobListingPreview({
         </div>
       ) : null}
 
-      {guest && listingState === 'live' && job.applyMode !== 'external' ? (
+      {guest && listingState === 'live' && job.applyMode === 'internal' ? (
         <GuestApplySheet
           open={signUpOpen}
           onOpenChange={setSignUpOpen}

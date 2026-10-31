@@ -599,7 +599,7 @@ than late in G1.
 - **Tests:** migration up/down; contract validation (min ≤ max); e2e: the
   employer enters a salary and the public card shows it.
 
-#### WP-A5 Apply by phone, Viber, e-mail + click tracking
+#### WP-A5 Apply by phone, Viber, e-mail + click tracking ✅ 2026-10-31
 
 - **Goal:** hospitality and retail employers get calls; the candidate needs
   no account for those ads.

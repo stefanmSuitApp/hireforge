@@ -8,6 +8,7 @@ export * from './lib/company-join-requests';
 export * from './lib/contracts';
 export * from './lib/domain';
 export * from './lib/editor';
+export * from './lib/contact-apply';
 export * from './lib/employer-jobs';
 export * from './lib/employer-catalog';
 export * from './lib/employer-subscriptions-list';

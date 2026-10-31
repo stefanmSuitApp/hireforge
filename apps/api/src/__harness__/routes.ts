@@ -55,6 +55,9 @@ export const ROUTES: Record<string, Access> = {
   'POST /api/public/jobs/:id/external-click': PUBLIC(
     'click counter; rate-limited',
   ),
+  'POST /api/public/jobs/:id/contact': PUBLIC(
+    'phone/e-mail apply link on tap; rate-limited, counted per page view',
+  ),
   'GET /api/public/jobs/:id/similar': PUBLIC('published jobs only'),
   'GET /api/public/jobs/:id': PUBLIC('published jobs only'),
   'GET /api/public/job-description-media/:id': PUBLIC(
