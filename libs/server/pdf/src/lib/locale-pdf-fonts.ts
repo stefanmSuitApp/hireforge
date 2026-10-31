@@ -2,6 +2,8 @@ import { Font } from '@react-pdf/renderer';
 
 /** Noto Sans: Serbian Latin and Cyrillic in every PDF (CVs, invoices). */
 export const PDF_BODY_FONT = 'NotoSans';
+/** Noto Serif: headings of the classic CV. */
+export const PDF_SERIF_FONT = 'NotoSerif';
 
 let registered = false;
 
@@ -22,6 +24,18 @@ export function registerLocalePdfFonts(base: string): void {
     fonts: [
       { src: `${base}/NotoSans-Regular.ttf`, fontWeight: 400 },
       { src: `${base}/NotoSans-Bold.ttf`, fontWeight: 700 },
+    ],
+  });
+  Font.register({
+    family: PDF_SERIF_FONT,
+    fonts: [
+      { src: `${base}/NotoSerif-Regular.ttf`, fontWeight: 400 },
+      { src: `${base}/NotoSerif-Bold.ttf`, fontWeight: 700 },
+      {
+        src: `${base}/NotoSerif-Italic.ttf`,
+        fontWeight: 400,
+        fontStyle: 'italic',
+      },
     ],
   });
 }

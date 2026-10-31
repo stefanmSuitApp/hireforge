@@ -91,6 +91,16 @@ pnpm build` (+ `pnpm check:i18n`) = `pnpm verify`; PRs run it locally, CI on
     (`cv-build-extras-step.tsx`); summary, links and the email switch sit
     in the basics step; description lines starting with "-" print as
     bullets. The three templates show the new sections when filled.
+  - **PR 3 done** (`feat/cv-templates-restyle`): Klasičan, Moderan and
+    Minimalan match the approved sketches. Klasičan is now one column
+    (serif headings, Noto Serif bundled) and ATS-safe; Moderan's sidebar
+    colour runs down every page and lists skills once (they were printed
+    twice); Minimalan has titles in a left column. Shared `sections.tsx`
+    takes a per-template `CvTheme`. Found: letter spacing above ~0.08 em
+    makes PDF text readers split headings into letters ("K O N T A K T"),
+    kept below that. Picker thumbnails: `pnpm cv:previews` (macOS `sips`)
+    writes `apps/web/public/cv-templates/<code>.png`; the picker uses them
+    when Sanity has no preview image.
 
 ### Plan steps, verified against code
 

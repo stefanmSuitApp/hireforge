@@ -760,17 +760,12 @@ export function CandidateCvBuildWizard({
                         : 'border-border hover:bg-muted/40'
                     }`}
                   >
-                    {cms?.previewUrl ? (
-                      <img
-                        src={cms.previewUrl}
-                        alt=""
-                        className="mb-2 h-28 w-full rounded object-cover"
-                      />
-                    ) : (
-                      <div className="mb-2 flex h-28 w-full items-center justify-center rounded bg-muted text-xs text-muted-foreground">
-                        {t('noPreview')}
-                      </div>
-                    )}
+                    {/* Sanity's image wins; else the thumbnail `pnpm cv:previews` renders. */}
+                    <img
+                      src={cms?.previewUrl ?? `/cv-templates/${code}.png`}
+                      alt=""
+                      className="mb-2 h-28 w-full rounded border border-border/60 bg-white object-cover object-top"
+                    />
                     <div className="text-sm font-medium">
                       {cms?.name ?? t(`templateNames.${code}`)}
                     </div>

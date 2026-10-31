@@ -11,6 +11,9 @@ export type CvLabels = {
   certificates: string;
   digitalSkills: string;
   links: string;
+  contact: string;
+  skillsAndMore: string;
+  additional: string;
   present: string;
   native: string;
   basic: string;
@@ -29,6 +32,9 @@ export const CV_LABELS: Record<CvLocale, CvLabels> = {
     certificates: 'Sertifikati',
     digitalSkills: 'Digitalne veštine',
     links: 'Linkovi',
+    contact: 'Kontakt',
+    skillsAndMore: 'Veštine i dozvole',
+    additional: 'Dodatno',
     present: 'danas',
     native: 'maternji',
     basic: 'osnovni',
@@ -45,6 +51,9 @@ export const CV_LABELS: Record<CvLocale, CvLabels> = {
     certificates: 'Certificates',
     digitalSkills: 'Digital skills',
     links: 'Links',
+    contact: 'Contact',
+    skillsAndMore: 'Skills and licences',
+    additional: 'Additional',
     present: 'present',
     native: 'native',
     basic: 'basic',

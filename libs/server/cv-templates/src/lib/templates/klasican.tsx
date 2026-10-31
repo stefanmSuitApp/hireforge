@@ -1,26 +1,54 @@
-import { Document, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
+import { Document, Page, Text, View } from '@react-pdf/renderer';
 import type { ReactElement } from 'react';
 
 import type { CvPdfLayoutInput } from 'contracts';
 
-import { localePdfBoldStyle } from 'server-pdf/locale-fonts';
-
-import { CV_LABELS, formatCvRange } from '../labels';
+import { CV_LABELS } from '../labels';
 import {
-  DescriptionText,
-  ExtraSections,
-  HeaderBlock,
-  pdfBody,
+  contactParts,
+  EducationSection,
+  ExperienceSection,
+  ExtraLinesSection,
   SummarySection,
+  type CvTheme,
 } from '../sections';
+import { CV_INK, CV_MUTED, SANS, SERIF } from '../theme';
 
-const styles = StyleSheet.create({
-  page: { padding: 40, fontFamily: pdfBody, fontSize: 10 },
-  row: { flexDirection: 'row' },
-  left: { width: '32%', paddingRight: 16 },
-  right: { width: '62%' },
-  rule: { height: 1, backgroundColor: '#cbd5e0', marginVertical: 8 },
-});
+// One column, black on white, serif headings over a rule: reads cleanly in
+// CV scanners (ATS). Look: Jake's Resume / Harvard-style resume.
+const BASE = {
+  fontFamily: SANS,
+  fontSize: 9.5,
+  color: CV_INK,
+  lineHeight: 1.4,
+};
+
+const theme: CvTheme = {
+  Title: ({ children }) => (
+    <Text
+      style={{
+        fontFamily: SERIF,
+        fontWeight: 700,
+        fontSize: 10.5,
+        textTransform: 'uppercase',
+        letterSpacing: 0.8,
+        color: CV_INK,
+        borderBottomWidth: 0.9,
+        borderBottomColor: CV_INK,
+        paddingBottom: 1.5,
+        marginBottom: 6,
+      }}
+    >
+      {children}
+    </Text>
+  ),
+  body: { ...BASE, textAlign: 'justify' },
+  bold: { ...BASE, fontWeight: 700 },
+  muted: { ...BASE, color: CV_INK },
+  sub: { fontFamily: SERIF, fontStyle: 'italic', fontSize: 9.5, color: CV_INK },
+  entry: 'row',
+  gap: 13,
+};
 
 export function KlasicanDoc({
   layout,
@@ -28,91 +56,60 @@ export function KlasicanDoc({
   layout: CvPdfLayoutInput;
 }): ReactElement {
   const labels = CV_LABELS[layout.locale];
-  const { experiences, education, skills } = layout.profile;
+  const p = layout.profile;
+  const onlySkills =
+    !p.drivingLicences.length &&
+    !p.certificates.length &&
+    !p.languages.length &&
+    !p.digitalSkills &&
+    !p.links.length;
   return (
     <Document>
-      <Page size="A4" style={styles.page}>
-        <View style={styles.row}>
-          <View style={styles.left}>
-            <HeaderBlock layout={layout} nameSize={16} />
-            <View style={styles.rule} />
-            {skills.length ? (
-              <View>
-                <Text style={localePdfBoldStyle({ fontSize: 10 })}>
-                  {labels.skills}
-                </Text>
-                <Text
-                  style={{ fontFamily: pdfBody, fontSize: 9, marginTop: 4 }}
-                >
-                  {skills.map((s) => `• ${s.name}`).join('\n')}
-                </Text>
-              </View>
-            ) : null}
-          </View>
-          <View style={styles.right}>
-            <SummarySection layout={layout} />
-            {experiences.length ? (
-              <View>
-                <Text style={localePdfBoldStyle({ fontSize: 11 })}>
-                  {labels.experience}
-                </Text>
-                {experiences.map((ex, i) => (
-                  <View key={i} style={{ marginTop: 8 }} wrap={false}>
-                    <Text style={localePdfBoldStyle({ fontSize: 10 })}>
-                      {ex.title}
-                    </Text>
-                    <Text
-                      style={{
-                        fontFamily: pdfBody,
-                        fontSize: 9,
-                        color: '#2d3748',
-                      }}
-                    >
-                      {ex.company}
-                    </Text>
-                    <Text
-                      style={{
-                        fontFamily: pdfBody,
-                        fontSize: 8,
-                        color: '#718096',
-                      }}
-                    >
-                      {formatCvRange(ex.startDate, ex.endDate, layout.locale)}
-                    </Text>
-                    {ex.summary ? <DescriptionText text={ex.summary} /> : null}
-                  </View>
-                ))}
-              </View>
-            ) : null}
-            {education.length ? (
-              <View style={{ marginTop: 12 }}>
-                <Text style={localePdfBoldStyle({ fontSize: 11 })}>
-                  {labels.education}
-                </Text>
-                {education.map((ed, i) => (
-                  <View key={i} style={{ marginTop: 6 }} wrap={false}>
-                    <Text style={localePdfBoldStyle({ fontSize: 10 })}>
-                      {ed.institution}
-                    </Text>
-                    <Text style={{ fontFamily: pdfBody, fontSize: 9 }}>
-                      {[ed.degree, ed.field].filter(Boolean).join(' · ')}
-                    </Text>
-                    <Text
-                      style={{
-                        fontFamily: pdfBody,
-                        fontSize: 8,
-                        color: '#718096',
-                      }}
-                    >
-                      {formatCvRange(ed.startDate, ed.endDate, layout.locale)}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            ) : null}
-            <ExtraSections layout={layout} />
-          </View>
+      <Page
+        size="A4"
+        style={{ ...BASE, paddingVertical: 42, paddingHorizontal: 46 }}
+      >
+        <View style={{ alignItems: 'center' }}>
+          <Text
+            style={{
+              fontFamily: SERIF,
+              fontWeight: 700,
+              fontSize: 25,
+              lineHeight: 1.25,
+            }}
+          >
+            {layout.fullName ?? 'CV'}
+          </Text>
+          {layout.headline ? (
+            <Text
+              style={{
+                fontFamily: SERIF,
+                fontStyle: 'italic',
+                fontSize: 10.5,
+                lineHeight: 1.4,
+                marginTop: 2,
+              }}
+            >
+              {layout.headline}
+            </Text>
+          ) : null}
+          {contactParts(layout).length ? (
+            <Text
+              style={{ ...BASE, fontSize: 9, marginTop: 4, color: CV_MUTED }}
+            >
+              {contactParts(layout).join(' · ')}
+            </Text>
+          ) : null}
         </View>
+        <SummarySection layout={layout} theme={theme} />
+        <ExperienceSection layout={layout} theme={theme} />
+        <EducationSection layout={layout} theme={theme} />
+        <ExtraLinesSection
+          layout={layout}
+          theme={theme}
+          title={onlySkills ? labels.skills : labels.skillsAndMore}
+          withSkills
+        />
       </Page>
     </Document>
   );

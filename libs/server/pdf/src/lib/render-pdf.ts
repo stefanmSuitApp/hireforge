@@ -1,6 +1,10 @@
 import { Font, renderToBuffer } from '@react-pdf/renderer';
 
-import { PDF_BODY_FONT, registerLocalePdfFonts } from './locale-pdf-fonts';
+import {
+  PDF_BODY_FONT,
+  PDF_SERIF_FONT,
+  registerLocalePdfFonts,
+} from './locale-pdf-fonts';
 import { pdfFontDir } from './pdf-font-dir';
 
 let queue: Promise<unknown> = Promise.resolve();
@@ -16,10 +20,12 @@ export function renderPdfToBuffer(
 ): Promise<Buffer> {
   const run = queue.then(() => {
     registerLocalePdfFonts(pdfFontDir());
-    for (const source of Font.getRegisteredFonts()[PDF_BODY_FONT]?.sources ??
-      []) {
-      source.data = null;
-      source.loadResultPromise = null;
+    const families = Font.getRegisteredFonts();
+    for (const family of [PDF_BODY_FONT, PDF_SERIF_FONT]) {
+      for (const source of families[family]?.sources ?? []) {
+        source.data = null;
+        source.loadResultPromise = null;
+      }
     }
     return renderToBuffer(document);
   });
